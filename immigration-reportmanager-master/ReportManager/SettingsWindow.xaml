@@ -1,0 +1,64 @@
+﻿<Window x:Class="ReportManager.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels ="clr-namespace:ReportManager.ViewModels"
+        mc:Ignorable="d" ResizeMode="CanMinimize"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Title="Cấu hình" Height="450" Width="483.051">
+    <Window.Resources>
+        <viewModels:SettingsViewModel x:Key="SettingsViewModel"></viewModels:SettingsViewModel>
+    </Window.Resources>
+    <Grid>
+        <StackPanel Orientation="Vertical" Background="#a6d9ef" Margin="0,2,2,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+            <Border CornerRadius="25" Margin="25,10" BorderBrush="Red" Background="White">
+                <StackPanel Orientation="Vertical">
+                    <Label Content="Cấu hình Server" FontSize="25" HorizontalAlignment="Center" FontWeight="Bold" Margin="2,5,2,0" VerticalContentAlignment="Bottom"/>
+
+                    <Grid Margin="2" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="200"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Margin="0,5" Content="Nguồn* : " VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Source, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="25,5,-41,5"  VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+
+                        <Label Grid.Row="1" Grid.Column="0" Margin="0,5" Content="Cơ sở dữ liệu* : " VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <TextBox Grid.Row="1"  Grid.Column="1" Text="{Binding Catalog, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="25,5,-41,5" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+
+                        <Label Grid.Row="2" Grid.Column="0" Margin="0,5" Content="ID* : " VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <TextBox Grid.Row="2"  Grid.Column="1" Text="{Binding IDSQLServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="25,5,-41,5" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+
+                        <Label Grid.Row="3" Grid.Column="0" Margin="0,5" Content="Mật khẩu* : " VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <TextBox Grid.Row="3"  Grid.Column="1" Text="{Binding PasswordSQLServer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="25,5,-41,5" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+
+                        <Label Grid.Row="4" Grid.Column="0" Margin="0,5" Content="Vị trí lưu file* : " VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <TextBox Grid.Row="4"  Grid.Column="1" Text="{Binding PathShare, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="25,5,-41,5" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+
+                        <Label Grid.Row="5" Grid.Column="0" Margin="0,5" Content="Tài khoản chia sẻ : " VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <TextBox Grid.Row="5"  Grid.Column="1" Text="{Binding AccountShare, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="25,5,-41,5" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+
+                        <Label Grid.Row="6" Grid.Column="0" Margin="0,5" Content="Mật khẩu chia sẻ : " VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <TextBox Grid.Row="6"  Grid.Column="1" Text="{Binding PasswordShare, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Margin="25,5,-41,5" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+
+                        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="103,0,-8,0" Width="217">
+                            <Button Content="Xong" Style="{DynamicResource BtnSuccess}" Margin="2,10" Width="100" Height="30" Command="{Binding SaveCommand}"/>
+                            <Button Content="Hủy" Style="{DynamicResource BtnCancel}" Margin="2,10" Width="100" Height="30" Command="{Binding BtnExitCommand}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,60 @@
+@page "/search"
+@rendermode InteractiveServer
+
+<PageTitle>Tìm kiếm — IRM v2.0</PageTitle>
+
+<MudStack AlignItems="AlignItems.Center" Class="mb-4">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight: 800;">Tìm kiếm toàn cục</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary">Nhập tên, hộ chiếu, công ty, quốc tịch... — tìm trên mọi trường dữ liệu</MudText>
+</MudStack>
+
+<MudStack Row="true" Justify="Justify.Center" Class="mb-4">
+    <MudTextField T="string" @bind-Value="_searchQuery" Placeholder="Nhập từ khóa tìm kiếm..."
+                  Variant="Variant.Outlined" Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Style="max-width: 600px;" Immediate="true"
+                  OnKeyUp="@((e) => { if (e.Key == "Enter") _hasSearched = true; })" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+               OnClick="@(() => _hasSearched = true)">Tìm kiếm</MudButton>
+</MudStack>
+
+@if (_hasSearched)
+{
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3" Align="Align.Center">
+        Tìm thấy <strong>@_results.Count</strong> kết quả cho "<em>@_searchQuery</em>" — trong 0.08 giây
+    </MudText>
+
+    <MudGrid Spacing="2" Class="mb-4" Justify="Justify.Center">
+        <MudItem xs="3"><MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;"><MudText Typo="Typo.h6" Color="Color.Primary" Style="font-weight:800;">@_results.Count(r => r.Type == "👥")</MudText><MudText Typo="Typo.caption">Nhân viên</MudText></MudPaper></MudItem>
+        <MudItem xs="3"><MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;"><MudText Typo="Typo.h6" Color="Color.Secondary" Style="font-weight:800;">@_results.Count(r => r.Type == "🏢")</MudText><MudText Typo="Typo.caption">Công ty</MudText></MudPaper></MudItem>
+        <MudItem xs="3"><MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;"><MudText Typo="Typo.h6" Color="Color.Success" Style="font-weight:800;">189</MudText><MudText Typo="Typo.caption">Có GPLĐ</MudText></MudPaper></MudItem>
+        <MudItem xs="3"><MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;"><MudText Typo="Typo.h6" Color="Color.Warning" Style="font-weight:800;">12</MudText><MudText Typo="Typo.caption">Sắp hết hạn</MudText></MudPaper></MudItem>
+    </MudGrid>
+
+    @foreach (var r in _results)
+    {
+        <MudPaper Elevation="0" Class="pa-3 mb-2 rounded-lg border-solid border d-flex align-center" Style="border-width: 1px;">
+            <MudText Style="font-size: 1.5rem; margin-right: 12px;">@r.Type</MudText>
+            <MudStack Spacing="0" Style="flex: 1;">
+                <MudText Typo="Typo.body1" Style="font-weight: 700;">@r.Title</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@r.Detail</MudText>
+            </MudStack>
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Xem →</MudButton>
+        </MudPaper>
+    }
+}
+
+@code {
+    private string _searchQuery = "Trung Quốc";
+    private bool _hasSearched = true;
+
+    private record SearchResult(string Type, string Title, string Detail);
+    private List<SearchResult> _results = new()
+    {
+        new("👥", "Zhang Wei — Trung Quốc", "HC: E12345678 · Samsung Electronics VN · Kỹ sư · GPLĐ: Có · Hạn TT: 15/08/2026"),
+        new("👥", "Wang Li — Trung Quốc", "HC: E98765432 · Hyundai Aluminum · Quản lý · GPLĐ: Có · Hạn TT: 20/05/2026"),
+        new("👥", "Liu Chen — Trung Quốc", "HC: E55566677 · Canon Vietnam · Kỹ thuật · GPLĐ: Miễn · Hạn TT: 30/12/2026"),
+        new("👥", "Chen Hao — Đài Loan", "HC: T44556677 · Formosa VN · Quản lý SX · GPLĐ: Có · Hạn TT: 05/07/2026"),
+        new("🏢", "Cty TNHH Trung Quốc Vina", "Sản xuất · 45 NLĐ · Công nghiệp · KCN Bình Dương"),
+    };
+}

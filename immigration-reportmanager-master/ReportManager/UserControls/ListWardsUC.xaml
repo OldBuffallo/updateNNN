@@ -1,0 +1,74 @@
+﻿<UserControl x:Class="ReportManager.UserControls.ListWardsUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ReportManager.UserControls"
+             mc:Ignorable="d" MaxHeight="350"
+             d:DesignHeight="330" d:DesignWidth="680">
+    <Grid Margin="13,15,27,30" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="85"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="10,10,10,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Label Content="Danh sách phường xã" Grid.Row="0" FontSize="25" HorizontalAlignment="Center" FontWeight="Bold" VerticalContentAlignment="Bottom"/>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Làm mới" Style="{DynamicResource BtnChoose}" Width="100" Height="30" Command="{Binding LoadDataCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                    <TextBox Grid.Column="1" Margin="10,3" MinWidth="120" Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" GotFocus="TextBox_GotFocus" LostFocus="TextBox_LostFocus"/>
+                    <Button  Grid.Column="2" Content="Tìm kiếm" Style="{DynamicResource BtnSearch}" Width="80" Height="30" Command="{Binding BtnSearchWardCommand}" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                    <Button Grid.Column="3" Content="Thêm mới" Style="{DynamicResource BtnSuccess}" Width="100" Height="30" Command="{Binding BtnAddWardCommand}" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+                </Grid>
+            </Grid>
+            <DataGrid Grid.Row="1" Margin="10,10,10,20"
+                      Name="dtgDataWardsInfo"
+                      VerticalScrollBarVisibility="Auto" 
+                      HorizontalScrollBarVisibility="Auto"
+                      CanUserAddRows="False"
+                      AutoGenerateColumns="False"
+                      SelectedItem="{Binding SelectWard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      MouseDoubleClick="dtgDataWardsInfo_MouseDoubleClick"
+                      SelectionChanged="dtgDataWardsInfo_SelectionChanged"
+                      ItemsSource="{Binding ListWardsData, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="50">
+                        <DataGridTemplateColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="STT" TextAlignment="Center" TextWrapping="Wrap" FontSize="18"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.HeaderTemplate>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding LineNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="450">
+                        <DataGridTemplateColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="Tên phường/ xã" TextAlignment="Center" TextWrapping="Wrap" FontSize="18" Padding="20,0,0,0"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.HeaderTemplate>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding WardName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,170 @@
+﻿<Window x:Class="ReportManager.ExportFileCompanyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ReportManager"
+        mc:Ignorable="d"
+        KeyDown="Window_KeyDown"
+        ResizeMode="CanMinimize"
+        SizeToContent="Height"
+        Title="Xuất file" Height="620" Width="620">
+    <StackPanel Background="#a6d9ef" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Border CornerRadius="25" Margin="20" BorderBrush="Red" Background="White">
+            <StackPanel Margin="0,10">
+                <Label Content="Tùy chọn định dạng xuất file" Grid.Row="0" FontSize="25" HorizontalAlignment="Center" FontWeight="Bold" VerticalContentAlignment="Bottom"/>
+
+                <!-- directory -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Margin="0,5" Content="Đường dẫn: " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Column="1" Margin="0,10, 20,10" Padding="0,4" Text="{Binding LinkFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" IsEnabled="False" FontSize="20"/>
+                    <Button Grid.Column="2" Content="Lưu tại" Style="{DynamicResource BtnChoose}" Margin="0,10,20,10" Width="100" Command="{Binding BtnSaveLinkCommand}" Background="#f0ff00" Foreground="Black" BorderBrush="White"/>
+                </Grid>
+
+                <!--type of export file-->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Margin="0,5" Content="Mẫu file: " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <ComboBox Grid.Column="1" Margin="0,5,20,5" FontSize="20" Padding="5,4" SelectedIndex="{Binding SelectFormatFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" HorizontalContentAlignment="Left">
+                        <ComboBoxItem Name="cbbScreenCompany" Content="Xuất từ dữ liệu trên màn hình"/>
+                        <ComboBoxItem Content="Xuất file tổng hợp số lượng NNN"/>
+                        <ComboBoxItem Content="Xuất file theo quốc tịch NNN"/>
+                        <ComboBoxItem Content="Xuất file theo số vốn đầu tư"/>
+                        <ComboBoxItem Content="Xuất file theo quốc tịch pháp nhân"/>
+                    </ComboBox>
+                </Grid>
+
+                <!--date export file-->
+                <Grid Grid.Row="3" Name="DateExportFile">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Margin="0,5" Content="Ngày xuất: " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Column="1" Margin="0,10,20,10" FontSize="20" Padding="5,4" Text="{Binding DateExportFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MouseDoubleClick="TextBox_MouseDoubleClick"/>
+                </Grid>
+
+                <!--time-->
+                <Grid Grid.Row="4" Name="Time">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Column="0" Margin="0,5" Content="KQGQ thủ tục: " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <TextBox Name="txtStartDate" Grid.Column="1" Margin="0,10,20,10" FontSize="20" Padding="5,4" Text="{Binding StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="txtStartDate_TextChanged"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MouseDoubleClick="TextBox_MouseDoubleClick"/>
+                    <Label Grid.Column="2" Margin="0,5" Content="Đến " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+                    <TextBox Name="txtEndDate" Grid.Column="3" Margin="0,10,20,10" FontSize="20" Padding="5,4" Text="{Binding EndDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="txtStartDate_TextChanged"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MouseDoubleClick="TextBox_MouseDoubleClick"/>
+                    <Grid Grid.Row="1" Grid.ColumnSpan="4" Name="checkboxSettlementResults" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding IsColumnDateCreated, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Height="50">
+                            Dùng ngày nhập khi không có KQGQ thủ tục
+                        </CheckBox>
+                    </Grid>
+                </Grid>
+                
+                <!--temporary stay-->
+                <Grid Grid.Row="5" Name="TemporaryStay">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Margin="0,5" Content="Thời hạn TT: " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Column="1" Margin="0,10,20,10" FontSize="20" Padding="5,4" Text="{Binding TemporaryStay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MouseDoubleClick="TextBox_MouseDoubleClick"/>
+                </Grid>
+                
+                <!--condition-->
+                <Grid Grid.Row="6" Name="gridcondition">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid Name="gridinvestment" Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Column="0" Margin="0,5" Content="Vốn đầu tư: " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <TextBox Grid.Column="1" Margin="0,10,20,10" Padding="5,4" FontSize="20" Text="{Binding MinInvestment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="number_PreviewTextInput" TextChanged="TextBox_TextChanged"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+                        <Label Grid.Column="2" Margin="0,5" Content="Đến " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+                        <TextBox Grid.Column="3" Margin="0,10,20,10" FontSize="20" Padding="5,4" Text="{Binding MaxInvestment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="number_PreviewTextInput" TextChanged="TextBox_TextChanged"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+                        <Grid Grid.Row="1" Grid.ColumnSpan="4" Name="checkboxInvestment" Visibility="Visible">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="1" IsChecked="{Binding IsCheckInvestment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Height="50">
+                                Các công ty không vốn đầu tư
+                            </CheckBox>
+                        </Grid>
+                    </Grid>
+                    <!--nationality-->
+                    <Grid Name="gridnationality" Grid.Row="1" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Margin="0,5" Content="Quốc tịch: " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <TextBox Grid.Column="1" Margin="0,5,20,5" CharacterCasing="Upper" FontSize="20" Text="{Binding SelectNationality.NationalityCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left" LostFocus="TextBox_LostFocus"/>
+                        <TextBox Grid.Column="2" IsReadOnly="True" Margin="0,5,20,5" FontSize="20" Text="{Binding SelectNationality.NationalityName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+                    </Grid>
+                </Grid>
+                
+                <!-- check address-->
+                <Grid Grid.Row="7" Name="gridCheckAddress">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="1" IsChecked="{Binding IsColumnAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Height="50">
+                        Thêm địa chỉ khi xuất file
+                    </CheckBox>
+                </Grid>
+                
+                <!-- check description of activities-->
+                <Grid Grid.Row="8" Name="gridCheckDescriptionOfActivities">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="1" IsChecked="{Binding IsColumnDiscriptionOfActivities, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Height="50">
+                        Thêm mô tả hoạt động khi xuất file
+                    </CheckBox>
+                </Grid>
+
+                <!-- button-->
+                <StackPanel Orientation="Horizontal" Grid.Row="9" HorizontalAlignment="Center">
+                    <Button Content="Xuất file" Style="{DynamicResource BtnSuccess}" Command="{Binding BtnExportFileCommand}" Margin="20,0,20,0" Width="120" Height="35" FontSize="20" Background="#80ff00" Foreground="Black" BorderBrush="White"/>
+                    <Button Content="Hủy bỏ" Style="{DynamicResource BtnCancel}" Command="{Binding BtnCancelCommand}" Margin="20,0,20,0" Width="120" Height="35" FontSize="20" Background="#ff2d2d" Foreground="Black" BorderBrush="White"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</Window>

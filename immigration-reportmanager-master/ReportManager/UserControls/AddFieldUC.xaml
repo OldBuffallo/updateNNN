@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="ReportManager.UserControls.AddFieldUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ReportManager.UserControls"
+             mc:Ignorable="d" MaxHeight="330"
+             d:DesignHeight="330" d:DesignWidth="680">
+    <Grid>
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+            <StackPanel Orientation="Vertical">
+                <Grid Margin="20, 10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110"/>
+                        <ColumnDefinition Width="450"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="50"/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" Margin="0,5" Content="Tên lĩnh vực : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Row="0" FontSize="18" Text="{Binding NewField.FieldName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="25,5,0,5"  VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+
+                    <Label Grid.Row="1" Grid.Column="0" Margin="0,5" Content="Mô tả : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Row="1" FontSize="18" Text="{Binding NewField.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="25,5,0,5"  VerticalContentAlignment="Center" HorizontalContentAlignment="Left" TextWrapping="Wrap" AcceptsReturn="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"/>
+
+                    <StackPanel Name="spAdd" Visibility="Hidden" Orientation="Horizontal" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" HorizontalAlignment="Center">
+                        <Button x:Name="BtnSuccess" Content="Thêm" FontSize="18" Style="{DynamicResource BtnSuccess}" Command="{Binding BtnCreateFieldCommand}" Margin="5,10" Width="100" Height="30" Background="#80ff00" Foreground="Black" BorderBrush="White"/>
+                        <Button x:Name="BtnCancel" Content="Hủy" FontSize="18" Style="{DynamicResource BtnCancel}" Command="{Binding BtnExitCommand}" Margin="5,10" Width="100" Height="30" Background="#ff2d2d" Foreground="Black" BorderBrush="White"/>
+                    </StackPanel>
+                    <StackPanel Name="spEdit" Orientation="Horizontal" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" HorizontalAlignment="Center">
+                        <Button Content="Sửa" FontSize="18" Style="{DynamicResource BtnSuccess}" Command="{Binding BtnCreateFieldCommand}" Margin="5,10" Width="100" Height="30" Background="#80ff00" Foreground="Black" BorderBrush="White"/>
+                        <Button Content="Xóa" FontSize="18" Style="{DynamicResource BtnChoose}" Command="{Binding BtnDeleteFieldCommand}" Margin="5,10" Width="100" Height="30" Background="#80ff00" Foreground="Black" BorderBrush="White"/>
+                        <Button Content="Hủy" FontSize="18" Style="{DynamicResource BtnCancel}" Command="{Binding BtnExitCommand}" Margin="5,10" Width="100" Height="30" Background="#ff2d2d" Foreground="Black" BorderBrush="White"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

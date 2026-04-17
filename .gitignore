@@ -1,0 +1,32 @@
+# Build outputs
+*.exe
+*.dll
+*.pdb
+*.user
+*.suo
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Packages
+packages/
+node_modules/
+bin/
+obj/
+
+# Gemini
+.gemini/
+
+# Large binary files
+*.zip
+*.rar
+*.7z

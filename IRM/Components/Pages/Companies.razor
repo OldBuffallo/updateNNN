@@ -1,0 +1,79 @@
+@page "/companies"
+@rendermode InteractiveServer
+
+<PageTitle>Quản lý Công ty — IRM v2.0</PageTitle>
+
+@* ── Header ── *@
+<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudStack Spacing="0">
+        <MudText Typo="Typo.h5" Style="font-weight: 800;">🏢 Danh sách Công ty</MudText>
+        <MudText Typo="Typo.caption" Color="Color.Secondary">Tổng: @_companies.Count công ty đang hoạt động</MudText>
+    </MudStack>
+    <MudStack Row="true" Spacing="2">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.UploadFile"
+                   Color="Color.Default" Href="/import">Import Excel</MudButton>
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add"
+                   Color="Color.Primary">Thêm công ty</MudButton>
+    </MudStack>
+</MudStack>
+
+@* ── DataGrid ── *@
+<MudDataGrid Items="@_companies" T="Company" Filterable="true" Sortable="true"
+             Dense="true" Hover="true" Bordered="false" Striped="true"
+             RowsPerPage="10" Class="rounded-lg border-solid border" Style="border-width: 1px;">
+    <Columns>
+        <PropertyColumn Property="x => x.Id" Title="STT" Sortable="false" Filterable="false" />
+        <PropertyColumn Property="x => x.Name" Title="Tên công ty" Style="font-weight: 600;" />
+        <PropertyColumn Property="x => x.Type" Title="Loại hình" />
+        <TemplateColumn Title="Lĩnh vực">
+            <CellTemplate>
+                <MudChip T="string" Size="Size.Small" Color="Color.Tertiary" Variant="Variant.Outlined">@context.Item.Field</MudChip>
+            </CellTemplate>
+        </TemplateColumn>
+        <PropertyColumn Property="x => x.TotalWorkers" Title="Tổng LĐ" Style="font-weight: 700;" />
+        <TemplateColumn Title="Có GPLĐ">
+            <CellTemplate>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">@context.Item.WithPermit</MudChip>
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Chưa có">
+            <CellTemplate>
+                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">@context.Item.WithoutPermit</MudChip>
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Miễn">
+            <CellTemplate>
+                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text">@context.Item.Exempt</MudChip>
+            </CellTemplate>
+        </TemplateColumn>
+        <PropertyColumn Property="x => x.Tracker" Title="Cán bộ TD" />
+        <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
+            <CellTemplate>
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Default" />
+                <MudIconButton Icon="@Icons.Material.Filled.UploadFile" Size="Size.Small" Color="Color.Default" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="Company" />
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    private record Company(int Id, string Name, string Type, string Field, int TotalWorkers, int WithPermit, int WithoutPermit, int Exempt, string Tracker);
+
+    private List<Company> _companies = new()
+    {
+        new(1, "Cty TNHH Samsung Electronics VN", "TNHH", "Sản xuất", 125, 98, 15, 12, "Nguyễn Văn A"),
+        new(2, "Cty CP Hyundai Aluminum Vina", "Cổ phần", "Công nghiệp", 89, 72, 10, 7, "Trần Thị B"),
+        new(3, "Cty TNHH Canon Vietnam", "TNHH", "Sản xuất", 67, 55, 5, 7, "Nguyễn Văn A"),
+        new(4, "Cty TNHH LG Display Vietnam", "TNHH", "Sản xuất", 56, 48, 3, 5, "Lê Văn C"),
+        new(5, "Cty CP Posco Vietnam", "Cổ phần", "Thép", 45, 38, 4, 3, "Trần Thị B"),
+        new(6, "Cty TNHH Foxconn Bình Dương", "TNHH", "Điện tử", 78, 65, 8, 5, "Nguyễn Văn A"),
+        new(7, "Cty TNHH Panasonic VN", "TNHH", "Sản xuất", 34, 28, 3, 3, "Lê Văn C"),
+        new(8, "Cty CP Formosa VN", "Cổ phần", "Hóa chất", 92, 76, 9, 7, "Trần Thị B"),
+        new(9, "Cty TNHH Toyota Motor VN", "TNHH", "Ô tô", 41, 35, 3, 3, "Nguyễn Văn A"),
+        new(10, "Cty TNHH Intel Products VN", "TNHH", "Bán dẫn", 112, 95, 10, 7, "Lê Văn C"),
+    };
+}

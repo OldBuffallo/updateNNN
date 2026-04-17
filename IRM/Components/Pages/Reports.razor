@@ -1,0 +1,114 @@
+@page "/reports"
+@rendermode InteractiveServer
+
+<PageTitle>Báo cáo — IRM v2.0</PageTitle>
+
+<MudText Typo="Typo.h5" Style="font-weight: 800;" Class="mb-1">📝 Tạo báo cáo tùy chỉnh</MudText>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">Kéo thả cột, thêm điều kiện, xuất Excel/PDF</MudText>
+
+<MudGrid Spacing="4">
+    @* ── Builder Sidebar ── *@
+    <MudItem xs="12" md="4" lg="3">
+        <MudPaper Elevation="0" Class="pa-5 rounded-lg border-solid border" Style="border-width: 1px; position: sticky; top: 80px;">
+            <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-4">⚙️ Cấu hình báo cáo</MudText>
+
+            <MudSelect T="string" Label="Nguồn dữ liệu" Variant="Variant.Outlined" Value="@("all")" Class="mb-4">
+                <MudSelectItem Value="@("all")">Nhân viên + Công ty</MudSelectItem>
+                <MudSelectItem Value="@("company")">Chỉ Công ty</MudSelectItem>
+                <MudSelectItem Value="@("employee")">Chỉ Nhân viên</MudSelectItem>
+            </MudSelect>
+
+            <MudText Typo="Typo.overline" Style="font-weight: 700; letter-spacing: 1px;" Class="mb-2">CHỌN CỘT HIỂN THỊ</MudText>
+            @foreach (var col in _columns)
+            {
+                <MudCheckBox T="bool" @bind-Value="col.Selected" Label="@col.Name" Dense="true" Color="Color.Primary"
+                             Style="font-size: 13px;" />
+            }
+
+            <MudDivider Class="my-4" />
+            <MudText Typo="Typo.overline" Style="font-weight: 700; letter-spacing: 1px;" Class="mb-2">NHÓM THEO</MudText>
+            <MudSelect T="string" Variant="Variant.Outlined" Value="@("company")" Class="mb-4">
+                <MudSelectItem Value="@("company")">Công ty</MudSelectItem>
+                <MudSelectItem Value="@("nationality")">Quốc tịch</MudSelectItem>
+                <MudSelectItem Value="@("field")">Lĩnh vực</MudSelectItem>
+            </MudSelect>
+
+            <MudDivider Class="my-4" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.Download" Class="mb-2">📥 Xuất Excel</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.PictureAsPdf" Class="mb-2">📄 Xuất PDF</MudButton>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.Save">💾 Lưu Template</MudButton>
+        </MudPaper>
+    </MudItem>
+
+    @* ── Preview ── *@
+    <MudItem xs="12" md="8" lg="9">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3">
+            <MudText Typo="Typo.subtitle1" Style="font-weight: 700;">Xem trước: BC NLĐ sắp hết hạn tạm trú</MudText>
+            <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">23 bản ghi</MudChip>
+        </MudStack>
+
+        <MudSimpleTable Dense="true" Hover="true" Striped="true"
+                        Class="rounded-lg border-solid border" Style="border-width: 1px;">
+            <thead>
+                <tr><th>STT</th><th>Công ty</th><th>Họ tên</th><th>Quốc tịch</th><th>Hộ chiếu</th><th>Nghề nghiệp</th><th>GPLĐ</th><th>Hạn TT</th><th>Còn lại</th></tr>
+            </thead>
+            <tbody>
+                <tr style="background: var(--mud-palette-background); font-weight: 700;">
+                    <td colspan="9">🏢 Cty TNHH Samsung Electronics VN</td>
+                </tr>
+                <tr><td>1</td><td></td><td>Zhang Wei</td><td>Trung Quốc</td><td>E12345678</td><td>Kỹ sư</td><td><MudChip T="string" Size="Size.Small" Color="Color.Success">Có GPLĐ</MudChip></td><td>18/04/2026</td><td style="color: var(--mud-palette-error); font-weight: 700;">3 ngày</td></tr>
+                <tr><td>2</td><td></td><td>Kim Min-jun</td><td>Hàn Quốc</td><td>M55667788</td><td>Quản lý</td><td><MudChip T="string" Size="Size.Small" Color="Color.Success">Có GPLĐ</MudChip></td><td>20/04/2026</td><td style="color: var(--mud-palette-error); font-weight: 700;">5 ngày</td></tr>
+                <tr style="background: var(--mud-palette-background); font-weight: 700;">
+                    <td colspan="9">🏢 Cty CP Hyundai Aluminum Vina</td>
+                </tr>
+                <tr><td>3</td><td></td><td>Park Ji-hoon</td><td>Hàn Quốc</td><td>M99887766</td><td>Kỹ thuật</td><td><MudChip T="string" Size="Size.Small" Color="Color.Success">Có GPLĐ</MudChip></td><td>03/05/2026</td><td style="color: var(--mud-palette-warning); font-weight: 700;">18 ngày</td></tr>
+                <tr><td>4</td><td></td><td>Wang Li</td><td>Trung Quốc</td><td>E98765432</td><td>Quản lý</td><td><MudChip T="string" Size="Size.Small" Color="Color.Success">Có GPLĐ</MudChip></td><td>10/05/2026</td><td style="color: var(--mud-palette-info); font-weight: 700;">25 ngày</td></tr>
+            </tbody>
+        </MudSimpleTable>
+
+        @* Saved Templates *@
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mt-8 mb-3">📋 Template đã lưu</MudText>
+        <MudStack Spacing="2">
+            @foreach (var tpl in _templates)
+            {
+                <MudPaper Elevation="0" Class="pa-4 rounded-lg border-solid border d-flex align-center gap-4" Style="border-width: 1px;">
+                    <MudIcon Icon="@Icons.Material.Filled.Description" Color="Color.Primary" />
+                    <MudStack Spacing="0" Style="flex: 1;">
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">@tpl.Name</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@tpl.Meta</MudText>
+                    </MudStack>
+                    <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Primary">Chạy</MudButton>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small">Sửa</MudButton>
+                </MudPaper>
+            }
+        </MudStack>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private class ColumnOption { public string Name { get; set; } = ""; public bool Selected { get; set; } }
+    private List<ColumnOption> _columns = new()
+    {
+        new() { Name = "Công ty", Selected = true },
+        new() { Name = "Họ tên", Selected = true },
+        new() { Name = "Quốc tịch", Selected = true },
+        new() { Name = "Hộ chiếu", Selected = true },
+        new() { Name = "Nghề nghiệp", Selected = true },
+        new() { Name = "Loại GPLĐ", Selected = true },
+        new() { Name = "Hạn tạm trú", Selected = true },
+        new() { Name = "Giới tính", Selected = false },
+        new() { Name = "Ngày sinh", Selected = false },
+        new() { Name = "Còn lại (ngày)", Selected = true },
+    };
+
+    private record TemplateItem(string Name, string Meta);
+    private List<TemplateItem> _templates = new()
+    {
+        new("BC NLĐ sắp hết hạn tạm trú", "23 bản ghi · Hôm nay"),
+        new("BC NLĐ theo quốc tịch", "1,245 bản ghi · 15/04"),
+        new("BC thống kê theo lĩnh vực", "156 công ty · 10/04"),
+    };
+}

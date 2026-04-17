@@ -1,0 +1,105 @@
+﻿<Window x:Class="ReportManager.ExportFileWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ReportManager"
+        mc:Ignorable="d"
+        ResizeMode="CanMinimize"
+        KeyDown="Window_KeyDown"
+        SizeToContent="Height"
+        Title="Xuất file" Height="390" Width="620">
+    <StackPanel Background="#a6d9ef" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Border CornerRadius="25" Margin="20" BorderBrush="Red" Background="White">
+            <StackPanel Margin="0,10">
+                <Label Content="Tùy chọn định dạng xuất file" Grid.Row="0" FontSize="25" HorizontalAlignment="Center" FontWeight="Bold" VerticalContentAlignment="Bottom"/>
+
+                <!-- directory -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Margin="0,5" Content="Đường dẫn: " FontSize="20" Height="40" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Column="1" Margin="0,10, 20,10" Text="{Binding LinkFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" IsEnabled="False" FontSize="20"/>
+                    <Button Grid.Column="2" Content="Lưu tại" Style="{DynamicResource BtnChoose}" Margin="0,10,20,10" Width="100" Command="{Binding BtnSaveLinkCommand}" Background="#f0ff00" Foreground="Black" BorderBrush="White"/>
+                </Grid>
+
+                <!--type of export file-->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Margin="0,5" Content="Mẫu file: " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <ComboBox Grid.Column="1" Margin="0,10,20,10" FontSize="20" Height="40" SelectedIndex="{Binding SelectFormatFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" HorizontalContentAlignment="Left">
+                        <ComboBoxItem Name="cbbScreenEmployee" Content="Xuất từ dữ liệu trên màn hình"/>
+                        <ComboBoxItem Content="Xuất file theo sở ban ngành"/>
+                        <ComboBoxItem Content="Xuất file theo quận huyện"/>
+                        <ComboBoxItem Content="Xuất file theo phường xã"/>
+                        <ComboBoxItem Content="Xuất file theo loại KQGQ"/>
+                    </ComboBox>
+                </Grid>
+                
+                <!--SettlementResults Type-->
+                <Grid Grid.Row="3" Grid.RowSpan="2" Name="SettlementResultsType">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Margin="0,5" Content="Loại KQGQ: " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <CheckBox Grid.Column="1" Margin="0,10,20,10" FontSize="20" Padding="5,4" Content="Tất cả" Name="cbAll"  VerticalContentAlignment="Center" Checked="cbAll_Checked" Unchecked="cbAll_Unchecked"/>
+                        <CheckBox Grid.Column="2" Margin="0,10,20,10" FontSize="20" Padding="5,4" Content="GHTT" Name="cbGHTT" IsChecked="{Binding IsGHTT, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  VerticalContentAlignment="Center"/>
+                        <CheckBox Grid.Column="3" Margin="0,10,20,10" FontSize="20" Padding="5,4" Content="VISA" Name="cbVISA" IsChecked="{Binding IsVISA, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  VerticalContentAlignment="Center"/>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Grid.Column="2" Margin="0,10,20,10" FontSize="20" Padding="5,4" Content="TTT" Name="cbTTT" IsChecked="{Binding IsTTT, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  VerticalContentAlignment="Center"/>
+                        <CheckBox Grid.Column="3" Margin="0,10,20,10" FontSize="20" Padding="5,4" Content="Khác" Name="cbOther" IsChecked="{Binding IsOther, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  VerticalContentAlignment="Center"/>
+                    </Grid>
+                </Grid>
+
+                <!--time-->
+                <Grid Grid.Row="3" Grid.RowSpan="2" Name="Time">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="140"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Margin="0,5" Content="KQGQ thủ tục: " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <TextBox Grid.Column="1" Margin="0,10,20,10" FontSize="20" Padding="5,4" Text="{Binding StartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MouseDoubleClick="TextBox_MouseDoubleClick"/>
+                        <Label Grid.Column="2" Margin="0,5" Content="Đến " FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+                        <TextBox Grid.Column="3" Margin="0,10,20,10" FontSize="20" Padding="5,4" Text="{Binding EndDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left" MouseDoubleClick="TextBox_MouseDoubleClick"/>
+                    </Grid>
+                    <!-- description for the time field-->
+                    <Label Grid.Row="1" Content="thời gian được đối chiếu từ ngày tạo thẻ của kết quả giải quyết" FontSize="13" Foreground="Red" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Light" VerticalContentAlignment="Center"/>
+                </Grid>
+
+                <!-- button-->
+                <StackPanel Orientation="Horizontal" Grid.Row="5" HorizontalAlignment="Center">
+                    <Button Content="Xuất file" Style="{DynamicResource BtnSuccess}" Command="{Binding BtnExportFileCommand}" Margin="20,0,20,0" Width="120" Height="35" FontSize="20" Background="#80ff00" Foreground="Black" BorderBrush="White"/>
+                    <Button Content="Hủy bỏ" Style="{DynamicResource BtnCancel}" Command="{Binding BtnCancelCommand}" Margin="20,0,20,0" Width="120" Height="35" FontSize="20" Background="#ff2d2d" Foreground="Black" BorderBrush="White"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</Window>

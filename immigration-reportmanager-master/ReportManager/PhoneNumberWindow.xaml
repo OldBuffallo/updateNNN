@@ -1,0 +1,49 @@
+﻿<Window x:Class="ReportManager.PhoneNumberWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ReportManager"
+        mc:Ignorable="d" ResizeMode="CanMinimize"
+        Title="Số điện thoại" Height="240" Width="385">
+    <Grid Background="#a6d9ef" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <Border CornerRadius="25" Margin="20" BorderBrush="Red" Background="White">
+            <Grid Margin="0,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <!-- name-->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Margin="0,5" Content="Tên * : " VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Column="1" Margin="20,5,20,5" Text="{Binding AddPhoneNumber.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+                </Grid>
+                <!-- email -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Margin="0,5" Content="SĐT * : " VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Column="1" Margin="20,5,20,5" Text="{Binding AddPhoneNumber.Phone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput"  VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+                </Grid>
+                <!-- Add button-->
+                <StackPanel Name="addPhone" Visibility="Collapsed" Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
+                    <Button Content="Thêm SĐT" Style="{DynamicResource BtnSuccess}" Command="{Binding BtnAddPhoneNumberCommand}" Margin="20,5,20,10" Width="100" Height="30" Background="#80ff00" Foreground="Black" BorderBrush="White"/>
+                    <Button Content="Hủy bỏ" Style="{DynamicResource BtnCancel}" Command="{Binding BtnExitCommand}" Margin="20,5,20,10" Width="100" Height="30" Background="#ff2d2d" Foreground="Black" BorderBrush="White"/>
+                </StackPanel>
+                <!-- Edit button-->
+                <StackPanel Name="editPhone" Visibility="Visible" Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Center">
+                    <Button Content="Lưu SĐT" Style="{DynamicResource BtnSuccess}" Command="{Binding BtnAddPhoneNumberCommand}" Margin="5,5,10,10" Width="80" Height="30" Background="#80ff00" Foreground="Black" BorderBrush="White"/>
+                    <Button Content="Xóa" Style="{DynamicResource BtnChoose}" Command="{Binding BtnDeletePhoneNumberCommand}" Margin="5,5,10,10" Width="80" Height="30" Background="#80ff00" Foreground="Black" BorderBrush="White"/>
+                    <Button Content="Hủy bỏ" Style="{DynamicResource BtnCancel}" Command="{Binding BtnExitCommand}" Margin="5,5,10,10" Width="80" Height="30" Background="#ff2d2d" Foreground="Black" BorderBrush="White"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

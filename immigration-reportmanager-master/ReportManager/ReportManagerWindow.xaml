@@ -1,0 +1,42 @@
+﻿<Window x:Class="ReportManager.ReportManagerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ReportManager"
+        mc:Ignorable="d" MinHeight="700" MinWidth="1121" KeyDown="Window_KeyDown"
+        Title="Thống kê công ty và người nước ngoài" Height="700" Width="1121">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0" Width="Auto" Height="20" >
+            <MenuItem Header="Trang chủ" Command="{Binding BtnHomeCommand}"/>
+            <MenuItem Header="Tùy chọn">
+                <MenuItem Header="Quản lý tài khoản" Command="{Binding BtnAddAccountCommand}"/>
+                <MenuItem Header="Lĩnh vực" Command="{Binding BtnFieldsCommand}" />
+                <MenuItem Header="Ngành nghề" Command="{Binding BtnCareersCommand}" />
+                <MenuItem Header="Quốc tịch" Command="{Binding BtnNationalitiesCommand}" />
+                <MenuItem Header="Quận/Huyện" Command="{Binding BtnDistrictsCommand}" />
+                <MenuItem Header="Phường/Xã" Command="{Binding BtnWardsCommand}" />
+                <MenuItem Name="exportFile" Header="Xuất file">
+                    <MenuItem x:Name="exportFileCompany" Header="Theo công ty"/>
+                    <MenuItem x:Name="exportFileEmployee" Header="Theo nhân viên"/>
+                    <MenuItem x:Name="exportFileCompanyAndEmployee" Header="Theo công ty và nhân viên"/>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Đăng xuất" Command="{Binding BtnLogOutCommand}" />
+            </MenuItem>
+            <MenuItem Header="Trợ giúp">
+                <MenuItem Header="Hướng dẫn" Command="{Binding BtnTutorialCommand}"/>
+                <MenuItem Header="Về chúng tôi" Command="{Binding BtnAboutCommand}"/>
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1" Background="#a6d9ef" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <Border CornerRadius="25" Margin="20" BorderBrush="Red" Background="White">
+                <ContentPresenter x:Name="ContentArea" Content="{Binding CurrentView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

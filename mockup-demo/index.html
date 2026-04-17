@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immigration Report Manager v2.0 — Demo</title>
+    <meta name="description"
+        content="Hệ thống quản lý báo cáo người lao động nước ngoài - Phiên bản Web Application hiện đại, bảo mật.">
+
+    <!-- OG Tags for social sharing (Zalo, Facebook) -->
+    <meta property="og:title" content="Immigration Report Manager v2.0 — Demo">
+    <meta property="og:description"
+        content="Hệ thống quản lý lao động nước ngoài — Dashboard, Import Excel thông minh, Tìm kiếm toàn cục, Báo cáo tùy chỉnh.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://placehold.co/1200x630/2563eb/ffffff?text=IRM+v2.0+Demo&font=inter">
+
+    <!-- Favicon -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232563eb'/><path d='M28 50L45 67L72 33' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- ============ LOADING SCREEN ============ -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Đang tải hệ thống...</div>
+    </div>
+
+    <!-- ============ LOGIN SCREEN ============ -->
+    <div id="loginScreen" class="login-screen active-screen">
+        <div class="login-bg">
+            <div class="login-card">
+                <div class="login-logo">
+                    <div class="logo-icon">
+                        <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+                            <path d="M14 24L22 32L34 16" stroke="white" stroke-width="3.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h1>Immigration Report Manager</h1>
+                    <p class="login-subtitle">Hệ thống quản lý lao động nước ngoài v2.0</p>
+                </div>
+                <form onsubmit="showDashboard(); return false;" id="loginForm">
+                    <div class="input-group">
+                        <label for="loginUser">Tài khoản</label>
+                        <input type="text" id="loginUser" value="admin" placeholder="Nhập tài khoản">
+                    </div>
+                    <div class="input-group">
+                        <label for="loginPass">Mật khẩu</label>
+                        <input type="password" id="loginPass" value="••••••" placeholder="Nhập mật khẩu">
+                    </div>
+                    <button type="submit" class="btn-login" id="btnLogin">Đăng nhập</button>
+                </form>
+                <div class="login-footer">
+                    <span class="secure-badge">🔒 Kết nối bảo mật (HTTPS) · Phiên bản 2.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ MAIN APP ============ -->
+    <div id="mainApp" class="main-app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+                        <rect width="48" height="48" rx="12" fill="#2563eb" />
+                        <path d="M14 24L22 32L34 16" stroke="white" stroke-width="3" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    <span>IRM <small>v2.0</small></span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Tổng quan</div>
+                <a href="#" class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+                    <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
+                </a>
+
+                <div class="nav-section-title">Quản lý dữ liệu</div>
+                <a href="#" class="nav-item" data-page="companies" onclick="switchPage('companies')">
+                    <span class="nav-icon">🏢</span><span class="nav-label">Công ty</span>
+                </a>
+                <a href="#" class="nav-item" data-page="employees" onclick="switchPage('employees')">
+                    <span class="nav-icon">👥</span><span class="nav-label">Nhân viên</span>
+                </a>
+                <a href="#" class="nav-item" data-page="import" onclick="switchPage('import')">
+                    <span class="nav-icon">📤</span><span class="nav-label">Import Excel</span>
+                    <span class="nav-badge">Mới</span>
+                </a>
+
+                <div class="nav-section-title">Phân tích &amp; Báo cáo</div>
+                <a href="#" class="nav-item" data-page="search" onclick="switchPage('search')">
+                    <span class="nav-icon">🔍</span><span class="nav-label">Tìm kiếm</span>
+                    <span class="nav-badge">Mới</span>
+                </a>
+                <a href="#" class="nav-item" data-page="reports" onclick="switchPage('reports')">
+                    <span class="nav-icon">📝</span><span class="nav-label">Báo cáo</span>
+                    <span class="nav-badge">Mới</span>
+                </a>
+
+                <div class="nav-divider"></div>
+                <a href="#" class="nav-item" data-page="admin" onclick="switchPage('admin')">
+                    <span class="nav-icon">⚙️</span><span class="nav-label">Quản trị</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar">A</div>
+                    <div class="user-info">
+                        <span class="user-name">Admin</span>
+                        <span class="user-role">Quản trị viên</span>
+                    </div>
+                    <button class="btn-logout" onclick="showLogin()" title="Đăng xuất">⏻</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="content">
+            <!-- TOP BAR -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="btn-menu" onclick="toggleSidebar()" id="btnSidebarToggle">☰</button>
+                    <div>
+                        <h2 id="pageTitle">Dashboard</h2>
+                        <span class="breadcrumb" id="breadcrumb"><a href="#" onclick="switchPage('dashboard')">Trang
+                                chủ</a> / Dashboard</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="global-search">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" placeholder="Tìm nhanh... (Ctrl+K)" id="globalSearchInput">
+                    </div>
+                    <button class="btn-topbar" id="btnNotif" title="Thông báo">
+                        🔔<span class="notif-dot"></span>
+                    </button>
+                    <button class="theme-toggle" id="btnTheme" onclick="toggleTheme()" title="Chuyển giao diện">
+                        <span class="icon-sun">☀️</span>
+                        <span class="icon-moon">🌙</span>
+                    </button>
+                    <button class="btn-topbar" id="btnHelp" onclick="toggleHelp()" title="Hỗ trợ sử dụng">
+                        ❓<span class="btn-help-label">Hỗ trợ</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- ============ DASHBOARD PAGE ============ -->
+            <div id="page-dashboard" class="page active-page">
+                <div class="section-header">
+                    <h3>📊 Tổng quan hệ thống</h3>
+                    <span class="breadcrumb">Dữ liệu cập nhật: Hôm nay, 17/04/2026</span>
+                </div>
+                <div class="kpi-grid">
+                    <div class="kpi-card kpi-blue">
+                        <div class="kpi-content">
+                            <span class="kpi-label">Tổng công ty</span>
+                            <span class="kpi-value" id="kpiCompanies">0</span>
+                            <span class="kpi-change up">▲ +12 tháng này</span>
+                        </div>
+                        <div class="kpi-icon">🏢</div>
+                    </div>
+                    <div class="kpi-card kpi-green">
+                        <div class="kpi-content">
+                            <span class="kpi-label">Tổng lao động NN</span>
+                            <span class="kpi-value" id="kpiEmployees">0</span>
+                            <span class="kpi-change up">▲ +45 tháng này</span>
+                        </div>
+                        <div class="kpi-icon">👥</div>
+                    </div>
+                    <div class="kpi-card kpi-orange">
+                        <div class="kpi-content">
+                            <span class="kpi-label">Sắp hết hạn tạm trú</span>
+                            <span class="kpi-value" id="kpiExpiring">0</span>
+                            <span class="kpi-change warn">⚠ Trong 30 ngày tới</span>
+                        </div>
+                        <div class="kpi-icon">⚠️</div>
+                    </div>
+                    <div class="kpi-card kpi-purple">
+                        <div class="kpi-content">
+                            <span class="kpi-label">Đã có GPLĐ</span>
+                            <span class="kpi-value" id="kpiPermit">0</span>
+                            <span class="kpi-change up">85.2% tổng số</span>
+                        </div>
+                        <div class="kpi-icon">📋</div>
+                    </div>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Lao động nước ngoài theo quốc tịch</h3>
+                            <select class="chart-filter">
+                                <option>Năm 2026</option>
+                                <option>Năm 2025</option>
+                            </select>
+                        </div>
+                        <canvas id="chartNationality" height="260"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Tỷ lệ giấy phép lao động</h3>
+                        </div>
+                        <canvas id="chartPermit" height="260"></canvas>
+                    </div>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Xu hướng hết hạn tạm trú (12 tháng)</h3>
+                        </div>
+                        <canvas id="chartTrend" height="240"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>⚠️ Cảnh báo — Sắp hết hạn</h3>
+                            <a href="#" class="link-all" onclick="switchPage('employees')">Xem tất cả →</a>
+                        </div>
+                        <div class="alert-list">
+                            <div class="alert-item danger">
+                                <div class="alert-info">
+                                    <strong>Zhang Wei</strong>
+                                    <span>Cty TNHH Samsung Electronics VN</span>
+                                </div>
+                                <span class="alert-badge danger">3 ngày</span>
+                            </div>
+                            <div class="alert-item danger">
+                                <div class="alert-info">
+                                    <strong>Kim Min-jun</strong>
+                                    <span>Cty CP Hyundai Aluminum Vina</span>
+                                </div>
+                                <span class="alert-badge danger">5 ngày</span>
+                            </div>
+                            <div class="alert-item warning">
+                                <div class="alert-info">
+                                    <strong>Tanaka Yuki</strong>
+                                    <span>Cty TNHH Canon Vietnam</span>
+                                </div>
+                                <span class="alert-badge warning">12 ngày</span>
+                            </div>
+                            <div class="alert-item warning">
+                                <div class="alert-info">
+                                    <strong>Park Ji-hoon</strong>
+                                    <span>Cty TNHH GHI</span>
+                                </div>
+                                <span class="alert-badge warning">18 ngày</span>
+                            </div>
+                            <div class="alert-item info">
+                                <div class="alert-info">
+                                    <strong>Wang Li</strong>
+                                    <span>Cty CP Foxconn VN</span>
+                                </div>
+                                <span class="alert-badge info">25 ngày</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ COMPANIES PAGE ============ -->
+            <div id="page-companies" class="page">
+                <div class="section-header">
+                    <h3>🏢 Danh sách Công ty</h3>
+                    <span class="breadcrumb">Tổng: 156 công ty đang hoạt động</span>
+                </div>
+                <div class="page-actions">
+                    <div class="actions-left">
+                        <div class="filter-group">
+                            <select class="filter-select">
+                                <option>Tất cả lĩnh vực</option>
+                                <option>Sản xuất</option>
+                                <option>Dịch vụ</option>
+                                <option>Thương mại</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>Tất cả cán bộ</option>
+                                <option>Nguyễn Văn A</option>
+                                <option>Trần Thị B</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="actions-right">
+                        <button class="btn btn-secondary" onclick="switchPage('import')">📤 Import Excel</button>
+                        <button class="btn btn-primary">+ Thêm công ty</button>
+                    </div>
+                </div>
+                <div class="data-table-wrapper">
+                    <table class="data-table" id="companyTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên công ty</th>
+                                <th>Loại hình</th>
+                                <th>Lĩnh vực</th>
+                                <th>Tổng LĐ</th>
+                                <th>Có GPLĐ</th>
+                                <th>Chưa có</th>
+                                <th>Miễn</th>
+                                <th>Cán bộ TD</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <span class="page-info">Hiển thị 1-10 / 156 công ty</span>
+                    <div class="page-controls">
+                        <button class="page-btn">‹</button>
+                        <button class="page-btn active">1</button><button class="page-btn">2</button><button
+                            class="page-btn">3</button>
+                        <button class="page-btn">...</button><button class="page-btn">16</button>
+                        <button class="page-btn">›</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ EMPLOYEES PAGE ============ -->
+            <div id="page-employees" class="page">
+                <div class="section-header">
+                    <h3>👥 Danh sách Nhân viên nước ngoài</h3>
+                    <span class="breadcrumb">Tổng: 1,245 nhân viên đang làm việc</span>
+                </div>
+                <div class="page-actions">
+                    <div class="actions-left">
+                        <div class="filter-group">
+                            <select class="filter-select">
+                                <option>Tất cả quốc tịch</option>
+                                <option>Trung Quốc</option>
+                                <option>Hàn Quốc</option>
+                                <option>Nhật Bản</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>Tất cả GPLĐ</option>
+                                <option>Đã có GPLĐ</option>
+                                <option>Miễn GPLĐ</option>
+                                <option>Chưa có GPLĐ</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>Đang làm</option>
+                                <option>Đã nghỉ</option>
+                                <option>Tất cả</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="actions-right">
+                        <button class="btn btn-outline">📥 Xuất Excel</button>
+                        <button class="btn btn-primary">+ Thêm nhân viên</button>
+                    </div>
+                </div>
+                <div class="data-table-wrapper">
+                    <table class="data-table" id="employeeTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Họ tên</th>
+                                <th>Quốc tịch</th>
+                                <th>Hộ chiếu</th>
+                                <th>Công ty</th>
+                                <th>Nghề nghiệp</th>
+                                <th>GPLĐ</th>
+                                <th>Hạn tạm trú</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <span class="page-info">Hiển thị 1-10 / 1,245 nhân viên</span>
+                    <div class="page-controls">
+                        <button class="page-btn">‹</button>
+                        <button class="page-btn active">1</button><button class="page-btn">2</button><button
+                            class="page-btn">3</button>
+                        <button class="page-btn">...</button><button class="page-btn">125</button>
+                        <button class="page-btn">›</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ IMPORT PAGE ============ -->
+            <div id="page-import" class="page">
+                <div class="section-header">
+                    <h3>📤 Import dữ liệu từ Excel</h3>
+                    <span class="breadcrumb">Cập nhật danh sách lao động từ file Excel</span>
+                </div>
+                <div class="import-wizard">
+                    <div class="wizard-steps">
+                        <div class="wizard-step active" data-step="1"><span class="step-num">1</span><span
+                                class="step-label">Upload file</span></div>
+                        <div class="wizard-connector"></div>
+                        <div class="wizard-step" data-step="2"><span class="step-num">2</span><span
+                                class="step-label">Ghép cột</span></div>
+                        <div class="wizard-connector"></div>
+                        <div class="wizard-step" data-step="3"><span class="step-num">3</span><span
+                                class="step-label">Xem trước</span></div>
+                        <div class="wizard-connector"></div>
+                        <div class="wizard-step" data-step="4"><span class="step-num">4</span><span
+                                class="step-label">Kết quả</span></div>
+                    </div>
+                    <!-- Step 1: Upload -->
+                    <div class="wizard-content" id="importStep1">
+                        <div class="upload-zone" id="dropZone">
+                            <div class="upload-icon">📄</div>
+                            <h3>Kéo thả file Excel vào đây</h3>
+                            <p>hoặc <a href="#">nhấn chọn file từ máy tính</a></p>
+                            <p class="upload-hint">Hỗ trợ: .xlsx, .xls, .csv — Tối đa 10MB</p>
+                        </div>
+                        <div class="upload-options">
+                            <div class="option-group">
+                                <label>Chọn công ty</label>
+                                <select class="filter-select" style="width:100%">
+                                    <option>— Chọn công ty nhận dữ liệu —</option>
+                                    <option selected>Cty TNHH Samsung Electronics VN</option>
+                                </select>
+                            </div>
+                            <div class="option-group">
+                                <label>Template ghép cột đã lưu</label>
+                                <select class="filter-select" style="width:100%">
+                                    <option>— Không dùng template —</option>
+                                    <option>Template Samsung</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="text-align:center; margin-top:28px;">
+                            <button class="btn btn-primary btn-lg" onclick="goImportStep(2)">Tiếp tục →</button>
+                        </div>
+                    </div>
+                    <!-- Step 2: Mapping -->
+                    <div class="wizard-content hidden" id="importStep2">
+                        <div class="mapping-info">
+                            <span class="mapping-file">📄 DanhSachNLD_Samsung_2026.xlsx</span>
+                            <span class="mapping-meta">Sheet 1 — 45 dòng dữ liệu — 12 cột</span>
+                        </div>
+                        <div class="mapping-grid">
+                            <div class="mapping-header"><span>Cột trong file Excel</span><span></span><span>Trường trong
+                                    hệ thống</span><span>Trạng thái</span></div>
+                            <div class="mapping-row matched"><span class="excel-col">Cột B: "Họ và tên"</span><span
+                                    class="mapping-arrow">→</span><select class="mapping-select">
+                                    <option selected>Họ tên (StaffName)</option>
+                                </select><span class="mapping-status">✅ Tự động</span></div>
+                            <div class="mapping-row matched"><span class="excel-col">Cột C: "Giới tính"</span><span
+                                    class="mapping-arrow">→</span><select class="mapping-select">
+                                    <option selected>Giới tính (Gender)</option>
+                                </select><span class="mapping-status">✅ Tự động</span></div>
+                            <div class="mapping-row matched"><span class="excel-col">Cột D: "Ngày sinh"</span><span
+                                    class="mapping-arrow">→</span><select class="mapping-select">
+                                    <option selected>Ngày sinh (Birthday)</option>
+                                </select><span class="mapping-status">✅ Tự động</span></div>
+                            <div class="mapping-row matched"><span class="excel-col">Cột E: "Quốc tịch"</span><span
+                                    class="mapping-arrow">→</span><select class="mapping-select">
+                                    <option selected>Quốc tịch (Nationality)</option>
+                                </select><span class="mapping-status">✅ Tự động</span></div>
+                            <div class="mapping-row matched"><span class="excel-col">Cột F: "Số hộ chiếu"</span><span
+                                    class="mapping-arrow">→</span><select class="mapping-select">
+                                    <option selected>Hộ chiếu (Passport)</option>
+                                </select><span class="mapping-status">✅ Tự động</span></div>
+                            <div class="mapping-row unmatched"><span class="excel-col">Cột G: "Nơi cấp HC"</span><span
+                                    class="mapping-arrow">→</span><select class="mapping-select">
+                                    <option selected>— Bỏ qua —</option>
+                                    <option>Ghi chú (Note)</option>
+                                </select><span class="mapping-status">⚠️ Chưa nhận</span></div>
+                            <div class="mapping-row matched"><span class="excel-col">Cột H: "Địa chỉ tạm
+                                    trú"</span><span class="mapping-arrow">→</span><select class="mapping-select">
+                                    <option selected>Địa chỉ (Address)</option>
+                                </select><span class="mapping-status">✅ Tự động</span></div>
+                            <div class="mapping-row matched"><span class="excel-col">Cột I: "Chức danh"</span><span
+                                    class="mapping-arrow">→</span><select class="mapping-select">
+                                    <option selected>Nghề nghiệp (Career)</option>
+                                </select><span class="mapping-status">✅ Tự động</span></div>
+                        </div>
+                        <div class="mapping-summary">
+                            <span class="matched-count">✅ 11/12 cột đã tự động nhận dạng</span>
+                            <label class="save-template"><input type="checkbox" checked> Lưu thành template tái sử
+                                dụng</label>
+                        </div>
+                        <div style="display:flex; gap:12px; justify-content:center; margin-top:28px;">
+                            <button class="btn btn-secondary" onclick="goImportStep(1)">← Quay lại</button>
+                            <button class="btn btn-primary btn-lg" onclick="goImportStep(3)">Tiếp tục →</button>
+                        </div>
+                    </div>
+                    <!-- Step 3: Preview -->
+                    <div class="wizard-content hidden" id="importStep3">
+                        <div class="preview-bar">
+                            <span>👁️ Xem trước 5 / 45 dòng dữ liệu sẽ import</span>
+                            <div class="conflict-summary">
+                                <span class="conflict-new">🟢 38 thêm mới</span>
+                                <span class="conflict-update">🟡 5 trùng</span>
+                                <span class="conflict-error">🔴 2 lỗi</span>
+                            </div>
+                        </div>
+                        <div class="data-table-wrapper">
+                            <table class="data-table preview-table">
+                                <thead>
+                                    <tr>
+                                        <th>Trạng thái</th>
+                                        <th>Họ tên</th>
+                                        <th>GT</th>
+                                        <th>Ngày sinh</th>
+                                        <th>Quốc tịch</th>
+                                        <th>Hộ chiếu</th>
+                                        <th>Nghề nghiệp</th>
+                                        <th>GPLĐ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="row-new">
+                                        <td><span class="status-tag new">Mới</span></td>
+                                        <td>Zhang Wei</td>
+                                        <td>Nam</td>
+                                        <td>15/03/1985</td>
+                                        <td>Trung Quốc</td>
+                                        <td>E12345678</td>
+                                        <td>Kỹ sư</td>
+                                        <td>Có GPLĐ</td>
+                                    </tr>
+                                    <tr class="row-new">
+                                        <td><span class="status-tag new">Mới</span></td>
+                                        <td>Kim Soo-hyun</td>
+                                        <td>Nam</td>
+                                        <td>22/07/1990</td>
+                                        <td>Hàn Quốc</td>
+                                        <td>M98765432</td>
+                                        <td>Quản lý</td>
+                                        <td>Có GPLĐ</td>
+                                    </tr>
+                                    <tr class="row-update">
+                                        <td><span class="status-tag update">Trùng</span></td>
+                                        <td>Tanaka Yuki</td>
+                                        <td>Nữ</td>
+                                        <td>10/11/1988</td>
+                                        <td>Nhật Bản</td>
+                                        <td>TK4567890</td>
+                                        <td>Phiên dịch</td>
+                                        <td>Miễn</td>
+                                    </tr>
+                                    <tr class="row-new">
+                                        <td><span class="status-tag new">Mới</span></td>
+                                        <td>Lee Min-ho</td>
+                                        <td>Nam</td>
+                                        <td>05/06/1992</td>
+                                        <td>Hàn Quốc</td>
+                                        <td>M11223344</td>
+                                        <td>Kỹ thuật</td>
+                                        <td>Chưa có</td>
+                                    </tr>
+                                    <tr class="row-error">
+                                        <td><span class="status-tag error">Lỗi</span></td>
+                                        <td>Wang ???</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                        <td>Trung Quốc</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                        <td>—</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="conflict-options">
+                            <h4>Xử lý 5 bản ghi trùng lặp:</h4>
+                            <label class="radio-option selected"><input type="radio" name="conflict" checked> 🔄 Cập
+                                nhật dữ liệu mới, giữ nguyên lịch sử</label>
+                            <label class="radio-option"><input type="radio" name="conflict"> ⏭️ Bỏ qua, giữ nguyên dữ
+                                liệu cũ</label>
+                        </div>
+                        <div style="display:flex; gap:12px; justify-content:center; margin-top:28px;">
+                            <button class="btn btn-secondary" onclick="goImportStep(2)">← Quay lại</button>
+                            <button class="btn btn-primary btn-lg" onclick="goImportStep(4)">⚡ Bắt đầu Import</button>
+                        </div>
+                    </div>
+                    <!-- Step 4: Result -->
+                    <div class="wizard-content hidden" id="importStep4">
+                        <div class="import-result">
+                            <div class="result-icon success">✅</div>
+                            <h2>Import hoàn tất!</h2>
+                            <p>File <strong>DanhSachNLD_Samsung_2026.xlsx</strong></p>
+                            <div class="result-stats">
+                                <div class="result-stat"><span class="stat-num green">38</span><span
+                                        class="stat-label">Thêm mới</span></div>
+                                <div class="result-stat"><span class="stat-num yellow">5</span><span
+                                        class="stat-label">Cập nhật</span></div>
+                                <div class="result-stat"><span class="stat-num red">2</span><span class="stat-label">Lỗi
+                                        (bỏ qua)</span></div>
+                            </div>
+                            <div class="result-actions">
+                                <button class="btn btn-secondary">📋 Xem chi tiết lỗi</button>
+                                <button class="btn btn-primary" onclick="switchPage('employees')">👥 Xem danh sách
+                                    NLĐ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ SEARCH PAGE ============ -->
+            <div id="page-search" class="page">
+                <div class="section-header">
+                    <h3>🔍 Tìm kiếm &amp; Thống kê</h3>
+                    <span class="breadcrumb">Tìm kiếm toàn bộ dữ liệu trong hệ thống</span>
+                </div>
+                <div class="search-hero">
+                    <h2>Tìm kiếm toàn cục</h2>
+                    <p>Nhập tên, hộ chiếu, công ty, quốc tịch... — hệ thống tự tìm trên mọi trường dữ liệu</p>
+                    <div class="search-bar-large">
+                        <input type="text" id="searchInput" placeholder="Nhập từ khóa tìm kiếm..." value="Trung Quốc">
+                        <button class="btn btn-primary" onclick="doSearch()">Tìm kiếm</button>
+                    </div>
+                </div>
+                <div class="search-results" id="searchResults" style="display:none;">
+                    <div class="search-stats-bar">
+                        <span>Tìm thấy <strong>245</strong> kết quả cho "<em>Trung Quốc</em>" — trong 0.12 giây</span>
+                    </div>
+                    <div class="search-stat-cards">
+                        <div class="stat-mini-card"><span class="stat-mini-num">245</span><span
+                                class="stat-mini-label">Nhân viên</span></div>
+                        <div class="stat-mini-card"><span class="stat-mini-num">67</span><span
+                                class="stat-mini-label">Công ty liên quan</span></div>
+                        <div class="stat-mini-card"><span class="stat-mini-num">189</span><span
+                                class="stat-mini-label">Có GPLĐ</span></div>
+                        <div class="stat-mini-card"><span class="stat-mini-num">12</span><span
+                                class="stat-mini-label">Sắp hết hạn</span></div>
+                    </div>
+                    <div class="search-result-list">
+                        <div class="search-result-item">
+                            <div class="result-type">👥</div>
+                            <div class="result-body">
+                                <h4>Zhang Wei — <mark>Trung Quốc</mark></h4>
+                                <p>HC: E12345678 · Cty TNHH Samsung Electronics VN · Kỹ sư · GPLĐ: Có · Hạn TT:
+                                    15/08/2026</p>
+                            </div><button class="btn btn-sm btn-outline">Xem →</button>
+                        </div>
+                        <div class="search-result-item">
+                            <div class="result-type">👥</div>
+                            <div class="result-body">
+                                <h4>Wang Li — <mark>Trung Quốc</mark></h4>
+                                <p>HC: E98765432 · Cty CP Hyundai Aluminum · Quản lý · GPLĐ: Có · Hạn TT: 20/05/2026</p>
+                            </div><button class="btn btn-sm btn-outline">Xem →</button>
+                        </div>
+                        <div class="search-result-item">
+                            <div class="result-type">👥</div>
+                            <div class="result-body">
+                                <h4>Liu Chen — <mark>Trung Quốc</mark></h4>
+                                <p>HC: E55566677 · Cty TNHH Canon Vietnam · Kỹ thuật · GPLĐ: Miễn · Hạn TT: 30/12/2026
+                                </p>
+                            </div><button class="btn btn-sm btn-outline">Xem →</button>
+                        </div>
+                        <div class="search-result-item">
+                            <div class="result-type">🏢</div>
+                            <div class="result-body">
+                                <h4>Cty TNHH <mark>Trung Quốc</mark> Vina</h4>
+                                <p>Sản xuất · 45 NLĐ · Lĩnh vực: Công nghiệp · ĐC: KCN Bình Dương</p>
+                            </div><button class="btn btn-sm btn-outline">Xem →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ REPORTS PAGE ============ -->
+            <div id="page-reports" class="page">
+                <div class="section-header" style="border-bottom:none; padding-bottom:0; margin-bottom:8px;">
+                    <h3>📝 Tạo báo cáo tùy chỉnh</h3>
+                </div>
+                <div class="report-builder">
+                    <div class="builder-sidebar">
+                        <h3>⚙️ Cấu hình báo cáo</h3>
+                        <div class="builder-section">
+                            <label>Nguồn dữ liệu</label>
+                            <select class="filter-select" style="width:100%">
+                                <option>Nhân viên + Công ty</option>
+                                <option>Chỉ Công ty</option>
+                                <option>Chỉ Nhân viên</option>
+                            </select>
+                        </div>
+                        <div class="builder-section">
+                            <label>Chọn cột hiển thị</label>
+                            <div class="column-checklist">
+                                <label><input type="checkbox" checked> Công ty</label>
+                                <label><input type="checkbox" checked> Họ tên</label>
+                                <label><input type="checkbox" checked> Quốc tịch</label>
+                                <label><input type="checkbox" checked> Hộ chiếu</label>
+                                <label><input type="checkbox" checked> Nghề nghiệp</label>
+                                <label><input type="checkbox" checked> Loại GPLĐ</label>
+                                <label><input type="checkbox" checked> Hạn tạm trú</label>
+                                <label><input type="checkbox"> Giới tính</label>
+                                <label><input type="checkbox"> Ngày sinh</label>
+                                <label><input type="checkbox"> Số visa</label>
+                                <label><input type="checkbox"> KQGQ</label>
+                                <label><input type="checkbox" checked> Còn lại (ngày)</label>
+                            </div>
+                        </div>
+                        <div class="builder-section">
+                            <label>Điều kiện lọc</label>
+                            <div class="filter-rules">
+                                <div class="filter-rule"><select class="filter-sm">
+                                        <option>Hạn tạm trú</option>
+                                    </select><select class="filter-sm">
+                                        <option>≤</option>
+                                    </select><input type="text" class="filter-sm" value="30 ngày tới"></div>
+                                <div class="filter-rule"><select class="filter-sm">
+                                        <option>Trạng thái</option>
+                                    </select><select class="filter-sm">
+                                        <option>=</option>
+                                    </select><input type="text" class="filter-sm" value="Đang làm"></div>
+                                <button class="btn btn-sm btn-outline" style="width:100%">+ Thêm điều kiện</button>
+                            </div>
+                        </div>
+                        <div class="builder-section">
+                            <label>Nhóm theo</label>
+                            <select class="filter-select" style="width:100%">
+                                <option>Công ty</option>
+                                <option>Quốc tịch</option>
+                                <option>Lĩnh vực</option>
+                            </select>
+                        </div>
+                        <div class="builder-actions">
+                            <button class="btn btn-primary" style="width:100%">📥 Xuất Excel</button>
+                            <button class="btn btn-outline" style="width:100%">📄 Xuất PDF</button>
+                            <button class="btn btn-secondary" style="width:100%">💾 Lưu Template</button>
+                        </div>
+                    </div>
+                    <div class="builder-preview">
+                        <div class="preview-header">
+                            <h3>Xem trước: BC NLĐ sắp hết hạn tạm trú</h3>
+                            <span class="preview-count">23 bản ghi</span>
+                        </div>
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Công ty</th>
+                                        <th>Họ tên</th>
+                                        <th>Quốc tịch</th>
+                                        <th>Hộ chiếu</th>
+                                        <th>Nghề nghiệp</th>
+                                        <th>GPLĐ</th>
+                                        <th>Hạn tạm trú</th>
+                                        <th>Còn lại</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="group-header">
+                                        <td colspan="9"><strong>🏢 Cty TNHH Samsung Electronics VN</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td></td>
+                                        <td>Zhang Wei</td>
+                                        <td>Trung Quốc</td>
+                                        <td>E12345678</td>
+                                        <td>Kỹ sư</td>
+                                        <td><span class="tag tag-green">Có GPLĐ</span></td>
+                                        <td>18/04/2026</td>
+                                        <td class="text-danger"><strong>3 ngày</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td></td>
+                                        <td>Kim Min-jun</td>
+                                        <td>Hàn Quốc</td>
+                                        <td>M55667788</td>
+                                        <td>Quản lý</td>
+                                        <td><span class="tag tag-green">Có GPLĐ</span></td>
+                                        <td>20/04/2026</td>
+                                        <td class="text-danger"><strong>5 ngày</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td></td>
+                                        <td>Tanaka Yuki</td>
+                                        <td>Nhật Bản</td>
+                                        <td>TK4567890</td>
+                                        <td>Phiên dịch</td>
+                                        <td><span class="tag tag-blue">Miễn</span></td>
+                                        <td>27/04/2026</td>
+                                        <td class="text-warning"><strong>12 ngày</strong></td>
+                                    </tr>
+                                    <tr class="group-header">
+                                        <td colspan="9"><strong>🏢 Cty CP Hyundai Aluminum Vina</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td></td>
+                                        <td>Park Ji-hoon</td>
+                                        <td>Hàn Quốc</td>
+                                        <td>M99887766</td>
+                                        <td>Kỹ thuật</td>
+                                        <td><span class="tag tag-green">Có GPLĐ</span></td>
+                                        <td>03/05/2026</td>
+                                        <td class="text-warning"><strong>18 ngày</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td></td>
+                                        <td>Wang Li</td>
+                                        <td>Trung Quốc</td>
+                                        <td>E98765432</td>
+                                        <td>Quản lý</td>
+                                        <td><span class="tag tag-green">Có GPLĐ</span></td>
+                                        <td>10/05/2026</td>
+                                        <td class="text-info"><strong>25 ngày</strong></td>
+                                    </tr>
+                                    <tr class="group-header">
+                                        <td colspan="9"><strong>🏢 Cty TNHH Canon Vietnam</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>6</td>
+                                        <td></td>
+                                        <td>Suzuki Taro</td>
+                                        <td>Nhật Bản</td>
+                                        <td>TJ1122334</td>
+                                        <td>Giám đốc</td>
+                                        <td><span class="tag tag-blue">Miễn</span></td>
+                                        <td>12/05/2026</td>
+                                        <td class="text-info"><strong>27 ngày</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="saved-templates">
+                            <h4>📋 Template đã lưu</h4>
+                            <div class="template-list">
+                                <div class="template-item"><span class="template-name">📊 BC NLĐ sắp hết hạn tạm
+                                        trú</span><span class="template-meta">23 bản ghi · Hôm nay</span>
+                                    <div class="template-actions"><button
+                                            class="btn btn-sm btn-primary">Chạy</button><button
+                                            class="btn btn-sm btn-outline">Sửa</button></div>
+                                </div>
+                                <div class="template-item"><span class="template-name">📊 BC NLĐ theo quốc
+                                        tịch</span><span class="template-meta">1,245 bản ghi · 15/04</span>
+                                    <div class="template-actions"><button
+                                            class="btn btn-sm btn-primary">Chạy</button><button
+                                            class="btn btn-sm btn-outline">Sửa</button></div>
+                                </div>
+                                <div class="template-item"><span class="template-name">📊 BC thống kê theo lĩnh
+                                        vực</span><span class="template-meta">156 công ty · 10/04</span>
+                                    <div class="template-actions"><button
+                                            class="btn btn-sm btn-primary">Chạy</button><button
+                                            class="btn btn-sm btn-outline">Sửa</button></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ ADMIN PAGE ============ -->
+            <div id="page-admin" class="page">
+                <div class="section-header">
+                    <h3>⚙️ Quản trị hệ thống</h3>
+                    <span class="breadcrumb">Quản lý danh mục và cấu hình hệ thống</span>
+                </div>
+                <div class="admin-grid">
+                    <div class="admin-card">
+                        <div class="admin-icon">👤</div>
+                        <h3>Tài khoản</h3>
+                        <p>4 tài khoản hoạt động</p>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-icon">🏭</div>
+                        <h3>Lĩnh vực</h3>
+                        <p>8 lĩnh vực</p>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-icon">💼</div>
+                        <h3>Ngành nghề</h3>
+                        <p>45 ngành — 6 nhóm</p>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-icon">🌍</div>
+                        <h3>Quốc tịch</h3>
+                        <p>25 quốc tịch</p>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-icon">🗺️</div>
+                        <h3>Quận / Huyện</h3>
+                        <p>12 quận huyện</p>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-icon">📍</div>
+                        <h3>Phường / Xã</h3>
+                        <p>89 phường xã</p>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-icon">📜</div>
+                        <h3>Nhật ký hệ thống</h3>
+                        <p>Audit Log — 1,523 bản ghi</p>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-icon">📤</div>
+                        <h3>Lịch sử Import</h3>
+                        <p>15 phiên import</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ============ HELP PANEL ============ -->
+    <div class="help-overlay" id="helpOverlay">
+        <div class="help-backdrop" onclick="toggleHelp()"></div>
+        <div class="help-panel">
+            <div class="help-header">
+                <h3>❓ Hỗ trợ sử dụng</h3>
+                <button class="btn-close-help" onclick="toggleHelp()">✕</button>
+            </div>
+            <div class="help-tab-bar">
+                <button class="help-tab active" onclick="switchHelpTab('current')">Trang hiện tại</button>
+                <button class="help-tab" onclick="switchHelpTab('shortcuts')">Phím tắt</button>
+                <button class="help-tab" onclick="switchHelpTab('faq')">Câu hỏi</button>
+            </div>
+            <div class="help-body">
+                <div class="help-content active" id="helpCurrent">
+                    <div id="helpContent"></div>
+                </div>
+                <div class="help-content" id="helpShortcuts">
+                    <div class="help-section">
+                        <h4>⌨️ Phím tắt nhanh</h4>
+                        <div class="help-shortcut"><span>Tìm kiếm nhanh</span><kbd>Ctrl + K</kbd></div>
+                        <div class="help-shortcut"><span>Mở hỗ trợ</span><kbd>F1</kbd></div>
+                        <div class="help-shortcut"><span>Về Dashboard</span><kbd>Ctrl + H</kbd></div>
+                        <div class="help-shortcut"><span>Thêm mới</span><kbd>Ctrl + N</kbd></div>
+                        <div class="help-shortcut"><span>Lưu / Xuất</span><kbd>Ctrl + S</kbd></div>
+                        <div class="help-shortcut"><span>Đóng cửa sổ</span><kbd>Esc</kbd></div>
+                    </div>
+                </div>
+                <div class="help-content" id="helpFaq">
+                    <div class="help-section">
+                        <h4>💬 Câu hỏi thường gặp</h4>
+                        <p><strong>Tôi quên mật khẩu?</strong></p>
+                        <p>Liên hệ quản trị viên để đặt lại mật khẩu. Vào Quản trị → Tài khoản → Đặt lại mật khẩu.</p>
+                    </div>
+                    <div class="help-section">
+                        <p><strong>File Excel import bị lỗi?</strong></p>
+                        <p>Đảm bảo file đúng định dạng .xlsx. Dòng đầu tiên phải là tiêu đề cột. Dữ liệu bắt đầu từ dòng
+                            2.</p>
+                    </div>
+                    <div class="help-section">
+                        <p><strong>Làm sao xuất báo cáo?</strong></p>
+                        <p>Vào Báo cáo → Chọn cột &amp; điều kiện → Nhấn "Xuất Excel" hoặc "Xuất PDF". Có thể lưu
+                            template để dùng lại.</p>
+                    </div>
+                    <div class="help-section">
+                        <p><strong>NLĐ sắp hết hạn hiển thị ở đâu?</strong></p>
+                        <p>Trên Dashboard có bảng cảnh báo. Hoặc vào Báo cáo → chạy template "BC NLĐ sắp hết hạn tạm
+                            trú".</p>
+                    </div>
+                    <div class="help-section">
+                        <p><strong>Liên hệ hỗ trợ kỹ thuật?</strong></p>
+                        <p>Email: support@irm.vn · Điện thoại: 0123.456.789</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

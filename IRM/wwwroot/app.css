@@ -1,0 +1,37 @@
+/* IRM v2.0 — Custom overrides */
+html, body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth theme transitions */
+.mud-layout, .mud-appbar, .mud-drawer, .mud-main-content, .mud-paper {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--mud-palette-divider); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--mud-palette-text-secondary); }
+
+/* Drawer section titles */
+.mud-nav-group .mud-nav-link {
+    font-size: 0.85rem;
+}
+
+/* Cursor pointer for clickable cards */
+.cursor-pointer { cursor: pointer; }
+.cursor-pointer:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+/* Mark highlight in search results */
+mark {
+    background: rgba(250, 204, 21, 0.3);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: 600;
+}

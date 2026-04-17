@@ -1,0 +1,189 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="_theme" IsDarkMode="@_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Dense="true" Style="backdrop-filter: blur(12px);">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+                       OnClick="@ToggleDrawer" />
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudText Typo="Typo.h6" Style="font-weight: 700;">@_pageTitle</MudText>
+        </MudStack>
+        <MudSpacer />
+
+        @* Search *@
+        <MudTextField T="string" Placeholder="Tìm nhanh... (Ctrl+K)" Variant="Variant.Outlined"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                      Margin="Margin.Dense" Class="mr-4" Style="max-width: 280px;" />
+
+        @* Notifications *@
+        <MudBadge Content="3" Color="Color.Error" Overlap="true" Class="mr-2">
+            <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" />
+        </MudBadge>
+
+        @* Dark Mode Toggle *@
+        <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                       Color="Color.Inherit" OnClick="@ToggleDarkMode" />
+
+        @* Help *@
+        <MudIconButton Icon="@Icons.Material.Filled.HelpOutline" Color="Color.Inherit"
+                       OnClick="@ToggleHelp" />
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="2" ClipMode="DrawerClipMode.Always"
+               Variant="DrawerVariant.Mini" OpenMiniOnHover="false">
+        <MudDrawerHeader Dense="true" Class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.FactCheck" Color="Color.Primary" Size="Size.Large" Class="mr-2" />
+            @if (_drawerOpen)
+            {
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight: 800; line-height: 1.2;">IRM</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Tertiary">v2.0</MudText>
+                </MudStack>
+            }
+        </MudDrawerHeader>
+
+        <NavMenu OnPageChanged="@OnPageChanged" />
+
+        <MudSpacer />
+
+        @* User Profile Footer *@
+        <MudNavGroup Icon="@Icons.Material.Filled.AccountCircle" Title="Admin" Style="margin-top: auto;">
+            <MudNavLink Icon="@Icons.Material.Filled.Person" Href="#">Quản trị viên</MudNavLink>
+            <MudNavLink Icon="@Icons.Material.Filled.Logout" OnClick="@Logout"
+                        IconColor="Color.Error">Đăng xuất</MudNavLink>
+        </MudNavGroup>
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-4 pt-6" Style="max-width: 1600px;">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@* Help Drawer *@
+<MudDrawer @bind-Open="_helpOpen" Anchor="Anchor.End" Elevation="3" Width="380px"
+           Variant="DrawerVariant.Temporary">
+    <MudDrawerHeader>
+        <MudText Typo="Typo.h6" Style="font-weight: 700;">❓ Hỗ trợ sử dụng</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Close" OnClick="@ToggleHelp" Size="Size.Small" />
+    </MudDrawerHeader>
+    <MudDivider />
+    <MudTabs Rounded="true" Centered="true" Class="px-2 pt-2">
+        <MudTabPanel Text="Trang hiện tại" Icon="@Icons.Material.Filled.Info">
+            <MudContainer Class="pa-4">
+                <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Color="Color.Primary" Class="mb-2">@_pageTitle</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Đây là trang @_pageTitle. Sử dụng các chức năng trên trang để quản lý dữ liệu lao động nước ngoài.
+                </MudText>
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mt-4">
+                    💡 <strong>Mẹo:</strong> Nhấn <strong>Ctrl+K</strong> để tìm kiếm nhanh từ bất kỳ trang nào.
+                </MudAlert>
+            </MudContainer>
+        </MudTabPanel>
+        <MudTabPanel Text="Phím tắt" Icon="@Icons.Material.Filled.Keyboard">
+            <MudSimpleTable Dense="true" Hover="true" Class="ma-4">
+                <thead><tr><th>Chức năng</th><th>Phím tắt</th></tr></thead>
+                <tbody>
+                    <tr><td>Tìm kiếm nhanh</td><td><MudChip T="string" Size="Size.Small">Ctrl + K</MudChip></td></tr>
+                    <tr><td>Mở hỗ trợ</td><td><MudChip T="string" Size="Size.Small">F1</MudChip></td></tr>
+                    <tr><td>Về Dashboard</td><td><MudChip T="string" Size="Size.Small">Ctrl + H</MudChip></td></tr>
+                    <tr><td>Thêm mới</td><td><MudChip T="string" Size="Size.Small">Ctrl + N</MudChip></td></tr>
+                </tbody>
+            </MudSimpleTable>
+        </MudTabPanel>
+        <MudTabPanel Text="FAQ" Icon="@Icons.Material.Filled.QuestionAnswer">
+            <MudContainer Class="pa-4">
+                <MudExpansionPanels MultiExpansion="true">
+                    <MudExpansionPanel Text="Tôi quên mật khẩu?" MaxHeight="200">
+                        <MudText Typo="Typo.body2">Liên hệ quản trị viên để đặt lại. Vào Quản trị → Tài khoản → Đặt lại mật khẩu.</MudText>
+                    </MudExpansionPanel>
+                    <MudExpansionPanel Text="File Excel import bị lỗi?" MaxHeight="200">
+                        <MudText Typo="Typo.body2">Đảm bảo file đúng định dạng .xlsx. Dòng đầu tiên phải là tiêu đề cột.</MudText>
+                    </MudExpansionPanel>
+                    <MudExpansionPanel Text="Liên hệ hỗ trợ kỹ thuật?" MaxHeight="200">
+                        <MudText Typo="Typo.body2">Email: support@irm.vn · ĐT: 0123.456.789</MudText>
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+            </MudContainer>
+        </MudTabPanel>
+    </MudTabs>
+</MudDrawer>
+
+@code {
+    private bool _drawerOpen = true;
+    private bool _isDarkMode = false;
+    private bool _helpOpen = false;
+    private string _pageTitle = "Dashboard";
+
+    private MudTheme _theme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#2563eb",
+            PrimaryDarken = "#1d4ed8",
+            PrimaryLighten = "#60a5fa",
+            Secondary = "#6366f1",
+            Tertiary = "#7c3aed",
+            Info = "#2563eb",
+            Success = "#059669",
+            Warning = "#d97706",
+            Error = "#dc2626",
+            Background = "#f0f4f8",
+            Surface = "#ffffff",
+            AppbarBackground = "#ffffff",
+            AppbarText = "#1a2332",
+            DrawerBackground = "#0f172a",
+            DrawerText = "rgba(255,255,255,0.7)",
+            DrawerIcon = "rgba(255,255,255,0.5)",
+            TextPrimary = "#1a2332",
+            TextSecondary = "#5a6a7e",
+            ActionDefault = "#5a6a7e",
+            Divider = "#e2e8f0",
+            DividerLight = "#f1f5f9",
+            TableHover = "#f0f6ff",
+        },
+        PaletteDark = new PaletteDark()
+        {
+            Primary = "#8ab4f8",
+            PrimaryDarken = "#6d9cf7",
+            PrimaryLighten = "#aecbfa",
+            Secondary = "#c4b5fd",
+            Tertiary = "#a78bfa",
+            Info = "#8ab4f8",
+            Success = "#34d399",
+            Warning = "#fbbf24",
+            Error = "#f87171",
+            Background = "#111318",
+            Surface = "#1c1f26",
+            AppbarBackground = "#1c1f26",
+            AppbarText = "#e4e6eb",
+            DrawerBackground = "#0d1017",
+            DrawerText = "rgba(255,255,255,0.6)",
+            DrawerIcon = "rgba(255,255,255,0.4)",
+            TextPrimary = "#e4e6eb",
+            TextSecondary = "#9aa0a6",
+            ActionDefault = "#9aa0a6",
+            Divider = "#2d3139",
+            DividerLight = "#22252d",
+            TableHover = "rgba(130,177,255,0.06)",
+        },
+        LayoutProperties = new LayoutProperties()
+        {
+            DefaultBorderRadius = "10px",
+            DrawerWidthLeft = "256px",
+            DrawerMiniWidthLeft = "68px",
+        }
+    };
+
+    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+    private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
+    private void ToggleHelp() => _helpOpen = !_helpOpen;
+    private void OnPageChanged(string title) => _pageTitle = title;
+    private void Logout() { /* TODO: implement logout */ }
+}

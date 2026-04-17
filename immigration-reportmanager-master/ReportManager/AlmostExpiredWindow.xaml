@@ -1,0 +1,169 @@
+﻿<Window x:Class="ReportManager.AlmostExpiredWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ReportManager"
+        mc:Ignorable="d"
+        Title="Danh sách nhân viên sắp hết hạn" MinWidth="1065" MinHeight="640">
+    <Grid Background="#a6d9ef">
+        <Border CornerRadius="25" Margin="20" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderBrush="Red" Background="White">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="45"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="65"/>
+                </Grid.RowDefinitions>
+                <Label Content="Danh sách người nước ngoài sắp hết hạn" Grid.Row="0" FontSize="25" HorizontalAlignment="Center" FontWeight="Bold" VerticalContentAlignment="Bottom"/>
+
+                <DataGrid Grid.Row="1" Margin="10,10,10,10"
+                Name="dtgDataEmployeesInfo"
+                VerticalScrollBarVisibility="Auto" 
+                HorizontalScrollBarVisibility="Auto"
+                CanUserAddRows="False"
+                AutoGenerateColumns="False"
+                MouseDoubleClick="dtgDataEmployeesInfo_MouseDoubleClick"
+                SelectionChanged="dtgDataEmployeesInfo_SelectionChanged"
+                SelectedItem="{Binding SelectEmployee, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                ItemsSource="{Binding ListAlmostExpired, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn MinWidth="20" Width="40">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="STT" TextAlignment="Center" TextWrapping="Wrap" FontSize="18"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding LineNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn MinWidth="50" Width="1*">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Họ và tên" TextAlignment="Center" TextWrapping="Wrap" FontSize="18"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding StaffName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn MinWidth="50" Width="50">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Giới tính" TextWrapping="Wrap" TextAlignment="Center" FontSize="18"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding GenderString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn MinWidth="60" Width="110">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Ngày sinh" TextWrapping="Wrap" TextAlignment="Center" FontSize="18"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Birthday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn MinWidth="60" Width="80">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Quốc tịch" TextWrapping="Wrap" TextAlignment="Center" FontSize="18"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Nationality.NationalityName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn MinWidth="60" Width="110">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Số hộ chiếu" TextWrapping="Wrap" TextAlignment="Center" FontSize="18"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Passport, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn MinWidth="50" Width="2*">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Tên công ty" TextWrapping="Wrap" TextAlignment="Center" FontSize="18"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Note}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn MinWidth="60" Width="115">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Nghề nghiệp" TextWrapping="Wrap" TextAlignment="Center" FontSize="18"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Career.CareerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn MinWidth="50" Width="100">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Số visa/Thẻ tạm trú" TextWrapping="Wrap" TextAlignment="Center" FontSize="18"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding VisaNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn MinWidth="60" Width="110">
+                            <DataGridTemplateColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Thời hạn tạm trú" TextWrapping="Wrap" TextAlignment="Center" FontSize="18"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.HeaderTemplate>
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TemporaryStay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!--back button-->
+                <Grid Grid.Row="2" Margin="0,0,0,30" VerticalAlignment="Bottom">
+                    <Button Content="Đóng" Style="{DynamicResource BtnCancel}" Command="{Binding BtnCloseCommand}" Width="120" Height="30" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Bottom" FontSize="20" Margin="10,0,0,0" Padding="10,0" Background="#e6e600" Foreground="Black" BorderBrush="White"/>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

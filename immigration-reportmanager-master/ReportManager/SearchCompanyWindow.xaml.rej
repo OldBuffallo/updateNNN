@@ -1,0 +1,166 @@
+diff a/ReportManager/SearchCompanyWindow.xaml b/ReportManager/SearchCompanyWindow.xaml	(rejected hunks)
+@@ -5,86 +5,91 @@
+         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+         xmlns:local="clr-namespace:ReportManager"
+         mc:Ignorable="d" ResizeMode="CanMinimize"
+-        Title="Tìm kiếm công ty" Height="367" Width="710">
++        Title="Tìm kiếm" Height="440" Width="710">
+     <Grid Background="#a6d9ef">
+         <Border CornerRadius="25" Margin="25,10" BorderBrush="Red" Background="White">
+-            <Grid Margin="0,15,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+-                <Grid.RowDefinitions>
+-                    <RowDefinition Height="1*"/>
+-                    <RowDefinition Height="1*"/>
+-                    <RowDefinition Height="1*"/>
+-                    <RowDefinition Height="1*"/>
+-                    <RowDefinition Height="1*"/>
+-                    <RowDefinition Height="1*"/>
+-                </Grid.RowDefinitions>
+-                <Grid.ColumnDefinitions>
+-                    <ColumnDefinition Width="396*"/>
+-                    <ColumnDefinition Width="247*"/>
+-                </Grid.ColumnDefinitions>
+-                <!-- company name-->
+-                <Grid Grid.Row="0" Grid.ColumnSpan="2">
+-                    <Grid.ColumnDefinitions>
+-                        <ColumnDefinition Width="210"/>
+-                        <ColumnDefinition Width="1*"/>
+-                    </Grid.ColumnDefinitions>
+-                    <Label Grid.Column="0" Margin="0,5" Content="Tên công ty : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+-                    <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding CompanyName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+-                </Grid>
++            <TabControl>
++                <TabItem Header="Theo Công ty">
++                    <Grid Margin="0,15,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
++                        <Grid.RowDefinitions>
++                            <RowDefinition Height="1*"/>
++                            <RowDefinition Height="1*"/>
++                            <RowDefinition Height="1*"/>
++                            <RowDefinition Height="1*"/>
++                            <RowDefinition Height="1*"/>
++                            <RowDefinition Height="1*"/>
++                            <RowDefinition Height="1*"/>
++                        </Grid.RowDefinitions>
++                        <Grid.ColumnDefinitions>
++                            <ColumnDefinition Width="396*"/>
++                            <ColumnDefinition Width="247*"/>
++                        </Grid.ColumnDefinitions>
++                        <!-- company name-->
++                        <Grid Grid.Row="1" Grid.ColumnSpan="2">
++                            <Grid.ColumnDefinitions>
++                                <ColumnDefinition Width="210"/>
++                                <ColumnDefinition Width="1*"/>
++                            </Grid.ColumnDefinitions>
++                            <Label Grid.Column="0" Margin="0,5" Content="Tên công ty : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
++                            <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding CompanyName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
++                        </Grid>
+ 
+-                <!-- type of businiess-->
+-                <Grid Grid.Row="1" Grid.ColumnSpan="2">
+-                    <Grid.ColumnDefinitions>
+-                        <ColumnDefinition Width="210"/>
+-                        <ColumnDefinition Width="1*"/>
+-                    </Grid.ColumnDefinitions>
+-                    <Label Grid.Column="0" Margin="0,5" Content="Loại hình doanh nghiệp : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+-                    <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding TypeOfBusiniess, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+-                </Grid>
++                        <!-- type of businiess-->
++                        <Grid Grid.Row="2" Grid.ColumnSpan="2">
++                            <Grid.ColumnDefinitions>
++                                <ColumnDefinition Width="210"/>
++                                <ColumnDefinition Width="1*"/>
++                            </Grid.ColumnDefinitions>
++                            <Label Grid.Column="0" Margin="0,5" Content="Loại hình doanh nghiệp : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
++                            <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding TypeOfBusiniess, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
++                        </Grid>
+ 
+-                <!-- investment-->
+-                <Grid Grid.Row="2" Grid.Column="0">
+-                    <Grid.ColumnDefinitions>
+-                        <ColumnDefinition Width="210"/>
+-                        <ColumnDefinition Width="1*"/>
+-                    </Grid.ColumnDefinitions>
+-                    <Label Grid.Column="0" Margin="0,5" Content="Vốn đầu tư : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+-                    <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding MinInvestment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"  VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+-                </Grid>
+-                <Grid Grid.Row="2" Grid.Column="1">
+-                    <Grid.ColumnDefinitions>
+-                        <ColumnDefinition Width="50"/>
+-                        <ColumnDefinition Width="1*"/>
+-                    </Grid.ColumnDefinitions>
+-                    <Label Grid.Column="0" Margin="0,5" Content="Đến " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+-                    <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding MaxInvestment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+-                </Grid>
++                        <!-- investment-->
++                        <Grid Grid.Row="3" Grid.Column="0">
++                            <Grid.ColumnDefinitions>
++                                <ColumnDefinition Width="210"/>
++                                <ColumnDefinition Width="1*"/>
++                            </Grid.ColumnDefinitions>
++                            <Label Grid.Column="0" Margin="0,5" Content="Vốn đầu tư : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
++                            <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding MinInvestment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"  VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
++                        </Grid>
++                        <Grid Grid.Row="2" Grid.Column="1">
++                            <Grid.ColumnDefinitions>
++                                <ColumnDefinition Width="50"/>
++                                <ColumnDefinition Width="1*"/>
++                            </Grid.ColumnDefinitions>
++                            <Label Grid.Column="0" Margin="0,5" Content="Đến " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
++                            <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding MaxInvestment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
++                        </Grid>
+ 
+-                <!-- address-->
+-                <Grid Grid.Row="3" Grid.ColumnSpan="2">
+-                    <Grid.ColumnDefinitions>
+-                        <ColumnDefinition Width="210"/>
+-                        <ColumnDefinition Width="1*"/>
+-                    </Grid.ColumnDefinitions>
+-                    <Label Grid.Column="0" Margin="0,5" Content="Địa chỉ : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+-                    <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+-                </Grid>
++                        <!-- address-->
++                        <Grid Grid.Row="4" Grid.ColumnSpan="2">
++                            <Grid.ColumnDefinitions>
++                                <ColumnDefinition Width="210"/>
++                                <ColumnDefinition Width="1*"/>
++                            </Grid.ColumnDefinitions>
++                            <Label Grid.Column="0" Margin="0,5" Content="Địa chỉ : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
++                            <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
++                        </Grid>
+ 
+-                <!-- field-->
+-                <Grid Grid.Row="4" Grid.ColumnSpan="2">
+-                    <Grid.ColumnDefinitions>
+-                        <ColumnDefinition Width="210"/>
+-                        <ColumnDefinition Width="1*"/>
+-                    </Grid.ColumnDefinitions>
+-                    <Label Grid.Column="0" Margin="0,5" Content="Lĩnh vực hoạt động : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+-                    <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding FieldString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+-                </Grid>
++                        <!-- field-->
++                        <Grid Grid.Row="5" Grid.ColumnSpan="2">
++                            <Grid.ColumnDefinitions>
++                                <ColumnDefinition Width="210"/>
++                                <ColumnDefinition Width="1*"/>
++                            </Grid.ColumnDefinitions>
++                            <Label Grid.Column="0" Margin="0,5" Content="Lĩnh vực hoạt động : " FontSize="18" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
++                            <TextBox Grid.Column="1" Margin="20,10" FontSize="18" Text="{Binding FieldString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
++                        </Grid>
+ 
+-                <!-- button-->
+-                <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Center" Width="240">
+-                    <Button Content="Tìm kiếm" Style="{DynamicResource BtnSuccess}" Command="{Binding BtnSearchCommand}" Margin="10,10" Width="100" Height="30"/>
+-                    <Button Content="Đóng" Style="{DynamicResource BtnCancel}" Margin="10,10" Width="100" Height="30" Command="{Binding BtnExitCommand}"/>
+-                </StackPanel>
+-            </Grid>
++                        <!-- button-->
++                        <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.ColumnSpan="2" HorizontalAlignment="Center" Width="240">
++                            <Button Content="Tìm kiếm" Style="{DynamicResource BtnSuccess}" Command="{Binding BtnSearchCommand}" Margin="10,10" Width="100" Height="30"/>
++                            <Button Content="Đóng" Style="{DynamicResource BtnCancel}" Margin="10,10" Width="100" Height="30" Command="{Binding BtnExitCommand}"/>
++                        </StackPanel>
++                    </Grid>
++                </TabItem>
++            </TabControl>
+         </Border>
+     </Grid>
+ </Window>

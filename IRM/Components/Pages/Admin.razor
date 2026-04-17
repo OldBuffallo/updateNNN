@@ -1,0 +1,42 @@
+@page "/admin"
+@rendermode InteractiveServer
+
+<PageTitle>Quản trị — IRM v2.0</PageTitle>
+
+<MudText Typo="Typo.h5" Style="font-weight: 800;" Class="mb-1">⚙️ Quản trị hệ thống</MudText>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">Quản lý danh mục và cấu hình hệ thống</MudText>
+
+<MudGrid Spacing="4">
+    @foreach (var card in _adminCards)
+    {
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Elevation="0" Class="rounded-lg border-solid border cursor-pointer"
+                     Style="border-width: 1px; transition: all 0.3s; text-align: center; border-top: 3px solid var(--mud-palette-primary);">
+                <MudCardContent Class="pa-6">
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Large" Class="mb-3"
+                               Style="width: 64px; height: 64px; font-size: 32px;">
+                        @card.Icon
+                    </MudAvatar>
+                    <MudText Typo="Typo.subtitle1" Style="font-weight: 700;">@card.Title</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@card.Description</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+    private record AdminCard(string Icon, string Title, string Description);
+
+    private List<AdminCard> _adminCards = new()
+    {
+        new("👤", "Tài khoản", "4 tài khoản hoạt động"),
+        new("🏭", "Lĩnh vực", "8 lĩnh vực"),
+        new("💼", "Ngành nghề", "45 ngành — 6 nhóm"),
+        new("🌍", "Quốc tịch", "25 quốc tịch"),
+        new("🗺️", "Quận / Huyện", "12 quận huyện"),
+        new("📍", "Phường / Xã", "89 phường xã"),
+        new("📜", "Nhật ký hệ thống", "Audit Log — 1,523 bản ghi"),
+        new("📤", "Lịch sử Import", "15 phiên import"),
+    };
+}

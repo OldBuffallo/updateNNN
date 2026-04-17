@@ -1,0 +1,153 @@
+@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Dashboard — IRM v2.0</PageTitle>
+
+@* ── KPI Cards — Compact ── *@
+<MudGrid Spacing="3" Class="mb-3">
+    <MudItem xs="12" sm="6" lg="3">
+        <MudPaper Elevation="0" Class="pa-3 rounded-lg" Style="border-left: 4px solid var(--mud-palette-primary); border: 1px solid var(--mud-palette-divider); border-left: 4px solid var(--mud-palette-primary);">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.caption" Style="font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Tổng công ty</MudText>
+                    <MudText Typo="Typo.h5" Color="Color.Primary" Style="font-weight: 800;">156</MudText>
+                </MudStack>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">▲ +12</MudChip>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MudPaper Elevation="0" Class="pa-3 rounded-lg" Style="border: 1px solid var(--mud-palette-divider); border-left: 4px solid var(--mud-palette-success);">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.caption" Style="font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Tổng LĐ nước ngoài</MudText>
+                    <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight: 800;">1.245</MudText>
+                </MudStack>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">▲ +45</MudChip>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MudPaper Elevation="0" Class="pa-3 rounded-lg" Style="border: 1px solid var(--mud-palette-divider); border-left: 4px solid var(--mud-palette-warning);">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.caption" Style="font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Sắp hết hạn tạm trú</MudText>
+                    <MudText Typo="Typo.h5" Color="Color.Warning" Style="font-weight: 800;">23</MudText>
+                </MudStack>
+                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">⚠ 30 ngày</MudChip>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MudPaper Elevation="0" Class="pa-3 rounded-lg" Style="border: 1px solid var(--mud-palette-divider); border-left: 4px solid var(--mud-palette-tertiary);">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.caption" Style="font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Đã có GPLĐ</MudText>
+                    <MudText Typo="Typo.h5" Style="font-weight: 800; color: var(--mud-palette-tertiary);">1.062</MudText>
+                </MudStack>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">85.2%</MudChip>
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@* ── Main row: Bar Chart + Donut + Alerts ── *@
+<MudGrid Spacing="3" Class="mb-3">
+    <MudItem xs="12" md="5">
+        <MudPaper Elevation="0" Class="pa-3 rounded-lg border-solid border" Style="border-width: 1px; height: 100%;">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+                <MudText Typo="Typo.subtitle2" Style="font-weight: 700;">LĐ nước ngoài theo quốc tịch</MudText>
+                <MudSelect T="string" Value="@_selectedYear" ValueChanged="@(v => _selectedYear = v)"
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Style="max-width: 110px;" Dense="true">
+                    <MudSelectItem Value="@("2026")">2026</MudSelectItem>
+                    <MudSelectItem Value="@("2025")">2025</MudSelectItem>
+                </MudSelect>
+            </MudStack>
+            <MudChart T="double" ChartType="ChartType.Bar" ChartSeries="@_nationalitySeries"
+                      XAxisLabels="@_nationalityLabels" Width="100%" Height="220px" />
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="3">
+        <MudPaper Elevation="0" Class="pa-3 rounded-lg border-solid border" Style="border-width: 1px; height: 100%;">
+            <MudText Typo="Typo.subtitle2" Style="font-weight: 700;" Class="mb-2">Tỷ lệ GPLĐ</MudText>
+            <MudChart T="double" ChartType="ChartType.Donut" InputData="@_permitData"
+                      InputLabels="@_permitLabels" Width="100%" Height="220px"
+                      ChartOptions="@(new ChartOptions { ChartPalette = _permitColors })" />
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="4">
+        <MudPaper Elevation="0" Class="pa-3 rounded-lg border-solid border" Style="border-width: 1px; height: 100%;">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+                <MudText Typo="Typo.subtitle2" Style="font-weight: 700;">⚠️ Cảnh báo — Sắp hết hạn</MudText>
+                <MudLink Href="/employees" Typo="Typo.caption" Style="font-weight: 600;">Tất cả →</MudLink>
+            </MudStack>
+            @foreach (var alert in _alerts)
+            {
+                <MudPaper Elevation="0" Class="pa-2 mb-1 rounded d-flex align-center justify-space-between"
+                          Style="@($"background: {alert.BgColor}; border: 1px solid {alert.BorderColor};")">
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.body2" Style="font-weight: 600; font-size: 0.8rem;">@alert.Name</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-size: 0.7rem;">@alert.Company</MudText>
+                    </MudStack>
+                    <MudChip T="string" Size="Size.Small" Color="@alert.Severity" Variant="Variant.Filled"
+                             Style="font-weight: 700; font-size: 0.7rem;">@alert.Days ngày</MudChip>
+                </MudPaper>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@* ── Bottom row: Trend chart + Recent Import ── *@
+<MudGrid Spacing="3">
+    <MudItem xs="12" md="7">
+        <MudPaper Elevation="0" Class="pa-3 rounded-lg border-solid border" Style="border-width: 1px;">
+            <MudText Typo="Typo.subtitle2" Style="font-weight: 700;" Class="mb-2">📈 Xu hướng hết hạn tạm trú (12 tháng)</MudText>
+            <MudChart T="double" ChartType="ChartType.Line" ChartSeries="@_trendSeries"
+                      XAxisLabels="@_trendLabels" Width="100%" Height="180px" />
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" md="5">
+        <MudPaper Elevation="0" Class="pa-3 rounded-lg border-solid border" Style="border-width: 1px;">
+            <MudText Typo="Typo.subtitle2" Style="font-weight: 700;" Class="mb-2">📤 Import gần đây</MudText>
+            <MudSimpleTable Dense="true" Hover="true" Style="font-size: 0.8rem;">
+                <thead><tr><th>Thời gian</th><th>File</th><th>KQ</th><th>TT</th></tr></thead>
+                <tbody>
+                    <tr><td>Hôm nay 09:30</td><td>NLD_Samsung.xlsx</td><td>+38</td><td><MudChip T="string" Size="Size.Small" Color="Color.Success">OK</MudChip></td></tr>
+                    <tr><td>16/04 14:15</td><td>NLD_Canon.xlsx</td><td>+22</td><td><MudChip T="string" Size="Size.Small" Color="Color.Success">OK</MudChip></td></tr>
+                    <tr><td>15/04 10:00</td><td>NLD_Hyundai.xlsx</td><td>+15</td><td><MudChip T="string" Size="Size.Small" Color="Color.Warning">Rollback</MudChip></td></tr>
+                </tbody>
+            </MudSimpleTable>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private string _selectedYear = "2026";
+
+    private string[] _nationalityLabels = { "T.Quốc", "H.Quốc", "N.Bản", "Đ.Loan", "Ấn Độ", "Khác" };
+    private List<ChartSeries<double>> _nationalitySeries = new()
+    {
+        new ChartSeries<double> { Name = "Số LĐ", Data = new double[] { 245, 180, 156, 120, 98, 446 } }
+    };
+
+    private double[] _permitData = { 620, 350, 180, 95 };
+    private string[] _permitLabels = { "Có GPLĐ", "Miễn GPLĐ", "Chưa có", "Khác" };
+    private string[] _permitColors = { "#059669", "#2563eb", "#d97706", "#94a3b8" };
+
+    private string[] _trendLabels = { "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12", "T1", "T2", "T3" };
+    private List<ChartSeries<double>> _trendSeries = new()
+    {
+        new ChartSeries<double> { Name = "Hết hạn", Data = new double[] { 23, 35, 28, 42, 19, 31, 45, 22, 37, 26, 33, 29 } },
+        new ChartSeries<double> { Name = "Đã gia hạn", Data = new double[] { 18, 29, 22, 35, 15, 25, 38, 18, 30, 20, 27, 22 } }
+    };
+
+    private record AlertItem(string Name, string Company, int Days, Color Severity, string BgColor, string BorderColor);
+    private List<AlertItem> _alerts = new()
+    {
+        new("Zhang Wei", "Samsung Electronics VN", 3, Color.Error, "var(--mud-palette-error-hover)", "var(--mud-palette-error)"),
+        new("Kim Min-jun", "Hyundai Aluminum Vina", 5, Color.Error, "var(--mud-palette-error-hover)", "var(--mud-palette-error)"),
+        new("Tanaka Yuki", "Canon Vietnam", 12, Color.Warning, "var(--mud-palette-warning-hover)", "var(--mud-palette-warning)"),
+        new("Park Ji-hoon", "Cty TNHH GHI", 18, Color.Warning, "var(--mud-palette-warning-hover)", "var(--mud-palette-warning)"),
+        new("Wang Li", "Foxconn VN", 25, Color.Info, "var(--mud-palette-info-hover)", "var(--mud-palette-info)"),
+    };
+}
