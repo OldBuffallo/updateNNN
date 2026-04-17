@@ -4,7 +4,7 @@ Hệ thống quản lý báo cáo người lao động nước ngoài — phiên
 
 ## Demo trực tiếp
 
-**[Xem demo tại đây →](https://YOUR_GITHUB_USERNAME.github.io/immigration-reportmanager-master/)**
+**[Xem demo tại đây →](https://oldbuffallo.github.io/updateNNN/)**
 
 > Đăng nhập với tài khoản: `admin` / mật khẩu: bất kỳ
 
