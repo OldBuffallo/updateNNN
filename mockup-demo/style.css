@@ -494,6 +494,7 @@ body {
 .page {
     display: none; padding: 28px;
     overflow-y: auto; flex: 1;
+    min-height: 0;
     animation: fadeUp 0.35s var(--ease);
 }
 .page.active-page { display: block; }
@@ -566,6 +567,13 @@ body {
     background: var(--bg-surface); border-radius: var(--radius-lg); padding: 22px;
     border: 1px solid var(--border); box-shadow: var(--shadow-sm);
     transition: box-shadow 0.3s var(--ease), border-color 0.3s var(--ease);
+    min-height: 340px;
+}
+.chart-card canvas {
+    display: block;
+    height: 260px !important;
+    width: 100% !important;
+    max-height: 260px;
 }
 .chart-card:hover { box-shadow: var(--shadow); }
 .chart-header {
