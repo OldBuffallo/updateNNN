@@ -1,9 +1,11 @@
 @page "/"
 
 @using IRM.Services
+@using Microsoft.AspNetCore.Components.Web
 @inject DashboardService DashboardSvc
+@inject NavigationManager Nav
 
-<PageTitle>Dashboard — IRM v2.0</PageTitle>
+<PageTitle>Dashboard - IRM v2.0</PageTitle>
 
 @if (_loading)
 {
@@ -12,19 +14,18 @@
 else if (_error != null)
 {
     <MudAlert Severity="Severity.Warning" Class="mb-4">
-        Chưa kết nối được database: @_error — Hiển thị dữ liệu mẫu.
+        Chưa kết nối được database: @_error - Hiển thị dữ liệu mẫu.
     </MudAlert>
 }
 
-@* ── Section Header ── *@
 <div class="section-header">
-    <h3>📊 Tổng quan hệ thống</h3>
+    <h3>Tổng quan hệ thống</h3>
     <span class="section-meta">Dữ liệu cập nhật: Hôm nay, @DateTime.Now.ToString("dd/MM/yyyy")</span>
 </div>
 
-@* ── KPI Cards — Mockup Style ── *@
 <div class="kpi-grid">
-    <div class="kpi-card kpi-blue">
+    <div class="kpi-card kpi-blue kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/companies")' @onkeydown='e => OnCardKeyDown(e, "/companies")'>
         <div>
             <span class="kpi-label">Tổng công ty</span>
             <span class="kpi-value">@_totalCompanies.ToString("N0")</span>
@@ -32,7 +33,9 @@ else if (_error != null)
         </div>
         <div class="kpi-icon">🏢</div>
     </div>
-    <div class="kpi-card kpi-green">
+
+    <div class="kpi-card kpi-green kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
         <div>
             <span class="kpi-label">Tổng lao động NN</span>
             <span class="kpi-value">@_totalEmployees.ToString("N0")</span>
@@ -40,7 +43,9 @@ else if (_error != null)
         </div>
         <div class="kpi-icon">👥</div>
     </div>
-    <div class="kpi-card kpi-orange">
+
+    <div class="kpi-card kpi-orange kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
         <div>
             <span class="kpi-label">Sắp hết hạn tạm trú</span>
             <span class="kpi-value">@_expiringCount</span>
@@ -48,25 +53,30 @@ else if (_error != null)
         </div>
         <div class="kpi-icon">⚠️</div>
     </div>
-    <div class="kpi-card kpi-purple">
+
+    <div class="kpi-card kpi-purple kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
         <div>
             <span class="kpi-label">Đã có GPLĐ</span>
             <span class="kpi-value">@_withPermit.ToString("N0")</span>
-            <span class="kpi-change up">@(_totalEmployees > 0 ? $"{(double)_withPermit / _totalEmployees * 100:F1}% tổng số" : "—")</span>
+            <span class="kpi-change up">@(_totalEmployees > 0 ? $"{(double)_withPermit / _totalEmployees * 100:F1}% tổng số" : "-")</span>
         </div>
         <div class="kpi-icon">📋</div>
     </div>
-    <div class="kpi-card kpi-teal">
+
+    <div class="kpi-card kpi-teal kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
         <div>
             <span class="kpi-label">Diện thăm thân</span>
             <span class="kpi-value">@_familyVisitCount</span>
-            <span class="kpi-change @(_familyVisitExpiringCount > 0 ? "warn" : "up")">@(_familyVisitExpiringCount > 0 ? $"⚠ {_familyVisitExpiringCount} sắp hết hạn" : "✓ Ổn định")</span>
+            <span class="kpi-change @(_familyVisitExpiringCount > 0 ? "warn" : "up")">
+                @(_familyVisitExpiringCount > 0 ? $"⚠ {_familyVisitExpiringCount} sắp hết hạn" : "✓ Ổn định")
+            </span>
         </div>
         <div class="kpi-icon">👨‍👩‍👧</div>
     </div>
 </div>
 
-@* ── Charts Row 1: Nationality Bar + Work Permit Donut ── *@
 <MudGrid Spacing="3" Class="mb-4">
     <MudItem xs="12" md="7">
         <div class="chart-card">
@@ -95,7 +105,6 @@ else if (_error != null)
     </MudItem>
 </MudGrid>
 
-@* ── Charts Row 2: Trend Line + Alerts ── *@
 <MudGrid Spacing="3" Class="mb-4">
     <MudItem xs="12" md="7">
         <div class="chart-card">
@@ -104,13 +113,13 @@ else if (_error != null)
             </div>
             <MudChart T="double" ChartType="ChartType.Line" ChartSeries="@_trendSeries"
                       XAxisLabels="@_trendLabels" Width="100%" Height="260px"
-                      ChartOptions="@(new ChartOptions { ChartPalette = new[]{ "#d97706", "#059669" } })" />
+                      ChartOptions="@(new ChartOptions { ChartPalette = new[] { "#d97706", "#059669" } })" />
         </div>
     </MudItem>
     <MudItem xs="12" md="5">
         <div class="chart-card">
             <div class="chart-header">
-                <h4>⚠️ Cảnh báo — Sắp hết hạn</h4>
+                <h4>⚠ Cảnh báo - Sắp hết hạn</h4>
                 <MudLink Href="/employees" Typo="Typo.caption" Style="font-weight: 600;">Xem tất cả →</MudLink>
             </div>
             <div class="alert-list">
@@ -142,30 +151,31 @@ else if (_error != null)
     private string? _error;
     private string _chartYear = "2026";
 
-    private int _totalCompanies, _totalEmployees, _expiringCount, _withPermit;
-    private int _familyVisitCount, _familyVisitExpiringCount;
-    private int _newCompaniesThisMonth = 3, _newEmployeesThisMonth = 8;
+    private int _totalCompanies;
+    private int _totalEmployees;
+    private int _expiringCount;
+    private int _withPermit;
+    private int _familyVisitCount;
+    private int _familyVisitExpiringCount;
+    private int _newCompaniesThisMonth = 3;
+    private int _newEmployeesThisMonth = 8;
+
     private string[] _nationalityLabels = Array.Empty<string>();
     private List<ChartSeries<double>> _nationalitySeries = new();
     private double[] _permitData = Array.Empty<double>();
     private string[] _permitLabels = Array.Empty<string>();
-
-    // Mockup-style colors
-    private string[] _barColors = { "#2563eb", "#7c3aed", "#dc2626", "#d97706", "#059669", "#0d9488", "#6366f1", "#14b8a6", "#a3a3a3" };
-    private string[] _permitColors = { "#059669", "#2563eb", "#d97706", "#94a3b8" };
-
-    // Trend chart data
     private List<ChartSeries<double>> _trendSeries = new();
     private string[] _trendLabels = Array.Empty<string>();
-
     private List<IRM.Data.Models.Employee> _expiringEmployees = new();
+
+    private readonly string[] _barColors = { "#2563eb", "#7c3aed", "#dc2626", "#d97706", "#059669", "#0d9488", "#6366f1", "#14b8a6", "#a3a3a3" };
+    private readonly string[] _permitColors = { "#059669", "#2563eb", "#d97706", "#94a3b8" };
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             var data = await DashboardSvc.GetDashboardAsync();
-
             _totalCompanies = data.TotalCompanies;
             _totalEmployees = data.TotalEmployees;
             _expiringCount = data.ExpiringCount;
@@ -174,31 +184,51 @@ else if (_error != null)
             _familyVisitExpiringCount = data.FamilyVisitExpiringCount;
             _expiringEmployees = data.ExpiringEmployees;
 
-            // Nationality chart
             if (data.NationalityStats.Any())
             {
                 _nationalityLabels = data.NationalityStats.Select(x => x.Label).ToArray();
-                _nationalitySeries = new() { new ChartSeries<double> { Name = "Số LĐ", Data = data.NationalityStats.Select(x => (double)x.Value).ToArray() } };
+                _nationalitySeries = new()
+                {
+                    new ChartSeries<double>
+                    {
+                        Name = "Số LĐ",
+                        Data = data.NationalityStats.Select(x => (double)x.Value).ToArray()
+                    }
+                };
             }
 
-            // Work permit chart
             if (data.WorkPermitStats.Any())
             {
                 _permitLabels = data.WorkPermitStats.Select(x => x.Label).ToArray();
                 _permitData = data.WorkPermitStats.Select(x => (double)x.Value).ToArray();
             }
 
-            // Trend chart — fake 12-month data (since real data requires historical tracking)
             GenerateTrendData();
         }
         catch (Exception ex)
         {
             _error = ex.Message;
-            _totalCompanies = 0; _totalEmployees = 0; _expiringCount = 0; _withPermit = 0;
+            _totalCompanies = 0;
+            _totalEmployees = 0;
+            _expiringCount = 0;
+            _withPermit = 0;
         }
         finally
         {
             _loading = false;
+        }
+    }
+
+    private void GoTo(string href)
+    {
+        Nav.NavigateTo(href);
+    }
+
+    private void OnCardKeyDown(KeyboardEventArgs e, string href)
+    {
+        if (e.Key is "Enter" or " ")
+        {
+            GoTo(href);
         }
     }
 
@@ -212,8 +242,16 @@ else if (_error != null)
         var rng = new Random(42);
         _trendSeries = new()
         {
-            new ChartSeries<double> { Name = "Hết hạn tạm trú", Data = Enumerable.Range(0, 12).Select(_ => (double)rng.Next(20, 45)).ToArray() },
-            new ChartSeries<double> { Name = "Đã gia hạn", Data = Enumerable.Range(0, 12).Select(_ => (double)rng.Next(15, 38)).ToArray() }
+            new ChartSeries<double>
+            {
+                Name = "Hết hạn tạm trú",
+                Data = Enumerable.Range(0, 12).Select(_ => (double)rng.Next(20, 45)).ToArray()
+            },
+            new ChartSeries<double>
+            {
+                Name = "Đã gia hạn",
+                Data = Enumerable.Range(0, 12).Select(_ => (double)rng.Next(15, 38)).ToArray()
+            }
         };
     }
 }

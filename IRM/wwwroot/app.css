@@ -463,6 +463,15 @@ body {
     box-shadow: var(--shadow-card-hover);
 }
 
+.kpi-card-action {
+    cursor: pointer;
+}
+
+.kpi-card-action:focus-visible {
+    outline: 3px solid var(--primary-light);
+    outline-offset: 2px;
+}
+
 .kpi-label {
     display: block;
     margin-bottom: 8px;
