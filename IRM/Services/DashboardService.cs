@@ -33,6 +33,15 @@ public class DashboardService
             e.Hidden_flag == 0 && e.WorkingStatus == 0
             && (e.WorkPermit == 1 || e.WorkPermit == 4));
 
+        // Thăm thân
+        data.FamilyVisitCount = await _db.Employees.CountAsync(e =>
+            e.Hidden_flag == 0 && e.WorkingStatus == 0 && e.FamilyVisit == 1);
+        data.FamilyVisitExpiringCount = await _db.Employees.CountAsync(e =>
+            e.Hidden_flag == 0 && e.WorkingStatus == 0 && e.FamilyVisit == 1
+            && e.FamilyVisitEndDate != null
+            && e.FamilyVisitEndDate >= today
+            && e.FamilyVisitEndDate <= in30Days);
+
         // Top 10 quốc tịch
         data.NationalityStats = await _db.Employees
             .Where(e => e.Hidden_flag == 0 && e.WorkingStatus == 0 && e.Nationality != null)
@@ -83,6 +92,8 @@ public class DashboardData
     public int TotalEmployees { get; set; }
     public int ExpiringCount { get; set; }
     public int WithWorkPermit { get; set; }
+    public int FamilyVisitCount { get; set; }
+    public int FamilyVisitExpiringCount { get; set; }
     public List<ChartItem> NationalityStats { get; set; } = new();
     public List<ChartItem> WorkPermitStats { get; set; } = new();
     public List<Employee> ExpiringEmployees { get; set; } = new();

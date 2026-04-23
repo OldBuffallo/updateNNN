@@ -6,11 +6,14 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1" Dense="true" Style="backdrop-filter: blur(12px);">
+    <MudAppBar Elevation="0" Dense="true" Style="backdrop-filter: blur(12px); border-bottom: 1px solid var(--mud-palette-divider);">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
                        OnClick="@ToggleDrawer" />
-        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-            <MudText Typo="Typo.h6" Style="font-weight: 700;">@_pageTitle</MudText>
+        <MudStack Spacing="0" Class="ml-2">
+            <MudText Typo="Typo.subtitle1" Style="font-weight: 700; font-size: 17px;">@_pageTitle</MudText>
+            <span class="irm-breadcrumb">
+                <a href="/">Trang chủ</a> / @_breadcrumbText
+            </span>
         </MudStack>
         <MudSpacer />
 
@@ -35,13 +38,14 @@
 
     <MudDrawer @bind-Open="_drawerOpen" Elevation="2" ClipMode="DrawerClipMode.Always"
                Variant="DrawerVariant.Mini" OpenMiniOnHover="false">
-        <MudDrawerHeader Dense="true" Class="d-flex align-center">
+        <MudDrawerHeader Dense="true" Class="d-flex align-center"
+                         Style="border-bottom: 1px solid rgba(255,255,255,0.06);">
             <MudIcon Icon="@Icons.Material.Filled.FactCheck" Color="Color.Primary" Size="Size.Large" Class="mr-2" />
             @if (_drawerOpen)
             {
                 <MudStack Spacing="0">
-                    <MudText Typo="Typo.subtitle1" Style="font-weight: 800; line-height: 1.2;">IRM</MudText>
-                    <MudText Typo="Typo.caption" Color="Color.Tertiary">v2.0</MudText>
+                    <MudText Typo="Typo.subtitle1" Style="font-weight: 800; line-height: 1.2; color: white;">IRM</MudText>
+                    <MudText Typo="Typo.caption" Style="font-size: 10px; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.1); padding: 2px 7px; border-radius: 5px; font-weight: 600; display: inline-block; width: fit-content;">v2.0</MudText>
                 </MudStack>
             }
         </MudDrawerHeader>
@@ -51,11 +55,21 @@
         <MudSpacer />
 
         @* User Profile Footer *@
-        <MudNavGroup Icon="@Icons.Material.Filled.AccountCircle" Title="Admin" Style="margin-top: auto;">
-            <MudNavLink Icon="@Icons.Material.Filled.Person" Href="#">Quản trị viên</MudNavLink>
-            <MudNavLink Icon="@Icons.Material.Filled.Logout" OnClick="@Logout"
-                        IconColor="Color.Error">Đăng xuất</MudNavLink>
-        </MudNavGroup>
+        <div class="user-footer">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <div class="user-avatar">A</div>
+                @if (_drawerOpen)
+                {
+                    <MudStack Spacing="0" Style="flex: 1; min-width: 0;">
+                        <MudText Typo="Typo.body2" Style="font-weight: 600; color: white; font-size: 13px;">Admin</MudText>
+                        <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.4); font-size: 11px;">Quản trị viên</MudText>
+                    </MudStack>
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Size="Size.Small"
+                                   Style="color: rgba(255,255,255,0.3);"
+                                   OnClick="@Logout" />
+                }
+            </MudStack>
+        </div>
     </MudDrawer>
 
     <MudMainContent>
@@ -120,6 +134,18 @@
     private bool _isDarkMode = false;
     private bool _helpOpen = false;
     private string _pageTitle = "Dashboard";
+    private string _breadcrumbText = "Dashboard";
+
+    private static readonly Dictionary<string, string> _breadcrumbs = new()
+    {
+        { "Dashboard", "Dashboard" },
+        { "Quản lý Công ty", "Quản lý dữ liệu / Công ty" },
+        { "Quản lý Nhân viên", "Quản lý dữ liệu / Nhân viên" },
+        { "Import Excel", "Quản lý dữ liệu / Import Excel" },
+        { "Tìm kiếm", "Phân tích & Báo cáo / Tìm kiếm" },
+        { "Báo cáo", "Phân tích & Báo cáo / Báo cáo" },
+        { "Quản trị", "Quản trị" }
+    };
 
     private MudTheme _theme = new MudTheme()
     {
@@ -136,7 +162,7 @@
             Error = "#dc2626",
             Background = "#f0f4f8",
             Surface = "#ffffff",
-            AppbarBackground = "#ffffff",
+            AppbarBackground = "rgba(255,255,255,0.85)",
             AppbarText = "#1a2332",
             DrawerBackground = "#0f172a",
             DrawerText = "rgba(255,255,255,0.7)",
@@ -161,7 +187,7 @@
             Error = "#f87171",
             Background = "#111318",
             Surface = "#1c1f26",
-            AppbarBackground = "#1c1f26",
+            AppbarBackground = "rgba(28,31,38,0.9)",
             AppbarText = "#e4e6eb",
             DrawerBackground = "#0d1017",
             DrawerText = "rgba(255,255,255,0.6)",
@@ -184,6 +210,10 @@
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
     private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
     private void ToggleHelp() => _helpOpen = !_helpOpen;
-    private void OnPageChanged(string title) => _pageTitle = title;
+    private void OnPageChanged(string title)
+    {
+        _pageTitle = title;
+        _breadcrumbText = _breadcrumbs.GetValueOrDefault(title, title);
+    }
     private void Logout() { /* TODO: implement logout */ }
 }
