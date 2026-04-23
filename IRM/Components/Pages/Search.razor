@@ -1,5 +1,9 @@
 @page "/search"
-@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.Web
+@using IRM.Services
+@using IRM.Data.Models
+@inject SearchService SearchSvc
 
 <PageTitle>Tìm kiếm — IRM v2.0</PageTitle>
 
@@ -13,31 +17,60 @@
                   Variant="Variant.Outlined" Adornment="Adornment.Start"
                   AdornmentIcon="@Icons.Material.Filled.Search"
                   Style="max-width: 600px;" Immediate="true"
-                  OnKeyUp="@((e) => { if (e.Key == "Enter") _hasSearched = true; })" />
+                  OnKeyUp="OnSearchKeyUp" />
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
-               OnClick="@(() => _hasSearched = true)">Tìm kiếm</MudButton>
+               OnClick="DoSearchAsync" Disabled="@_loading">
+        @if (_loading) { <MudProgressCircular Size="Size.Small" Indeterminate="true" /> }
+        else { <text>Tìm kiếm</text> }
+    </MudButton>
 </MudStack>
 
-@if (_hasSearched)
+@if (_hasSearched && _result != null)
 {
     <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3" Align="Align.Center">
-        Tìm thấy <strong>@_results.Count</strong> kết quả cho "<em>@_searchQuery</em>" — trong 0.08 giây
+        Tìm thấy <strong>@_result.TotalCount</strong> kết quả cho "<em>@_result.Keyword</em>"
     </MudText>
 
     <MudGrid Spacing="2" Class="mb-4" Justify="Justify.Center">
-        <MudItem xs="3"><MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;"><MudText Typo="Typo.h6" Color="Color.Primary" Style="font-weight:800;">@_results.Count(r => r.Type == "👥")</MudText><MudText Typo="Typo.caption">Nhân viên</MudText></MudPaper></MudItem>
-        <MudItem xs="3"><MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;"><MudText Typo="Typo.h6" Color="Color.Secondary" Style="font-weight:800;">@_results.Count(r => r.Type == "🏢")</MudText><MudText Typo="Typo.caption">Công ty</MudText></MudPaper></MudItem>
-        <MudItem xs="3"><MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;"><MudText Typo="Typo.h6" Color="Color.Success" Style="font-weight:800;">189</MudText><MudText Typo="Typo.caption">Có GPLĐ</MudText></MudPaper></MudItem>
-        <MudItem xs="3"><MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;"><MudText Typo="Typo.h6" Color="Color.Warning" Style="font-weight:800;">12</MudText><MudText Typo="Typo.caption">Sắp hết hạn</MudText></MudPaper></MudItem>
+        <MudItem xs="6" sm="3">
+            <MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;">
+                <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-weight:800;">@_result.Employees.Count</MudText>
+                <MudText Typo="Typo.caption">Nhân viên</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6" sm="3">
+            <MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;">
+                <MudText Typo="Typo.h6" Color="Color.Secondary" Style="font-weight:800;">@_result.Companies.Count</MudText>
+                <MudText Typo="Typo.caption">Công ty</MudText>
+            </MudPaper>
+        </MudItem>
     </MudGrid>
 
-    @foreach (var r in _results)
+    @* ── Employee results ── *@
+    @foreach (var emp in _result.Employees)
     {
         <MudPaper Elevation="0" Class="pa-3 mb-2 rounded-lg border-solid border d-flex align-center" Style="border-width: 1px;">
-            <MudText Style="font-size: 1.5rem; margin-right: 12px;">@r.Type</MudText>
+            <MudText Style="font-size: 1.5rem; margin-right: 12px;">👥</MudText>
             <MudStack Spacing="0" Style="flex: 1;">
-                <MudText Typo="Typo.body1" Style="font-weight: 700;">@r.Title</MudText>
-                <MudText Typo="Typo.caption" Color="Color.Secondary">@r.Detail</MudText>
+                <MudText Typo="Typo.body1" Style="font-weight: 700;">@emp.StaffName — @(emp.NationalityNav?.NationalityName ?? emp.Nationality)</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    HC: @emp.Passport · @emp.Company?.CompanyName · @(emp.Career?.CareerName ?? "") · @emp.WorkPermitString · Hạn TT: @(emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "—")
+                </MudText>
+            </MudStack>
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Xem →</MudButton>
+        </MudPaper>
+    }
+
+    @* ── Company results ── *@
+    @foreach (var c in _result.Companies)
+    {
+        <MudPaper Elevation="0" Class="pa-3 mb-2 rounded-lg border-solid border d-flex align-center" Style="border-width: 1px;">
+            <MudText Style="font-size: 1.5rem; margin-right: 12px;">🏢</MudText>
+            <MudStack Spacing="0" Style="flex: 1;">
+                <MudText Typo="Typo.body1" Style="font-weight: 700;">@c.CompanyName</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    @(c.Field?.FieldName ?? "") · @c.TotalAmount NLĐ · @c.Address
+                </MudText>
             </MudStack>
             <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Xem →</MudButton>
         </MudPaper>
@@ -45,16 +78,26 @@
 }
 
 @code {
-    private string _searchQuery = "Trung Quốc";
-    private bool _hasSearched = true;
+    private string _searchQuery = "";
+    private bool _hasSearched;
+    private bool _loading;
+    private SearchResult? _result;
 
-    private record SearchResult(string Type, string Title, string Detail);
-    private List<SearchResult> _results = new()
+    private async Task OnSearchKeyUp(KeyboardEventArgs e)
     {
-        new("👥", "Zhang Wei — Trung Quốc", "HC: E12345678 · Samsung Electronics VN · Kỹ sư · GPLĐ: Có · Hạn TT: 15/08/2026"),
-        new("👥", "Wang Li — Trung Quốc", "HC: E98765432 · Hyundai Aluminum · Quản lý · GPLĐ: Có · Hạn TT: 20/05/2026"),
-        new("👥", "Liu Chen — Trung Quốc", "HC: E55566677 · Canon Vietnam · Kỹ thuật · GPLĐ: Miễn · Hạn TT: 30/12/2026"),
-        new("👥", "Chen Hao — Đài Loan", "HC: T44556677 · Formosa VN · Quản lý SX · GPLĐ: Có · Hạn TT: 05/07/2026"),
-        new("🏢", "Cty TNHH Trung Quốc Vina", "Sản xuất · 45 NLĐ · Công nghiệp · KCN Bình Dương"),
-    };
+        if (e.Key == "Enter") await DoSearchAsync();
+    }
+
+    private async Task DoSearchAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_searchQuery)) return;
+        _loading = true;
+        try
+        {
+            _result = await SearchSvc.SearchAsync(_searchQuery);
+            _hasSearched = true;
+        }
+        catch { _result = new SearchResult(); }
+        finally { _loading = false; }
+    }
 }

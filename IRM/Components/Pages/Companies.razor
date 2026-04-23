@@ -1,5 +1,10 @@
 @page "/companies"
-@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.Web
+@using IRM.Services
+@using IRM.Data.Models
+@inject CompanyService CompanySvc
+@inject CatalogService CatalogSvc
 
 <PageTitle>Quản lý Công ty — IRM v2.0</PageTitle>
 
@@ -17,41 +22,70 @@
     </MudStack>
 </MudStack>
 
+@* ── Filters ── *@
+<MudStack Row="true" Spacing="2" Class="mb-3">
+    <MudTextField T="string" @bind-Value="_searchText" Placeholder="Tìm theo tên, địa chỉ..."
+                  Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true"
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                  Style="max-width: 350px;" OnKeyUp="OnSearchKeyUp" />
+    <MudSelect T="int?" @bind-Value="_selectedFieldId" Placeholder="Lĩnh vực"
+               Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true"
+               Style="max-width: 200px;">
+        @foreach (var f in _fields)
+        {
+            <MudSelectItem T="int?" Value="@((int?)f.IDField)">@f.FieldName</MudSelectItem>
+        }
+    </MudSelect>
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadDataAsync" Size="Size.Small">Lọc</MudButton>
+</MudStack>
+
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+}
+
 @* ── DataGrid ── *@
-<MudDataGrid Items="@_companies" T="Company" Filterable="true" Sortable="true"
+<MudDataGrid Items="@_companies" T="Company" Filterable="false" Sortable="true"
              Dense="true" Hover="true" Bordered="false" Striped="true"
-             RowsPerPage="10" Class="rounded-lg border-solid border" Style="border-width: 1px;">
+             RowsPerPage="15" Class="rounded-lg border-solid border" Style="border-width: 1px;">
     <Columns>
-        <PropertyColumn Property="x => x.Id" Title="STT" Sortable="false" Filterable="false" />
-        <PropertyColumn Property="x => x.Name" Title="Tên công ty" Style="font-weight: 600;" />
-        <PropertyColumn Property="x => x.Type" Title="Loại hình" />
-        <TemplateColumn Title="Lĩnh vực">
+        <TemplateColumn Title="STT" Sortable="false" Filterable="false">
             <CellTemplate>
-                <MudChip T="string" Size="Size.Small" Color="Color.Tertiary" Variant="Variant.Outlined">@context.Item.Field</MudChip>
+                <MudText Typo="Typo.body2">@(_companies.IndexOf(context.Item) + 1)</MudText>
             </CellTemplate>
         </TemplateColumn>
-        <PropertyColumn Property="x => x.TotalWorkers" Title="Tổng LĐ" Style="font-weight: 700;" />
+        <PropertyColumn Property="x => x.CompanyName" Title="Tên công ty" Style="font-weight: 600;" />
+        <PropertyColumn Property="x => x.TypeOfBusiniess" Title="Loại hình" />
+        <TemplateColumn Title="Lĩnh vực">
+            <CellTemplate>
+                <MudChip T="string" Size="Size.Small" Color="Color.Tertiary" Variant="Variant.Outlined">@(context.Item.Field?.FieldName ?? "")</MudChip>
+            </CellTemplate>
+        </TemplateColumn>
+        <PropertyColumn Property="x => x.TotalAmount" Title="Tổng LĐ" Style="font-weight: 700;" />
         <TemplateColumn Title="Có GPLĐ">
             <CellTemplate>
-                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">@context.Item.WithPermit</MudChip>
+                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">@context.Item.QuantityAvailable</MudChip>
             </CellTemplate>
         </TemplateColumn>
         <TemplateColumn Title="Chưa có">
             <CellTemplate>
-                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">@context.Item.WithoutPermit</MudChip>
+                <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">@context.Item.QuantityNotYet</MudChip>
             </CellTemplate>
         </TemplateColumn>
         <TemplateColumn Title="Miễn">
             <CellTemplate>
-                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text">@context.Item.Exempt</MudChip>
+                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text">@context.Item.AmountOfExemption</MudChip>
             </CellTemplate>
         </TemplateColumn>
-        <PropertyColumn Property="x => x.Tracker" Title="Cán bộ TD" />
+        <TemplateColumn Title="Cán bộ TD">
+            <CellTemplate>
+                <MudText Typo="Typo.body2">@(context.Item.Tracker?.Name)</MudText>
+            </CellTemplate>
+        </TemplateColumn>
         <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
             <CellTemplate>
                 <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" />
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Default" />
-                <MudIconButton Icon="@Icons.Material.Filled.UploadFile" Size="Size.Small" Color="Color.Default" />
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -61,19 +95,36 @@
 </MudDataGrid>
 
 @code {
-    private record Company(int Id, string Name, string Type, string Field, int TotalWorkers, int WithPermit, int WithoutPermit, int Exempt, string Tracker);
+    private List<Company> _companies = new();
+    private List<Field> _fields = new();
+    private string? _searchText;
+    private int? _selectedFieldId;
+    private bool _loading = true;
 
-    private List<Company> _companies = new()
+    protected override async Task OnInitializedAsync()
     {
-        new(1, "Cty TNHH Samsung Electronics VN", "TNHH", "Sản xuất", 125, 98, 15, 12, "Nguyễn Văn A"),
-        new(2, "Cty CP Hyundai Aluminum Vina", "Cổ phần", "Công nghiệp", 89, 72, 10, 7, "Trần Thị B"),
-        new(3, "Cty TNHH Canon Vietnam", "TNHH", "Sản xuất", 67, 55, 5, 7, "Nguyễn Văn A"),
-        new(4, "Cty TNHH LG Display Vietnam", "TNHH", "Sản xuất", 56, 48, 3, 5, "Lê Văn C"),
-        new(5, "Cty CP Posco Vietnam", "Cổ phần", "Thép", 45, 38, 4, 3, "Trần Thị B"),
-        new(6, "Cty TNHH Foxconn Bình Dương", "TNHH", "Điện tử", 78, 65, 8, 5, "Nguyễn Văn A"),
-        new(7, "Cty TNHH Panasonic VN", "TNHH", "Sản xuất", 34, 28, 3, 3, "Lê Văn C"),
-        new(8, "Cty CP Formosa VN", "Cổ phần", "Hóa chất", 92, 76, 9, 7, "Trần Thị B"),
-        new(9, "Cty TNHH Toyota Motor VN", "TNHH", "Ô tô", 41, 35, 3, 3, "Nguyễn Văn A"),
-        new(10, "Cty TNHH Intel Products VN", "TNHH", "Bán dẫn", 112, 95, 10, 7, "Lê Văn C"),
-    };
+        try
+        {
+            _fields = await CatalogSvc.GetFieldsAsync();
+            await LoadDataAsync();
+        }
+        catch { }
+        finally { _loading = false; }
+    }
+
+    private async Task OnSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _loading = true;
+        try
+        {
+            _companies = await CompanySvc.GetAllAsync(_searchText, _selectedFieldId);
+        }
+        catch { _companies = new(); }
+        finally { _loading = false; }
+    }
 }

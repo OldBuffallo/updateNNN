@@ -1,5 +1,10 @@
 @page "/admin"
-@rendermode InteractiveServer
+
+@using IRM.Services
+@using IRM.Data.Models
+@inject AuthService AuthSvc
+@inject AuditService AuditSvc
+@inject CatalogService CatalogSvc
 
 <PageTitle>Quản trị — IRM v2.0</PageTitle>
 
@@ -27,16 +32,45 @@
 
 @code {
     private record AdminCard(string Icon, string Title, string Description);
+    private List<AdminCard> _adminCards = new();
 
-    private List<AdminCard> _adminCards = new()
+    protected override async Task OnInitializedAsync()
     {
-        new("👤", "Tài khoản", "4 tài khoản hoạt động"),
-        new("🏭", "Lĩnh vực", "8 lĩnh vực"),
-        new("💼", "Ngành nghề", "45 ngành — 6 nhóm"),
-        new("🌍", "Quốc tịch", "25 quốc tịch"),
-        new("🗺️", "Quận / Huyện", "12 quận huyện"),
-        new("📍", "Phường / Xã", "89 phường xã"),
-        new("📜", "Nhật ký hệ thống", "Audit Log — 1,523 bản ghi"),
-        new("📤", "Lịch sử Import", "15 phiên import"),
-    };
+        try
+        {
+            var accounts = await AuthSvc.GetAllAccountsAsync();
+            var fields = await CatalogSvc.GetFieldsAsync();
+            var careers = await CatalogSvc.GetCareersAsync();
+            var nationalities = await CatalogSvc.GetNationalitiesAsync();
+            var districts = await CatalogSvc.GetDistrictsAsync();
+            var wards = await CatalogSvc.GetWardsAsync();
+            var logs = await AuditSvc.GetRecentAsync(1);
+
+            _adminCards = new()
+            {
+                new("👤", "Tài khoản", $"{accounts.Count} tài khoản hoạt động"),
+                new("🏭", "Lĩnh vực", $"{fields.Count} lĩnh vực"),
+                new("💼", "Ngành nghề", $"{careers.Count} ngành"),
+                new("🌍", "Quốc tịch", $"{nationalities.Count} quốc tịch"),
+                new("🗺️", "Quận / Huyện", $"{districts.Count} quận huyện"),
+                new("📍", "Phường / Xã", $"{wards.Count} phường xã"),
+                new("📜", "Nhật ký hệ thống", "Audit Log"),
+                new("📤", "Lịch sử Import", "Import History"),
+            };
+        }
+        catch
+        {
+            _adminCards = new()
+            {
+                new("👤", "Tài khoản", "Chưa kết nối DB"),
+                new("🏭", "Lĩnh vực", "Chưa kết nối DB"),
+                new("💼", "Ngành nghề", "Chưa kết nối DB"),
+                new("🌍", "Quốc tịch", "Chưa kết nối DB"),
+                new("🗺️", "Quận / Huyện", "Chưa kết nối DB"),
+                new("📍", "Phường / Xã", "Chưa kết nối DB"),
+                new("📜", "Nhật ký", "Chưa kết nối DB"),
+                new("📤", "Import", "Chưa kết nối DB"),
+            };
+        }
+    }
 }

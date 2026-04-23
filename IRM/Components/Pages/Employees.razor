@@ -1,12 +1,19 @@
 @page "/employees"
-@rendermode InteractiveServer
+
+@using IRM.Services
+@using IRM.Data.Models
+@inject EmployeeService EmployeeSvc
+@inject CompanyService CompanySvc
 
 <PageTitle>Quản lý Nhân viên — IRM v2.0</PageTitle>
 
 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
     <MudStack Spacing="0">
-        <MudText Typo="Typo.h5" Style="font-weight: 800;">👥 Danh sách Nhân viên nước ngoài</MudText>
-        <MudText Typo="Typo.caption" Color="Color.Secondary">Tổng: @_employees.Count nhân viên đang làm việc</MudText>
+        <MudText Typo="Typo.h5" Style="font-weight: 800;">👥 Danh sách Lao động nước ngoài</MudText>
+        <MudText Typo="Typo.caption" Color="Color.Secondary">
+            @if (_selectedCompany != null) { <text>@_selectedCompany.CompanyName — @_employees.Count nhân viên</text> }
+            else { <text>Chọn công ty để xem nhân viên</text> }
+        </MudText>
     </MudStack>
     <MudStack Row="true" Spacing="2">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Download"
@@ -16,73 +23,124 @@
     </MudStack>
 </MudStack>
 
-<MudDataGrid Items="@_employees" T="Employee" Filterable="true" Sortable="true"
-             Dense="true" Hover="true" Striped="true"
-             RowsPerPage="10" Class="rounded-lg border-solid border" Style="border-width: 1px;">
-    <Columns>
-        <PropertyColumn Property="x => x.Id" Title="STT" Sortable="false" Filterable="false" />
-        <PropertyColumn Property="x => x.Name" Title="Họ tên" Style="font-weight: 600;" />
-        <PropertyColumn Property="x => x.Nationality" Title="Quốc tịch" />
-        <TemplateColumn Title="Hộ chiếu">
-            <CellTemplate>
-                <MudText Typo="Typo.body2" Style="font-family: monospace; font-size: 12px; background: var(--mud-palette-background); padding: 2px 8px; border-radius: 4px;">@context.Item.Passport</MudText>
-            </CellTemplate>
-        </TemplateColumn>
-        <PropertyColumn Property="x => x.Company" Title="Công ty" />
-        <PropertyColumn Property="x => x.Career" Title="Nghề nghiệp" />
-        <TemplateColumn Title="GPLĐ" Filterable="true" SortBy="@(x => x.PermitType)">
-            <CellTemplate>
-                @{
-                    var color = context.Item.PermitType switch
-                    {
-                        "Có GPLĐ" => Color.Success,
-                        "Miễn" => Color.Info,
-                        _ => Color.Warning
-                    };
-                }
-                <MudChip T="string" Size="Size.Small" Color="@color" Variant="Variant.Outlined">@context.Item.PermitType</MudChip>
-            </CellTemplate>
-        </TemplateColumn>
-        <PropertyColumn Property="x => x.StayExpiry" Title="Hạn tạm trú" />
-        <TemplateColumn Title="Trạng thái" SortBy="@(x => x.DaysLeft)">
-            <CellTemplate>
-                @{
-                    var (label, chipColor) = context.Item.DaysLeft switch
-                    {
-                        <= 7 => ("Sắp hết hạn", Color.Error),
-                        <= 30 => ("Gần hết hạn", Color.Warning),
-                        _ => ("Bình thường", Color.Success)
-                    };
-                }
-                <MudChip T="string" Size="Size.Small" Color="@chipColor" Variant="Variant.Filled">@label</MudChip>
-            </CellTemplate>
-        </TemplateColumn>
-        <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
-            <CellTemplate>
-                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" />
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Default" />
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="Employee" />
-    </PagerContent>
-</MudDataGrid>
+@* ── Company selector ── *@
+<MudStack Row="true" Spacing="2" Class="mb-3">
+    <MudAutocomplete T="Company" @bind-Value="_selectedCompany" Label="Chọn công ty"
+                     SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")"
+                     Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                     Style="max-width: 450px;" ResetValueOnEmptyText="true"
+                     Immediate="true" />
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadEmployeesAsync"
+               Disabled="@(_selectedCompany == null)" Size="Size.Small">Xem</MudButton>
+    <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="LoadExpiringAsync"
+               Size="Size.Small" StartIcon="@Icons.Material.Filled.Warning">Sắp hết hạn</MudButton>
+</MudStack>
+
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+}
+
+@if (_employees.Any())
+{
+    <MudDataGrid Items="@_employees" T="Employee" Filterable="true" Sortable="true"
+                 Dense="true" Hover="true" Striped="true"
+                 RowsPerPage="15" Class="rounded-lg border-solid border" Style="border-width: 1px;">
+        <Columns>
+            <TemplateColumn Title="STT" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudText Typo="Typo.body2">@(_employees.IndexOf(context.Item) + 1)</MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.StaffName" Title="Họ tên" Style="font-weight: 600;" />
+            <PropertyColumn Property="x => x.NationalityNav != null ? x.NationalityNav.NationalityName : x.Nationality" Title="Quốc tịch" />
+            <TemplateColumn Title="Hộ chiếu">
+                <CellTemplate>
+                    <MudText Typo="Typo.body2" Style="font-family: monospace; font-size: 12px; background: var(--mud-palette-background); padding: 2px 8px; border-radius: 4px;">@context.Item.Passport</MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Công ty">
+                <CellTemplate>
+                    <MudText Typo="Typo.body2">@(context.Item.Company?.CompanyName)</MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Nghề nghiệp">
+                <CellTemplate>
+                    <MudText Typo="Typo.body2">@(context.Item.Career?.CareerName)</MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="GPLĐ">
+                <CellTemplate>
+                    @{
+                        var wpColor = context.Item.WorkPermit switch
+                        {
+                            1 or 4 => Color.Success,
+                            0 or 3 => Color.Info,
+                            _ => Color.Warning
+                        };
+                    }
+                    <MudChip T="string" Size="Size.Small" Color="@wpColor" Variant="Variant.Outlined">@context.Item.WorkPermitString</MudChip>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Hạn tạm trú" SortBy="@(x => x.TemporaryStay)">
+                <CellTemplate>
+                    <MudText Typo="Typo.body2">@(context.Item.TemporaryStay?.ToString("dd/MM/yyyy") ?? "—")</MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Trạng thái" SortBy="@(x => x.DaysUntilExpiry ?? 9999)">
+                <CellTemplate>
+                    @{
+                        var days = context.Item.DaysUntilExpiry ?? 999;
+                        var (label, chipColor) = days switch
+                        {
+                            <= 0 => ("Hết hạn", Color.Error),
+                            <= 7 => ("Sắp hết hạn", Color.Error),
+                            <= 30 => ("Gần hết hạn", Color.Warning),
+                            _ => ("Bình thường", Color.Success)
+                        };
+                    }
+                    <MudChip T="string" Size="Size.Small" Color="@chipColor" Variant="Variant.Filled">@label</MudChip>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Default" />
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="Employee" />
+        </PagerContent>
+    </MudDataGrid>
+}
 
 @code {
-    private record Employee(int Id, string Name, string Nationality, string Passport, string Company, string Career, string PermitType, string StayExpiry, int DaysLeft);
+    private List<Employee> _employees = new();
+    private Company? _selectedCompany;
+    private bool _loading;
+    private bool _showExpiring;
 
-    private List<Employee> _employees = new()
+    private async Task<IEnumerable<Company>> SearchCompanyAsync(string? value, CancellationToken cancel)
     {
-        new(1, "Zhang Wei", "Trung Quốc", "E12345678", "Samsung Electronics VN", "Kỹ sư", "Có GPLĐ", "18/04/2026", 3),
-        new(2, "Kim Soo-hyun", "Hàn Quốc", "M98765432", "Hyundai Aluminum Vina", "Quản lý", "Có GPLĐ", "15/08/2026", 120),
-        new(3, "Tanaka Yuki", "Nhật Bản", "TK4567890", "Canon Vietnam", "Phiên dịch", "Miễn", "27/04/2026", 12),
-        new(4, "Park Ji-hoon", "Hàn Quốc", "M99887766", "Hyundai Aluminum Vina", "Kỹ thuật", "Có GPLĐ", "03/05/2026", 18),
-        new(5, "Wang Li", "Trung Quốc", "E98765432", "Foxconn Bình Dương", "Quản lý", "Có GPLĐ", "22/11/2026", 220),
-        new(6, "Lee Min-ho", "Hàn Quốc", "M11223344", "LG Display Vietnam", "Kỹ thuật", "Chưa có", "30/09/2026", 168),
-        new(7, "Suzuki Taro", "Nhật Bản", "TJ1122334", "Canon Vietnam", "Giám đốc", "Miễn", "15/12/2026", 243),
-        new(8, "Liu Chen", "Trung Quốc", "E55566677", "Samsung Electronics VN", "Kỹ thuật", "Có GPLĐ", "30/12/2026", 258),
-        new(9, "Chen Hao", "Đài Loan", "T44556677", "Formosa VN", "Quản lý SX", "Có GPLĐ", "05/07/2026", 81),
-        new(10, "Raj Patel", "Ấn Độ", "H88990011", "Intel Products VN", "KS phần mềm", "Có GPLĐ", "20/03/2027", 338),
-    };
+        var all = await CompanySvc.GetAllAsync(value);
+        return all;
+    }
+
+    private async Task LoadEmployeesAsync()
+    {
+        if (_selectedCompany == null) return;
+        _loading = true; _showExpiring = false;
+        try { _employees = await EmployeeSvc.GetByCompanyAsync(_selectedCompany.IDCompany); }
+        catch { _employees = new(); }
+        finally { _loading = false; }
+    }
+
+    private async Task LoadExpiringAsync()
+    {
+        _loading = true; _showExpiring = true;
+        try { _employees = await EmployeeSvc.GetExpiringAsync(90); }
+        catch { _employees = new(); }
+        finally { _loading = false; }
+    }
 }
