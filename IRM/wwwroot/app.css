@@ -73,7 +73,8 @@ body {
 }
 
 body {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 *,
@@ -350,11 +351,13 @@ body {
 
 .irm-main {
     background: var(--bg-body);
+    overflow-x: hidden;
 }
 
 .irm-main-container {
     max-width: 1600px;
     padding: 28px !important;
+    overflow-x: hidden;
 }
 
 .help-drawer .mud-drawer-content {
@@ -430,7 +433,7 @@ body {
 
 .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 18px;
     margin-bottom: 28px;
 }
@@ -562,6 +565,74 @@ body {
     border-radius: var(--radius-lg);
     background: var(--bg-surface);
     box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+/* ============ MUDBLAZOR CHART STYLING ============ */
+.chart-card .mud-chart {
+    width: 100% !important;
+    min-height: 280px;
+}
+
+/* Bar chart: thicker bars */
+.mud-chart .mud-chart-bar rect {
+    rx: 4;
+    ry: 4;
+}
+
+/* Bar chart SVG container */
+.mud-chart-bar {
+    width: 100% !important;
+}
+
+/* Donut/Pie charts */
+.mud-chart-donut,
+.mud-chart-pie {
+    width: 100% !important;
+}
+
+.mud-chart-donut svg,
+.mud-chart-pie svg {
+    max-width: 100%;
+    height: auto !important;
+}
+
+/* Chart legend */
+.mud-chart-legend {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 0;
+}
+
+.mud-chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0;
+}
+
+/* Line chart */
+.mud-chart-line {
+    width: 100% !important;
+}
+
+.mud-chart-line path {
+    stroke-width: 2.5;
+}
+
+.mud-chart-line circle {
+    r: 4;
+}
+
+/* X axis labels */
+.mud-chart text {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    fill: var(--text-secondary);
+}
+
+.mud-chart .mud-chart-legend-marker {
+    border-radius: 3px;
 }
 
 .chart-card-action {
@@ -1047,15 +1118,16 @@ body {
     background: var(--bg-surface);
 }
 
+/* ============ RESPONSIVE: TABLET ============ */
 @media (max-width: 1400px) {
     .kpi-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 1200px) {
     .admin-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .report-builder-grid {
@@ -1065,8 +1137,13 @@ body {
     .report-builder-sidebar {
         position: static;
     }
+
+    .chart-card .mud-chart {
+        min-height: 240px;
+    }
 }
 
+/* ============ RESPONSIVE: SMALL TABLET ============ */
 @media (max-width: 960px) {
     .page-actions-bar {
         flex-direction: column;
@@ -1081,23 +1158,35 @@ body {
     .topbar-search {
         display: none;
     }
+
+    /* Hide the mini drawer stub on smaller screens so it doesn't overlap */
+    .mud-drawer--closed.mud-drawer-mini {
+        width: 0 !important;
+        min-width: 0 !important;
+        overflow: hidden;
+    }
 }
 
+/* ============ RESPONSIVE: MOBILE ============ */
 @media (max-width: 768px) {
     .irm-main-container {
-        padding: 18px !important;
+        padding: 16px !important;
     }
 
     .irm-topbar {
-        padding: 0 16px;
+        padding: 0 12px;
     }
 
     .section-header {
         flex-direction: column;
         align-items: flex-start;
+        gap: 4px;
     }
 
-    .kpi-grid,
+    .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
     .admin-grid,
     .search-stat-cards {
         grid-template-columns: 1fr;
@@ -1108,6 +1197,40 @@ body {
     }
 
     .topbar-help-btn .mud-button-label {
+        display: none;
+    }
+
+    /* Ensure main content is not blocked by drawer */
+    .mud-main-content {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+
+    .mud-drawer--closed.mud-drawer-mini {
+        width: 0 !important;
+        min-width: 0 !important;
+        overflow: hidden;
+    }
+
+    .chart-card {
+        padding: 16px;
+    }
+
+    .chart-card .mud-chart {
+        min-height: 200px;
+    }
+
+    /* Table horizontal scroll on mobile */
+    .mud-simple-table,
+    .mud-table-container {
+        overflow-x: auto;
+    }
+
+    .topbar-right {
+        gap: 4px;
+    }
+
+    .topbar-right .topbar-search {
         display: none;
     }
 }
@@ -1380,67 +1503,19 @@ body {
     animation: fadeUp 0.3s ease;
 }
 
-/* ============ KPI GRID RESPONSIVE 4 COLS ============ */
-.kpi-grid {
-    grid-template-columns: repeat(4, 1fr);
-}
-
 /* ============ DASHBOARD LAYOUT TUNING ============ */
 .kpi-card {
     min-height: 126px;
 }
-.chart-card {
-    min-height: 360px;
-}
-.chart-card .mud-chart {
-    min-height: 260px;
-}
 
-/* ============ RESPONSIVE ============ */
-@media (min-width: 1200px) {
-    .kpi-grid { grid-template-columns: repeat(4, 1fr); }
-}
-
-@media (max-width: 1200px) {
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .report-builder-grid { grid-template-columns: 1fr; }
-    .report-builder-sidebar { min-width: unset; }
-    .chart-card { min-height: 320px; }
-}
-
-@media (max-width: 768px) {
-    .kpi-grid { grid-template-columns: 1fr; }
-    .admin-grid { grid-template-columns: repeat(2, 1fr); }
-    .search-stat-cards { grid-template-columns: repeat(2, 1fr); }
-
-    .irm-topbar .topbar-left { flex: 1; min-width: 0; }
-    .irm-topbar .topbar-right { display: none; }
-    .topbar-search { display: none; }
-
-    .irm-main-container { padding: 12px !important; }
-
-    .chart-card { padding: 16px; }
-    .chart-card { min-height: auto; }
-
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
-    }
-
-    .page-actions { flex-direction: column; gap: 8px; }
-    .actions-left, .actions-right { width: 100%; }
-
-    .report-builder-grid { grid-template-columns: 1fr; }
-}
-
+/* ============ RESPONSIVE: EXTRA SMALL ============ */
 @media (max-width: 480px) {
     .kpi-grid { grid-template-columns: 1fr; gap: 10px; }
     .admin-grid { grid-template-columns: 1fr; }
     .search-stat-cards { grid-template-columns: 1fr; }
 
     .kpi-card { padding: 16px; }
-    .kpi-value { font-size: 28px; }
+    .kpi-value { font-size: 26px; }
 
-    .irm-drawer { display: none; }
+    .irm-topbar .topbar-right { display: none; }
 }

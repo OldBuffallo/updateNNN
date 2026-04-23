@@ -79,8 +79,8 @@ else if (_error != null)
                 </MudSelect>
             </div>
             <MudChart T="double" ChartType="ChartType.Bar" ChartSeries="@_nationalitySeries"
-                      XAxisLabels="@_nationalityLabels" Width="100%" Height="260px"
-                      ChartOptions="@(new ChartOptions { ChartPalette = _barColors })" />
+                      XAxisLabels="@_nationalityLabels" Width="100%" Height="300px"
+                      ChartOptions="@_barChartOptions" />
         </div>
     </MudItem>
     <MudItem xs="12" md="5">
@@ -90,8 +90,8 @@ else if (_error != null)
                 <h4>Tỷ lệ giấy phép lao động</h4>
             </div>
             <MudChart T="double" ChartType="ChartType.Donut" InputData="@_permitData"
-                      InputLabels="@_permitLabels" Width="100%" Height="260px"
-                      ChartOptions="@(new ChartOptions { ChartPalette = _permitColors })" />
+                      InputLabels="@_permitLabels" Width="100%" Height="300px"
+                      ChartOptions="@_donutChartOptions" />
         </div>
     </MudItem>
 </MudGrid>
@@ -104,8 +104,8 @@ else if (_error != null)
                 <h4>Xu hướng hết hạn tạm trú (12 tháng)</h4>
             </div>
             <MudChart T="double" ChartType="ChartType.Line" ChartSeries="@_trendSeries"
-                      XAxisLabels="@_trendLabels" Width="100%" Height="260px"
-                      ChartOptions="@(new ChartOptions { ChartPalette = new[] { "#d97706", "#059669" } })" />
+                      XAxisLabels="@_trendLabels" Width="100%" Height="300px"
+                      ChartOptions="@_lineChartOptions" />
         </div>
     </MudItem>
     <MudItem xs="12" md="5">
@@ -163,6 +163,21 @@ else if (_error != null)
 
     private readonly string[] _barColors = { "#2563eb", "#7c3aed", "#dc2626", "#d97706", "#059669", "#0d9488", "#6366f1", "#14b8a6", "#a3a3a3" };
     private readonly string[] _permitColors = { "#059669", "#2563eb", "#d97706", "#94a3b8" };
+
+    private ChartOptions _barChartOptions = new()
+    {
+        ChartPalette = new[] { "#2563eb", "#7c3aed", "#dc2626", "#d97706", "#059669", "#0d9488", "#6366f1", "#14b8a6", "#a3a3a3" }
+    };
+
+    private ChartOptions _donutChartOptions = new()
+    {
+        ChartPalette = new[] { "#059669", "#2563eb", "#d97706", "#94a3b8" }
+    };
+
+    private ChartOptions _lineChartOptions = new()
+    {
+        ChartPalette = new[] { "#d97706", "#059669" }
+    };
 
     protected override async Task OnInitializedAsync()
     {
