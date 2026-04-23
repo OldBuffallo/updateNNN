@@ -16,7 +16,7 @@
             <MudStack Spacing="0">
                 <MudText Typo="Typo.subtitle1" Class="topbar-title">@_pageTitle</MudText>
                 <span class="irm-breadcrumb">
-                    <a href="/">Trang chu</a> / @_breadcrumbText
+                    <a href="/">Trang chủ</a> / @_breadcrumbText
                 </span>
             </MudStack>
         </div>
@@ -25,7 +25,7 @@
 
         <div class="topbar-right">
             <MudTextField T="string"
-                          Placeholder="Tim nhanh... (Ctrl+K)"
+                          Placeholder="Tìm nhanh... (Ctrl+K)"
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search"
@@ -48,7 +48,7 @@
                        StartIcon="@Icons.Material.Filled.HelpOutline"
                        Class="topbar-help-btn"
                        OnClick="@ToggleHelp">
-                Ho tro
+                Hỗ trợ
             </MudButton>
         </div>
     </MudAppBar>
@@ -87,7 +87,7 @@
                 {
                     <MudStack Spacing="0" Class="user-footer-copy">
                         <MudText Typo="Typo.body2" Class="user-footer-name">Admin</MudText>
-                        <MudText Typo="Typo.caption" Class="user-footer-role">Quan tri vien</MudText>
+                        <MudText Typo="Typo.caption" Class="user-footer-role">Quản trị viên</MudText>
                     </MudStack>
 
                     <MudIconButton Icon="@Icons.Material.Filled.Logout"
@@ -113,7 +113,7 @@
            Variant="DrawerVariant.Temporary"
            Class="help-drawer">
     <MudDrawerHeader Class="help-drawer-header">
-        <MudText Typo="Typo.h6" Class="help-drawer-title">Ho tro su dung</MudText>
+        <MudText Typo="Typo.h6" Class="help-drawer-title">Hỗ trợ sử dụng</MudText>
         <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.Close"
                        OnClick="@ToggleHelp"
@@ -124,31 +124,31 @@
     <MudDivider />
 
     <MudTabs Rounded="true" Centered="true" Class="help-tabs">
-        <MudTabPanel Text="Trang hien tai" Icon="@Icons.Material.Filled.Info">
+        <MudTabPanel Text="Trang hiện tại" Icon="@Icons.Material.Filled.Info">
             <MudContainer Class="pa-4">
                 <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Color="Color.Primary" Class="mb-2">@_pageTitle</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Day la trang @_pageTitle. Su dung cac chuc nang tren trang de quan ly du lieu lao dong nuoc ngoai.
+                    Đây là trang @_pageTitle. Sử dụng các chức năng trên trang để quản lý dữ liệu lao động nước ngoài.
                 </MudText>
                 <MudAlert Severity="Severity.Info" Dense="true" Class="mt-4">
-                    <strong>Meo:</strong> Nhan <strong>Ctrl+K</strong> de tim kiem nhanh tu bat ky trang nao.
+                    <strong>Mẹo:</strong> Nhấn <strong>Ctrl+K</strong> để tìm kiếm nhanh từ bất kỳ trang nào.
                 </MudAlert>
             </MudContainer>
         </MudTabPanel>
 
-        <MudTabPanel Text="Phim tat" Icon="@Icons.Material.Filled.Keyboard">
+        <MudTabPanel Text="Phím tắt" Icon="@Icons.Material.Filled.Keyboard">
             <MudSimpleTable Dense="true" Hover="true" Class="ma-4">
                 <thead>
                     <tr>
-                        <th>Chuc nang</th>
-                        <th>Phim tat</th>
+                        <th>Chức năng</th>
+                        <th>Phím tắt</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>Tim kiem nhanh</td><td><MudChip T="string" Size="Size.Small">Ctrl + K</MudChip></td></tr>
-                    <tr><td>Mo ho tro</td><td><MudChip T="string" Size="Size.Small">F1</MudChip></td></tr>
-                    <tr><td>Ve Dashboard</td><td><MudChip T="string" Size="Size.Small">Ctrl + H</MudChip></td></tr>
-                    <tr><td>Them moi</td><td><MudChip T="string" Size="Size.Small">Ctrl + N</MudChip></td></tr>
+                    <tr><td>Tìm kiếm nhanh</td><td><MudChip T="string" Size="Size.Small">Ctrl + K</MudChip></td></tr>
+                    <tr><td>Mở hỗ trợ</td><td><MudChip T="string" Size="Size.Small">F1</MudChip></td></tr>
+                    <tr><td>Về Dashboard</td><td><MudChip T="string" Size="Size.Small">Ctrl + H</MudChip></td></tr>
+                    <tr><td>Thêm mới</td><td><MudChip T="string" Size="Size.Small">Ctrl + N</MudChip></td></tr>
                 </tbody>
             </MudSimpleTable>
         </MudTabPanel>
@@ -156,14 +156,14 @@
         <MudTabPanel Text="FAQ" Icon="@Icons.Material.Filled.QuestionAnswer">
             <MudContainer Class="pa-4">
                 <MudExpansionPanels MultiExpansion="true">
-                    <MudExpansionPanel Text="Toi quen mat khau?" MaxHeight="200">
-                        <MudText Typo="Typo.body2">Lien he quan tri vien de dat lai. Vao Quan tri -> Tai khoan -> Dat lai mat khau.</MudText>
+                    <MudExpansionPanel Text="Tôi quên mật khẩu?" MaxHeight="200">
+                        <MudText Typo="Typo.body2">Liên hệ quản trị viên để đặt lại. Vào Quản trị → Tài khoản → Đặt lại mật khẩu.</MudText>
                     </MudExpansionPanel>
-                    <MudExpansionPanel Text="File Excel import bi loi?" MaxHeight="200">
-                        <MudText Typo="Typo.body2">Dam bao file dung dinh dang .xlsx. Dong dau tien phai la tieu de cot.</MudText>
+                    <MudExpansionPanel Text="File Excel import bị lỗi?" MaxHeight="200">
+                        <MudText Typo="Typo.body2">Đảm bảo file đúng định dạng .xlsx. Dòng đầu tiên phải là tiêu đề cột.</MudText>
                     </MudExpansionPanel>
-                    <MudExpansionPanel Text="Lien he ho tro ky thuat?" MaxHeight="200">
-                        <MudText Typo="Typo.body2">Email: support@irm.vn - DT: 0123.456.789</MudText>
+                    <MudExpansionPanel Text="Liên hệ hỗ trợ kỹ thuật?" MaxHeight="200">
+                        <MudText Typo="Typo.body2">Email: support@irm.vn · ĐT: 0123.456.789</MudText>
                     </MudExpansionPanel>
                 </MudExpansionPanels>
             </MudContainer>
@@ -181,12 +181,12 @@
     private static readonly Dictionary<string, string> _breadcrumbs = new()
     {
         { "Dashboard", "Dashboard" },
-        { "Quan ly Cong ty", "Quan ly du lieu / Cong ty" },
-        { "Quan ly Nhan vien", "Quan ly du lieu / Nhan vien" },
-        { "Import Excel", "Quan ly du lieu / Import Excel" },
-        { "Tim kiem", "Phan tich va Bao cao / Tim kiem" },
-        { "Bao cao", "Phan tich va Bao cao / Bao cao" },
-        { "Quan tri", "Quan tri" }
+        { "Quản lý Công ty", "Quản lý dữ liệu / Công ty" },
+        { "Quản lý Nhân viên", "Quản lý dữ liệu / Nhân viên" },
+        { "Import Excel", "Quản lý dữ liệu / Import Excel" },
+        { "Tìm kiếm", "Phân tích & Báo cáo / Tìm kiếm" },
+        { "Báo cáo", "Phân tích & Báo cáo / Báo cáo" },
+        { "Quản trị", "Quản trị" }
     };
 
     private MudTheme _theme = new()

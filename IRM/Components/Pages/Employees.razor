@@ -5,22 +5,22 @@
 @inject EmployeeService EmployeeSvc
 @inject CompanyService CompanySvc
 
-<PageTitle>Quan ly Nhan vien - IRM v2.0</PageTitle>
+<PageTitle>Quản lý Nhân viên - IRM v2.0</PageTitle>
 
 <div class="section-header">
-    <h3>Danh sach Nhan vien nuoc ngoai</h3>
+    <h3>👥 Danh sách Nhân viên nước ngoài</h3>
     <span class="section-meta">
         @if (_showExpiring)
         {
-            <text>Tong: @_employees.Count nhan vien sap het han</text>
+            <text>Tổng: @_employees.Count nhân viên sắp hết hạn</text>
         }
         else if (_selectedCompany != null)
         {
-            <text>@_selectedCompany.CompanyName - @_employees.Count nhan vien</text>
+            <text>@_selectedCompany.CompanyName - @_employees.Count nhân viên</text>
         }
         else
         {
-            <text>Tong: @_employees.Count nhan vien dang lam viec</text>
+            <text>Tổng: @_employees.Count nhân viên đang làm việc</text>
         }
     </span>
 </div>
@@ -30,7 +30,7 @@
         <MudAutocomplete T="Company"
                          Value="_selectedCompany"
                          ValueChanged="OnCompanyChanged"
-                         Placeholder="Tat ca cong ty"
+                         Placeholder="Tất cả công ty"
                          SearchFunc="SearchCompanyAsync"
                          ToStringFunc="@(c => c?.CompanyName ?? "")"
                          Variant="Variant.Outlined"
@@ -43,53 +43,53 @@
         <MudSelect T="string"
                    @bind-Value="_selectedNationality"
                    @bind-Value:after="ApplyFilters"
-                   Placeholder="Tat ca quoc tich"
+                   Placeholder="Tất cả quốc tịch"
                    Variant="Variant.Outlined"
                    Margin="Margin.Dense"
                    Clearable="true"
                    Style="min-width: 170px;">
-            <MudSelectItem T="string" Value="@("CN")">Trung Quoc</MudSelectItem>
-            <MudSelectItem T="string" Value="@("KR")">Han Quoc</MudSelectItem>
-            <MudSelectItem T="string" Value="@("JP")">Nhat Ban</MudSelectItem>
-            <MudSelectItem T="string" Value="@("TW")">Dai Loan</MudSelectItem>
-            <MudSelectItem T="string" Value="@("IN")">An Do</MudSelectItem>
-            <MudSelectItem T="string" Value="@("US")">Hoa Ky</MudSelectItem>
+            <MudSelectItem T="string" Value="@("CN")">Trung Quốc</MudSelectItem>
+            <MudSelectItem T="string" Value="@("KR")">Hàn Quốc</MudSelectItem>
+            <MudSelectItem T="string" Value="@("JP")">Nhật Bản</MudSelectItem>
+            <MudSelectItem T="string" Value="@("TW")">Đài Loan</MudSelectItem>
+            <MudSelectItem T="string" Value="@("IN")">Ấn Độ</MudSelectItem>
+            <MudSelectItem T="string" Value="@("US")">Hoa Kỳ</MudSelectItem>
         </MudSelect>
 
         <MudSelect T="string"
                    @bind-Value="_selectedPermit"
                    @bind-Value:after="ApplyFilters"
-                   Placeholder="Tat ca GPLD"
+                   Placeholder="Tất cả GPLĐ"
                    Variant="Variant.Outlined"
                    Margin="Margin.Dense"
                    Clearable="true"
                    Style="min-width: 170px;">
-            <MudSelectItem T="string" Value="@("1")">Da co GPLD</MudSelectItem>
-            <MudSelectItem T="string" Value="@("0")">Mien GPLD</MudSelectItem>
-            <MudSelectItem T="string" Value="@("2")">Chua co GPLD</MudSelectItem>
+            <MudSelectItem T="string" Value="@("1")">Đã có GPLĐ</MudSelectItem>
+            <MudSelectItem T="string" Value="@("0")">Miễn GPLĐ</MudSelectItem>
+            <MudSelectItem T="string" Value="@("2")">Chưa có GPLĐ</MudSelectItem>
         </MudSelect>
     </MudStack>
 
     <MudStack Row="true" Spacing="2">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Download" Color="Color.Default">
-            Xuat Excel
+            📥 Xuất Excel
         </MudButton>
         <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PersonAdd" Color="Color.Primary">
-            Them nhan vien
+            + Thêm nhân viên
         </MudButton>
     </MudStack>
 </div>
 
 <MudStack Row="true" Spacing="2" Class="mb-3">
     <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadAllAsync" Size="Size.Small">
-        Tat ca
+        Tất cả
     </MudButton>
     <MudButton Variant="@(_showExpiring ? Variant.Filled : Variant.Outlined)"
                Color="Color.Warning"
                OnClick="LoadExpiringAsync"
                Size="Size.Small"
                StartIcon="@Icons.Material.Filled.Warning">
-        Sap het han
+        Sắp hết hạn
     </MudButton>
     @if (_selectedCompany != null)
     {
@@ -120,8 +120,8 @@
                     <MudText Typo="Typo.body2">@(_employees.IndexOf(context.Item) + 1)</MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <PropertyColumn Property="x => x.StaffName" Title="Ho ten" Style="font-weight: 600;" />
-            <TemplateColumn Title="Quoc tich">
+            <PropertyColumn Property="x => x.StaffName" Title="Họ tên" Style="font-weight: 600;" />
+            <TemplateColumn Title="Quốc tịch">
                 <CellTemplate>
                     @{
                         var natName = context.Item.NationalityNav?.NationalityName ?? context.Item.Nationality;
@@ -130,7 +130,7 @@
                     <span class="tag @natTag">@natName</span>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Ho chieu">
+            <TemplateColumn Title="Hộ chiếu">
                 <CellTemplate>
                     <MudText Typo="Typo.body2"
                              Style="font-family: monospace; font-size: 12px; background: var(--mud-palette-background); padding: 2px 8px; border-radius: 4px;">
@@ -138,17 +138,17 @@
                     </MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Cong ty">
+            <TemplateColumn Title="Công ty">
                 <CellTemplate>
                     <MudText Typo="Typo.body2">@(context.Item.Company?.CompanyName)</MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Nghe nghiep">
+            <TemplateColumn Title="Nghề nghiệp">
                 <CellTemplate>
                     <MudText Typo="Typo.body2">@(context.Item.Career?.CareerName)</MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="GPLD">
+            <TemplateColumn Title="GPLĐ">
                 <CellTemplate>
                     @{
                         var wpTag = context.Item.WorkPermit switch
@@ -161,12 +161,12 @@
                     <span class="tag @wpTag">@context.Item.WorkPermitString</span>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Han tam tru" SortBy="@(x => x.TemporaryStay)">
+            <TemplateColumn Title="Hạn tạm trú" SortBy="@(x => x.TemporaryStay)">
                 <CellTemplate>
                     <MudText Typo="Typo.body2">@(context.Item.TemporaryStay?.ToString("dd/MM/yyyy") ?? "-")</MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Con lai" SortBy="@(x => x.DaysUntilExpiry ?? 9999)">
+            <TemplateColumn Title="Còn lại" SortBy="@(x => x.DaysUntilExpiry ?? 9999)">
                 <CellTemplate>
                     @{
                         var days = context.Item.DaysUntilExpiry ?? 999;
@@ -174,11 +174,11 @@
                                         days <= 30 ? "color: var(--orange); font-weight: 700;" : "";
                     }
                     <MudText Typo="Typo.body2" Style="@daysStyle">
-                        @(days < 999 ? $"{days} ngay" : "-")
+                        @(days < 999 ? $"{days} ngày" : "-")
                     </MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Thao tac" Sortable="false" Filterable="false">
+            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
                 <CellTemplate>
                     <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" />
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning" />
@@ -194,7 +194,7 @@ else if (!_loading)
 {
     <MudPaper Elevation="0" Class="pa-8 rounded-lg text-center empty-state-card">
         <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-2">
-            Chon cong ty hoac nhan "Sap het han" de xem danh sach
+            Chọn công ty hoặc nhấn "Sắp hết hạn" để xem danh sách
         </MudText>
     </MudPaper>
 }

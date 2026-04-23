@@ -79,7 +79,8 @@ else if (_error != null)
 
 <MudGrid Spacing="3" Class="mb-4">
     <MudItem xs="12" md="7">
-        <div class="chart-card">
+        <div class="chart-card chart-card-action" role="button" tabindex="0"
+             @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
             <div class="chart-header">
                 <h4>Lao động nước ngoài theo quốc tịch</h4>
                 <MudSelect T="string" Value="@_chartYear" Variant="Variant.Outlined" Margin="Margin.Dense"
@@ -94,7 +95,8 @@ else if (_error != null)
         </div>
     </MudItem>
     <MudItem xs="12" md="5">
-        <div class="chart-card">
+        <div class="chart-card chart-card-action" role="button" tabindex="0"
+             @onclick='() => GoTo("/reports")' @onkeydown='e => OnCardKeyDown(e, "/reports")'>
             <div class="chart-header">
                 <h4>Tỷ lệ giấy phép lao động</h4>
             </div>
@@ -107,7 +109,8 @@ else if (_error != null)
 
 <MudGrid Spacing="3" Class="mb-4">
     <MudItem xs="12" md="7">
-        <div class="chart-card">
+        <div class="chart-card chart-card-action" role="button" tabindex="0"
+             @onclick='() => GoTo("/reports")' @onkeydown='e => OnCardKeyDown(e, "/reports")'>
             <div class="chart-header">
                 <h4>Xu hướng hết hạn tạm trú (12 tháng)</h4>
             </div>
@@ -117,7 +120,8 @@ else if (_error != null)
         </div>
     </MudItem>
     <MudItem xs="12" md="5">
-        <div class="chart-card">
+        <div class="chart-card chart-card-action" role="button" tabindex="0"
+             @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
             <div class="chart-header">
                 <h4>⚠ Cảnh báo - Sắp hết hạn</h4>
                 <MudLink Href="/employees" Typo="Typo.caption" Style="font-weight: 600;">Xem tất cả →</MudLink>

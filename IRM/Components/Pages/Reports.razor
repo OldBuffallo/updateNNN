@@ -1,26 +1,26 @@
 @page "/reports"
 
-<PageTitle>Bao cao - IRM v2.0</PageTitle>
+<PageTitle>Báo cáo - IRM v2.0</PageTitle>
 
 <div class="section-header" style="border-bottom:none; padding-bottom:0; margin-bottom:8px;">
-    <h3>Tao bao cao tuy chinh</h3>
+    <h3>Tạo báo cáo tùy chỉnh</h3>
 </div>
 
 <div class="report-builder-grid">
     <div class="report-builder-sidebar">
-        <MudText Typo="Typo.subtitle1" Class="mb-4" Style="font-weight: 700;">Cau hinh bao cao</MudText>
+        <MudText Typo="Typo.subtitle1" Class="mb-4" Style="font-weight: 700;">Cấu hình báo cáo</MudText>
 
         <div class="mb-4">
-            <span class="builder-section-title">Nguon du lieu</span>
+            <span class="builder-section-title">Nguồn dữ liệu</span>
             <MudSelect T="string" Variant="Variant.Outlined" Value="@("all")" FullWidth="true">
-                <MudSelectItem Value="@("all")">Nhan vien + Cong ty</MudSelectItem>
-                <MudSelectItem Value="@("company")">Chi Cong ty</MudSelectItem>
-                <MudSelectItem Value="@("employee")">Chi Nhan vien</MudSelectItem>
+                <MudSelectItem Value="@("all")">Nhân viên + Công ty</MudSelectItem>
+                <MudSelectItem Value="@("company")">Chỉ Công ty</MudSelectItem>
+                <MudSelectItem Value="@("employee")">Chỉ Nhân viên</MudSelectItem>
             </MudSelect>
         </div>
 
         <div class="mb-4">
-            <span class="builder-section-title">Chon cot hien thi</span>
+            <span class="builder-section-title">Chọn cột hiển thị</span>
             @foreach (var col in _columns)
             {
                 <MudCheckBox T="bool"
@@ -34,11 +34,11 @@
         <MudDivider Class="my-4" />
 
         <div class="mb-4">
-            <span class="builder-section-title">Nhom theo</span>
+            <span class="builder-section-title">Nhóm theo</span>
             <MudSelect T="string" Variant="Variant.Outlined" Value="@("company")" FullWidth="true">
-                <MudSelectItem Value="@("company")">Cong ty</MudSelectItem>
-                <MudSelectItem Value="@("nationality")">Quoc tich</MudSelectItem>
-                <MudSelectItem Value="@("field")">Linh vuc</MudSelectItem>
+                <MudSelectItem Value="@("company")">Công ty</MudSelectItem>
+                <MudSelectItem Value="@("nationality")">Quốc tịch</MudSelectItem>
+                <MudSelectItem Value="@("field")">Lĩnh vực</MudSelectItem>
             </MudSelect>
         </div>
 
@@ -46,52 +46,52 @@
 
         <MudStack Spacing="1">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" StartIcon="@Icons.Material.Filled.Download">
-                Xuat Excel
+                Xuất Excel
             </MudButton>
             <MudButton Variant="Variant.Outlined" Color="Color.Default" FullWidth="true" StartIcon="@Icons.Material.Filled.PictureAsPdf">
-                Xuat PDF
+                Xuất PDF
             </MudButton>
             <MudButton Variant="Variant.Text" Color="Color.Primary" FullWidth="true" StartIcon="@Icons.Material.Filled.Save">
-                Luu Template
+                Lưu Template
             </MudButton>
         </MudStack>
     </div>
 
     <div class="report-builder-preview">
         <div class="chart-header">
-            <h3>Xem truoc: BC NLD sap het han tam tru</h3>
-            <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">23 ban ghi</MudChip>
+            <h3>Xem trước: BC NLĐ sắp hết hạn tạm trú</h3>
+            <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">23 bản ghi</MudChip>
         </div>
 
         <MudSimpleTable Dense="true" Hover="true" Striped="true">
             <thead>
                 <tr>
                     <th>STT</th>
-                    <th>Cong ty</th>
-                    <th>Ho ten</th>
-                    <th>Quoc tich</th>
-                    <th>Ho chieu</th>
-                    <th>Nghe nghiep</th>
-                    <th>GPLD</th>
-                    <th>Han TT</th>
-                    <th>Con lai</th>
+                    <th>Công ty</th>
+                    <th>Họ tên</th>
+                    <th>Quốc tịch</th>
+                    <th>Hộ chiếu</th>
+                    <th>Nghề nghiệp</th>
+                    <th>GPLĐ</th>
+                    <th>Hạn TT</th>
+                    <th>Còn lại</th>
                 </tr>
             </thead>
             <tbody>
                 <tr class="group-header">
-                    <td colspan="9"><strong>🏢 Cty TNHH Samsung Electronics VN</strong></td>
+                    <td colspan="9"><strong>Cty TNHH Samsung Electronics VN</strong></td>
                 </tr>
-                <tr><td>1</td><td></td><td>Zhang Wei</td><td>Trung Quoc</td><td>E12345678</td><td>Ky su</td><td><span class="tag tag-green">Co GPLD</span></td><td>18/04/2026</td><td class="text-danger"><strong>3 ngay</strong></td></tr>
-                <tr><td>2</td><td></td><td>Kim Min-jun</td><td>Han Quoc</td><td>M55667788</td><td>Quan ly</td><td><span class="tag tag-green">Co GPLD</span></td><td>20/04/2026</td><td class="text-danger"><strong>5 ngay</strong></td></tr>
+                <tr><td>1</td><td></td><td>Zhang Wei</td><td>Trung Quốc</td><td>E12345678</td><td>Kỹ sư</td><td><span class="tag tag-green">Có GPLĐ</span></td><td>18/04/2026</td><td class="text-danger"><strong>3 ngày</strong></td></tr>
+                <tr><td>2</td><td></td><td>Kim Min-jun</td><td>Hàn Quốc</td><td>M55667788</td><td>Quản lý</td><td><span class="tag tag-green">Có GPLĐ</span></td><td>20/04/2026</td><td class="text-danger"><strong>5 ngày</strong></td></tr>
                 <tr class="group-header">
-                    <td colspan="9"><strong>🏢 Cty CP Hyundai Aluminum Vina</strong></td>
+                    <td colspan="9"><strong>Cty CP Hyundai Aluminum Vina</strong></td>
                 </tr>
-                <tr><td>3</td><td></td><td>Park Ji-hoon</td><td>Han Quoc</td><td>M99887766</td><td>Ky thuat</td><td><span class="tag tag-green">Co GPLD</span></td><td>03/05/2026</td><td class="text-warning"><strong>18 ngay</strong></td></tr>
-                <tr><td>4</td><td></td><td>Wang Li</td><td>Trung Quoc</td><td>E98765432</td><td>Quan ly</td><td><span class="tag tag-green">Co GPLD</span></td><td>10/05/2026</td><td class="text-info"><strong>25 ngay</strong></td></tr>
+                <tr><td>3</td><td></td><td>Park Ji-hoon</td><td>Hàn Quốc</td><td>M99887766</td><td>Kỹ thuật</td><td><span class="tag tag-green">Có GPLĐ</span></td><td>03/05/2026</td><td class="text-warning"><strong>18 ngày</strong></td></tr>
+                <tr><td>4</td><td></td><td>Wang Li</td><td>Trung Quốc</td><td>E98765432</td><td>Quản lý</td><td><span class="tag tag-green">Có GPLĐ</span></td><td>10/05/2026</td><td class="text-info"><strong>25 ngày</strong></td></tr>
             </tbody>
         </MudSimpleTable>
 
-        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mt-8 mb-3">Template da luu</MudText>
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mt-8 mb-3">Template đã lưu</MudText>
         <MudStack Spacing="2">
             @foreach (var tpl in _templates)
             {
@@ -101,8 +101,8 @@
                         <MudText Typo="Typo.body2" Class="template-item-title">@tpl.Name</MudText>
                         <MudText Typo="Typo.caption" Color="Color.Secondary">@tpl.Meta</MudText>
                     </div>
-                    <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Primary">Chay</MudButton>
-                    <MudButton Variant="Variant.Outlined" Size="Size.Small">Sua</MudButton>
+                    <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Primary">Chạy</MudButton>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small">Sửa</MudButton>
                 </div>
             }
         </MudStack>
@@ -118,24 +118,24 @@
 
     private readonly List<ColumnOption> _columns = new()
     {
-        new() { Name = "Cong ty", Selected = true },
-        new() { Name = "Ho ten", Selected = true },
-        new() { Name = "Quoc tich", Selected = true },
-        new() { Name = "Ho chieu", Selected = true },
-        new() { Name = "Nghe nghiep", Selected = true },
-        new() { Name = "Loai GPLD", Selected = true },
-        new() { Name = "Han tam tru", Selected = true },
-        new() { Name = "Gioi tinh", Selected = false },
-        new() { Name = "Ngay sinh", Selected = false },
-        new() { Name = "Con lai (ngay)", Selected = true }
+        new() { Name = "Công ty", Selected = true },
+        new() { Name = "Họ tên", Selected = true },
+        new() { Name = "Quốc tịch", Selected = true },
+        new() { Name = "Hộ chiếu", Selected = true },
+        new() { Name = "Nghề nghiệp", Selected = true },
+        new() { Name = "Loại GPLĐ", Selected = true },
+        new() { Name = "Hạn tạm trú", Selected = true },
+        new() { Name = "Giới tính", Selected = false },
+        new() { Name = "Ngày sinh", Selected = false },
+        new() { Name = "Còn lại (ngày)", Selected = true }
     };
 
     private record TemplateItem(string Name, string Meta);
 
     private readonly List<TemplateItem> _templates = new()
     {
-        new("BC NLD sap het han tam tru", "23 ban ghi · Hom nay"),
-        new("BC NLD theo quoc tich", "1,245 ban ghi · 15/04"),
-        new("BC thong ke theo linh vuc", "156 cong ty · 10/04")
+        new("BC NLĐ sắp hết hạn tạm trú", "23 bản ghi · Hôm nay"),
+        new("BC NLĐ theo quốc tịch", "1,245 bản ghi · 15/04"),
+        new("BC thống kê theo lĩnh vực", "156 công ty · 10/04")
     };
 }

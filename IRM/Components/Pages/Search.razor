@@ -5,19 +5,19 @@
 @using IRM.Data.Models
 @inject SearchService SearchSvc
 
-<PageTitle>Tim kiem - IRM v2.0</PageTitle>
+<PageTitle>Tìm kiếm - IRM v2.0</PageTitle>
 
 <div class="search-hero">
-    <MudText Typo="Typo.h4" Class="search-hero-title">Tim kiem toan cuc</MudText>
+    <MudText Typo="Typo.h4" Class="search-hero-title">Tìm kiếm toàn cục</MudText>
     <MudText Typo="Typo.body2" Class="search-hero-subtitle">
-        Nhap ten, ho chieu, cong ty, quoc tich... de tim tren moi truong du lieu
+        Nhập tên, hộ chiếu, công ty, quốc tịch... để tìm trên mọi trường dữ liệu
     </MudText>
 </div>
 
 <div class="search-bar-large">
     <MudTextField T="string"
                   @bind-Value="_searchQuery"
-                  Placeholder="Nhap tu khoa tim kiem..."
+                  Placeholder="Nhập từ khóa tìm kiếm..."
                   Variant="Variant.Outlined"
                   Adornment="Adornment.Start"
                   AdornmentIcon="@Icons.Material.Filled.Search"
@@ -34,7 +34,7 @@
         }
         else
         {
-            <text>Tim kiem</text>
+            <text>Tìm kiếm</text>
         }
     </MudButton>
 </div>
@@ -42,17 +42,17 @@
 @if (_hasSearched && _result != null)
 {
     <div class="search-results-meta">
-        Tim thay <strong>@_result.TotalCount</strong> ket qua cho "<em>@_result.Keyword</em>"
+        Tìm thấy <strong>@_result.TotalCount</strong> kết quả cho "<em>@_result.Keyword</em>"
     </div>
 
     <div class="search-stat-cards">
         <div class="stat-mini-card">
             <span class="stat-mini-num">@_result.Employees.Count</span>
-            <span class="stat-mini-label">Nhan vien</span>
+            <span class="stat-mini-label">Nhân viên</span>
         </div>
         <div class="stat-mini-card">
             <span class="stat-mini-num">@_result.Companies.Count</span>
-            <span class="stat-mini-label">Cong ty</span>
+            <span class="stat-mini-label">Công ty</span>
         </div>
     </div>
 
@@ -64,7 +64,7 @@
                 <h4>@emp.StaffName - @(emp.NationalityNav?.NationalityName ?? emp.Nationality)</h4>
                 <p>
                     HC: @emp.Passport · @emp.Company?.CompanyName · @(emp.Career?.CareerName ?? "") ·
-                    @emp.WorkPermitString · Han TT: @(emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "-")
+                    @emp.WorkPermitString · Hạn TT: @(emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "-")
                 </p>
             </div>
             <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Xem →</MudButton>

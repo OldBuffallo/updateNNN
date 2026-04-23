@@ -1,23 +1,22 @@
 @page "/admin"
 
 @using IRM.Services
-@using IRM.Data.Models
 @inject AuthService AuthSvc
 @inject AuditService AuditSvc
 @inject CatalogService CatalogSvc
 
-<PageTitle>Quan tri - IRM v2.0</PageTitle>
+<PageTitle>Quản trị - IRM v2.0</PageTitle>
 
 <div class="section-header">
-    <h3>Quan tri he thong</h3>
-    <span class="section-meta">Quan ly danh muc va cau hinh he thong</span>
+    <h3>Quản trị hệ thống</h3>
+    <span class="section-meta">Quản lý danh mục và cấu hình hệ thống</span>
 </div>
 
 <div class="admin-grid">
     @foreach (var card in _adminCards)
     {
         <div class="admin-card">
-            <div class="admin-icon">@card.Icon</div>
+            <MudIcon Icon="@card.Icon" Class="admin-icon" />
             <MudText Typo="Typo.subtitle1" Style="font-weight:700;">@card.Title</MudText>
             <MudText Typo="Typo.caption" Color="Color.Secondary">@card.Description</MudText>
         </div>
@@ -43,28 +42,28 @@
 
             _adminCards = new()
             {
-                new("👤", "Tai khoan", $"{accounts.Count} tai khoan hoat dong"),
-                new("🏭", "Linh vuc", $"{fields.Count} linh vuc"),
-                new("💼", "Nganh nghe", $"{careers.Count} nganh"),
-                new("🌍", "Quoc tich", $"{nationalities.Count} quoc tich"),
-                new("🗺️", "Quan / Huyen", $"{districts.Count} quan huyen"),
-                new("📍", "Phuong / Xa", $"{wards.Count} phuong xa"),
-                new("📜", "Nhat ky he thong", "Audit Log"),
-                new("📤", "Lich su Import", "Import History")
+                new(Icons.Material.Filled.ManageAccounts, "Tài khoản", $"{accounts.Count} tài khoản hoạt động"),
+                new(Icons.Material.Filled.Business, "Lĩnh vực", $"{fields.Count} lĩnh vực"),
+                new(Icons.Material.Filled.Work, "Ngành nghề", $"{careers.Count} ngành"),
+                new(Icons.Material.Filled.Public, "Quốc tịch", $"{nationalities.Count} quốc tịch"),
+                new(Icons.Material.Filled.Map, "Quận / Huyện", $"{districts.Count} quận huyện"),
+                new(Icons.Material.Filled.Place, "Phường / Xã", $"{wards.Count} phường xã"),
+                new(Icons.Material.Filled.ReceiptLong, "Nhật ký hệ thống", "Audit Log"),
+                new(Icons.Material.Filled.CloudUpload, "Lịch sử Import", "Import History")
             };
         }
         catch
         {
             _adminCards = new()
             {
-                new("👤", "Tai khoan", "Chua ket noi DB"),
-                new("🏭", "Linh vuc", "Chua ket noi DB"),
-                new("💼", "Nganh nghe", "Chua ket noi DB"),
-                new("🌍", "Quoc tich", "Chua ket noi DB"),
-                new("🗺️", "Quan / Huyen", "Chua ket noi DB"),
-                new("📍", "Phuong / Xa", "Chua ket noi DB"),
-                new("📜", "Nhat ky", "Chua ket noi DB"),
-                new("📤", "Import", "Chua ket noi DB")
+                new(Icons.Material.Filled.ManageAccounts, "Tài khoản", "Chưa kết nối DB"),
+                new(Icons.Material.Filled.Business, "Lĩnh vực", "Chưa kết nối DB"),
+                new(Icons.Material.Filled.Work, "Ngành nghề", "Chưa kết nối DB"),
+                new(Icons.Material.Filled.Public, "Quốc tịch", "Chưa kết nối DB"),
+                new(Icons.Material.Filled.Map, "Quận / Huyện", "Chưa kết nối DB"),
+                new(Icons.Material.Filled.Place, "Phường / Xã", "Chưa kết nối DB"),
+                new(Icons.Material.Filled.ReceiptLong, "Nhật ký", "Chưa kết nối DB"),
+                new(Icons.Material.Filled.CloudUpload, "Import", "Chưa kết nối DB")
             };
         }
     }
