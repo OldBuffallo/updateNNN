@@ -12,9 +12,21 @@ public class EmployeeService
     private readonly IrmDbContext _db;
     public EmployeeService(IrmDbContext db) => _db = db;
 
+    public async Task<List<Employee>> GetAllActiveAsync()
+    {
+        return await _db.Employees
+            .Include(e => e.Company)
+            .Include(e => e.Career)
+            .Include(e => e.NationalityNav)
+            .Where(e => e.Hidden_flag == 0 && e.WorkingStatus == 0)
+            .OrderBy(e => e.StaffName)
+            .ToListAsync();
+    }
+
     public async Task<List<Employee>> GetByCompanyAsync(int companyId, bool includeHidden = false)
     {
         var query = _db.Employees
+            .Include(e => e.Company)
             .Include(e => e.Career)
             .Include(e => e.NationalityNav)
             .Where(e => e.IDCompany == companyId);

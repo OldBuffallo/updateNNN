@@ -5,71 +5,97 @@
 @inject EmployeeService EmployeeSvc
 @inject CompanyService CompanySvc
 
-<PageTitle>Quản lý Nhân viên — IRM v2.0</PageTitle>
+<PageTitle>Quan ly Nhan vien - IRM v2.0</PageTitle>
 
-@* ── Section Header ── *@
 <div class="section-header">
-    <h3>👥 Danh sách Nhân viên nước ngoài</h3>
+    <h3>Danh sach Nhan vien nuoc ngoai</h3>
     <span class="section-meta">
         @if (_showExpiring)
         {
-            <text>Tổng: @_employees.Count nhân viên sắp hết hạn</text>
+            <text>Tong: @_employees.Count nhan vien sap het han</text>
         }
         else if (_selectedCompany != null)
         {
-            <text>@_selectedCompany.CompanyName — @_employees.Count nhân viên</text>
+            <text>@_selectedCompany.CompanyName - @_employees.Count nhan vien</text>
         }
         else
         {
-            <text>Tổng: @_employees.Count nhân viên đang làm việc</text>
+            <text>Tong: @_employees.Count nhan vien dang lam viec</text>
         }
     </span>
 </div>
 
-@* ── Actions Bar ── *@
 <div class="page-actions-bar">
     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-        <MudAutocomplete T="Company" @bind-Value="_selectedCompany" Placeholder="Tất cả công ty"
-                         SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")"
-                         Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
-                         Style="min-width: 300px;" ResetValueOnEmptyText="true"
+        <MudAutocomplete T="Company"
+                         Value="_selectedCompany"
+                         ValueChanged="OnCompanyChanged"
+                         Placeholder="Tat ca cong ty"
+                         SearchFunc="SearchCompanyAsync"
+                         ToStringFunc="@(c => c?.CompanyName ?? "")"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense"
+                         Dense="true"
+                         Style="min-width: 300px;"
+                         ResetValueOnEmptyText="true"
                          Immediate="true" />
-        <MudSelect T="string" @bind-Value="_selectedNationality" Placeholder="Tất cả quốc tịch"
-                   Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true"
-                   Style="min-width: 160px;">
-            <MudSelectItem T="string" Value="@("CN")">Trung Quốc</MudSelectItem>
-            <MudSelectItem T="string" Value="@("KR")">Hàn Quốc</MudSelectItem>
-            <MudSelectItem T="string" Value="@("JP")">Nhật Bản</MudSelectItem>
-            <MudSelectItem T="string" Value="@("TW")">Đài Loan</MudSelectItem>
-            <MudSelectItem T="string" Value="@("IN")">Ấn Độ</MudSelectItem>
+
+        <MudSelect T="string"
+                   @bind-Value="_selectedNationality"
+                   @bind-Value:after="ApplyFilters"
+                   Placeholder="Tat ca quoc tich"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Clearable="true"
+                   Style="min-width: 170px;">
+            <MudSelectItem T="string" Value="@("CN")">Trung Quoc</MudSelectItem>
+            <MudSelectItem T="string" Value="@("KR")">Han Quoc</MudSelectItem>
+            <MudSelectItem T="string" Value="@("JP")">Nhat Ban</MudSelectItem>
+            <MudSelectItem T="string" Value="@("TW")">Dai Loan</MudSelectItem>
+            <MudSelectItem T="string" Value="@("IN")">An Do</MudSelectItem>
+            <MudSelectItem T="string" Value="@("US")">Hoa Ky</MudSelectItem>
         </MudSelect>
-        <MudSelect T="string" @bind-Value="_selectedPermit" Placeholder="Tất cả GPLĐ"
-                   Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true"
-                   Style="min-width: 150px;">
-            <MudSelectItem T="string" Value="@("1")">Đã có GPLĐ</MudSelectItem>
-            <MudSelectItem T="string" Value="@("2")">Miễn GPLĐ</MudSelectItem>
-            <MudSelectItem T="string" Value="@("0")">Chưa có GPLĐ</MudSelectItem>
+
+        <MudSelect T="string"
+                   @bind-Value="_selectedPermit"
+                   @bind-Value:after="ApplyFilters"
+                   Placeholder="Tat ca GPLD"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Clearable="true"
+                   Style="min-width: 170px;">
+            <MudSelectItem T="string" Value="@("1")">Da co GPLD</MudSelectItem>
+            <MudSelectItem T="string" Value="@("0")">Mien GPLD</MudSelectItem>
+            <MudSelectItem T="string" Value="@("2")">Chua co GPLD</MudSelectItem>
         </MudSelect>
     </MudStack>
+
     <MudStack Row="true" Spacing="2">
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Download"
-                   Color="Color.Default">📥 Xuất Excel</MudButton>
-        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PersonAdd"
-                   Color="Color.Primary">+ Thêm nhân viên</MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Download" Color="Color.Default">
+            Xuat Excel
+        </MudButton>
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PersonAdd" Color="Color.Primary">
+            Them nhan vien
+        </MudButton>
     </MudStack>
 </div>
 
-@* ── Quick Actions ── *@
 <MudStack Row="true" Spacing="2" Class="mb-3">
-    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadAllAsync"
-               Size="Size.Small">Tất cả</MudButton>
-    <MudButton Variant="@(_showExpiring ? Variant.Filled : Variant.Outlined)" Color="Color.Warning"
-               OnClick="LoadExpiringAsync" Size="Size.Small"
-               StartIcon="@Icons.Material.Filled.Warning">Sắp hết hạn</MudButton>
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadAllAsync" Size="Size.Small">
+        Tat ca
+    </MudButton>
+    <MudButton Variant="@(_showExpiring ? Variant.Filled : Variant.Outlined)"
+               Color="Color.Warning"
+               OnClick="LoadExpiringAsync"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Filled.Warning">
+        Sap het han
+    </MudButton>
     @if (_selectedCompany != null)
     {
-        <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadEmployeesAsync"
-                   Size="Size.Small">@_selectedCompany.CompanyName</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadEmployeesByCompanyAsync" Size="Size.Small">
+            @_selectedCompany.CompanyName
+        </MudButton>
     }
 </MudStack>
 
@@ -80,17 +106,22 @@
 
 @if (_employees.Any())
 {
-    <MudDataGrid Items="@_employees" T="Employee" Filterable="true" Sortable="true"
-                 Dense="true" Hover="true" Striped="false"
-                 RowsPerPage="10" Style="border: 1px solid var(--mud-palette-divider); border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+    <MudDataGrid Items="@_employees"
+                 T="Employee"
+                 Filterable="true"
+                 Sortable="true"
+                 Dense="true"
+                 Hover="true"
+                 Striped="false"
+                 RowsPerPage="10">
         <Columns>
             <TemplateColumn Title="STT" Sortable="false" Filterable="false">
                 <CellTemplate>
                     <MudText Typo="Typo.body2">@(_employees.IndexOf(context.Item) + 1)</MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <PropertyColumn Property="x => x.StaffName" Title="Họ tên" Style="font-weight: 600;" />
-            <TemplateColumn Title="Quốc tịch">
+            <PropertyColumn Property="x => x.StaffName" Title="Ho ten" Style="font-weight: 600;" />
+            <TemplateColumn Title="Quoc tich">
                 <CellTemplate>
                     @{
                         var natName = context.Item.NationalityNav?.NationalityName ?? context.Item.Nationality;
@@ -99,22 +130,25 @@
                     <span class="tag @natTag">@natName</span>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Hộ chiếu">
+            <TemplateColumn Title="Ho chieu">
                 <CellTemplate>
-                    <MudText Typo="Typo.body2" Style="font-family: monospace; font-size: 12px; background: var(--mud-palette-background); padding: 2px 8px; border-radius: 4px;">@context.Item.Passport</MudText>
+                    <MudText Typo="Typo.body2"
+                             Style="font-family: monospace; font-size: 12px; background: var(--mud-palette-background); padding: 2px 8px; border-radius: 4px;">
+                        @context.Item.Passport
+                    </MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Công ty">
+            <TemplateColumn Title="Cong ty">
                 <CellTemplate>
                     <MudText Typo="Typo.body2">@(context.Item.Company?.CompanyName)</MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Nghề nghiệp">
+            <TemplateColumn Title="Nghe nghiep">
                 <CellTemplate>
                     <MudText Typo="Typo.body2">@(context.Item.Career?.CareerName)</MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="GPLĐ">
+            <TemplateColumn Title="GPLD">
                 <CellTemplate>
                     @{
                         var wpTag = context.Item.WorkPermit switch
@@ -127,74 +161,27 @@
                     <span class="tag @wpTag">@context.Item.WorkPermitString</span>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Thăm thân" SortBy="@(x => x.FamilyVisit)">
+            <TemplateColumn Title="Han tam tru" SortBy="@(x => x.TemporaryStay)">
                 <CellTemplate>
-                    @if (context.Item.HasFamilyVisit)
-                    {
-                        var fvDays = context.Item.DaysUntilFamilyVisitExpiry;
-                        var fvTag = fvDays.HasValue && fvDays <= 30 ? "tag-orange" : "tag-green";
-                        <MudTooltip>
-                            <ChildContent>
-                                <span class="tag @fvTag">Có</span>
-                            </ChildContent>
-                            <TooltipContent>
-                                <MudStack Spacing="1">
-                                    <MudText Typo="Typo.caption" Style="font-weight: 700; color: white;">Thông tin thăm thân</MudText>
-                                    @if (!string.IsNullOrEmpty(context.Item.FamilyVisitRelativeName))
-                                    {
-                                        <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.8);">Người thân: @context.Item.FamilyVisitRelativeName</MudText>
-                                    }
-                                    @if (!string.IsNullOrEmpty(context.Item.FamilyVisitRelationship))
-                                    {
-                                        <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.8);">Quan hệ: @context.Item.FamilyVisitRelationship</MudText>
-                                    }
-                                    @if (context.Item.FamilyVisitStartDate.HasValue)
-                                    {
-                                        <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.8);">Từ: @context.Item.FamilyVisitStartDate?.ToString("dd/MM/yyyy")</MudText>
-                                    }
-                                    @if (context.Item.FamilyVisitEndDate.HasValue)
-                                    {
-                                        <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.8);">Đến: @context.Item.FamilyVisitEndDate?.ToString("dd/MM/yyyy")
-                                            @if (fvDays.HasValue)
-                                            {
-                                                <text> (còn @fvDays ngày)</text>
-                                            }
-                                        </MudText>
-                                    }
-                                </MudStack>
-                            </TooltipContent>
-                        </MudTooltip>
-                    }
-                    else
-                    {
-                        <MudText Typo="Typo.body2" Color="Color.Secondary" Style="font-size: 12px;">—</MudText>
-                    }
+                    <MudText Typo="Typo.body2">@(context.Item.TemporaryStay?.ToString("dd/MM/yyyy") ?? "-")</MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Hạn tạm trú" SortBy="@(x => x.TemporaryStay)">
-                <CellTemplate>
-                    <MudText Typo="Typo.body2">@(context.Item.TemporaryStay?.ToString("dd/MM/yyyy") ?? "—")</MudText>
-                </CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn Title="Còn lại" SortBy="@(x => x.DaysUntilExpiry ?? 9999)">
+            <TemplateColumn Title="Con lai" SortBy="@(x => x.DaysUntilExpiry ?? 9999)">
                 <CellTemplate>
                     @{
                         var days = context.Item.DaysUntilExpiry ?? 999;
-                        var daysClass = days <= 7 ? "text-danger" : days <= 30 ? "text-warning" : "";
                         var daysStyle = days <= 7 ? "color: var(--red); font-weight: 700;" :
                                         days <= 30 ? "color: var(--orange); font-weight: 700;" : "";
                     }
                     <MudText Typo="Typo.body2" Style="@daysStyle">
-                        @(days < 999 ? $"{days} ngày" : "—")
+                        @(days < 999 ? $"{days} ngay" : "-")
                     </MudText>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
+            <TemplateColumn Title="Thao tac" Sortable="false" Filterable="false">
                 <CellTemplate>
-                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary"
-                                   Style="border: 1px solid var(--mud-palette-divider); border-radius: 6px; margin: 0 1px;" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning"
-                                   Style="border: 1px solid var(--mud-palette-divider); border-radius: 6px; margin: 0 1px;" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning" />
                 </CellTemplate>
             </TemplateColumn>
         </Columns>
@@ -205,15 +192,15 @@
 }
 else if (!_loading)
 {
-    <MudPaper Elevation="0" Class="pa-8 rounded-lg text-center"
-              Style="border: 1px solid var(--mud-palette-divider);">
+    <MudPaper Elevation="0" Class="pa-8 rounded-lg text-center empty-state-card">
         <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-2">
-            Chọn công ty hoặc nhấn "Sắp hết hạn" để xem danh sách
+            Chon cong ty hoac nhan "Sap het han" de xem danh sach
         </MudText>
     </MudPaper>
 }
 
 @code {
+    private List<Employee> _allEmployees = new();
     private List<Employee> _employees = new();
     private Company? _selectedCompany;
     private string? _selectedNationality;
@@ -231,32 +218,102 @@ else if (!_loading)
         return await CompanySvc.GetAllAsync(value);
     }
 
-    private async Task LoadAllAsync()
+    private async Task OnCompanyChanged(Company? company)
     {
-        _loading = true; _showExpiring = false;
-        try { _employees = await EmployeeSvc.GetExpiringAsync(99999); }
-        catch { _employees = new(); }
-        finally { _loading = false; }
+        _selectedCompany = company;
+        if (_selectedCompany == null)
+        {
+            await LoadAllAsync();
+            return;
+        }
+
+        await LoadEmployeesByCompanyAsync();
     }
 
-    private async Task LoadEmployeesAsync()
+    private async Task LoadAllAsync()
     {
-        if (_selectedCompany == null) return;
-        _loading = true; _showExpiring = false;
-        try { _employees = await EmployeeSvc.GetByCompanyAsync(_selectedCompany.IDCompany); }
-        catch { _employees = new(); }
-        finally { _loading = false; }
+        _loading = true;
+        _showExpiring = false;
+        try
+        {
+            _allEmployees = await EmployeeSvc.GetAllActiveAsync();
+            ApplyFilters();
+        }
+        catch
+        {
+            _allEmployees = new();
+            _employees = new();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadEmployeesByCompanyAsync()
+    {
+        if (_selectedCompany == null)
+        {
+            await LoadAllAsync();
+            return;
+        }
+
+        _loading = true;
+        _showExpiring = false;
+        try
+        {
+            _allEmployees = await EmployeeSvc.GetByCompanyAsync(_selectedCompany.IDCompany);
+            ApplyFilters();
+        }
+        catch
+        {
+            _allEmployees = new();
+            _employees = new();
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private async Task LoadExpiringAsync()
     {
-        _loading = true; _showExpiring = true;
-        try { _employees = await EmployeeSvc.GetExpiringAsync(90); }
-        catch { _employees = new(); }
-        finally { _loading = false; }
+        _loading = true;
+        _showExpiring = true;
+        try
+        {
+            _allEmployees = await EmployeeSvc.GetExpiringAsync(90);
+            ApplyFilters();
+        }
+        catch
+        {
+            _allEmployees = new();
+            _employees = new();
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
-    private string GetNatTagClass(string? code) => code switch
+    private void ApplyFilters()
+    {
+        IEnumerable<Employee> query = _allEmployees;
+
+        if (!string.IsNullOrWhiteSpace(_selectedNationality))
+        {
+            query = query.Where(e => string.Equals(e.Nationality, _selectedNationality, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_selectedPermit) && int.TryParse(_selectedPermit, out var permitStatus))
+        {
+            query = query.Where(e => e.WorkPermit == permitStatus);
+        }
+
+        _employees = query.ToList();
+    }
+
+    private static string GetNatTagClass(string? code) => code switch
     {
         "CN" => "tag-red",
         "KR" => "tag-blue",

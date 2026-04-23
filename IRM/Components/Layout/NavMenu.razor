@@ -1,57 +1,72 @@
 @using Microsoft.AspNetCore.Components.Routing
 
-<MudNavMenu Bordered="true" Color="Color.Primary" Class="pa-2">
-    <MudText Typo="Typo.overline" Class="px-4 mt-2 mb-1" Style="color: rgba(255,255,255,0.3); font-weight: 700; letter-spacing: 1.5px;">
-        TỔNG QUAN
-    </MudText>
-    <MudNavLink Href="/" Match="NavLinkMatch.All"
+<MudNavMenu Class="irm-nav-menu">
+    <MudText Typo="Typo.overline" Class="nav-section-title">Tong quan</MudText>
+    <MudNavLink Href="/"
+                Match="NavLinkMatch.All"
                 Icon="@Icons.Material.Filled.Dashboard"
+                Class="irm-nav-link"
+                ActiveClass="active"
                 OnClick='@(() => NotifyPageChanged("Dashboard"))'>
         Dashboard
     </MudNavLink>
 
-    <MudText Typo="Typo.overline" Class="px-4 mt-4 mb-1" Style="color: rgba(255,255,255,0.3); font-weight: 700; letter-spacing: 1.5px;">
-        QUẢN LÝ DỮ LIỆU
-    </MudText>
-    <MudNavLink Href="/companies" Match="NavLinkMatch.Prefix"
+    <MudText Typo="Typo.overline" Class="nav-section-title">Quan ly du lieu</MudText>
+    <MudNavLink Href="/companies"
+                Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.Business"
-                OnClick='@(() => NotifyPageChanged("Quản lý Công ty"))'>
-        Công ty
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Quan ly Cong ty"))'>
+        Cong ty
     </MudNavLink>
-    <MudNavLink Href="/employees" Match="NavLinkMatch.Prefix"
+    <MudNavLink Href="/employees"
+                Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.Groups"
-                OnClick='@(() => NotifyPageChanged("Quản lý Nhân viên"))'>
-        Nhân viên
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Quan ly Nhan vien"))'>
+        Nhan vien
     </MudNavLink>
-    <MudNavLink Href="/import" Match="NavLinkMatch.Prefix"
+    <MudNavLink Href="/import"
+                Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.UploadFile"
+                Class="irm-nav-link"
+                ActiveClass="active"
                 OnClick='@(() => NotifyPageChanged("Import Excel"))'>
-        Import Excel
-        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="ml-auto">Mới</MudChip>
+        <span>Import Excel</span>
+        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="nav-link-badge">Moi</MudChip>
     </MudNavLink>
 
-    <MudText Typo="Typo.overline" Class="px-4 mt-4 mb-1" Style="color: rgba(255,255,255,0.3); font-weight: 700; letter-spacing: 1.5px;">
-        PHÂN TÍCH & BÁO CÁO
-    </MudText>
-    <MudNavLink Href="/search" Match="NavLinkMatch.Prefix"
+    <MudText Typo="Typo.overline" Class="nav-section-title">Phan tich va bao cao</MudText>
+    <MudNavLink Href="/search"
+                Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.Search"
-                OnClick='@(() => NotifyPageChanged("Tìm kiếm & Thống kê"))'>
-        Tìm kiếm
-        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="ml-auto">Mới</MudChip>
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Tim kiem"))'>
+        <span>Tim kiem</span>
+        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="nav-link-badge">Moi</MudChip>
     </MudNavLink>
-    <MudNavLink Href="/reports" Match="NavLinkMatch.Prefix"
+    <MudNavLink Href="/reports"
+                Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.Assessment"
-                OnClick='@(() => NotifyPageChanged("Báo cáo"))'>
-        Báo cáo
-        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="ml-auto">Mới</MudChip>
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Bao cao"))'>
+        <span>Bao cao</span>
+        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="nav-link-badge">Moi</MudChip>
     </MudNavLink>
 
-    <MudDivider Class="my-3" Style="border-color: rgba(255,255,255,0.06);" />
+    <MudDivider Class="nav-divider" />
 
-    <MudNavLink Href="/admin" Match="NavLinkMatch.Prefix"
+    <MudNavLink Href="/admin"
+                Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.Settings"
-                OnClick='@(() => NotifyPageChanged("Quản trị hệ thống"))'>
-        Quản trị
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Quan tri"))'>
+        Quan tri
     </MudNavLink>
 </MudNavMenu>
 

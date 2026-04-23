@@ -6,38 +6,71 @@
 @inject CompanyService CompanySvc
 @inject CatalogService CatalogSvc
 
-<PageTitle>Quản lý Công ty — IRM v2.0</PageTitle>
+<PageTitle>Quan ly Cong ty - IRM v2.0</PageTitle>
 
-@* ── Section Header ── *@
 <div class="section-header">
-    <h3>🏢 Danh sách Công ty</h3>
-    <span class="section-meta">Tổng: @_companies.Count công ty đang hoạt động</span>
+    <h3>Danh sach Cong ty</h3>
+    <span class="section-meta">Tong: @_companies.Count cong ty dang hoat dong</span>
 </div>
 
-@* ── Actions Bar ── *@
 <div class="page-actions-bar">
     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-        <MudSelect T="int?" @bind-Value="_selectedFieldId" Placeholder="Tất cả lĩnh vực"
-                   Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true"
+        <MudTextField T="string"
+                      @bind-Value="_searchText"
+                      Placeholder="Tim ten cong ty..."
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Style="min-width: 240px;"
+                      OnKeyUp="OnSearchKeyUp" />
+
+        <MudSelect T="int?"
+                   @bind-Value="_selectedFieldId"
+                   @bind-Value:after="LoadDataAsync"
+                   Placeholder="Tat ca linh vuc"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Clearable="true"
                    Style="min-width: 180px;">
             @foreach (var f in _fields)
             {
                 <MudSelectItem T="int?" Value="@((int?)f.IDField)">@f.FieldName</MudSelectItem>
             }
         </MudSelect>
-        <MudSelect T="string" @bind-Value="_selectedTracker" Placeholder="Tất cả cán bộ"
-                   Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true"
-                   Style="min-width: 160px;">
-            <MudSelectItem T="string" Value="@("Nguyễn Văn A")">Nguyễn Văn A</MudSelectItem>
-            <MudSelectItem T="string" Value="@("Trần Thị B")">Trần Thị B</MudSelectItem>
-            <MudSelectItem T="string" Value="@("Lê Văn C")">Lê Văn C</MudSelectItem>
+
+        <MudSelect T="string"
+                   @bind-Value="_selectedTracker"
+                   @bind-Value:after="LoadDataAsync"
+                   Placeholder="Tat ca can bo"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Clearable="true"
+                   Style="min-width: 180px;">
+            <MudSelectItem T="string" Value="@("Nguyen Van A")">Nguyen Van A</MudSelectItem>
+            <MudSelectItem T="string" Value="@("Tran Thi B")">Tran Thi B</MudSelectItem>
+            <MudSelectItem T="string" Value="@("Le Van C")">Le Van C</MudSelectItem>
         </MudSelect>
     </MudStack>
+
     <MudStack Row="true" Spacing="2">
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.UploadFile"
-                   Color="Color.Default" Href="/import">📤 Import Excel</MudButton>
-        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add"
-                   Color="Color.Primary">+ Thêm công ty</MudButton>
+        <MudButton Variant="Variant.Text"
+                   StartIcon="@Icons.Material.Filled.Search"
+                   Color="Color.Primary"
+                   OnClick="LoadDataAsync">
+            Tim
+        </MudButton>
+        <MudButton Variant="Variant.Outlined"
+                   StartIcon="@Icons.Material.Filled.UploadFile"
+                   Color="Color.Default"
+                   Href="/import">
+            Import Excel
+        </MudButton>
+        <MudButton Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Color="Color.Primary">
+            Them cong ty
+        </MudButton>
     </MudStack>
 </div>
 
@@ -46,19 +79,24 @@
     <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
 }
 
-@* ── DataGrid ── *@
-<MudDataGrid Items="@_companies" T="Company" Filterable="false" Sortable="true"
-             Dense="true" Hover="true" Bordered="false" Striped="false"
-             RowsPerPage="10" Class="rounded-lg" Style="border: 1px solid var(--mud-palette-divider); box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+<MudDataGrid Items="@_companies"
+             T="Company"
+             Filterable="false"
+             Sortable="true"
+             Dense="true"
+             Hover="true"
+             Bordered="false"
+             Striped="false"
+             RowsPerPage="10">
     <Columns>
         <TemplateColumn Title="STT" Sortable="false" Filterable="false">
             <CellTemplate>
                 <MudText Typo="Typo.body2">@(_companies.IndexOf(context.Item) + 1)</MudText>
             </CellTemplate>
         </TemplateColumn>
-        <PropertyColumn Property="x => x.CompanyName" Title="Tên công ty" Style="font-weight: 600;" />
-        <PropertyColumn Property="x => x.TypeOfBusiniess" Title="Loại hình" />
-        <TemplateColumn Title="Lĩnh vực">
+        <PropertyColumn Property="x => x.CompanyName" Title="Ten cong ty" Style="font-weight: 600;" />
+        <PropertyColumn Property="x => x.TypeOfBusiniess" Title="Loai hinh" />
+        <TemplateColumn Title="Linh vuc">
             <CellTemplate>
                 @{
                     var fieldName = context.Item.Field?.FieldName ?? "";
@@ -67,35 +105,32 @@
                 <span class="tag @tagClass">@fieldName</span>
             </CellTemplate>
         </TemplateColumn>
-        <PropertyColumn Property="x => x.TotalAmount" Title="Tổng LĐ" Style="font-weight: 700; text-align: center;" />
-        <TemplateColumn Title="Có GPLĐ">
+        <PropertyColumn Property="x => x.TotalAmount" Title="Tong LD" Style="font-weight: 700; text-align: center;" />
+        <TemplateColumn Title="Co GPLD">
             <CellTemplate>
                 <span class="tag tag-green">@context.Item.QuantityAvailable</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Chưa có">
+        <TemplateColumn Title="Chua co">
             <CellTemplate>
                 <span class="tag tag-orange">@context.Item.QuantityNotYet</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Miễn">
+        <TemplateColumn Title="Mien">
             <CellTemplate>
                 <span class="tag tag-blue">@context.Item.AmountOfExemption</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Cán bộ TD">
+        <TemplateColumn Title="Can bo TD">
             <CellTemplate>
                 <MudText Typo="Typo.body2">@(context.Item.Tracker?.Name)</MudText>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
+        <TemplateColumn Title="Thao tac" Sortable="false" Filterable="false">
             <CellTemplate>
-                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary"
-                               Style="border: 1px solid var(--mud-palette-divider); border-radius: 6px; margin: 0 1px;" />
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning"
-                               Style="border: 1px solid var(--mud-palette-divider); border-radius: 6px; margin: 0 1px;" />
-                <MudIconButton Icon="@Icons.Material.Filled.People" Size="Size.Small" Color="Color.Info"
-                               Style="border: 1px solid var(--mud-palette-divider); border-radius: 6px; margin: 0 1px;" />
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning" />
+                <MudIconButton Icon="@Icons.Material.Filled.People" Size="Size.Small" Color="Color.Info" />
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -119,13 +154,18 @@
             _fields = await CatalogSvc.GetFieldsAsync();
             await LoadDataAsync();
         }
-        catch { }
-        finally { _loading = false; }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private async Task OnSearchKeyUp(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter") await LoadDataAsync();
+        if (e.Key == "Enter")
+        {
+            await LoadDataAsync();
+        }
     }
 
     private async Task LoadDataAsync()
@@ -133,20 +173,34 @@
         _loading = true;
         try
         {
-            _companies = await CompanySvc.GetAllAsync(_searchText, _selectedFieldId);
+            var data = await CompanySvc.GetAllAsync(_searchText, _selectedFieldId);
+            if (!string.IsNullOrWhiteSpace(_selectedTracker))
+            {
+                data = data
+                    .Where(c => string.Equals(c.Tracker?.Name, _selectedTracker, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            _companies = data;
         }
-        catch { _companies = new(); }
-        finally { _loading = false; }
+        catch
+        {
+            _companies = new();
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
-    private string GetFieldTagClass(string fieldName) => fieldName switch
+    private static string GetFieldTagClass(string fieldName) => fieldName switch
     {
-        "Sản xuất công nghiệp" => "tag-green",
-        "Điện tử" => "tag-purple",
-        "Thép" => "tag-blue",
-        "Hóa chất" => "tag-orange",
-        "Ô tô" => "tag-teal",
-        "Bán dẫn" => "tag-red",
+        "San xuat cong nghiep" => "tag-green",
+        "Dien tu" => "tag-purple",
+        "Thep" => "tag-blue",
+        "Hoa chat" => "tag-orange",
+        "O to" => "tag-teal",
+        "Ban dan" => "tag-red",
         _ => "tag-blue"
     };
 }

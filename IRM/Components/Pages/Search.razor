@@ -5,75 +5,82 @@
 @using IRM.Data.Models
 @inject SearchService SearchSvc
 
-<PageTitle>Tìm kiếm — IRM v2.0</PageTitle>
+<PageTitle>Tim kiem - IRM v2.0</PageTitle>
 
-<MudStack AlignItems="AlignItems.Center" Class="mb-4">
-    <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight: 800;">Tìm kiếm toàn cục</MudText>
-    <MudText Typo="Typo.body2" Color="Color.Secondary">Nhập tên, hộ chiếu, công ty, quốc tịch... — tìm trên mọi trường dữ liệu</MudText>
-</MudStack>
+<div class="search-hero">
+    <MudText Typo="Typo.h4" Class="search-hero-title">Tim kiem toan cuc</MudText>
+    <MudText Typo="Typo.body2" Class="search-hero-subtitle">
+        Nhap ten, ho chieu, cong ty, quoc tich... de tim tren moi truong du lieu
+    </MudText>
+</div>
 
-<MudStack Row="true" Justify="Justify.Center" Class="mb-4">
-    <MudTextField T="string" @bind-Value="_searchQuery" Placeholder="Nhập từ khóa tìm kiếm..."
-                  Variant="Variant.Outlined" Adornment="Adornment.Start"
+<div class="search-bar-large">
+    <MudTextField T="string"
+                  @bind-Value="_searchQuery"
+                  Placeholder="Nhap tu khoa tim kiem..."
+                  Variant="Variant.Outlined"
+                  Adornment="Adornment.Start"
                   AdornmentIcon="@Icons.Material.Filled.Search"
-                  Style="max-width: 600px;" Immediate="true"
+                  Immediate="true"
                   OnKeyUp="OnSearchKeyUp" />
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
-               OnClick="DoSearchAsync" Disabled="@_loading">
-        @if (_loading) { <MudProgressCircular Size="Size.Small" Indeterminate="true" /> }
-        else { <text>Tìm kiếm</text> }
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               Size="Size.Large"
+               OnClick="DoSearchAsync"
+               Disabled="@_loading">
+        @if (_loading)
+        {
+            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+        }
+        else
+        {
+            <text>Tim kiem</text>
+        }
     </MudButton>
-</MudStack>
+</div>
 
 @if (_hasSearched && _result != null)
 {
-    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3" Align="Align.Center">
-        Tìm thấy <strong>@_result.TotalCount</strong> kết quả cho "<em>@_result.Keyword</em>"
-    </MudText>
+    <div class="search-results-meta">
+        Tim thay <strong>@_result.TotalCount</strong> ket qua cho "<em>@_result.Keyword</em>"
+    </div>
 
-    <MudGrid Spacing="2" Class="mb-4" Justify="Justify.Center">
-        <MudItem xs="6" sm="3">
-            <MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;">
-                <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-weight:800;">@_result.Employees.Count</MudText>
-                <MudText Typo="Typo.caption">Nhân viên</MudText>
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="6" sm="3">
-            <MudPaper Elevation="0" Class="pa-2 text-center rounded-lg border-solid border" Style="border-width:1px;">
-                <MudText Typo="Typo.h6" Color="Color.Secondary" Style="font-weight:800;">@_result.Companies.Count</MudText>
-                <MudText Typo="Typo.caption">Công ty</MudText>
-            </MudPaper>
-        </MudItem>
-    </MudGrid>
+    <div class="search-stat-cards">
+        <div class="stat-mini-card">
+            <span class="stat-mini-num">@_result.Employees.Count</span>
+            <span class="stat-mini-label">Nhan vien</span>
+        </div>
+        <div class="stat-mini-card">
+            <span class="stat-mini-num">@_result.Companies.Count</span>
+            <span class="stat-mini-label">Cong ty</span>
+        </div>
+    </div>
 
-    @* ── Employee results ── *@
     @foreach (var emp in _result.Employees)
     {
-        <MudPaper Elevation="0" Class="pa-3 mb-2 rounded-lg border-solid border d-flex align-center" Style="border-width: 1px;">
-            <MudText Style="font-size: 1.5rem; margin-right: 12px;">👥</MudText>
-            <MudStack Spacing="0" Style="flex: 1;">
-                <MudText Typo="Typo.body1" Style="font-weight: 700;">@emp.StaffName — @(emp.NationalityNav?.NationalityName ?? emp.Nationality)</MudText>
-                <MudText Typo="Typo.caption" Color="Color.Secondary">
-                    HC: @emp.Passport · @emp.Company?.CompanyName · @(emp.Career?.CareerName ?? "") · @emp.WorkPermitString · Hạn TT: @(emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "—")
-                </MudText>
-            </MudStack>
+        <div class="search-result-item">
+            <div class="result-type">👥</div>
+            <div class="result-body">
+                <h4>@emp.StaffName - @(emp.NationalityNav?.NationalityName ?? emp.Nationality)</h4>
+                <p>
+                    HC: @emp.Passport · @emp.Company?.CompanyName · @(emp.Career?.CareerName ?? "") ·
+                    @emp.WorkPermitString · Han TT: @(emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "-")
+                </p>
+            </div>
             <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Xem →</MudButton>
-        </MudPaper>
+        </div>
     }
 
-    @* ── Company results ── *@
-    @foreach (var c in _result.Companies)
+    @foreach (var company in _result.Companies)
     {
-        <MudPaper Elevation="0" Class="pa-3 mb-2 rounded-lg border-solid border d-flex align-center" Style="border-width: 1px;">
-            <MudText Style="font-size: 1.5rem; margin-right: 12px;">🏢</MudText>
-            <MudStack Spacing="0" Style="flex: 1;">
-                <MudText Typo="Typo.body1" Style="font-weight: 700;">@c.CompanyName</MudText>
-                <MudText Typo="Typo.caption" Color="Color.Secondary">
-                    @(c.Field?.FieldName ?? "") · @c.TotalAmount NLĐ · @c.Address
-                </MudText>
-            </MudStack>
+        <div class="search-result-item">
+            <div class="result-type">🏢</div>
+            <div class="result-body">
+                <h4>@company.CompanyName</h4>
+                <p>@(company.Field?.FieldName ?? "") · @company.TotalAmount NLD · @company.Address</p>
+            </div>
             <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Xem →</MudButton>
-        </MudPaper>
+        </div>
     }
 }
 
@@ -85,19 +92,32 @@
 
     private async Task OnSearchKeyUp(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter") await DoSearchAsync();
+        if (e.Key == "Enter")
+        {
+            await DoSearchAsync();
+        }
     }
 
     private async Task DoSearchAsync()
     {
-        if (string.IsNullOrWhiteSpace(_searchQuery)) return;
+        if (string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            return;
+        }
+
         _loading = true;
         try
         {
             _result = await SearchSvc.SearchAsync(_searchQuery);
             _hasSearched = true;
         }
-        catch { _result = new SearchResult(); }
-        finally { _loading = false; }
+        catch
+        {
+            _result = new SearchResult();
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 }

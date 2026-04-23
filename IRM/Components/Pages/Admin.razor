@@ -6,32 +6,27 @@
 @inject AuditService AuditSvc
 @inject CatalogService CatalogSvc
 
-<PageTitle>Quản trị — IRM v2.0</PageTitle>
+<PageTitle>Quan tri - IRM v2.0</PageTitle>
 
-<MudText Typo="Typo.h5" Style="font-weight: 800;" Class="mb-1">⚙️ Quản trị hệ thống</MudText>
-<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">Quản lý danh mục và cấu hình hệ thống</MudText>
+<div class="section-header">
+    <h3>Quan tri he thong</h3>
+    <span class="section-meta">Quan ly danh muc va cau hinh he thong</span>
+</div>
 
-<MudGrid Spacing="4">
+<div class="admin-grid">
     @foreach (var card in _adminCards)
     {
-        <MudItem xs="12" sm="6" md="3">
-            <MudCard Elevation="0" Class="rounded-lg border-solid border cursor-pointer"
-                     Style="border-width: 1px; transition: all 0.3s; text-align: center; border-top: 3px solid var(--mud-palette-primary);">
-                <MudCardContent Class="pa-6">
-                    <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Large" Class="mb-3"
-                               Style="width: 64px; height: 64px; font-size: 32px;">
-                        @card.Icon
-                    </MudAvatar>
-                    <MudText Typo="Typo.subtitle1" Style="font-weight: 700;">@card.Title</MudText>
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">@card.Description</MudText>
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
+        <div class="admin-card">
+            <div class="admin-icon">@card.Icon</div>
+            <MudText Typo="Typo.subtitle1" Style="font-weight:700;">@card.Title</MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">@card.Description</MudText>
+        </div>
     }
-</MudGrid>
+</div>
 
 @code {
     private record AdminCard(string Icon, string Title, string Description);
+
     private List<AdminCard> _adminCards = new();
 
     protected override async Task OnInitializedAsync()
@@ -44,32 +39,32 @@
             var nationalities = await CatalogSvc.GetNationalitiesAsync();
             var districts = await CatalogSvc.GetDistrictsAsync();
             var wards = await CatalogSvc.GetWardsAsync();
-            var logs = await AuditSvc.GetRecentAsync(1);
+            await AuditSvc.GetRecentAsync(1);
 
             _adminCards = new()
             {
-                new("👤", "Tài khoản", $"{accounts.Count} tài khoản hoạt động"),
-                new("🏭", "Lĩnh vực", $"{fields.Count} lĩnh vực"),
-                new("💼", "Ngành nghề", $"{careers.Count} ngành"),
-                new("🌍", "Quốc tịch", $"{nationalities.Count} quốc tịch"),
-                new("🗺️", "Quận / Huyện", $"{districts.Count} quận huyện"),
-                new("📍", "Phường / Xã", $"{wards.Count} phường xã"),
-                new("📜", "Nhật ký hệ thống", "Audit Log"),
-                new("📤", "Lịch sử Import", "Import History"),
+                new("👤", "Tai khoan", $"{accounts.Count} tai khoan hoat dong"),
+                new("🏭", "Linh vuc", $"{fields.Count} linh vuc"),
+                new("💼", "Nganh nghe", $"{careers.Count} nganh"),
+                new("🌍", "Quoc tich", $"{nationalities.Count} quoc tich"),
+                new("🗺️", "Quan / Huyen", $"{districts.Count} quan huyen"),
+                new("📍", "Phuong / Xa", $"{wards.Count} phuong xa"),
+                new("📜", "Nhat ky he thong", "Audit Log"),
+                new("📤", "Lich su Import", "Import History")
             };
         }
         catch
         {
             _adminCards = new()
             {
-                new("👤", "Tài khoản", "Chưa kết nối DB"),
-                new("🏭", "Lĩnh vực", "Chưa kết nối DB"),
-                new("💼", "Ngành nghề", "Chưa kết nối DB"),
-                new("🌍", "Quốc tịch", "Chưa kết nối DB"),
-                new("🗺️", "Quận / Huyện", "Chưa kết nối DB"),
-                new("📍", "Phường / Xã", "Chưa kết nối DB"),
-                new("📜", "Nhật ký", "Chưa kết nối DB"),
-                new("📤", "Import", "Chưa kết nối DB"),
+                new("👤", "Tai khoan", "Chua ket noi DB"),
+                new("🏭", "Linh vuc", "Chua ket noi DB"),
+                new("💼", "Nganh nghe", "Chua ket noi DB"),
+                new("🌍", "Quoc tich", "Chua ket noi DB"),
+                new("🗺️", "Quan / Huyen", "Chua ket noi DB"),
+                new("📍", "Phuong / Xa", "Chua ket noi DB"),
+                new("📜", "Nhat ky", "Chua ket noi DB"),
+                new("📤", "Import", "Chua ket noi DB")
             };
         }
     }
