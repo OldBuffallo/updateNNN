@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Components.Web
 @inject DashboardService DashboardSvc
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <PageTitle>Dashboard - IRM v2.0</PageTitle>
 
@@ -28,7 +29,7 @@ else if (_error != null)
          @onclick='() => GoTo("/companies")' @onkeydown='e => OnCardKeyDown(e, "/companies")'>
         <div>
             <span class="kpi-label">Tổng công ty</span>
-            <span class="kpi-value">@_totalCompanies.ToString("N0")</span>
+            <span class="kpi-value" id="kpiCompanies">@_totalCompanies.ToString("N0")</span>
             <span class="kpi-change up">▲ +@_newCompaniesThisMonth tháng này</span>
         </div>
         <div class="kpi-icon">🏢</div>
@@ -38,7 +39,7 @@ else if (_error != null)
          @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
         <div>
             <span class="kpi-label">Tổng lao động NN</span>
-            <span class="kpi-value">@_totalEmployees.ToString("N0")</span>
+            <span class="kpi-value" id="kpiEmployees">@_totalEmployees.ToString("N0")</span>
             <span class="kpi-change up">▲ +@_newEmployeesThisMonth tháng này</span>
         </div>
         <div class="kpi-icon">👥</div>
@@ -48,7 +49,7 @@ else if (_error != null)
          @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
         <div>
             <span class="kpi-label">Sắp hết hạn tạm trú</span>
-            <span class="kpi-value">@_expiringCount</span>
+            <span class="kpi-value" id="kpiExpiring">@_expiringCount</span>
             <span class="kpi-change warn">⚠ Trong 30 ngày tới</span>
         </div>
         <div class="kpi-icon">⚠️</div>
@@ -58,7 +59,7 @@ else if (_error != null)
          @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
         <div>
             <span class="kpi-label">Đã có GPLĐ</span>
-            <span class="kpi-value">@_withPermit.ToString("N0")</span>
+            <span class="kpi-value" id="kpiPermit">@_withPermit.ToString("N0")</span>
             <span class="kpi-change up">@(_totalEmployees > 0 ? $"{(double)_withPermit / _totalEmployees * 100:F1}% tổng số" : "-")</span>
         </div>
         <div class="kpi-icon">📋</div>
@@ -68,7 +69,7 @@ else if (_error != null)
          @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
         <div>
             <span class="kpi-label">Diện thăm thân</span>
-            <span class="kpi-value">@_familyVisitCount</span>
+            <span class="kpi-value" id="kpiFamily">@_familyVisitCount</span>
             <span class="kpi-change @(_familyVisitExpiringCount > 0 ? "warn" : "up")">
                 @(_familyVisitExpiringCount > 0 ? $"⚠ {_familyVisitExpiringCount} sắp hết hạn" : "✓ Ổn định")
             </span>
@@ -221,6 +222,27 @@ else if (_error != null)
         {
             _loading = false;
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_loading)
+        {
+            await AnimateKPIs();
+        }
+    }
+
+    private async Task AnimateKPIs()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiCompanies", _totalCompanies, 1200);
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiEmployees", _totalEmployees, 1500);
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiExpiring", _expiringCount, 800);
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiPermit", _withPermit, 1300);
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiFamily", _familyVisitCount, 1000);
+        }
+        catch { /* JS interop may fail during prerender */ }
     }
 
     private void GoTo(string href)

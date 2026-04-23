@@ -1,182 +1,236 @@
 @inherits LayoutComponentBase
+@inject IJSRuntime JS
 
 <MudThemeProvider Theme="_theme" IsDarkMode="@_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout Class="irm-shell">
-    <MudAppBar Elevation="0" Dense="true" Class="irm-topbar">
-        <div class="topbar-left">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu"
-                           Color="Color.Inherit"
-                           Edge="Edge.Start"
-                           Class="topbar-icon-btn"
-                           OnClick="@ToggleDrawer" />
-            <MudStack Spacing="0">
-                <MudText Typo="Typo.subtitle1" Class="topbar-title">@_pageTitle</MudText>
-                <span class="irm-breadcrumb">
-                    <a href="/">Trang chủ</a> / @_breadcrumbText
-                </span>
-            </MudStack>
+@* ============ LOADING SCREEN ============ *@
+<div class="loading-screen" id="irmLoadingScreen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Đang tải hệ thống...</div>
+</div>
+
+@* ============ LOGIN SCREEN ============ *@
+@if (!_isLoggedIn)
+{
+    <div class="login-screen active-screen">
+        <div class="login-bg">
+            <div class="login-card">
+                <div class="login-logo">
+                    <div class="logo-icon">
+                        <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+                            <path d="M14 24L22 32L34 16" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h1>Immigration Report Manager</h1>
+                    <p class="login-subtitle">Hệ thống quản lý lao động nước ngoài v2.0</p>
+                </div>
+                <EditForm Model="_loginModel" OnValidSubmit="HandleLogin" FormName="loginForm">
+                    <div class="input-group">
+                        <label for="loginUser">Tài khoản</label>
+                        <input type="text" id="loginUser" @bind="_loginModel.Username" placeholder="Nhập tài khoản" />
+                    </div>
+                    <div class="input-group">
+                        <label for="loginPass">Mật khẩu</label>
+                        <input type="password" id="loginPass" @bind="_loginModel.Password" placeholder="Nhập mật khẩu" />
+                    </div>
+                    <button type="submit" class="btn-login">Đăng nhập</button>
+                </EditForm>
+                <div class="login-footer">
+                    <span class="secure-badge">🔒 Kết nối bảo mật (HTTPS) · Phiên bản 2.0</span>
+                </div>
+            </div>
         </div>
+    </div>
+}
 
-        <MudSpacer />
-
-        <div class="topbar-right">
-            <MudTextField T="string"
-                          Placeholder="Tìm nhanh... (Ctrl+K)"
-                          Variant="Variant.Outlined"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          Margin="Margin.Dense"
-                          Class="topbar-search" />
-
-            <MudBadge Dot="true" Color="Color.Error" Overlap="true">
-                <MudIconButton Icon="@Icons.Material.Filled.NotificationsNone"
+@* ============ MAIN APP ============ *@
+@if (_isLoggedIn)
+{
+    <MudLayout Class="irm-shell">
+        <MudAppBar Elevation="0" Dense="true" Class="irm-topbar">
+            <div class="topbar-left">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu"
                                Color="Color.Inherit"
-                               Class="topbar-icon-btn" />
-            </MudBadge>
-
-            <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                           Color="Color.Inherit"
-                           Class="topbar-icon-btn"
-                           OnClick="@ToggleDarkMode" />
-
-            <MudButton Variant="Variant.Outlined"
-                       Color="Color.Default"
-                       StartIcon="@Icons.Material.Filled.HelpOutline"
-                       Class="topbar-help-btn"
-                       OnClick="@ToggleHelp">
-                Hỗ trợ
-            </MudButton>
-        </div>
-    </MudAppBar>
-
-    <MudDrawer @bind-Open="_drawerOpen"
-               Elevation="2"
-               ClipMode="DrawerClipMode.Always"
-               Variant="DrawerVariant.Mini"
-               OpenMiniOnHover="false"
-               Class="irm-drawer">
-        <MudDrawerHeader Dense="true" Class="irm-drawer-header">
-            <div class="sidebar-logo-mark">
-                <MudIcon Icon="@Icons.Material.Filled.FactCheck"
-                         Color="Color.Inherit"
-                         Size="Size.Medium" />
+                               Edge="Edge.Start"
+                               Class="topbar-icon-btn"
+                               OnClick="@ToggleDrawer" />
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.subtitle1" Class="topbar-title">@_pageTitle</MudText>
+                    <span class="irm-breadcrumb">
+                        <a href="/">Trang chủ</a> / @_breadcrumbText
+                    </span>
+                </MudStack>
             </div>
 
-            @if (_drawerOpen)
-            {
-                <MudStack Spacing="0" Class="sidebar-brand-copy">
-                    <MudText Typo="Typo.subtitle1" Class="sidebar-brand-title">IRM</MudText>
-                    <MudText Typo="Typo.caption" Class="sidebar-brand-badge">v2.0</MudText>
-                </MudStack>
-            }
-        </MudDrawerHeader>
+            <MudSpacer />
 
-        <NavMenu OnPageChanged="@OnPageChanged" />
+            <div class="topbar-right">
+                <MudTextField T="string"
+                              Placeholder="Tìm nhanh... (Ctrl+K)"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Margin="Margin.Dense"
+                              Class="topbar-search" />
 
-        <MudSpacer />
+                <MudBadge Dot="true" Color="Color.Error" Overlap="true">
+                    <MudIconButton Icon="@Icons.Material.Filled.NotificationsNone"
+                                   Color="Color.Inherit"
+                                   Class="topbar-icon-btn" />
+                </MudBadge>
 
-        <div class="user-footer">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="user-footer-row">
-                <div class="user-avatar">A</div>
+                <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                               Color="Color.Inherit"
+                               Class="topbar-icon-btn"
+                               OnClick="@ToggleDarkMode" />
+
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Default"
+                           StartIcon="@Icons.Material.Filled.HelpOutline"
+                           Class="topbar-help-btn"
+                           OnClick="@ToggleHelp">
+                    Hỗ trợ
+                </MudButton>
+            </div>
+        </MudAppBar>
+
+        <MudDrawer @bind-Open="_drawerOpen"
+                   Elevation="2"
+                   ClipMode="DrawerClipMode.Always"
+                   Variant="DrawerVariant.Mini"
+                   OpenMiniOnHover="false"
+                   Class="irm-drawer">
+            <MudDrawerHeader Dense="true" Class="irm-drawer-header">
+                <div class="sidebar-logo-mark">
+                    <MudIcon Icon="@Icons.Material.Filled.FactCheck"
+                             Color="Color.Inherit"
+                             Size="Size.Medium" />
+                </div>
 
                 @if (_drawerOpen)
                 {
-                    <MudStack Spacing="0" Class="user-footer-copy">
-                        <MudText Typo="Typo.body2" Class="user-footer-name">Admin</MudText>
-                        <MudText Typo="Typo.caption" Class="user-footer-role">Quản trị viên</MudText>
+                    <MudStack Spacing="0" Class="sidebar-brand-copy">
+                        <MudText Typo="Typo.subtitle1" Class="sidebar-brand-title">IRM</MudText>
+                        <MudText Typo="Typo.caption" Class="sidebar-brand-badge">v2.0</MudText>
                     </MudStack>
-
-                    <MudIconButton Icon="@Icons.Material.Filled.Logout"
-                                   Size="Size.Small"
-                                   Class="user-footer-logout"
-                                   OnClick="@Logout" />
                 }
-            </MudStack>
-        </div>
+            </MudDrawerHeader>
+
+            <NavMenu OnPageChanged="@OnPageChanged" />
+
+            <MudSpacer />
+
+            <div class="user-footer">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="user-footer-row">
+                    <div class="user-avatar">A</div>
+
+                    @if (_drawerOpen)
+                    {
+                        <MudStack Spacing="0" Class="user-footer-copy">
+                            <MudText Typo="Typo.body2" Class="user-footer-name">Admin</MudText>
+                            <MudText Typo="Typo.caption" Class="user-footer-role">Quản trị viên</MudText>
+                        </MudStack>
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Logout"
+                                       Size="Size.Small"
+                                       Class="user-footer-logout"
+                                       OnClick="@Logout" />
+                    }
+                </MudStack>
+            </div>
+        </MudDrawer>
+
+        <MudMainContent Class="irm-main">
+            <MudContainer MaxWidth="MaxWidth.False" Class="irm-main-container">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+
+    <MudDrawer @bind-Open="_helpOpen"
+               Anchor="Anchor.End"
+               Elevation="3"
+               Width="380px"
+               Variant="DrawerVariant.Temporary"
+               Class="help-drawer">
+        <MudDrawerHeader Class="help-drawer-header">
+            <MudText Typo="Typo.h6" Class="help-drawer-title">Hỗ trợ sử dụng</MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                           OnClick="@ToggleHelp"
+                           Size="Size.Small"
+                           Class="help-close-btn" />
+        </MudDrawerHeader>
+
+        <MudDivider />
+
+        <MudTabs Rounded="true" Centered="true" Class="help-tabs">
+            <MudTabPanel Text="Trang hiện tại" Icon="@Icons.Material.Filled.Info">
+                <MudContainer Class="pa-4">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Color="Color.Primary" Class="mb-2">@_pageTitle</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Đây là trang @_pageTitle. Sử dụng các chức năng trên trang để quản lý dữ liệu lao động nước ngoài.
+                    </MudText>
+                    <MudAlert Severity="Severity.Info" Dense="true" Class="mt-4">
+                        <strong>Mẹo:</strong> Nhấn <strong>Ctrl+K</strong> để tìm kiếm nhanh từ bất kỳ trang nào.
+                    </MudAlert>
+                </MudContainer>
+            </MudTabPanel>
+
+            <MudTabPanel Text="Phím tắt" Icon="@Icons.Material.Filled.Keyboard">
+                <MudSimpleTable Dense="true" Hover="true" Class="ma-4">
+                    <thead>
+                        <tr>
+                            <th>Chức năng</th>
+                            <th>Phím tắt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Tìm kiếm nhanh</td><td><MudChip T="string" Size="Size.Small">Ctrl + K</MudChip></td></tr>
+                        <tr><td>Mở hỗ trợ</td><td><MudChip T="string" Size="Size.Small">F1</MudChip></td></tr>
+                        <tr><td>Về Dashboard</td><td><MudChip T="string" Size="Size.Small">Ctrl + H</MudChip></td></tr>
+                        <tr><td>Thêm mới</td><td><MudChip T="string" Size="Size.Small">Ctrl + N</MudChip></td></tr>
+                    </tbody>
+                </MudSimpleTable>
+            </MudTabPanel>
+
+            <MudTabPanel Text="FAQ" Icon="@Icons.Material.Filled.QuestionAnswer">
+                <MudContainer Class="pa-4">
+                    <MudExpansionPanels MultiExpansion="true">
+                        <MudExpansionPanel Text="Tôi quên mật khẩu?" MaxHeight="200">
+                            <MudText Typo="Typo.body2">Liên hệ quản trị viên để đặt lại. Vào Quản trị → Tài khoản → Đặt lại mật khẩu.</MudText>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Text="File Excel import bị lỗi?" MaxHeight="200">
+                            <MudText Typo="Typo.body2">Đảm bảo file đúng định dạng .xlsx. Dòng đầu tiên phải là tiêu đề cột.</MudText>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Text="Liên hệ hỗ trợ kỹ thuật?" MaxHeight="200">
+                            <MudText Typo="Typo.body2">Email: support@irm.vn · ĐT: 0123.456.789</MudText>
+                        </MudExpansionPanel>
+                    </MudExpansionPanels>
+                </MudContainer>
+            </MudTabPanel>
+        </MudTabs>
     </MudDrawer>
-
-    <MudMainContent Class="irm-main">
-        <MudContainer MaxWidth="MaxWidth.False" Class="irm-main-container">
-            @Body
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
-
-<MudDrawer @bind-Open="_helpOpen"
-           Anchor="Anchor.End"
-           Elevation="3"
-           Width="380px"
-           Variant="DrawerVariant.Temporary"
-           Class="help-drawer">
-    <MudDrawerHeader Class="help-drawer-header">
-        <MudText Typo="Typo.h6" Class="help-drawer-title">Hỗ trợ sử dụng</MudText>
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.Close"
-                       OnClick="@ToggleHelp"
-                       Size="Size.Small"
-                       Class="help-close-btn" />
-    </MudDrawerHeader>
-
-    <MudDivider />
-
-    <MudTabs Rounded="true" Centered="true" Class="help-tabs">
-        <MudTabPanel Text="Trang hiện tại" Icon="@Icons.Material.Filled.Info">
-            <MudContainer Class="pa-4">
-                <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Color="Color.Primary" Class="mb-2">@_pageTitle</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Đây là trang @_pageTitle. Sử dụng các chức năng trên trang để quản lý dữ liệu lao động nước ngoài.
-                </MudText>
-                <MudAlert Severity="Severity.Info" Dense="true" Class="mt-4">
-                    <strong>Mẹo:</strong> Nhấn <strong>Ctrl+K</strong> để tìm kiếm nhanh từ bất kỳ trang nào.
-                </MudAlert>
-            </MudContainer>
-        </MudTabPanel>
-
-        <MudTabPanel Text="Phím tắt" Icon="@Icons.Material.Filled.Keyboard">
-            <MudSimpleTable Dense="true" Hover="true" Class="ma-4">
-                <thead>
-                    <tr>
-                        <th>Chức năng</th>
-                        <th>Phím tắt</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td>Tìm kiếm nhanh</td><td><MudChip T="string" Size="Size.Small">Ctrl + K</MudChip></td></tr>
-                    <tr><td>Mở hỗ trợ</td><td><MudChip T="string" Size="Size.Small">F1</MudChip></td></tr>
-                    <tr><td>Về Dashboard</td><td><MudChip T="string" Size="Size.Small">Ctrl + H</MudChip></td></tr>
-                    <tr><td>Thêm mới</td><td><MudChip T="string" Size="Size.Small">Ctrl + N</MudChip></td></tr>
-                </tbody>
-            </MudSimpleTable>
-        </MudTabPanel>
-
-        <MudTabPanel Text="FAQ" Icon="@Icons.Material.Filled.QuestionAnswer">
-            <MudContainer Class="pa-4">
-                <MudExpansionPanels MultiExpansion="true">
-                    <MudExpansionPanel Text="Tôi quên mật khẩu?" MaxHeight="200">
-                        <MudText Typo="Typo.body2">Liên hệ quản trị viên để đặt lại. Vào Quản trị → Tài khoản → Đặt lại mật khẩu.</MudText>
-                    </MudExpansionPanel>
-                    <MudExpansionPanel Text="File Excel import bị lỗi?" MaxHeight="200">
-                        <MudText Typo="Typo.body2">Đảm bảo file đúng định dạng .xlsx. Dòng đầu tiên phải là tiêu đề cột.</MudText>
-                    </MudExpansionPanel>
-                    <MudExpansionPanel Text="Liên hệ hỗ trợ kỹ thuật?" MaxHeight="200">
-                        <MudText Typo="Typo.body2">Email: support@irm.vn · ĐT: 0123.456.789</MudText>
-                    </MudExpansionPanel>
-                </MudExpansionPanels>
-            </MudContainer>
-        </MudTabPanel>
-    </MudTabs>
-</MudDrawer>
+}
 
 @code {
     private bool _drawerOpen = true;
     private bool _isDarkMode;
     private bool _helpOpen;
+    private bool _isLoggedIn;
     private string _pageTitle = "Dashboard";
     private string _breadcrumbText = "Dashboard";
+
+    private LoginModel _loginModel = new() { Username = "admin", Password = "" };
+
+    private class LoginModel
+    {
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
 
     private static readonly Dictionary<string, string> _breadcrumbs = new()
     {
@@ -249,8 +303,37 @@
         }
     };
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Init theme from localStorage
+            var savedTheme = await JS.InvokeAsync<string>("irmInterop.initTheme");
+            if (savedTheme == "dark" && !_isDarkMode)
+            {
+                _isDarkMode = true;
+                StateHasChanged();
+            }
+
+            // Hide loading screen
+            await JS.InvokeVoidAsync("irmInterop.hideLoadingScreen");
+        }
+    }
+
+    private void HandleLogin()
+    {
+        // Simple UI-only login (accept any credentials)
+        _isLoggedIn = true;
+    }
+
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
-    private void ToggleDarkMode() => _isDarkMode = !_isDarkMode;
+
+    private async Task ToggleDarkMode()
+    {
+        _isDarkMode = !_isDarkMode;
+        await JS.InvokeVoidAsync("irmInterop.setTheme", _isDarkMode ? "dark" : "light");
+    }
+
     private void ToggleHelp() => _helpOpen = !_helpOpen;
 
     private void OnPageChanged(string title)
@@ -261,6 +344,6 @@
 
     private void Logout()
     {
-        // UI-only for now.
+        _isLoggedIn = false;
     }
 }
