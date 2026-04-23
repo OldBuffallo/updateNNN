@@ -1,21 +1,32 @@
 @page "/admin"
+@page "/admin/{SectionKey}"
 
 @using IRM.Services
+@using IRM.Data.Models
+@using Microsoft.AspNetCore.Components.Web
 @inject AuthService AuthSvc
 @inject AuditService AuditSvc
 @inject CatalogService CatalogSvc
+@inject ImportService ImportSvc
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
 
-<PageTitle>Quản trị - IRM v2.0</PageTitle>
+<PageTitle>Quan tri - IRM v2.0</PageTitle>
 
 <div class="section-header">
-    <h3>Quản trị hệ thống</h3>
-    <span class="section-meta">Quản lý danh mục và cấu hình hệ thống</span>
+    <h3>Quan tri he thong</h3>
+    <span class="section-meta">Quan ly danh muc va cau hinh he thong</span>
 </div>
 
 <div class="admin-grid">
     @foreach (var card in _adminCards)
     {
-        <div class="admin-card">
+        var isActive = string.Equals(card.Key, _activeSection, StringComparison.OrdinalIgnoreCase);
+        <div class="admin-card admin-card-action @(isActive ? "active" : "")"
+             role="button"
+             tabindex="0"
+             @onclick="() => GoSection(card.Key)"
+             @onkeydown="e => OnCardKeyDown(e, card.Key)">
             <MudIcon Icon="@card.Icon" Class="admin-icon" />
             <MudText Typo="Typo.subtitle1" Style="font-weight:700;">@card.Title</MudText>
             <MudText Typo="Typo.caption" Color="Color.Secondary">@card.Description</MudText>
@@ -23,48 +34,903 @@
     }
 </div>
 
-@code {
-    private record AdminCard(string Icon, string Title, string Description);
+@if (!string.IsNullOrWhiteSpace(_activeSection))
+{
+    <div class="section-header mt-6">
+        <h3>@_activeSectionTitle</h3>
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick='() => Nav.NavigateTo("/admin")'
+                   StartIcon="@Icons.Material.Filled.ArrowBack">Ve trang quan tri</MudButton>
+    </div>
+}
 
-    private List<AdminCard> _adminCards = new();
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+}
+else if (!string.IsNullOrWhiteSpace(_activeSection))
+{
+    @switch (_activeSection)
+    {
+        case "accounts":
+            <MudPaper Class="pa-4 mb-4">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@(_editingAccount ? "Cap nhat tai khoan" : "Them tai khoan")</MudText>
+                <MudGrid>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Username" @bind-Value="_accountForm.Username" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Ho ten" @bind-Value="_accountForm.Name" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Mat khau" InputType="InputType.Password" @bind-Value="_accountForm.Password" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudSelect T="int" Label="Quyen" @bind-Value="_accountForm.Permission" Variant="Variant.Outlined">
+                            <MudSelectItem Value="1">Admin</MudSelectItem>
+                            <MudSelectItem Value="0">User</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="1" Class="d-flex align-center">
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAccountAsync">
+                                @(_editingAccount ? "Luu" : "Them")
+                            </MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetAccountForm">Huy</MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>Username</th><th>Ho ten</th><th>Quyen</th><th>Trang thai</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var acc in _accounts)
+                    {
+                        <tr>
+                            <td>@acc.Username</td>
+                            <td>@acc.Name</td>
+                            <td><MudChip T="string" Size="Size.Small" Color="Color.Primary">@acc.PermissionString</MudChip></td>
+                            <td><MudChip T="string" Size="Size.Small" Color="Color.Success">Hoat dong</MudChip></td>
+                            <td>
+                                <MudStack Row="true" Spacing="1">
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditAccount(acc))">Sua</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteAccountAsync(acc.IDUser))">Xoa</MudButton>
+                                </MudStack>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+            break;
+
+        case "fields":
+            <MudPaper Class="pa-4 mb-4">
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudTextField T="string" Label="Ten linh vuc" @bind-Value="_fieldForm.FieldName" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string" Label="Mo ta" @bind-Value="_fieldForm.Description" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="2" Class="d-flex align-center">
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveFieldAsync">@(_editingField ? "Luu" : "Them")</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetFieldForm">Huy</MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>ID</th><th>Ten linh vuc</th><th>Mo ta</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var f in _fields)
+                    {
+                        <tr>
+                            <td>@f.IDField</td>
+                            <td>@f.FieldName</td>
+                            <td>@f.Description</td>
+                            <td>
+                                <MudStack Row="true" Spacing="1">
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditField(f))">Sua</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteFieldAsync(f.IDField))">Xoa</MudButton>
+                                </MudStack>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+            break;
+
+        case "careers":
+            <MudPaper Class="pa-4 mb-4">
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudTextField T="string" Label="Ten nganh nghe" @bind-Value="_careerForm.CareerName" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSelect T="int" Label="Nhom nganh" @bind-Value="_careerForm.IDCG" Variant="Variant.Outlined">
+                            @foreach (var group in _careerGroups)
+                            {
+                                <MudSelectItem Value="@group.IDCG">@group.CareerGroupName</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="4" Class="d-flex align-center">
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCareerAsync">@(_editingCareer ? "Luu" : "Them")</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetCareerForm">Huy</MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>ID</th><th>Ten nganh nghe</th><th>Nhom</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var c in _careers)
+                    {
+                        <tr>
+                            <td>@c.IDCareer</td>
+                            <td>@c.CareerName</td>
+                            <td>@(c.CareerGroup?.CareerGroupName ?? "")</td>
+                            <td>
+                                <MudStack Row="true" Spacing="1">
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditCareer(c))">Sua</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteCareerAsync(c.IDCareer))">Xoa</MudButton>
+                                </MudStack>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+            break;
+
+        case "nationalities":
+            <MudPaper Class="pa-4 mb-4">
+                <MudGrid>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Ma quoc tich" @bind-Value="_nationalityForm.NationalityCode" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string" Label="Ten quoc tich" @bind-Value="_nationalityForm.NationalityName" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="3" Class="d-flex align-center">
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveNationalityAsync">@(_editingNationality ? "Luu" : "Them")</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetNationalityForm">Huy</MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>Ma</th><th>Ten quoc tich</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var n in _nationalities)
+                    {
+                        <tr>
+                            <td>@n.NationalityCode</td>
+                            <td>@n.NationalityName</td>
+                            <td>
+                                <MudStack Row="true" Spacing="1">
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditNationality(n))">Sua</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteNationalityAsync(n.IDNationality))">Xoa</MudButton>
+                                </MudStack>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+            break;
+
+        case "districts":
+            <MudPaper Class="pa-4 mb-4">
+                <MudGrid>
+                    <MudItem xs="12" md="8">
+                        <MudTextField T="string" Label="Ten quan/huyen" @bind-Value="_districtForm.DisTrictName" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="4" Class="d-flex align-center">
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveDistrictAsync">@(_editingDistrict ? "Luu" : "Them")</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetDistrictForm">Huy</MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>ID</th><th>Ten quan/huyen</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var d in _districts)
+                    {
+                        <tr>
+                            <td>@d.IDDistrict</td>
+                            <td>@d.DisTrictName</td>
+                            <td>
+                                <MudStack Row="true" Spacing="1">
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditDistrict(d))">Sua</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteDistrictAsync(d.IDDistrict))">Xoa</MudButton>
+                                </MudStack>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+            break;
+
+        case "wards":
+            <MudPaper Class="pa-4 mb-4">
+                <MudGrid>
+                    <MudItem xs="12" md="8">
+                        <MudTextField T="string" Label="Ten phuong/xa" @bind-Value="_wardForm.WardName" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="4" Class="d-flex align-center">
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveWardAsync">@(_editingWard ? "Luu" : "Them")</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetWardForm">Huy</MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>ID</th><th>Ten phuong/xa</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var w in _wards)
+                    {
+                        <tr>
+                            <td>@w.IDWard</td>
+                            <td>@w.WardName</td>
+                            <td>
+                                <MudStack Row="true" Spacing="1">
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditWard(w))">Sua</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteWardAsync(w.IDWard))">Xoa</MudButton>
+                                </MudStack>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+            break;
+
+        case "audit":
+            <MudPaper Class="pa-4 mb-4">
+                <MudGrid>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Username" @bind-Value="_auditFilterUsername" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Action" @bind-Value="_auditFilterAction" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudDatePicker Label="Tu ngay" @bind-Date="_auditFrom" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudDatePicker Label="Den ngay" @bind-Date="_auditTo" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="2" Class="d-flex align-center">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadAuditAsync">Loc</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>Thoi gian</th><th>User</th><th>Action</th><th>Loai</th><th>Mo ta</th></tr></thead>
+                <tbody>
+                    @foreach (var log in _auditLogs)
+                    {
+                        <tr>
+                            <td>@log.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@log.Username</td>
+                            <td><MudChip T="string" Size="Size.Small" Color="@GetActionColor(log.Action)">@log.Action</MudChip></td>
+                            <td>@log.EntityType</td>
+                            <td>@log.Description</td>
+                        </tr>
+                    }
+                    @if (!_auditLogs.Any())
+                    {
+                        <tr><td colspan="5" style="text-align:center;color:#94a3b8;">Khong co du lieu</td></tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+            break;
+
+        case "import-history":
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>Thoi gian</th><th>Session</th><th>File</th><th>Cong ty</th><th>+Moi</th><th>~Cap nhat</th><th>Loi</th><th>Trang thai</th><th>User</th></tr></thead>
+                <tbody>
+                    @foreach (var item in _importHistory)
+                    {
+                        <tr>
+                            <td>@item.Time</td>
+                            <td>@item.SessionId</td>
+                            <td>@item.FileName</td>
+                            <td>@item.Company</td>
+                            <td>@item.Added</td>
+                            <td>@item.Updated</td>
+                            <td>@item.Errors</td>
+                            <td>@item.Status</td>
+                            <td>@item.User</td>
+                        </tr>
+                    }
+                    @if (!_importHistory.Any())
+                    {
+                        <tr><td colspan="9" style="text-align:center;color:#94a3b8;">Chua co lich su import</td></tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+            break;
+
+        default:
+            <MudAlert Severity="Severity.Warning">Khong tim thay module quan tri: @_activeSection</MudAlert>
+            break;
+    }
+}
+
+@code {
+    [Parameter]
+    public string? SectionKey { get; set; }
+
+    private record AdminCardInfo(string Key, string Icon, string Title, string Description);
+
+    private bool _loading;
+    private string _activeSection = "";
+    private string _activeSectionTitle = "";
+
+    private readonly List<AdminCardInfo> _adminCards = new();
+
+    private List<Account> _accounts = new();
+    private List<Field> _fields = new();
+    private List<Career> _careers = new();
+    private List<CareerGroup> _careerGroups = new();
+    private List<NationalityEntity> _nationalities = new();
+    private List<District> _districts = new();
+    private List<Ward> _wards = new();
+    private List<AuditLog> _auditLogs = new();
+    private List<ImportSessionInfo> _importHistory = new();
+
+    private Account _accountForm = new();
+    private bool _editingAccount;
+    private Field _fieldForm = new();
+    private bool _editingField;
+    private Career _careerForm = new();
+    private bool _editingCareer;
+    private NationalityEntity _nationalityForm = new();
+    private bool _editingNationality;
+    private District _districtForm = new();
+    private bool _editingDistrict;
+    private Ward _wardForm = new();
+    private bool _editingWard;
+
+    private string? _auditFilterUsername;
+    private string? _auditFilterAction;
+    private DateTime? _auditFrom;
+    private DateTime? _auditTo;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadCoreDataAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _activeSection = (SectionKey ?? string.Empty).Trim().ToLowerInvariant();
+        _activeSectionTitle = _adminCards.FirstOrDefault(c => c.Key == _activeSection)?.Title ?? _activeSection;
+        await LoadActiveSectionDataAsync();
+    }
+
+    private async Task LoadCoreDataAsync()
+    {
+        _loading = true;
         try
         {
-            var accounts = await AuthSvc.GetAllAccountsAsync();
-            var fields = await CatalogSvc.GetFieldsAsync();
-            var careers = await CatalogSvc.GetCareersAsync();
-            var nationalities = await CatalogSvc.GetNationalitiesAsync();
-            var districts = await CatalogSvc.GetDistrictsAsync();
-            var wards = await CatalogSvc.GetWardsAsync();
-            await AuditSvc.GetRecentAsync(1);
-
-            _adminCards = new()
-            {
-                new(Icons.Material.Filled.ManageAccounts, "Tài khoản", $"{accounts.Count} tài khoản hoạt động"),
-                new(Icons.Material.Filled.Business, "Lĩnh vực", $"{fields.Count} lĩnh vực"),
-                new(Icons.Material.Filled.Work, "Ngành nghề", $"{careers.Count} ngành"),
-                new(Icons.Material.Filled.Public, "Quốc tịch", $"{nationalities.Count} quốc tịch"),
-                new(Icons.Material.Filled.Map, "Quận / Huyện", $"{districts.Count} quận huyện"),
-                new(Icons.Material.Filled.Place, "Phường / Xã", $"{wards.Count} phường xã"),
-                new(Icons.Material.Filled.ReceiptLong, "Nhật ký hệ thống", "Audit Log"),
-                new(Icons.Material.Filled.CloudUpload, "Lịch sử Import", "Import History")
-            };
+            _accounts = await AuthSvc.GetAllAccountsAsync();
+            _fields = await CatalogSvc.GetFieldsAsync();
+            _careers = await CatalogSvc.GetCareersAsync();
+            _careerGroups = await CatalogSvc.GetCareerGroupsAsync();
+            _nationalities = await CatalogSvc.GetNationalitiesAsync();
+            _districts = await CatalogSvc.GetDistrictsAsync();
+            _wards = await CatalogSvc.GetWardsAsync();
+            BuildCards();
+            ResetFormsAfterDataLoaded();
         }
-        catch
+        catch (Exception ex)
         {
-            _adminCards = new()
-            {
-                new(Icons.Material.Filled.ManageAccounts, "Tài khoản", "Chưa kết nối DB"),
-                new(Icons.Material.Filled.Business, "Lĩnh vực", "Chưa kết nối DB"),
-                new(Icons.Material.Filled.Work, "Ngành nghề", "Chưa kết nối DB"),
-                new(Icons.Material.Filled.Public, "Quốc tịch", "Chưa kết nối DB"),
-                new(Icons.Material.Filled.Map, "Quận / Huyện", "Chưa kết nối DB"),
-                new(Icons.Material.Filled.Place, "Phường / Xã", "Chưa kết nối DB"),
-                new(Icons.Material.Filled.ReceiptLong, "Nhật ký", "Chưa kết nối DB"),
-                new(Icons.Material.Filled.CloudUpload, "Import", "Chưa kết nối DB")
-            };
+            Snackbar.Add($"Khong tai du lieu quan tri: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
         }
     }
+
+    private async Task LoadActiveSectionDataAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_activeSection))
+        {
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            switch (_activeSection)
+            {
+                case "accounts":
+                    _accounts = await AuthSvc.GetAllAccountsAsync();
+                    break;
+                case "fields":
+                    _fields = await CatalogSvc.GetFieldsAsync();
+                    break;
+                case "careers":
+                    _careers = await CatalogSvc.GetCareersAsync();
+                    _careerGroups = await CatalogSvc.GetCareerGroupsAsync();
+                    if (_careerForm.IDCG == 0 && _careerGroups.Any())
+                    {
+                        _careerForm.IDCG = _careerGroups[0].IDCG;
+                    }
+                    break;
+                case "nationalities":
+                    _nationalities = await CatalogSvc.GetNationalitiesAsync();
+                    break;
+                case "districts":
+                    _districts = await CatalogSvc.GetDistrictsAsync();
+                    break;
+                case "wards":
+                    _wards = await CatalogSvc.GetWardsAsync();
+                    break;
+                case "audit":
+                    await LoadAuditAsync();
+                    break;
+                case "import-history":
+                    _importHistory = await ImportSvc.GetHistoryAsync();
+                    break;
+            }
+            BuildCards();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Khong tai du lieu module '{_activeSection}': {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void BuildCards()
+    {
+        _adminCards.Clear();
+        _adminCards.Add(new("accounts", Icons.Material.Filled.ManageAccounts, "Tai khoan", $"{_accounts.Count} tai khoan"));
+        _adminCards.Add(new("fields", Icons.Material.Filled.Business, "Linh vuc", $"{_fields.Count} linh vuc"));
+        _adminCards.Add(new("careers", Icons.Material.Filled.Work, "Nganh nghe", $"{_careers.Count} nganh"));
+        _adminCards.Add(new("nationalities", Icons.Material.Filled.Public, "Quoc tich", $"{_nationalities.Count} quoc tich"));
+        _adminCards.Add(new("districts", Icons.Material.Filled.Map, "Quan / Huyen", $"{_districts.Count} quan/huyen"));
+        _adminCards.Add(new("wards", Icons.Material.Filled.Place, "Phuong / Xa", $"{_wards.Count} phuong/xa"));
+        _adminCards.Add(new("audit", Icons.Material.Filled.ReceiptLong, "Nhat ky he thong", "Audit log"));
+        _adminCards.Add(new("import-history", Icons.Material.Filled.CloudUpload, "Lich su Import", "Lich su phien import"));
+    }
+
+    private void ResetFormsAfterDataLoaded()
+    {
+        ResetAccountForm();
+        ResetFieldForm();
+        ResetCareerForm();
+        ResetNationalityForm();
+        ResetDistrictForm();
+        ResetWardForm();
+    }
+
+    private void GoSection(string key)
+    {
+        Nav.NavigateTo($"/admin/{key}");
+    }
+
+    private void OnCardKeyDown(KeyboardEventArgs e, string key)
+    {
+        if (e.Key is "Enter" or " ")
+        {
+            GoSection(key);
+        }
+    }
+
+    private async Task SaveAccountAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_accountForm.Username) || string.IsNullOrWhiteSpace(_accountForm.Name) || string.IsNullOrWhiteSpace(_accountForm.Password))
+        {
+            Snackbar.Add("Vui long nhap day du thong tin tai khoan.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            if (_editingAccount)
+            {
+                await AuthSvc.UpdateAccountAsync(_accountForm);
+                Snackbar.Add("Cap nhat tai khoan thanh cong.", Severity.Success);
+            }
+            else
+            {
+                await AuthSvc.CreateAccountAsync(_accountForm);
+                Snackbar.Add("Them tai khoan thanh cong.", Severity.Success);
+            }
+            _accounts = await AuthSvc.GetAllAccountsAsync();
+            BuildCards();
+            ResetAccountForm();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi luu tai khoan: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void EditAccount(Account account)
+    {
+        _accountForm = new Account
+        {
+            IDUser = account.IDUser,
+            Username = account.Username,
+            Name = account.Name,
+            Password = account.Password,
+            Permission = account.Permission,
+            Delete_flag = account.Delete_flag
+        };
+        _editingAccount = true;
+    }
+
+    private async Task DeleteAccountAsync(int id)
+    {
+        try
+        {
+            await AuthSvc.DeleteAccountAsync(id);
+            _accounts = await AuthSvc.GetAllAccountsAsync();
+            BuildCards();
+            Snackbar.Add("Da xoa tai khoan.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi xoa tai khoan: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ResetAccountForm()
+    {
+        _accountForm = new Account { Permission = 0 };
+        _editingAccount = false;
+    }
+
+    private async Task SaveFieldAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_fieldForm.FieldName))
+        {
+            Snackbar.Add("Ten linh vuc khong duoc de trong.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            if (_editingField)
+            {
+                await CatalogSvc.UpdateFieldAsync(_fieldForm);
+            }
+            else
+            {
+                await CatalogSvc.CreateFieldAsync(_fieldForm);
+            }
+            _fields = await CatalogSvc.GetFieldsAsync();
+            BuildCards();
+            ResetFieldForm();
+            Snackbar.Add("Da luu linh vuc.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi luu linh vuc: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void EditField(Field field)
+    {
+        _fieldForm = new Field
+        {
+            IDField = field.IDField,
+            FieldName = field.FieldName,
+            Description = field.Description,
+            Delete_flag = field.Delete_flag
+        };
+        _editingField = true;
+    }
+
+    private async Task DeleteFieldAsync(int id)
+    {
+        try
+        {
+            await CatalogSvc.DeleteFieldAsync(id);
+            _fields = await CatalogSvc.GetFieldsAsync();
+            BuildCards();
+            Snackbar.Add("Da xoa linh vuc.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi xoa linh vuc: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ResetFieldForm()
+    {
+        _fieldForm = new Field();
+        _editingField = false;
+    }
+
+    private async Task SaveCareerAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_careerForm.CareerName))
+        {
+            Snackbar.Add("Ten nganh nghe khong duoc de trong.", Severity.Warning);
+            return;
+        }
+
+        if (_careerForm.IDCG == 0 && _careerGroups.Any())
+        {
+            _careerForm.IDCG = _careerGroups[0].IDCG;
+        }
+
+        try
+        {
+            if (_editingCareer)
+            {
+                await CatalogSvc.UpdateCareerAsync(_careerForm);
+            }
+            else
+            {
+                await CatalogSvc.CreateCareerAsync(_careerForm);
+            }
+            _careers = await CatalogSvc.GetCareersAsync();
+            BuildCards();
+            ResetCareerForm();
+            Snackbar.Add("Da luu nganh nghe.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi luu nganh nghe: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void EditCareer(Career career)
+    {
+        _careerForm = new Career
+        {
+            IDCareer = career.IDCareer,
+            CareerName = career.CareerName,
+            IDCG = career.IDCG,
+            Delete_flag = career.Delete_flag
+        };
+        _editingCareer = true;
+    }
+
+    private async Task DeleteCareerAsync(int id)
+    {
+        try
+        {
+            await CatalogSvc.DeleteCareerAsync(id);
+            _careers = await CatalogSvc.GetCareersAsync();
+            BuildCards();
+            Snackbar.Add("Da xoa nganh nghe.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi xoa nganh nghe: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ResetCareerForm()
+    {
+        _careerForm = new Career
+        {
+            IDCG = _careerGroups.FirstOrDefault()?.IDCG ?? 0
+        };
+        _editingCareer = false;
+    }
+
+    private async Task SaveNationalityAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_nationalityForm.NationalityCode) || string.IsNullOrWhiteSpace(_nationalityForm.NationalityName))
+        {
+            Snackbar.Add("Vui long nhap day du ma va ten quoc tich.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            if (_editingNationality)
+            {
+                await CatalogSvc.UpdateNationalityAsync(_nationalityForm);
+            }
+            else
+            {
+                await CatalogSvc.CreateNationalityAsync(_nationalityForm);
+            }
+            _nationalities = await CatalogSvc.GetNationalitiesAsync();
+            BuildCards();
+            ResetNationalityForm();
+            Snackbar.Add("Da luu quoc tich.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi luu quoc tich: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void EditNationality(NationalityEntity nationality)
+    {
+        _nationalityForm = new NationalityEntity
+        {
+            IDNationality = nationality.IDNationality,
+            NationalityCode = nationality.NationalityCode,
+            NationalityName = nationality.NationalityName,
+            Delete_flag = nationality.Delete_flag
+        };
+        _editingNationality = true;
+    }
+
+    private async Task DeleteNationalityAsync(int id)
+    {
+        try
+        {
+            await CatalogSvc.DeleteNationalityAsync(id);
+            _nationalities = await CatalogSvc.GetNationalitiesAsync();
+            BuildCards();
+            Snackbar.Add("Da xoa quoc tich.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi xoa quoc tich: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ResetNationalityForm()
+    {
+        _nationalityForm = new NationalityEntity();
+        _editingNationality = false;
+    }
+
+    private async Task SaveDistrictAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_districtForm.DisTrictName))
+        {
+            Snackbar.Add("Ten quan/huyen khong duoc de trong.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            if (_editingDistrict)
+            {
+                await CatalogSvc.UpdateDistrictAsync(_districtForm);
+            }
+            else
+            {
+                await CatalogSvc.CreateDistrictAsync(_districtForm);
+            }
+            _districts = await CatalogSvc.GetDistrictsAsync();
+            BuildCards();
+            ResetDistrictForm();
+            Snackbar.Add("Da luu quan/huyen.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi luu quan/huyen: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void EditDistrict(District district)
+    {
+        _districtForm = new District
+        {
+            IDDistrict = district.IDDistrict,
+            DisTrictName = district.DisTrictName,
+            Delete_flag = district.Delete_flag
+        };
+        _editingDistrict = true;
+    }
+
+    private async Task DeleteDistrictAsync(int id)
+    {
+        try
+        {
+            await CatalogSvc.DeleteDistrictAsync(id);
+            _districts = await CatalogSvc.GetDistrictsAsync();
+            BuildCards();
+            Snackbar.Add("Da xoa quan/huyen.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi xoa quan/huyen: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ResetDistrictForm()
+    {
+        _districtForm = new District();
+        _editingDistrict = false;
+    }
+
+    private async Task SaveWardAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_wardForm.WardName))
+        {
+            Snackbar.Add("Ten phuong/xa khong duoc de trong.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            if (_editingWard)
+            {
+                await CatalogSvc.UpdateWardAsync(_wardForm);
+            }
+            else
+            {
+                await CatalogSvc.CreateWardAsync(_wardForm);
+            }
+            _wards = await CatalogSvc.GetWardsAsync();
+            BuildCards();
+            ResetWardForm();
+            Snackbar.Add("Da luu phuong/xa.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi luu phuong/xa: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void EditWard(Ward ward)
+    {
+        _wardForm = new Ward
+        {
+            IDWard = ward.IDWard,
+            WardName = ward.WardName,
+            Delete_flag = ward.Delete_flag
+        };
+        _editingWard = true;
+    }
+
+    private async Task DeleteWardAsync(int id)
+    {
+        try
+        {
+            await CatalogSvc.DeleteWardAsync(id);
+            _wards = await CatalogSvc.GetWardsAsync();
+            BuildCards();
+            Snackbar.Add("Da xoa phuong/xa.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi xoa phuong/xa: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ResetWardForm()
+    {
+        _wardForm = new Ward();
+        _editingWard = false;
+    }
+
+    private async Task LoadAuditAsync()
+    {
+        try
+        {
+            var action = string.IsNullOrWhiteSpace(_auditFilterAction) ? null : _auditFilterAction.Trim().ToUpperInvariant();
+            var username = string.IsNullOrWhiteSpace(_auditFilterUsername) ? null : _auditFilterUsername.Trim();
+            _auditLogs = await AuditSvc.SearchAsync(username, action, _auditFrom, _auditTo);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Loi tai audit log: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private static Color GetActionColor(string? action) => action switch
+    {
+        "CREATE" or "INSERT" => Color.Success,
+        "UPDATE" => Color.Warning,
+        "DELETE" => Color.Error,
+        "LOGIN" => Color.Info,
+        "IMPORT" => Color.Primary,
+        _ => Color.Default
+    };
 }

@@ -20,7 +20,7 @@ else if (_error != null)
 }
 
 <div class="section-header">
-    <h3>Tổng quan hệ thống</h3>
+    <h3>📊 Tổng quan hệ thống</h3>
     <span class="section-meta">Dữ liệu cập nhật: Hôm nay, @DateTime.Now.ToString("dd/MM/yyyy")</span>
 </div>
 
@@ -63,18 +63,6 @@ else if (_error != null)
             <span class="kpi-change up">@(_totalEmployees > 0 ? $"{(double)_withPermit / _totalEmployees * 100:F1}% tổng số" : "-")</span>
         </div>
         <div class="kpi-icon">📋</div>
-    </div>
-
-    <div class="kpi-card kpi-teal kpi-card-action" role="button" tabindex="0"
-         @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
-        <div>
-            <span class="kpi-label">Diện thăm thân</span>
-            <span class="kpi-value" id="kpiFamily">@_familyVisitCount</span>
-            <span class="kpi-change @(_familyVisitExpiringCount > 0 ? "warn" : "up")">
-                @(_familyVisitExpiringCount > 0 ? $"⚠ {_familyVisitExpiringCount} sắp hết hạn" : "✓ Ổn định")
-            </span>
-        </div>
-        <div class="kpi-icon">👨‍👩‍👧</div>
     </div>
 </div>
 
@@ -240,7 +228,6 @@ else if (_error != null)
             await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiEmployees", _totalEmployees, 1500);
             await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiExpiring", _expiringCount, 800);
             await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiPermit", _withPermit, 1300);
-            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiFamily", _familyVisitCount, 1000);
         }
         catch { /* JS interop may fail during prerender */ }
     }

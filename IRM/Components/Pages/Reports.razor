@@ -1,18 +1,21 @@
 @page "/reports"
 
 @using IRM.Services
+@using IRM.Data.Models
 @inject ExportService ExportSvc
+@inject EmployeeService EmployeeSvc
 @inject IJSRuntime JS
+@inject ISnackbar Snackbar
 
 <PageTitle>Báo cáo - IRM v2.0</PageTitle>
 
 <div class="section-header" style="border-bottom:none; padding-bottom:0; margin-bottom:8px;">
-    <h3>Tạo báo cáo tùy chỉnh</h3>
+    <h3>📝 Tạo báo cáo tùy chỉnh</h3>
 </div>
 
 <div class="report-builder-grid">
     <div class="report-builder-sidebar">
-        <MudText Typo="Typo.subtitle1" Class="mb-4" Style="font-weight: 700;">Cấu hình báo cáo</MudText>
+        <MudText Typo="Typo.subtitle1" Class="mb-4" Style="font-weight: 700;">⚙️ Cấu hình báo cáo</MudText>
 
         <div class="mb-4">
             <span class="builder-section-title">Nguồn dữ liệu</span>
@@ -49,15 +52,17 @@
         <MudDivider Class="my-4" />
 
         <MudStack Spacing="1">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" StartIcon="@Icons.Material.Filled.Download"
-                       OnClick="ExportExcelAsync">
-                Xuất Excel
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.Visibility" OnClick="LoadPreviewAsync">
+                Xem trước
             </MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Default" FullWidth="true" StartIcon="@Icons.Material.Filled.PictureAsPdf"
-                       OnClick="ExportExcelAsync">
-                Xuất PDF
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.Download" OnClick="ExportExcelAsync"
+                       Disabled="@_isExporting">
+                @(_isExporting ? "Đang xuất..." : "📥 Xuất Excel")
             </MudButton>
-            <MudButton Variant="Variant.Text" Color="Color.Primary" FullWidth="true" StartIcon="@Icons.Material.Filled.Save">
+            <MudButton Variant="Variant.Text" Color="Color.Primary" FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.Save">
                 Lưu Template
             </MudButton>
         </MudStack>
@@ -65,39 +70,61 @@
 
     <div class="report-builder-preview">
         <div class="chart-header">
-            <h3>Xem trước: BC NLĐ sắp hết hạn tạm trú</h3>
-            <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">23 bản ghi</MudChip>
+            <h3>Xem trước báo cáo</h3>
+            <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">@_previewEmployees.Count bản ghi</MudChip>
         </div>
 
-        <MudSimpleTable Dense="true" Hover="true" Striped="true">
-            <thead>
-                <tr>
-                    <th>STT</th>
-                    <th>Công ty</th>
-                    <th>Họ tên</th>
-                    <th>Quốc tịch</th>
-                    <th>Hộ chiếu</th>
-                    <th>Nghề nghiệp</th>
-                    <th>GPLĐ</th>
-                    <th>Hạn TT</th>
-                    <th>Còn lại</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="group-header">
-                    <td colspan="9"><strong>Cty TNHH Samsung Electronics VN</strong></td>
-                </tr>
-                <tr><td>1</td><td></td><td>Zhang Wei</td><td>Trung Quốc</td><td>E12345678</td><td>Kỹ sư</td><td><span class="tag tag-green">Có GPLĐ</span></td><td>18/04/2026</td><td class="text-danger"><strong>3 ngày</strong></td></tr>
-                <tr><td>2</td><td></td><td>Kim Min-jun</td><td>Hàn Quốc</td><td>M55667788</td><td>Quản lý</td><td><span class="tag tag-green">Có GPLĐ</span></td><td>20/04/2026</td><td class="text-danger"><strong>5 ngày</strong></td></tr>
-                <tr class="group-header">
-                    <td colspan="9"><strong>Cty CP Hyundai Aluminum Vina</strong></td>
-                </tr>
-                <tr><td>3</td><td></td><td>Park Ji-hoon</td><td>Hàn Quốc</td><td>M99887766</td><td>Kỹ thuật</td><td><span class="tag tag-green">Có GPLĐ</span></td><td>03/05/2026</td><td class="text-warning"><strong>18 ngày</strong></td></tr>
-                <tr><td>4</td><td></td><td>Wang Li</td><td>Trung Quốc</td><td>E98765432</td><td>Quản lý</td><td><span class="tag tag-green">Có GPLĐ</span></td><td>10/05/2026</td><td class="text-info"><strong>25 ngày</strong></td></tr>
-            </tbody>
-        </MudSimpleTable>
+        @if (_isLoading)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+        }
+        else if (_previewEmployees.Any())
+        {
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Style="max-height: 500px; overflow-y: auto;">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        @foreach (var col in _columns.Where(c => c.Selected))
+                        {
+                            <th>@col.Name</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int stt = 0;
+                        string? currentGroup = null;
+                    }
+                    @foreach (var emp in _previewEmployees)
+                    {
+                        var groupVal = GetGroupValue(emp);
+                        if (groupVal != currentGroup)
+                        {
+                            currentGroup = groupVal;
+                            <tr class="group-header">
+                                <td colspan="@(_columns.Count(c => c.Selected) + 1)"><strong>🏢 @currentGroup</strong></td>
+                            </tr>
+                        }
+                        stt++;
+                        <tr>
+                            <td>@stt</td>
+                            @foreach (var col in _columns.Where(c => c.Selected))
+                            {
+                                <td>@GetColumnValue(emp, col.Name)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mt-4">
+                Nhấn "Xem trước" để tải dữ liệu báo cáo.
+            </MudAlert>
+        }
 
-        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mt-8 mb-3">Template đã lưu</MudText>
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mt-8 mb-3">📋 Template đã lưu</MudText>
         <MudStack Spacing="2">
             @foreach (var tpl in _templates)
             {
@@ -107,7 +134,7 @@
                         <MudText Typo="Typo.body2" Class="template-item-title">@tpl.Name</MudText>
                         <MudText Typo="Typo.caption" Color="Color.Secondary">@tpl.Meta</MudText>
                     </div>
-                    <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Primary">Chạy</MudButton>
+                    <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Primary" OnClick="LoadPreviewAsync">Chạy</MudButton>
                     <MudButton Variant="Variant.Outlined" Size="Size.Small">Sửa</MudButton>
                 </div>
             }
@@ -124,6 +151,9 @@
 
     private string _dataSource = "all";
     private string _groupBy = "company";
+    private bool _isLoading;
+    private bool _isExporting;
+    private List<Employee> _previewEmployees = new();
 
     private readonly List<ColumnOption> _columns = new()
     {
@@ -143,23 +173,116 @@
 
     private readonly List<TemplateItem> _templates = new()
     {
-        new("BC NLĐ sắp hết hạn tạm trú", "23 bản ghi · Hôm nay"),
-        new("BC NLĐ theo quốc tịch", "1,245 bản ghi · 15/04"),
-        new("BC thống kê theo lĩnh vực", "156 công ty · 10/04")
+        new("BC NLĐ sắp hết hạn tạm trú", "Sắp hết hạn trong 30 ngày"),
+        new("BC NLĐ theo quốc tịch", "Tất cả nhân viên"),
+        new("BC thống kê theo lĩnh vực", "Tất cả công ty")
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPreviewAsync();
+    }
+
+    private async Task LoadPreviewAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            _previewEmployees = await EmployeeSvc.GetAllActiveAsync();
+
+            // Sort by group
+            _previewEmployees = _groupBy switch
+            {
+                "nationality" => _previewEmployees.OrderBy(e => e.NationalityNav?.NationalityName ?? e.Nationality).ThenBy(e => e.StaffName).ToList(),
+                "field" => _previewEmployees.OrderBy(e => e.Company?.Field?.FieldName).ThenBy(e => e.StaffName).ToList(),
+                _ => _previewEmployees.OrderBy(e => e.Company?.CompanyName).ThenBy(e => e.StaffName).ToList()
+            };
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u xem trÆ°á»›c: {ex.Message}", Severity.Error);
+            _previewEmployees = new();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private string GetGroupValue(Employee emp) => _groupBy switch
+    {
+        "nationality" => emp.NationalityNav?.NationalityName ?? emp.Nationality ?? "Khác",
+        "field" => emp.Company?.Field?.FieldName ?? "Khác",
+        _ => emp.Company?.CompanyName ?? "Khác"
+    };
+
+    private string GetColumnValue(Employee emp, string col) => col switch
+    {
+        "Công ty" => emp.Company?.CompanyName ?? "",
+        "Họ tên" => emp.StaffName ?? "",
+        "Quốc tịch" => emp.NationalityNav?.NationalityName ?? emp.Nationality ?? "",
+        "Hộ chiếu" => emp.Passport ?? "",
+        "Nghề nghiệp" => emp.Career?.CareerName ?? "",
+        "Loại GPLĐ" => emp.WorkPermitString,
+        "Hạn tạm trú" => emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "",
+        "Giới tính" => emp.GenderString,
+        "Ngày sinh" => emp.Birthday?.ToString("dd/MM/yyyy") ?? "",
+        "Còn lại (ngày)" => emp.DaysUntilExpiry?.ToString() ?? "",
+        _ => ""
     };
 
     private async Task ExportExcelAsync()
     {
+        if (_isExporting)
+        {
+            return;
+        }
+
+        var selectedCols = _columns.Where(c => c.Selected).Select(c => c.Name).ToList();
+        if (!selectedCols.Any())
+        {
+            Snackbar.Add("Vui lÃ²ng chá»n Ã­t nháº¥t 1 cá»™t Ä‘á»ƒ xuáº¥t bÃ¡o cÃ¡o.", Severity.Warning);
+            return;
+        }
+
+        if (!_previewEmployees.Any())
+        {
+            Snackbar.Add("KhÃ´ng cÃ³ dá»¯ liá»‡u Ä‘á»ƒ xuáº¥t. HÃ£y báº¥m 'Xem trÆ°á»›c' trÆ°á»›c.", Severity.Warning);
+            return;
+        }
+
+        _isExporting = true;
         try
         {
-            var selectedCols = _columns.Where(c => c.Selected).Select(c => c.Name).ToList();
             var bytes = await ExportSvc.ExportReportAsync(selectedCols, _groupBy);
+            if (bytes.Length == 0)
+            {
+                throw new InvalidOperationException("Dá»¯ liá»‡u file xuáº¥t rá»—ng.");
+            }
+
             var base64 = Convert.ToBase64String(bytes);
-            await JS.InvokeVoidAsync("irmInterop.downloadFile",
-                $"BaoCao_{DateTime.Now:yyyyMMdd}.xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                base64);
+            try
+            {
+                await JS.InvokeVoidAsync("irmInterop.downloadFile",
+                    $"BaoCao_{DateTime.Now:yyyyMMdd}.xlsx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    base64);
+            }
+            catch (Exception jsEx)
+            {
+                await JS.InvokeVoidAsync("irmInterop.logError", "Export download failed", jsEx.Message);
+                throw;
+            }
+
+            Snackbar.Add("Xuáº¥t Excel thÃ nh cÃ´ng.", Severity.Success);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Xuáº¥t Excel tháº¥t báº¡i: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isExporting = false;
+        }
     }
 }

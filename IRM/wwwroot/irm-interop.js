@@ -49,5 +49,10 @@ window.irmInterop = {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    },
+
+    // â”€â”€ Client Error Log â”€â”€
+    logError: function (message, detail) {
+        console.error('[IRM]', message, detail || '');
     }
 };
