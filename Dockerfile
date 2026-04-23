@@ -23,6 +23,9 @@ COPY --from=build /app/publish .
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:10000
 ENV ConnectionStrings__DefaultConnection=""
+# Disable file watchers to avoid inotify limit on Render
+ENV DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
 
 EXPOSE 10000
 
