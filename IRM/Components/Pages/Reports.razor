@@ -1,5 +1,9 @@
 @page "/reports"
 
+@using IRM.Services
+@inject ExportService ExportSvc
+@inject IJSRuntime JS
+
 <PageTitle>Báo cáo - IRM v2.0</PageTitle>
 
 <div class="section-header" style="border-bottom:none; padding-bottom:0; margin-bottom:8px;">
@@ -12,7 +16,7 @@
 
         <div class="mb-4">
             <span class="builder-section-title">Nguồn dữ liệu</span>
-            <MudSelect T="string" Variant="Variant.Outlined" Value="@("all")" FullWidth="true">
+            <MudSelect T="string" Variant="Variant.Outlined" @bind-Value="_dataSource" FullWidth="true">
                 <MudSelectItem Value="@("all")">Nhân viên + Công ty</MudSelectItem>
                 <MudSelectItem Value="@("company")">Chỉ Công ty</MudSelectItem>
                 <MudSelectItem Value="@("employee")">Chỉ Nhân viên</MudSelectItem>
@@ -35,7 +39,7 @@
 
         <div class="mb-4">
             <span class="builder-section-title">Nhóm theo</span>
-            <MudSelect T="string" Variant="Variant.Outlined" Value="@("company")" FullWidth="true">
+            <MudSelect T="string" Variant="Variant.Outlined" @bind-Value="_groupBy" FullWidth="true">
                 <MudSelectItem Value="@("company")">Công ty</MudSelectItem>
                 <MudSelectItem Value="@("nationality")">Quốc tịch</MudSelectItem>
                 <MudSelectItem Value="@("field")">Lĩnh vực</MudSelectItem>
@@ -45,10 +49,12 @@
         <MudDivider Class="my-4" />
 
         <MudStack Spacing="1">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" StartIcon="@Icons.Material.Filled.Download">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" StartIcon="@Icons.Material.Filled.Download"
+                       OnClick="ExportExcelAsync">
                 Xuất Excel
             </MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Default" FullWidth="true" StartIcon="@Icons.Material.Filled.PictureAsPdf">
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" FullWidth="true" StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                       OnClick="ExportExcelAsync">
                 Xuất PDF
             </MudButton>
             <MudButton Variant="Variant.Text" Color="Color.Primary" FullWidth="true" StartIcon="@Icons.Material.Filled.Save">
@@ -116,6 +122,9 @@
         public bool Selected { get; set; }
     }
 
+    private string _dataSource = "all";
+    private string _groupBy = "company";
+
     private readonly List<ColumnOption> _columns = new()
     {
         new() { Name = "Công ty", Selected = true },
@@ -138,4 +147,19 @@
         new("BC NLĐ theo quốc tịch", "1,245 bản ghi · 15/04"),
         new("BC thống kê theo lĩnh vực", "156 công ty · 10/04")
     };
+
+    private async Task ExportExcelAsync()
+    {
+        try
+        {
+            var selectedCols = _columns.Where(c => c.Selected).Select(c => c.Name).ToList();
+            var bytes = await ExportSvc.ExportReportAsync(selectedCols, _groupBy);
+            var base64 = Convert.ToBase64String(bytes);
+            await JS.InvokeVoidAsync("irmInterop.downloadFile",
+                $"BaoCao_{DateTime.Now:yyyyMMdd}.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+        }
+        catch { }
+    }
 }

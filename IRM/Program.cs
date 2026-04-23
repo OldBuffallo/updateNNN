@@ -64,6 +64,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<CatalogService>();
 builder.Services.AddScoped<ImportService>();
+builder.Services.AddScoped<ExportService>();
 
 var app = builder.Build();
 

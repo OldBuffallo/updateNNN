@@ -5,6 +5,8 @@
 @using IRM.Data.Models
 @inject CompanyService CompanySvc
 @inject CatalogService CatalogSvc
+@inject ExportService ExportSvc
+@inject IJSRuntime JS
 
 <PageTitle>Quản lý Công ty - IRM v2.0</PageTitle>
 
@@ -59,6 +61,12 @@
                    Color="Color.Primary"
                    OnClick="LoadDataAsync">
             Tìm
+        </MudButton>
+        <MudButton Variant="Variant.Outlined"
+                   StartIcon="@Icons.Material.Filled.Download"
+                   Color="Color.Default"
+                   OnClick="ExportExcelAsync">
+            📥 Xuất Excel
         </MudButton>
         <MudButton Variant="Variant.Outlined"
                    StartIcon="@Icons.Material.Filled.UploadFile"
@@ -191,6 +199,20 @@
         {
             _loading = false;
         }
+    }
+
+    private async Task ExportExcelAsync()
+    {
+        try
+        {
+            var bytes = await ExportSvc.ExportCompaniesAsync(_searchText, _selectedFieldId);
+            var base64 = Convert.ToBase64String(bytes);
+            await JS.InvokeVoidAsync("irmInterop.downloadFile",
+                $"DanhSachCongTy_{DateTime.Now:yyyyMMdd}.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+        }
+        catch { }
     }
 
     private static string GetFieldTagClass(string fieldName) => fieldName switch

@@ -39,5 +39,15 @@ window.irmInterop = {
             if (progress < 1) requestAnimationFrame(update);
         }
         requestAnimationFrame(update);
+    },
+
+    // ── File Download ──
+    downloadFile: function (fileName, contentType, base64) {
+        var link = document.createElement('a');
+        link.download = fileName;
+        link.href = 'data:' + contentType + ';base64,' + base64;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 };

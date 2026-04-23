@@ -36,6 +36,10 @@
                         <label for="loginPass">Mật khẩu</label>
                         <input type="password" id="loginPass" @bind="_loginModel.Password" placeholder="Nhập mật khẩu" />
                     </div>
+                    @if (!string.IsNullOrEmpty(_loginError))
+                    {
+                        <div style="color: #dc2626; font-size: 13px; margin-bottom: 12px; text-align: center;">@_loginError</div>
+                    }
                     <button type="submit" class="btn-login">Đăng nhập</button>
                 </EditForm>
                 <div class="login-footer">
@@ -225,6 +229,7 @@
     private string _breadcrumbText = "Dashboard";
 
     private LoginModel _loginModel = new() { Username = "admin", Password = "" };
+    private string? _loginError;
 
     private class LoginModel
     {
@@ -322,7 +327,12 @@
 
     private void HandleLogin()
     {
-        // Simple UI-only login (accept any credentials)
+        if (_loginModel.Password != "demo")
+        {
+            _loginError = "❌ Sai mật khẩu. Mật khẩu mặc định: demo";
+            return;
+        }
+        _loginError = null;
         _isLoggedIn = true;
     }
 

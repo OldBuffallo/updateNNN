@@ -135,7 +135,7 @@
 
         <MudGrid Spacing="3" Class="mt-3">
             <MudItem xs="6">
-                <MudAutocomplete T="Company" @bind-Value="_selectedCompany" Label="Chọn công ty (*)"
+                <MudAutocomplete T="Company" @bind-Value="_selectedCompany" Label="Chọn công ty (tùy chọn)"
                                  SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")"
                                  Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
                                  ResetValueOnEmptyText="true" Immediate="true" />
@@ -159,7 +159,7 @@
         <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
                        EndIcon="@Icons.Material.Filled.ArrowForward"
-                       Disabled="@(_fileStream == null || _selectedCompany == null)"
+                       Disabled="@(_fileStream == null)"
                        OnClick="GoToStep2">Tiếp tục</MudButton>
         </MudStack>
     }
@@ -470,7 +470,7 @@
 
     private async Task GoToStep2()
     {
-        if (_fileStream == null || _selectedCompany == null) return;
+        if (_fileStream == null) return;
 
         _isProcessing = true;
         _processingMessage = "Đang đọc cấu trúc file Excel...";
@@ -522,7 +522,7 @@
 
     private async Task GoToStep3()
     {
-        if (_fileStream == null || _selectedCompany == null) return;
+        if (_fileStream == null) return;
 
         _isProcessing = true;
         _processingMessage = "Đang phân tích dữ liệu và kiểm tra trùng lặp...";
@@ -538,7 +538,7 @@
                 Snackbar.Add($"✅ Đã lưu template '{_templateName}'", Severity.Success);
             }
 
-            _previewRows = await ImportSvc.GeneratePreviewAsync(_fileStream, _columnMappings, _selectedCompany.IDCompany);
+            _previewRows = await ImportSvc.GeneratePreviewAsync(_fileStream, _columnMappings, _selectedCompany?.IDCompany ?? 0);
 
             // Init duplicate decisions — default to "update"
             _duplicateDecisions = new();
@@ -575,7 +575,7 @@
 
     private async Task ExecuteImport()
     {
-        if (_selectedCompany == null) return;
+        if (_fileStream == null) return;
 
         _isProcessing = true;
         _processingMessage = "Đang import dữ liệu vào CSDL...";
@@ -586,7 +586,7 @@
             _importResult = await ImportSvc.ExecuteImportAsync(
                 _previewRows,
                 _duplicateDecisions,
-                _selectedCompany.IDCompany,
+                _selectedCompany?.IDCompany ?? 0,
                 _uploadedFileName ?? "unknown.xlsx",
                 "admin"
             );

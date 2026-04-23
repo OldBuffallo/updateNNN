@@ -4,6 +4,8 @@
 @using IRM.Data.Models
 @inject EmployeeService EmployeeSvc
 @inject CompanyService CompanySvc
+@inject ExportService ExportSvc
+@inject IJSRuntime JS
 
 <PageTitle>Quản lý Nhân viên - IRM v2.0</PageTitle>
 
@@ -71,7 +73,8 @@
     </MudStack>
 
     <MudStack Row="true" Spacing="2">
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Download" Color="Color.Default">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Download" Color="Color.Default"
+                   OnClick="ExportExcelAsync">
             📥 Xuất Excel
         </MudButton>
         <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PersonAdd" Color="Color.Primary">
@@ -311,6 +314,28 @@ else if (!_loading)
         }
 
         _employees = query.ToList();
+    }
+
+    private async Task ExportExcelAsync()
+    {
+        try
+        {
+            int? wpFilter = null;
+            if (!string.IsNullOrWhiteSpace(_selectedPermit) && int.TryParse(_selectedPermit, out var wp))
+                wpFilter = wp;
+
+            var bytes = await ExportSvc.ExportEmployeesAsync(
+                _selectedCompany?.IDCompany,
+                _selectedNationality,
+                wpFilter,
+                _showExpiring);
+            var base64 = Convert.ToBase64String(bytes);
+            await JS.InvokeVoidAsync("irmInterop.downloadFile",
+                $"DanhSachNhanVien_{DateTime.Now:yyyyMMdd}.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+        }
+        catch { }
     }
 
     private static string GetNatTagClass(string? code) => code switch
