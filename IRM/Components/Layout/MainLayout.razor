@@ -1,5 +1,8 @@
 @inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Web
 @inject IJSRuntime JS
+@inject NavigationManager Nav
+@inject Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage.ProtectedSessionStorage SessionStore
 
 <MudThemeProvider Theme="_theme" IsDarkMode="@_isDarkMode" />
 <MudPopoverProvider />
@@ -73,12 +76,15 @@
 
             <div class="topbar-right">
                 <MudTextField T="string"
+                              @bind-Value="_topSearchQuery"
                               Placeholder="Tìm nhanh... (Ctrl+K)"
                               Variant="Variant.Outlined"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
                               Margin="Margin.Dense"
-                              Class="topbar-search" />
+                              Class="topbar-search"
+                              OnKeyUp="OnTopSearchKeyUp"
+                              Immediate="true" />
 
                 <MudBadge Dot="true" Color="Color.Error" Overlap="true">
                     <MudIconButton Icon="@Icons.Material.Filled.NotificationsNone"
@@ -175,12 +181,75 @@
             <MudTabPanel Text="Trang hiện tại" Icon="@Icons.Material.Filled.Info">
                 <MudContainer Class="pa-4">
                     <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Color="Color.Primary" Class="mb-2">@_pageTitle</MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        Đây là trang @_pageTitle. Sử dụng các chức năng trên trang để quản lý dữ liệu lao động nước ngoài.
-                    </MudText>
-                    <MudAlert Severity="Severity.Info" Dense="true" Class="mt-4">
+                    @switch (_pageTitle)
+                    {
+                        case "Dashboard":
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>KPI</strong> — Hiển thị tổng số NLĐ, GPLĐ, và cảnh báo sắp hết hạn. Nhấn vào thẻ KPI để xem chi tiết.</MudAlert>
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Biểu đồ</strong> — Phân bổ NLĐ theo quốc tịch, lĩnh vực, trạng thái GPLĐ. Di chuột để xem số liệu cụ thể.</MudAlert>
+                            <MudAlert Severity="Severity.Warning" Dense="true"><strong>Cảnh báo</strong> — Danh sách NLĐ sắp hết hạn tạm trú (≤30 ngày) hiện ở bảng cảnh báo bên phải.</MudAlert>
+                            break;
+                        case "Quản lý Công ty":
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Thêm công ty</strong> — Nhấn nút "Thêm công ty" → điền tên, loại hình, lĩnh vực, số LĐ.</MudAlert>
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Sửa/Xóa</strong> — Nhấn ⋮ ở cột cuối mỗi dòng → chọn Sửa hoặc Xóa.</MudAlert>
+                            <MudAlert Severity="Severity.Success" Dense="true"><strong>Xuất Excel</strong> — Nhấn nút "Xuất Excel" ở thanh công cụ phía trên. File tải về dạng .xlsx.</MudAlert>
+                            break;
+                        case "Quản lý Nhân viên":
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Lọc</strong> — Dùng bộ lọc trên thanh công cụ: Công ty, Quốc tịch, GPLĐ, Sắp hết hạn.</MudAlert>
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Thêm NLĐ</strong> — Nhấn "Thêm nhân viên" → điền thông tin → Lưu. Hộ chiếu sẽ được kiểm tra trùng.</MudAlert>
+                            <MudAlert Severity="Severity.Warning" Dense="true"><strong>Màu sắc dòng</strong> — Đỏ: hết hạn ≤7 ngày, Cam: ≤30 ngày.</MudAlert>
+                            break;
+                        case "Import Excel":
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Bước 1</strong> — Upload file .xlsx hoặc .xls. Nhấn "Tải file mẫu" để lấy cấu trúc chuẩn.</MudAlert>
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Bước 2</strong> — Ghép cột Excel với trường hệ thống. HT tự nhận dạng, bạn có thể chỉnh lại.</MudAlert>
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Bước 3</strong> — Xem trước dữ liệu và xử lý trùng lặp (hộ chiếu). Chọn bỏ qua/cập nhật.</MudAlert>
+                            <MudAlert Severity="Severity.Success" Dense="true" Class="mb-2"><strong>Bước 4</strong> — Kết quả import với thống kê. Có thể hoàn tác (rollback) nếu cần.</MudAlert>
+                            <MudAlert Severity="Severity.Warning" Dense="true"><strong>Nhập thủ công</strong> — Nhấn "✏️ Nhập thủ công" để nhập từng NLĐ mà không cần file Excel.</MudAlert>
+                            break;
+                        case "Tìm kiếm":
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Full-text</strong> — Tìm trên tên, hộ chiếu, visa, GPLĐ, công ty, quốc tịch, nghề nghiệp, người thân.</MudAlert>
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Bộ lọc</strong> — Chọn chip "Nhân viên" / "Công ty" để thu hẹp kết quả.</MudAlert>
+                            <MudAlert Severity="Severity.Success" Dense="true"><strong>Từ khóa được tô sáng</strong> — Từ khóa tìm kiếm sẽ được highlight trong kết quả.</MudAlert>
+                            break;
+                        case "Báo cáo":
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Chọn cột</strong> — Tick/untick các cột bên trái để tùy chỉnh báo cáo.</MudAlert>
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Bộ lọc</strong> — Lọc theo GPLĐ, quốc tịch, NLĐ sắp hết hạn (30/60/90 ngày).</MudAlert>
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2"><strong>Nhóm</strong> — Chọn nhóm theo Công ty, Quốc tịch, hoặc Lĩnh vực.</MudAlert>
+                            <MudAlert Severity="Severity.Success" Dense="true"><strong>Xuất Excel</strong> — Nhấn "Xuất Excel" để tải file .xlsx với dữ liệu đã lọc + thống kê tóm tắt.</MudAlert>
+                            break;
+                        default:
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                Sử dụng các chức năng trên trang để quản lý dữ liệu lao động nước ngoài.
+                            </MudText>
+                            break;
+                    }
+                    <MudAlert Severity="Severity.Normal" Dense="true" Class="mt-4">
                         <strong>Mẹo:</strong> Nhấn <strong>Ctrl+K</strong> để tìm kiếm nhanh từ bất kỳ trang nào.
                     </MudAlert>
+                </MudContainer>
+            </MudTabPanel>
+
+            <MudTabPanel Text="Hướng dẫn nhanh" Icon="@Icons.Material.Filled.RocketLaunch">
+                <MudContainer Class="pa-4">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-3">🚀 Bắt đầu nhanh với IRM</MudText>
+                    <MudTimeline TimelinePosition="TimelinePosition.Start">
+                        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+                            <MudText Typo="Typo.body2"><strong>1. Tạo công ty</strong> — Vào "Công ty" → Thêm công ty mới với thông tin cơ bản.</MudText>
+                        </MudTimelineItem>
+                        <MudTimelineItem Color="Color.Success" Size="Size.Small">
+                            <MudText Typo="Typo.body2"><strong>2. Thêm nhân viên</strong> — Vào "Import" → Tải file mẫu → Điền dữ liệu → Upload. Hoặc nhấn "Nhập thủ công".</MudText>
+                        </MudTimelineItem>
+                        <MudTimelineItem Color="Color.Warning" Size="Size.Small">
+                            <MudText Typo="Typo.body2"><strong>3. Theo dõi</strong> — Dashboard hiển thị KPI, biểu đồ và cảnh báo hết hạn tự động.</MudText>
+                        </MudTimelineItem>
+                        <MudTimelineItem Color="Color.Info" Size="Size.Small">
+                            <MudText Typo="Typo.body2"><strong>4. Báo cáo</strong> — Vào "Báo cáo" → Chọn cột, bộ lọc → Xuất Excel để gửi cơ quan.</MudText>
+                        </MudTimelineItem>
+                    </MudTimeline>
+                    <MudDivider Class="my-3" />
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        ⚠️ Dữ liệu xóa sẽ được "ẩn" (soft delete), có thể phục hồi từ trang Quản trị.<br/>
+                        📥 Import hỗ trợ .xlsx và .xls. Mỗi phiên import đều có lịch sử để hoàn tác.
+                    </MudText>
                 </MudContainer>
             </MudTabPanel>
 
@@ -207,8 +276,32 @@
                         <MudExpansionPanel Text="Tôi quên mật khẩu?" MaxHeight="200">
                             <MudText Typo="Typo.body2">Liên hệ quản trị viên để đặt lại. Vào Quản trị → Tài khoản → Đặt lại mật khẩu.</MudText>
                         </MudExpansionPanel>
-                        <MudExpansionPanel Text="File Excel import bị lỗi?" MaxHeight="200">
-                            <MudText Typo="Typo.body2">Đảm bảo file đúng định dạng .xlsx. Dòng đầu tiên phải là tiêu đề cột.</MudText>
+                        <MudExpansionPanel Text="File Excel import bị lỗi?" MaxHeight="300">
+                            <MudText Typo="Typo.body2">Đảm bảo file đúng định dạng .xlsx hoặc .xls. Dòng đầu tiên phải là tiêu đề cột. Nhấn "📥 Tải file mẫu" trong trang Import để lấy cấu trúc chuẩn.</MudText>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Text="Làm sao để hoàn tác import?" MaxHeight="300">
+                            <MudText Typo="Typo.body2">Vào trang Import → Nhấn "Lịch sử Import" → Tìm phiên import cần hoàn tác → Nhấn "Rollback". Dữ liệu sẽ khôi phục về trạng thái trước khi import.</MudText>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Text="Trùng hộ chiếu khi import?" MaxHeight="300">
+                            <MudText Typo="Typo.body2">Hệ thống tự phát hiện hộ chiếu trùng ở Bước 3. Bạn có thể chọn "Cập nhật" (ghi đè dữ liệu cũ) hoặc "Bỏ qua" cho từng dòng.</MudText>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Text="Nhập thủ công thay vì dùng Excel?" MaxHeight="300">
+                            <MudText Typo="Typo.body2">Trong trang Import, nhấn nút "✏️ Nhập thủ công" ở góc trên phải. Form sẽ hiển thị để bạn nhập từng nhân viên trực tiếp.</MudText>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Text="Xuất báo cáo theo bộ lọc?" MaxHeight="300">
+                            <MudText Typo="Typo.body2">Vào Báo cáo → Chọn bộ lọc (GPLĐ, quốc tịch, sắp hết hạn) → Nhấn "Xem trước" → Nhấn "Xuất Excel". File xuất sẽ chỉ chứa dữ liệu đã lọc.</MudText>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Text="NLĐ sắp hết hạn được tính thế nào?" MaxHeight="300">
+                            <MudText Typo="Typo.body2">Hệ thống so sánh ngày "Hạn tạm trú" với ngày hiện tại. NLĐ có hạn ≤30 ngày sẽ được đánh dấu cảnh báo trên Dashboard và trong danh sách.</MudText>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Text="Xóa nhân viên có mất dữ liệu không?" MaxHeight="200">
+                            <MudText Typo="Typo.body2">Không. Hệ thống sử dụng "xóa mềm" — dữ liệu chỉ bị ẩn và có thể phục hồi từ trang Quản trị.</MudText>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Text="Hệ thống hỗ trợ file .xls không?" MaxHeight="200">
+                            <MudText Typo="Typo.body2">Có. Hệ thống hỗ trợ cả .xlsx (Excel 2007+) và .xls (Excel 97-2003) cho cả import và export.</MudText>
+                        </MudExpansionPanel>
+                        <MudExpansionPanel Text="Tìm kiếm hoạt động thế nào?" MaxHeight="300">
+                            <MudText Typo="Typo.body2">Full-text search tìm trên tất cả các trường: tên, hộ chiếu, visa, GPLĐ, công ty, quốc tịch, nghề nghiệp, người thân. Có thể lọc theo NV hoặc Công ty.</MudText>
                         </MudExpansionPanel>
                         <MudExpansionPanel Text="Liên hệ hỗ trợ kỹ thuật?" MaxHeight="200">
                             <MudText Typo="Typo.body2">Email: support@irm.vn · ĐT: 0123.456.789</MudText>
@@ -227,6 +320,7 @@
     private bool _isLoggedIn;
     private string _pageTitle = "Dashboard";
     private string _breadcrumbText = "Dashboard";
+    private string? _topSearchQuery;
 
     private LoginModel _loginModel = new() { Username = "admin", Password = "" };
     private string? _loginError;
@@ -312,6 +406,18 @@
     {
         if (firstRender)
         {
+            // Restore login state from session
+            try
+            {
+                var result = await SessionStore.GetAsync<bool>("irm_logged_in");
+                if (result.Success && result.Value && !_isLoggedIn)
+                {
+                    _isLoggedIn = true;
+                    StateHasChanged();
+                }
+            }
+            catch { /* First visit, no session */ }
+
             // Init theme from localStorage
             var savedTheme = await JS.InvokeAsync<string>("irmInterop.initTheme");
             if (savedTheme == "dark" && !_isDarkMode)
@@ -325,7 +431,7 @@
         }
     }
 
-    private void HandleLogin()
+    private async Task HandleLogin()
     {
         if (_loginModel.Password != "demo")
         {
@@ -334,6 +440,7 @@
         }
         _loginError = null;
         _isLoggedIn = true;
+        try { await SessionStore.SetAsync("irm_logged_in", true); } catch { }
     }
 
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
@@ -342,6 +449,7 @@
     {
         _isDarkMode = !_isDarkMode;
         await JS.InvokeVoidAsync("irmInterop.setTheme", _isDarkMode ? "dark" : "light");
+        try { await JS.InvokeVoidAsync("irmInterop.refreshCharts"); } catch { }
     }
 
     private void ToggleHelp() => _helpOpen = !_helpOpen;
@@ -352,8 +460,18 @@
         _breadcrumbText = _breadcrumbs.GetValueOrDefault(title, title);
     }
 
-    private void Logout()
+    private void OnTopSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(_topSearchQuery))
+        {
+            Nav.NavigateTo($"/search?q={Uri.EscapeDataString(_topSearchQuery)}");
+            _topSearchQuery = "";
+        }
+    }
+
+    private async Task Logout()
     {
         _isLoggedIn = false;
+        try { await SessionStore.DeleteAsync("irm_logged_in"); } catch { }
     }
 }

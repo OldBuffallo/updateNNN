@@ -3,6 +3,10 @@
 @using IRM.Data.Models
 @inject ImportService ImportSvc
 @inject CompanyService CompanySvc
+@inject ExportService ExportSvc
+@inject EmployeeService EmployeeSvc
+@inject CatalogService CatalogSvc
+@inject IJSRuntime JS
 @inject ISnackbar Snackbar
 
 <PageTitle>Import Excel — IRM v2.0</PageTitle>
@@ -16,6 +20,15 @@
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.History"
                    Color="Color.Default" OnClick="@(() => _showHistory = !_showHistory)">
             @(_showHistory ? "Ẩn lịch sử" : "Lịch sử Import")
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Download"
+                   Color="Color.Primary" OnClick="DownloadSampleFile">
+            📥 Tải file mẫu
+        </MudButton>
+        <MudButton Variant="@(_manualMode ? Variant.Filled : Variant.Outlined)"
+                   StartIcon="@Icons.Material.Filled.Edit"
+                   Color="Color.Success" OnClick="@(() => _manualMode = !_manualMode)">
+            @(_manualMode ? "📤 Chuyển Import Excel" : "✏️ Nhập thủ công")
         </MudButton>
     </MudStack>
 </MudStack>
@@ -78,7 +91,69 @@
     </MudPaper>
 }
 
-@* ── Wizard Steps ── *@
+@* ── MANUAL ENTRY FORM ── *@
+@if (_manualMode)
+{
+    <MudPaper Elevation="0" Class="pa-6 mb-4 rounded-xl border-solid border" Style="border-width: 1px;">
+        <MudText Typo="Typo.h6" Style="font-weight: 800;" Class="mb-1">✏️ Nhập thủ công — Thêm nhân viên trực tiếp</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">Điền thông tin bên dưới để thêm nhân viên mà không cần file Excel</MudText>
+
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6"><MudTextField T="string" Label="Họ tên *" @bind-Value="_mf.StaffName" Variant="Variant.Outlined" Required="true" HelperText="Bắt buộc — Nhập đầy đủ họ và tên" /></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="int" Label="Giới tính" @bind-Value="_mf.Gender" Variant="Variant.Outlined"><MudSelectItem Value="1">Nam</MudSelectItem><MudSelectItem Value="0">Nữ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudDatePicker Label="Ngày sinh" @bind-Date="_mf.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+
+            <MudItem xs="6" md="4"><MudSelect T="string" Label="Quốc tịch" @bind-Value="_mf.Nationality" Variant="Variant.Outlined" Clearable="true">@foreach(var n in _mfNationalities){<MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>}</MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Số hộ chiếu *" @bind-Value="_mf.Passport" Variant="Variant.Outlined" HelperText="Quan trọng — Dùng để kiểm tra trùng lặp" /></MudItem>
+            <MudItem xs="12" md="4"><MudAutocomplete T="Company" Label="Công ty *" Value="_mfCompany" ValueChanged="v => { _mfCompany = v; _mf.IDCompany = v?.IDCompany ?? 0; }" SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")" Variant="Variant.Outlined" ResetValueOnEmptyText="true" /></MudItem>
+
+            <MudItem xs="6" md="4"><MudSelect T="int?" Label="Nghề nghiệp" @bind-Value="_mf.IDCareer" Variant="Variant.Outlined" Clearable="true">@foreach(var c in _mfCareers){<MudSelectItem T="int?" Value="@((int?)c.IDCareer)">@c.CareerName</MudSelectItem>}</MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="int" Label="GPLĐ" @bind-Value="_mf.WorkPermit" Variant="Variant.Outlined"><MudSelectItem Value="0">Miễn GPLĐ</MudSelectItem><MudSelectItem Value="1">Đã có GPLĐ</MudSelectItem><MudSelectItem Value="2">Chưa có GPLĐ</MudSelectItem><MudSelectItem Value="3">NĐT miễn GPLĐ</MudSelectItem><MudSelectItem Value="4">NĐT đã có GPLĐ</MudSelectItem><MudSelectItem Value="5">NĐT chưa có GPLĐ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudDatePicker Label="Hạn tạm trú" @bind-Date="_mf.TemporaryStay" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" HelperText="Quan trọng — Cảnh báo hết hạn" /></MudItem>
+
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Số GPLĐ" @bind-Value="_mf.WorkPermitNumber" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Số Visa" @bind-Value="_mf.VisaNumber" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="12" md="4"><MudTextField T="string" Label="Địa chỉ" @bind-Value="_mf.Address" Variant="Variant.Outlined" /></MudItem>
+
+            <MudItem xs="12"><MudTextField T="string" Label="Ghi chú" @bind-Value="_mf.Note" Variant="Variant.Outlined" Lines="2" /></MudItem>
+
+            @* Thăm thân *@
+            <MudItem xs="12"><MudDivider Class="my-1" /><MudText Typo="Typo.subtitle2" Style="font-weight:700;">👨‍👩‍👧 Thông tin thăm thân (tùy chọn)</MudText></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="int" Label="Thăm thân" @bind-Value="_mf.FamilyVisit" Variant="Variant.Outlined"><MudSelectItem Value="0">Không</MudSelectItem><MudSelectItem Value="1">Có</MudSelectItem></MudSelect></MudItem>
+            @if (_mf.FamilyVisit == 1)
+            {
+                <MudItem xs="6" md="3"><MudTextField T="string" Label="Tên người thân" @bind-Value="_mf.FamilyVisitRelativeName" Variant="Variant.Outlined" /></MudItem>
+                <MudItem xs="6" md="3"><MudSelect T="string" Label="Quan hệ" @bind-Value="_mf.FamilyVisitRelationship" Variant="Variant.Outlined"><MudSelectItem Value="@("Vợ/Chồng")">Vợ/Chồng</MudSelectItem><MudSelectItem Value="@("Con")">Con</MudSelectItem><MudSelectItem Value="@("Cha/Mẹ")">Cha/Mẹ</MudSelectItem><MudSelectItem Value="@("Anh/Chị/Em")">Anh/Chị/Em</MudSelectItem></MudSelect></MudItem>
+                <MudItem xs="6" md="3"><MudTextField T="string" Label="CMND/CCCD người thân" @bind-Value="_mf.FamilyVisitRelativeIdCard" Variant="Variant.Outlined" /></MudItem>
+                <MudItem xs="6" md="3"><MudDatePicker Label="Ngày bắt đầu TT" @bind-Date="_mf.FamilyVisitStartDate" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+                <MudItem xs="6" md="3"><MudDatePicker Label="Hạn thăm thân" @bind-Date="_mf.FamilyVisitEndDate" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            }
+        </MudGrid>
+
+        <MudStack Row="true" Justify="Justify.Center" Spacing="3" Class="mt-4">
+            <MudButton Variant="Variant.Outlined" OnClick="ResetManualForm" StartIcon="@Icons.Material.Filled.Clear">Xóa form</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large"
+                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                       OnClick="SaveManualEntryAsync"
+                       Disabled="@(string.IsNullOrWhiteSpace(_mf.StaffName) || _mf.IDCompany == 0)">
+                ➕ Thêm nhân viên
+            </MudButton>
+        </MudStack>
+
+        @if (!string.IsNullOrWhiteSpace(_mf.StaffName) && _mf.IDCompany == 0)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-3">⚠️ Vui lòng chọn <strong>Công ty</strong> trước khi thêm nhân viên.</MudAlert>
+        }
+        @if (!string.IsNullOrWhiteSpace(_mf.StaffName) && string.IsNullOrWhiteSpace(_mf.Passport))
+        {
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">💡 Nên điền <strong>Số hộ chiếu</strong> để hệ thống kiểm tra trùng lặp.</MudAlert>
+        }
+    </MudPaper>
+}
+
+@* ── Wizard Steps (Excel Import Mode) ── *@
+@if (!_manualMode)
+{
 <MudPaper Elevation="0" Class="pa-3 mb-4 rounded-lg border-solid border" Style="border-width: 1px;">
     <MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center" Spacing="0">
         @for (int i = 1; i <= 4; i++)
@@ -115,10 +190,10 @@
             <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">
                 hoặc nhấn nút bên dưới để chọn file
             </MudText>
-            <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="mt-2">.xlsx — Yêu cầu đúng cấu trúc với CSDL</MudText>
+            <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="mt-2">.xlsx hoặc .xls — Hệ thống hỗ trợ cả hai định dạng Excel</MudText>
 
             <MudStack AlignItems="AlignItems.Center" Class="mt-4">
-                <InputFile OnChange="HandleFileUpload" accept=".xlsx" id="fileInput" style="display:none" />
+                <InputFile OnChange="HandleFileUpload" accept=".xlsx,.xls" id="fileInput" style="display:none" />
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" HtmlTag="label" For="fileInput"
                            StartIcon="@Icons.Material.Filled.AttachFile">
                     Chọn file Excel
@@ -373,6 +448,7 @@
         </MudPaper>
     }
 </MudContainer>
+}
 
 @if (_isProcessing)
 {
@@ -389,6 +465,13 @@
     private int _currentStep = 1;
     private bool _showHistory = false;
     private bool _isProcessing;
+    private bool _manualMode = false;
+
+    // Manual entry
+    private Employee _mf = new() { Gender = 1 };
+    private Company? _mfCompany;
+    private List<NationalityEntity> _mfNationalities = new();
+    private List<Career> _mfCareers = new();
     private string _processingMessage = "";
 
     // Step 1
@@ -422,6 +505,8 @@
     {
         await LoadHistoryAsync();
         await LoadTemplatesAsync();
+        _mfNationalities = await CatalogSvc.GetNationalitiesAsync();
+        _mfCareers = await CatalogSvc.GetCareersAsync();
     }
 
     // ══════════════════════════════════════════
@@ -433,9 +518,10 @@
         var file = e.File;
         if (file == null) return;
 
-        if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+        if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) &&
+            !file.Name.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
         {
-            Snackbar.Add("❌ Chỉ hỗ trợ file .xlsx", Severity.Error);
+            Snackbar.Add("❌ Chỉ hỗ trợ file Excel (.xlsx hoặc .xls)", Severity.Error);
             return;
         }
 
@@ -667,5 +753,69 @@
         _importResult = null;
         _saveTemplate = false;
         _templateName = "";
+    }
+
+    // ══════════════════════════════════════════
+    // MANUAL ENTRY
+    // ══════════════════════════════════════════
+
+    private async Task SaveManualEntryAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_mf.StaffName))
+        {
+            Snackbar.Add("❌ Họ tên không được trống", Severity.Error);
+            return;
+        }
+        if (_mf.IDCompany == 0)
+        {
+            Snackbar.Add("❌ Chưa chọn công ty", Severity.Error);
+            return;
+        }
+
+        // Check duplicate passport
+        if (!string.IsNullOrWhiteSpace(_mf.Passport))
+        {
+            var isDup = await EmployeeSvc.CheckDuplicatePassportAsync(_mf.Passport);
+            if (isDup)
+            {
+                Snackbar.Add($"⚠️ Hộ chiếu {_mf.Passport} đã tồn tại trong hệ thống!", Severity.Warning);
+                return;
+            }
+        }
+
+        try
+        {
+            await EmployeeSvc.CreateAsync(_mf);
+            Snackbar.Add($"✅ Đã thêm nhân viên \"{_mf.StaffName}\" thành công!", Severity.Success);
+            ResetManualForm();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"❌ Lỗi: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ResetManualForm()
+    {
+        _mf = new Employee { Gender = 1 };
+        _mfCompany = null;
+    }
+
+    private async Task DownloadSampleFile()
+    {
+        try
+        {
+            var bytes = ExportSvc.GenerateSampleExcelBytes();
+            var base64 = Convert.ToBase64String(bytes);
+            await JS.InvokeVoidAsync("irmInterop.downloadFile",
+                "Mau_Import_NLD.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+            Snackbar.Add("📥 Đã tải file mẫu — Xem sheet 'Hướng dẫn' trong file", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"❌ Lỗi tải file mẫu: {ex.Message}", Severity.Error);
+        }
     }
 }

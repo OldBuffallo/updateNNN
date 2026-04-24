@@ -124,15 +124,35 @@ public class ExportService
         return WorkbookToBytes(wb);
     }
 
-    /// <summary>Export báo cáo tùy chỉnh</summary>
-    public async Task<byte[]> ExportReportAsync(List<string> selectedColumns, string groupBy = "company")
+    /// <summary>Export báo cáo tùy chỉnh — hỗ trợ bộ lọc và cột thăm thân</summary>
+    public async Task<byte[]> ExportReportAsync(
+        List<string> selectedColumns,
+        string groupBy = "company",
+        int? filterWorkPermit = null,
+        string? filterNationality = null,
+        int? filterExpiringDays = null)
     {
         using var db = await _dbFactory.CreateDbContextAsync();
-        var employees = await db.Employees
+        IQueryable<Employee> query = db.Employees
             .Include(e => e.Company).ThenInclude(c => c!.Field)
             .Include(e => e.NationalityNav)
             .Include(e => e.Career)
-            .Where(e => e.WorkingStatus == 0)
+            .Where(e => e.WorkingStatus == 0 && e.Hidden_flag == 0);
+
+        // Áp dụng bộ lọc
+        if (filterWorkPermit.HasValue)
+            query = query.Where(e => e.WorkPermit == filterWorkPermit.Value);
+        if (!string.IsNullOrWhiteSpace(filterNationality))
+            query = query.Where(e => e.Nationality == filterNationality);
+        if (filterExpiringDays.HasValue)
+        {
+            var cutoff = DateTime.Today.AddDays(filterExpiringDays.Value);
+            query = query.Where(e => e.TemporaryStay != null
+                && e.TemporaryStay >= DateTime.Today
+                && e.TemporaryStay <= cutoff);
+        }
+
+        var employees = await query
             .OrderBy(e => e.Company!.CompanyName)
             .ThenBy(e => e.StaffName)
             .ToListAsync();
@@ -140,7 +160,7 @@ public class ExportService
         using var wb = new XLWorkbook();
         var ws = wb.Worksheets.Add("Báo cáo");
 
-        // Build headers from selected columns
+        // Build headers from selected columns — hỗ trợ thêm cột thăm thân
         var colMap = new Dictionary<string, Func<Employee, string>>
         {
             ["Công ty"] = e => e.Company?.CompanyName ?? "",
@@ -149,10 +169,20 @@ public class ExportService
             ["Hộ chiếu"] = e => e.Passport ?? "",
             ["Nghề nghiệp"] = e => e.Career?.CareerName ?? "",
             ["Loại GPLĐ"] = e => e.WorkPermitString ?? "",
+            ["Số GPLĐ"] = e => e.WorkPermitNumber ?? "",
             ["Hạn tạm trú"] = e => e.TemporaryStay?.ToString("dd/MM/yyyy") ?? "",
             ["Giới tính"] = e => e.GenderString,
             ["Ngày sinh"] = e => e.Birthday?.ToString("dd/MM/yyyy") ?? "",
-            ["Còn lại (ngày)"] = e => e.DaysUntilExpiry?.ToString() ?? ""
+            ["Còn lại (ngày)"] = e => e.DaysUntilExpiry?.ToString() ?? "",
+            ["Số Visa"] = e => e.VisaNumber ?? "",
+            ["Địa chỉ"] = e => e.Address ?? "",
+            ["Ghi chú"] = e => e.Note ?? "",
+            // Cột thăm thân
+            ["Thăm thân"] = e => e.FamilyVisitString,
+            ["Tên người thân"] = e => e.FamilyVisitRelativeName ?? "",
+            ["Quan hệ"] = e => e.FamilyVisitRelationship ?? "",
+            ["CMND người thân"] = e => e.FamilyVisitRelativeIdCard ?? "",
+            ["Hạn thăm thân"] = e => e.FamilyVisitEndDate?.ToString("dd/MM/yyyy") ?? ""
         };
 
         var cols = selectedColumns.Where(c => colMap.ContainsKey(c)).ToList();
@@ -200,9 +230,134 @@ public class ExportService
             {
                 ws.Cell(row, i + 2).Value = colMap[cols[i]](emp);
             }
+
+            // Color code expiring rows
+            var days = emp.DaysUntilExpiry;
+            if (days.HasValue && days.Value <= 7)
+                ws.Row(row).Style.Font.FontColor = XLColor.Red;
+            else if (days.HasValue && days.Value <= 30)
+                ws.Row(row).Style.Font.FontColor = XLColor.FromHtml("#d97706");
+
             row++;
         }
 
+        // Thêm hàng thống kê cuối
+        row++;
+        ws.Cell(row, 1).Value = "TỔNG KẾT";
+        ws.Cell(row, 1).Style.Font.Bold = true;
+        ws.Cell(row, 2).Value = $"Tổng: {employees.Count} nhân viên";
+        ws.Cell(row, 2).Style.Font.Bold = true;
+        row++;
+
+        var groups = employees.GroupBy(e => groupBy switch
+        {
+            "nationality" => e.NationalityNav?.NationalityName ?? e.Nationality ?? "Khác",
+            "field" => e.Company?.Field?.FieldName ?? "Khác",
+            _ => e.Company?.CompanyName ?? "Khác"
+        });
+        foreach (var g in groups)
+        {
+            ws.Cell(row, 2).Value = $"{g.Key}: {g.Count()} NLĐ";
+            row++;
+        }
+
+        ws.Columns().AdjustToContents();
+        return WorkbookToBytes(wb);
+    }
+
+    /// <summary>Tạo file Excel mẫu để download</summary>
+    public byte[] GenerateSampleExcelBytes()
+    {
+        using var wb = new XLWorkbook();
+        var ws = wb.Worksheets.Add("Mẫu Import");
+
+        // Header
+        var headers = new[] {
+            "Họ tên", "Giới tính", "Ngày sinh", "Quốc tịch", "Số hộ chiếu",
+            "Địa chỉ", "Nghề nghiệp", "GPLĐ", "Số GPLĐ", "Số Visa",
+            "Hạn tạm trú", "Ghi chú",
+            "Thăm thân", "Tên người thân", "Quan hệ", "CMND người thân",
+            "Ngày bắt đầu thăm thân", "Hạn thăm thân", "Ghi chú thăm thân"
+        };
+
+        for (int i = 0; i < headers.Length; i++)
+        {
+            ws.Cell(1, i + 1).Value = headers[i];
+            ws.Cell(1, i + 1).Style.Font.Bold = true;
+            ws.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#2563eb");
+            ws.Cell(1, i + 1).Style.Font.FontColor = XLColor.White;
+        }
+
+        // Dữ liệu mẫu dòng 1
+        var sample1 = new[] {
+            "NGUYEN VAN A", "Nam", "15/03/1985", "Trung Quốc", "E12345678",
+            "123 Đường ABC, Quận 1", "Kỹ sư phần mềm", "Đã có GPLĐ", "GP-2024-001", "V-2024-001",
+            "31/12/2025", "Ghi chú mẫu",
+            "Có", "Trần Thị B", "Vợ/Chồng", "012345678901",
+            "01/01/2024", "31/12/2025", ""
+        };
+        for (int i = 0; i < sample1.Length; i++)
+            ws.Cell(2, i + 1).Value = sample1[i];
+
+        // Dữ liệu mẫu dòng 2
+        var sample2 = new[] {
+            "PARK MIN YOUNG", "Nữ", "22/07/1990", "Hàn Quốc", "K98765432",
+            "456 Đường XYZ, Quận 7", "Giám đốc dự án", "Miễn GPLĐ", "", "V-2024-002",
+            "30/06/2026", "",
+            "Không", "", "", "",
+            "", "", ""
+        };
+        for (int i = 0; i < sample2.Length; i++)
+            ws.Cell(3, i + 1).Value = sample2[i];
+
+        // Sheet hướng dẫn
+        var guide = wb.Worksheets.Add("Hướng dẫn");
+        guide.Cell(1, 1).Value = "HƯỚNG DẪN SỬ DỤNG FILE IMPORT";
+        guide.Cell(1, 1).Style.Font.Bold = true;
+        guide.Cell(1, 1).Style.Font.FontSize = 14;
+
+        var guideData = new (string field, string format, string example, string note)[] {
+            ("Họ tên", "Văn bản", "NGUYEN VAN A", "Bắt buộc. In hoa hoặc thường đều được"),
+            ("Giới tính", "Nam / Nữ / Male / Female", "Nam", "Mặc định: Nữ nếu để trống"),
+            ("Ngày sinh", "dd/MM/yyyy", "15/03/1985", "Tùy chọn. Nhập đúng định dạng"),
+            ("Quốc tịch", "Tên hoặc mã quốc gia", "Trung Quốc hoặc CN", "Hệ thống tự nhận dạng"),
+            ("Số hộ chiếu", "Văn bản", "E12345678", "Quan trọng: dùng để kiểm tra trùng lặp"),
+            ("Địa chỉ", "Văn bản", "123 Đường ABC", "Tùy chọn"),
+            ("Nghề nghiệp", "Tên nghề nghiệp", "Kỹ sư phần mềm", "Hệ thống tự match với danh mục"),
+            ("GPLĐ", "Đã có GPLĐ / Miễn GPLĐ / Chưa có", "Đã có GPLĐ", "Mặc định: Miễn GPLĐ"),
+            ("Số GPLĐ", "Văn bản", "GP-2024-001", "Tùy chọn"),
+            ("Số Visa", "Văn bản", "V-2024-001", "Tùy chọn"),
+            ("Hạn tạm trú", "dd/MM/yyyy", "31/12/2025", "Quan trọng: dùng để cảnh báo hết hạn"),
+            ("Ghi chú", "Văn bản", "Ghi chú tùy ý", "Tùy chọn"),
+            ("Thăm thân", "Có / Không", "Có", "Mặc định: Không"),
+            ("Tên người thân", "Văn bản", "Trần Thị B", "Điền nếu thăm thân = Có"),
+            ("Quan hệ", "Vợ/Chồng/Con/Cha mẹ", "Vợ/Chồng", "Điền nếu thăm thân = Có"),
+            ("CMND người thân", "Số CMND/CCCD", "012345678901", "Điền nếu thăm thân = Có"),
+            ("Ngày bắt đầu thăm thân", "dd/MM/yyyy", "01/01/2024", "Tùy chọn"),
+            ("Hạn thăm thân", "dd/MM/yyyy", "31/12/2025", "Tùy chọn"),
+            ("Ghi chú thăm thân", "Văn bản", "", "Tùy chọn")
+        };
+
+        guide.Cell(3, 1).Value = "Tên cột"; guide.Cell(3, 1).Style.Font.Bold = true;
+        guide.Cell(3, 2).Value = "Định dạng"; guide.Cell(3, 2).Style.Font.Bold = true;
+        guide.Cell(3, 3).Value = "Ví dụ"; guide.Cell(3, 3).Style.Font.Bold = true;
+        guide.Cell(3, 4).Value = "Ghi chú"; guide.Cell(3, 4).Style.Font.Bold = true;
+        for (int i = 0; i < guideData.Length; i++)
+        {
+            guide.Cell(4 + i, 1).Value = guideData[i].field;
+            guide.Cell(4 + i, 2).Value = guideData[i].format;
+            guide.Cell(4 + i, 3).Value = guideData[i].example;
+            guide.Cell(4 + i, 4).Value = guideData[i].note;
+
+            // Highlight bắt buộc
+            if (guideData[i].note.Contains("Bắt buộc") || guideData[i].note.Contains("Quan trọng"))
+            {
+                guide.Cell(4 + i, 1).Style.Font.Bold = true;
+                guide.Cell(4 + i, 4).Style.Font.FontColor = XLColor.Red;
+            }
+        }
+
+        guide.Columns().AdjustToContents();
         ws.Columns().AdjustToContents();
         return WorkbookToBytes(wb);
     }

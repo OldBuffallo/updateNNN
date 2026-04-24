@@ -4,6 +4,7 @@
 @using IRM.Data.Models
 @inject ExportService ExportSvc
 @inject EmployeeService EmployeeSvc
+@inject CatalogService CatalogSvc
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
 
@@ -51,6 +52,38 @@
 
         <MudDivider Class="my-4" />
 
+        @* ── Bộ lọc mới ── *@
+        <div class="mb-4">
+            <span class="builder-section-title">🔍 Bộ lọc</span>
+
+            <MudSelect T="string" Label="Trạng thái GPLĐ" Variant="Variant.Outlined" @bind-Value="_filterPermit"
+                       Margin="Margin.Dense" Dense="true" Clearable="true" Class="mb-2">
+                <MudSelectItem Value="@("0")">Miễn GPLĐ</MudSelectItem>
+                <MudSelectItem Value="@("1")">Đã có GPLĐ</MudSelectItem>
+                <MudSelectItem Value="@("2")">Chưa có GPLĐ</MudSelectItem>
+                <MudSelectItem Value="@("3")">NĐT miễn GPLĐ</MudSelectItem>
+                <MudSelectItem Value="@("4")">NĐT đã có GPLĐ</MudSelectItem>
+                <MudSelectItem Value="@("5")">NĐT chưa có GPLĐ</MudSelectItem>
+            </MudSelect>
+
+            <MudSelect T="string" Label="Quốc tịch" Variant="Variant.Outlined" @bind-Value="_filterNationality"
+                       Margin="Margin.Dense" Dense="true" Clearable="true" Class="mb-2">
+                @foreach (var n in _nationalities)
+                {
+                    <MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="string" Label="Sắp hết hạn" Variant="Variant.Outlined" @bind-Value="_filterExpiring"
+                       Margin="Margin.Dense" Dense="true" Clearable="true" Class="mb-2">
+                <MudSelectItem Value="@("30")">Trong 30 ngày</MudSelectItem>
+                <MudSelectItem Value="@("60")">Trong 60 ngày</MudSelectItem>
+                <MudSelectItem Value="@("90")">Trong 90 ngày</MudSelectItem>
+            </MudSelect>
+        </div>
+
+        <MudDivider Class="my-4" />
+
         <MudStack Spacing="1">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
                        StartIcon="@Icons.Material.Filled.Visibility" OnClick="LoadPreviewAsync">
@@ -59,11 +92,7 @@
             <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
                        StartIcon="@Icons.Material.Filled.Download" OnClick="ExportExcelAsync"
                        Disabled="@_isExporting">
-                @(_isExporting ? "Đang xuất..." : "📥 Xuất Excel")
-            </MudButton>
-            <MudButton Variant="Variant.Text" Color="Color.Primary" FullWidth="true"
-                       StartIcon="@Icons.Material.Filled.Save">
-                Lưu Template
+                @(_isExporting ? "Đang xuất..." : "📥 Xuất Excel (.xlsx)")
             </MudButton>
         </MudStack>
     </div>
@@ -73,6 +102,36 @@
             <h3>Xem trước báo cáo</h3>
             <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">@_previewEmployees.Count bản ghi</MudChip>
         </div>
+
+        @* Hiển thị bộ lọc đang áp dụng *@
+        @if (!string.IsNullOrEmpty(_filterPermit) || !string.IsNullOrEmpty(_filterNationality) || !string.IsNullOrEmpty(_filterExpiring))
+        {
+            <MudStack Row="true" Spacing="1" Class="mb-3" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.caption" Style="font-weight: 600;">Bộ lọc:</MudText>
+                @if (!string.IsNullOrEmpty(_filterPermit))
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Filled"
+                             OnClose="@(() => { _filterPermit = null; })">
+                        GPLĐ: @GetPermitLabel(_filterPermit)
+                    </MudChip>
+                }
+                @if (!string.IsNullOrEmpty(_filterNationality))
+                {
+                    var natName = _nationalities.FirstOrDefault(n => n.NationalityCode == _filterNationality)?.NationalityName ?? _filterNationality;
+                    <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Filled"
+                             OnClose="@(() => { _filterNationality = null; })">
+                        QT: @natName
+                    </MudChip>
+                }
+                @if (!string.IsNullOrEmpty(_filterExpiring))
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled"
+                             OnClose="@(() => { _filterExpiring = null; })">
+                        Hết hạn ≤ @_filterExpiring ngày
+                    </MudChip>
+                }
+            </MudStack>
+        }
 
         @if (_isLoading)
         {
@@ -106,7 +165,10 @@
                             </tr>
                         }
                         stt++;
-                        <tr>
+                        var days = emp.DaysUntilExpiry;
+                        var rowStyle = days.HasValue && days.Value <= 7 ? "color: var(--red); font-weight: 600;"
+                                     : days.HasValue && days.Value <= 30 ? "color: var(--orange);" : "";
+                        <tr style="@rowStyle">
                             <td>@stt</td>
                             @foreach (var col in _columns.Where(c => c.Selected))
                             {
@@ -116,6 +178,37 @@
                     }
                 </tbody>
             </MudSimpleTable>
+
+            @* ── Thống kê tóm tắt ── *@
+            <MudPaper Elevation="0" Class="pa-4 mt-4 rounded-lg border-solid border" Style="border-width: 1px;">
+                <MudText Typo="Typo.subtitle2" Style="font-weight: 700;" Class="mb-2">📊 Thống kê tóm tắt</MudText>
+                <MudGrid Spacing="2">
+                    <MudItem xs="3">
+                        <div class="stat-mini-card">
+                            <span class="stat-mini-num">@_previewEmployees.Count</span>
+                            <span class="stat-mini-label">Tổng số NLĐ</span>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="3">
+                        <div class="stat-mini-card">
+                            <span class="stat-mini-num" style="color: var(--green);">@_previewEmployees.Count(e => e.WorkPermit == 1 || e.WorkPermit == 4)</span>
+                            <span class="stat-mini-label">Đã có GPLĐ</span>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="3">
+                        <div class="stat-mini-card">
+                            <span class="stat-mini-num" style="color: var(--orange);">@_previewEmployees.Count(e => e.WorkPermit == 0 || e.WorkPermit == 3)</span>
+                            <span class="stat-mini-label">Miễn GPLĐ</span>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="3">
+                        <div class="stat-mini-card">
+                            <span class="stat-mini-num" style="color: var(--red);">@_previewEmployees.Count(e => e.DaysUntilExpiry.HasValue && e.DaysUntilExpiry.Value <= 30)</span>
+                            <span class="stat-mini-label">Sắp hết hạn (≤30 ngày)</span>
+                        </div>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
         }
         else
         {
@@ -154,6 +247,12 @@
     private bool _isLoading;
     private bool _isExporting;
     private List<Employee> _previewEmployees = new();
+    private List<NationalityEntity> _nationalities = new();
+
+    // Bộ lọc mới
+    private string? _filterPermit;
+    private string? _filterNationality;
+    private string? _filterExpiring;
 
     private readonly List<ColumnOption> _columns = new()
     {
@@ -163,10 +262,20 @@
         new() { Name = "Hộ chiếu", Selected = true },
         new() { Name = "Nghề nghiệp", Selected = true },
         new() { Name = "Loại GPLĐ", Selected = true },
+        new() { Name = "Số GPLĐ", Selected = false },
         new() { Name = "Hạn tạm trú", Selected = true },
         new() { Name = "Giới tính", Selected = false },
         new() { Name = "Ngày sinh", Selected = false },
-        new() { Name = "Còn lại (ngày)", Selected = true }
+        new() { Name = "Còn lại (ngày)", Selected = true },
+        new() { Name = "Số Visa", Selected = false },
+        new() { Name = "Địa chỉ", Selected = false },
+        new() { Name = "Ghi chú", Selected = false },
+        // Thăm thân
+        new() { Name = "Thăm thân", Selected = false },
+        new() { Name = "Tên người thân", Selected = false },
+        new() { Name = "Quan hệ", Selected = false },
+        new() { Name = "CMND người thân", Selected = false },
+        new() { Name = "Hạn thăm thân", Selected = false }
     };
 
     private record TemplateItem(string Name, string Meta);
@@ -180,6 +289,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _nationalities = await CatalogSvc.GetNationalitiesAsync();
         await LoadPreviewAsync();
     }
 
@@ -189,6 +299,22 @@
         try
         {
             _previewEmployees = await EmployeeSvc.GetAllActiveAsync();
+
+            // Áp dụng bộ lọc
+            if (!string.IsNullOrEmpty(_filterPermit) && int.TryParse(_filterPermit, out var wp))
+                _previewEmployees = _previewEmployees.Where(e => e.WorkPermit == wp).ToList();
+
+            if (!string.IsNullOrEmpty(_filterNationality))
+                _previewEmployees = _previewEmployees.Where(e =>
+                    string.Equals(e.Nationality, _filterNationality, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            if (!string.IsNullOrEmpty(_filterExpiring) && int.TryParse(_filterExpiring, out var days))
+            {
+                _previewEmployees = _previewEmployees.Where(e =>
+                    e.DaysUntilExpiry.HasValue
+                    && e.DaysUntilExpiry.Value >= 0
+                    && e.DaysUntilExpiry.Value <= days).ToList();
+            }
 
             // Sort by group
             _previewEmployees = _groupBy switch
@@ -200,7 +326,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u xem trÆ°á»›c: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Không tải được dữ liệu xem trước: {ex.Message}", Severity.Error);
             _previewEmployees = new();
         }
         finally
@@ -224,10 +350,26 @@
         "Hộ chiếu" => emp.Passport ?? "",
         "Nghề nghiệp" => emp.Career?.CareerName ?? "",
         "Loại GPLĐ" => emp.WorkPermitString,
+        "Số GPLĐ" => emp.WorkPermitNumber ?? "",
         "Hạn tạm trú" => emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "",
         "Giới tính" => emp.GenderString,
         "Ngày sinh" => emp.Birthday?.ToString("dd/MM/yyyy") ?? "",
         "Còn lại (ngày)" => emp.DaysUntilExpiry?.ToString() ?? "",
+        "Số Visa" => emp.VisaNumber ?? "",
+        "Địa chỉ" => emp.Address ?? "",
+        "Ghi chú" => emp.Note ?? "",
+        "Thăm thân" => emp.FamilyVisitString,
+        "Tên người thân" => emp.FamilyVisitRelativeName ?? "",
+        "Quan hệ" => emp.FamilyVisitRelationship ?? "",
+        "CMND người thân" => emp.FamilyVisitRelativeIdCard ?? "",
+        "Hạn thăm thân" => emp.FamilyVisitEndDate?.ToString("dd/MM/yyyy") ?? "",
+        _ => ""
+    };
+
+    private string GetPermitLabel(string? val) => val switch
+    {
+        "0" => "Miễn", "1" => "Đã có", "2" => "Chưa có",
+        "3" => "NĐT miễn", "4" => "NĐT có", "5" => "NĐT chưa",
         _ => ""
     };
 
@@ -241,23 +383,30 @@
         var selectedCols = _columns.Where(c => c.Selected).Select(c => c.Name).ToList();
         if (!selectedCols.Any())
         {
-            Snackbar.Add("Vui lÃ²ng chá»n Ã­t nháº¥t 1 cá»™t Ä‘á»ƒ xuáº¥t bÃ¡o cÃ¡o.", Severity.Warning);
+            Snackbar.Add("Vui lòng chọn ít nhất 1 cột để xuất báo cáo.", Severity.Warning);
             return;
         }
 
         if (!_previewEmployees.Any())
         {
-            Snackbar.Add("KhÃ´ng cÃ³ dá»¯ liá»‡u Ä‘á»ƒ xuáº¥t. HÃ£y báº¥m 'Xem trÆ°á»›c' trÆ°á»›c.", Severity.Warning);
+            Snackbar.Add("Không có dữ liệu để xuất. Hãy bấm 'Xem trước' trước.", Severity.Warning);
             return;
         }
 
         _isExporting = true;
         try
         {
-            var bytes = await ExportSvc.ExportReportAsync(selectedCols, _groupBy);
+            int? wpFilter = null;
+            if (!string.IsNullOrEmpty(_filterPermit) && int.TryParse(_filterPermit, out var wp))
+                wpFilter = wp;
+            int? expiringDays = null;
+            if (!string.IsNullOrEmpty(_filterExpiring) && int.TryParse(_filterExpiring, out var ed))
+                expiringDays = ed;
+
+            var bytes = await ExportSvc.ExportReportAsync(selectedCols, _groupBy, wpFilter, _filterNationality, expiringDays);
             if (bytes.Length == 0)
             {
-                throw new InvalidOperationException("Dá»¯ liá»‡u file xuáº¥t rá»—ng.");
+                throw new InvalidOperationException("Dữ liệu file xuất rỗng.");
             }
 
             var base64 = Convert.ToBase64String(bytes);
@@ -274,11 +423,11 @@
                 throw;
             }
 
-            Snackbar.Add("Xuáº¥t Excel thÃ nh cÃ´ng.", Severity.Success);
+            Snackbar.Add("Xuất Excel thành công.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Xuáº¥t Excel tháº¥t báº¡i: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Xuất Excel thất bại: {ex.Message}", Severity.Error);
         }
         finally
         {

@@ -4,13 +4,14 @@
 @using IRM.Services
 @using IRM.Data.Models
 @inject SearchService SearchSvc
+@inject NavigationManager Nav
 
 <PageTitle>Tìm kiếm - IRM v2.0</PageTitle>
 
 <div class="search-hero">
     <MudText Typo="Typo.h4" Class="search-hero-title">Tìm kiếm toàn cục</MudText>
     <MudText Typo="Typo.body2" Class="search-hero-subtitle">
-        Nhập tên, hộ chiếu, công ty, quốc tịch... để tìm trên mọi trường dữ liệu
+        Nhập tên, hộ chiếu, công ty, quốc tịch, nghề nghiệp... để tìm trên mọi trường dữ liệu
     </MudText>
 </div>
 
@@ -39,10 +40,23 @@
     </MudButton>
 </div>
 
+@* Bộ lọc nhanh *@
+<div class="search-filter-bar">
+    <MudChipSet T="string" @bind-SelectedValue="_filterType" SelectionMode="SelectionMode.SingleSelection" CheckMark="true">
+        <MudChip Value="@("all")" Default="true" Variant="Variant.Outlined" Color="Color.Primary">📋 Tất cả</MudChip>
+        <MudChip Value="@("employee")" Variant="Variant.Outlined" Color="Color.Success">👥 Nhân viên</MudChip>
+        <MudChip Value="@("company")" Variant="Variant.Outlined" Color="Color.Info">🏢 Công ty</MudChip>
+    </MudChipSet>
+</div>
+
 @if (_hasSearched && _result != null)
 {
     <div class="search-results-meta">
         Tìm thấy <strong>@_result.TotalCount</strong> kết quả cho "<em>@_result.Keyword</em>"
+        @if (_filterType != "all")
+        {
+            <text> — Lọc: <strong>@(_filterType == "employee" ? "Nhân viên" : "Công ty")</strong></text>
+        }
     </div>
 
     <div class="search-stat-cards">
@@ -56,39 +70,119 @@
         </div>
     </div>
 
-    @foreach (var emp in _result.Employees)
+    @if (_result.Employees.Any())
     {
-        <div class="search-result-item">
-            <div class="result-type">👥</div>
-            <div class="result-body">
-                <h4>@emp.StaffName - @(emp.NationalityNav?.NationalityName ?? emp.Nationality)</h4>
-                <p>
-                    HC: @emp.Passport · @emp.Company?.CompanyName · @(emp.Career?.CareerName ?? "") ·
-                    @emp.WorkPermitString · Hạn TT: @(emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "-")
-                </p>
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-2">👥 Nhân viên (@_result.Employees.Count)</MudText>
+        @foreach (var emp in _result.Employees)
+        {
+            <div class="search-result-item">
+                <div class="result-type">👥</div>
+                <div class="result-body">
+                    <h4>@((MarkupString)HighlightKeyword(emp.StaffName ?? "")) — @((MarkupString)HighlightKeyword(emp.NationalityNav?.NationalityName ?? emp.Nationality ?? ""))</h4>
+                    <p>
+                        HC: @((MarkupString)HighlightKeyword(emp.Passport ?? "")) ·
+                        @((MarkupString)HighlightKeyword(emp.Company?.CompanyName ?? "")) ·
+                        @((MarkupString)HighlightKeyword(emp.Career?.CareerName ?? "")) ·
+                        @emp.WorkPermitString ·
+                        Hạn TT: @(emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "-")
+                        @if (emp.DaysUntilExpiry.HasValue)
+                        {
+                            var days = emp.DaysUntilExpiry.Value;
+                            var color = days <= 7 ? "#dc2626" : days <= 30 ? "#d97706" : "#059669";
+                            <text> · </text><span style="font-weight:700;color:@color">@days ngày</span>
+                        }
+                    </p>
+                </div>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
+                           Href="/employees">Xem →</MudButton>
             </div>
-            <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Xem →</MudButton>
-        </div>
+        }
     }
 
-    @foreach (var company in _result.Companies)
+    @if (_result.Companies.Any())
     {
-        <div class="search-result-item">
-            <div class="result-type">🏢</div>
-            <div class="result-body">
-                <h4>@company.CompanyName</h4>
-                <p>@(company.Field?.FieldName ?? "") · @company.TotalAmount NLD · @company.Address</p>
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-2 mt-4">🏢 Công ty (@_result.Companies.Count)</MudText>
+        @foreach (var company in _result.Companies)
+        {
+            <div class="search-result-item">
+                <div class="result-type">🏢</div>
+                <div class="result-body">
+                    <h4>@((MarkupString)HighlightKeyword(company.CompanyName ?? ""))</h4>
+                    <p>
+                        @((MarkupString)HighlightKeyword(company.Field?.FieldName ?? "")) ·
+                        @company.TotalAmount NLĐ ·
+                        @((MarkupString)HighlightKeyword(company.Address ?? ""))
+                    </p>
+                </div>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
+                           Href="/companies">Xem →</MudButton>
             </div>
-            <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary">Xem →</MudButton>
-        </div>
+        }
     }
+
+    @if (_result.TotalCount == 0)
+    {
+        <MudPaper Elevation="0" Class="pa-8 rounded-lg text-center empty-state-card">
+            <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-2">
+                Không tìm thấy kết quả nào cho "@_searchQuery"
+            </MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                Gợi ý: thử từ khóa ngắn hơn, kiểm tra chính tả, hoặc tìm theo hộ chiếu/tên công ty
+            </MudText>
+        </MudPaper>
+    }
+}
+else if (!_hasSearched)
+{
+    <MudPaper Elevation="0" Class="pa-6 rounded-lg empty-state-card">
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-3">💡 Gợi ý tìm kiếm</MudText>
+        <MudGrid Spacing="2">
+            <MudItem xs="12" md="6">
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">
+                    <strong>🔍 Tìm nhân viên</strong> — Nhập tên, số hộ chiếu, quốc tịch, hoặc nghề nghiệp
+                </MudAlert>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">
+                    <strong>🏢 Tìm công ty</strong> — Nhập tên công ty, địa chỉ, lĩnh vực hoạt động
+                </MudAlert>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">
+                    <strong>📋 Tìm hộ chiếu</strong> — Nhập số hộ chiếu để tra cứu nhanh
+                </MudAlert>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">
+                    <strong>👨‍👩‍👧 Tìm thăm thân</strong> — Nhập tên người thân hoặc số CMND/CCCD
+                </MudAlert>
+            </MudItem>
+        </MudGrid>
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+            Hệ thống sẽ tìm trên tất cả các trường: tên, hộ chiếu, visa, GPLĐ, công ty, quốc tịch, nghề nghiệp, người thân...
+        </MudText>
+    </MudPaper>
 }
 
 @code {
     private string _searchQuery = "";
+    private string _filterType = "all";
     private bool _hasSearched;
     private bool _loading;
     private SearchResult? _result;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Read ?q= from URL
+        var uri = new Uri(Nav.Uri);
+        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var q = queryParams["q"];
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            _searchQuery = q;
+            await DoSearchAsync();
+        }
+    }
 
     private async Task OnSearchKeyUp(KeyboardEventArgs e)
     {
@@ -108,7 +202,7 @@
         _loading = true;
         try
         {
-            _result = await SearchSvc.SearchAsync(_searchQuery);
+            _result = await SearchSvc.SearchAsync(_searchQuery, _filterType);
             _hasSearched = true;
         }
         catch
@@ -119,5 +213,24 @@
         {
             _loading = false;
         }
+    }
+
+    /// <summary>
+    /// Highlight từ khóa tìm kiếm trong text
+    /// </summary>
+    private string HighlightKeyword(string text)
+    {
+        if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(_searchQuery))
+            return System.Net.WebUtility.HtmlEncode(text);
+
+        var encoded = System.Net.WebUtility.HtmlEncode(text);
+        var keyword = System.Net.WebUtility.HtmlEncode(_searchQuery.Trim());
+
+        // Case-insensitive replace
+        var idx = encoded.IndexOf(keyword, StringComparison.OrdinalIgnoreCase);
+        if (idx < 0) return encoded;
+
+        var matched = encoded.Substring(idx, keyword.Length);
+        return encoded.Substring(0, idx) + $"<mark>{matched}</mark>" + encoded.Substring(idx + keyword.Length);
     }
 }
