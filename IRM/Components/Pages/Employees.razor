@@ -4,8 +4,11 @@
 @using IRM.Data.Models
 @inject EmployeeService EmployeeSvc
 @inject CompanyService CompanySvc
+@inject CatalogService CatalogSvc
 @inject ExportService ExportSvc
 @inject IJSRuntime JS
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>Quản lý Nhân viên - IRM v2.0</PageTitle>
 
@@ -77,7 +80,8 @@
                    OnClick="ExportExcelAsync">
             📥 Xuất Excel
         </MudButton>
-        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PersonAdd" Color="Color.Primary">
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PersonAdd" Color="Color.Primary"
+                   OnClick="OpenAddDialog">
             + Thêm nhân viên
         </MudButton>
     </MudStack>
@@ -202,6 +206,64 @@ else if (!_loading)
     </MudPaper>
 }
 
+@* ══════ DIALOG THÊM/SỬA NV ══════ *@
+<MudDialog @bind-Visible="_dlgVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent>
+        <MudText Typo="Typo.h6" Style="font-weight:700;">@(_dlgEditing ? "✏️ Sửa nhân viên" : "➕ Thêm nhân viên")</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6"><MudTextField T="string" Label="Họ tên *" @bind-Value="_f.StaffName" Variant="Variant.Outlined" Required="true" /></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="int" Label="Giới tính" @bind-Value="_f.Gender" Variant="Variant.Outlined"><MudSelectItem Value="1">Nam</MudSelectItem><MudSelectItem Value="0">Nữ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudDatePicker Label="Ngày sinh" @bind-Date="_f.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="string" Label="Quốc tịch" @bind-Value="_f.Nationality" Variant="Variant.Outlined" Clearable="true">@foreach(var n in _nationalities){<MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>}</MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Số hộ chiếu" @bind-Value="_f.Passport" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="12" md="4"><MudAutocomplete T="Company" Label="Công ty *" Value="_dlgCompany" ValueChanged="v => { _dlgCompany = v; _f.IDCompany = v?.IDCompany ?? 0; }" SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")" Variant="Variant.Outlined" ResetValueOnEmptyText="true" /></MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="int?" Label="Nghề nghiệp" @bind-Value="_f.IDCareer" Variant="Variant.Outlined" Clearable="true">@foreach(var c in _careers){<MudSelectItem T="int?" Value="@((int?)c.IDCareer)">@c.CareerName</MudSelectItem>}</MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="int" Label="GPLĐ" @bind-Value="_f.WorkPermit" Variant="Variant.Outlined"><MudSelectItem Value="0">Miễn GPLĐ</MudSelectItem><MudSelectItem Value="1">Đã có GPLĐ</MudSelectItem><MudSelectItem Value="2">Chưa có GPLĐ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudDatePicker Label="Hạn tạm trú" @bind-Date="_f.TemporaryStay" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            <MudItem xs="12"><MudTextField T="string" Label="Ghi chú" @bind-Value="_f.Note" Variant="Variant.Outlined" Lines="2" /></MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="@(() => _dlgVisible = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveEmployeeAsync" Disabled="@(string.IsNullOrWhiteSpace(_f.StaffName))">@(_dlgEditing ? "💾 Cập nhật" : "➕ Thêm")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@* ══════ DIALOG CHI TIẾT ══════ *@
+<MudDialog @bind-Visible="_detVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent><MudText Typo="Typo.h6" Style="font-weight:700;">👤 Hồ sơ nhân viên</MudText></TitleContent>
+    <DialogContent>
+        @if (_detEmp != null)
+        {
+            <MudGrid Spacing="2">
+                <MudItem xs="12"><MudText Typo="Typo.h5" Style="font-weight:800;">@_detEmp.StaffName</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Giới tính</MudText><MudText Style="font-weight:600;">@_detEmp.GenderString</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Ngày sinh</MudText><MudText Style="font-weight:600;">@(_detEmp.Birthday?.ToString("dd/MM/yyyy") ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Quốc tịch</MudText><MudText Style="font-weight:600;">@(_detEmp.NationalityNav?.NationalityName ?? _detEmp.Nationality ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Hộ chiếu</MudText><MudText Style="font-weight:600;">@(_detEmp.Passport ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Công ty</MudText><MudText Style="font-weight:600;">@(_detEmp.Company?.CompanyName ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Nghề nghiệp</MudText><MudText Style="font-weight:600;">@(_detEmp.Career?.CareerName ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">GPLĐ</MudText><span class="tag @(_detEmp.WorkPermit == 1 ? "tag-green" : _detEmp.WorkPermit == 0 ? "tag-blue" : "tag-orange")">@_detEmp.WorkPermitString</span></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Hạn tạm trú</MudText><MudText Style="font-weight:600;">@(_detEmp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Còn lại</MudText><MudText Style="@GetExpiryStyle(_detEmp)">@(_detEmp.DaysUntilExpiry.HasValue ? $"{_detEmp.DaysUntilExpiry} ngày" : "—")</MudText></MudItem>
+                @if (_detEmp.HasFamilyVisit)
+                {
+                    <MudItem xs="12"><MudDivider Class="my-1" /><MudText Typo="Typo.subtitle2" Style="font-weight:700;">👨‍👩‍👧 Thông tin thăm thân</MudText></MudItem>
+                    <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Người thân</MudText><MudText Style="font-weight:600;">@(_detEmp.FamilyVisitRelativeName ?? "—")</MudText></MudItem>
+                    <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Quan hệ</MudText><MudText Style="font-weight:600;">@(_detEmp.FamilyVisitRelationship ?? "—")</MudText></MudItem>
+                    <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Hết hạn</MudText><MudText Style="font-weight:600;">@(_detEmp.FamilyVisitEndDate?.ToString("dd/MM/yyyy") ?? "—")</MudText></MudItem>
+                }
+            </MudGrid>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" OnClick="@(() => _detVisible = false)">Đóng</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Edit" OnClick="@(() => { _detVisible = false; if (_detEmp != null) OpenEditDialog(_detEmp); })">Sửa</MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     private List<Employee> _allEmployees = new();
     private List<Employee> _employees = new();
@@ -211,8 +273,16 @@ else if (!_loading)
     private bool _loading;
     private bool _showExpiring;
 
+    // Dialog state
+    private bool _dlgVisible; private bool _dlgEditing; private Employee _f = new(); private int _dlgEditId; private Company? _dlgCompany;
+    private bool _detVisible; private Employee? _detEmp;
+    private List<NationalityEntity> _nationalities = new();
+    private List<Career> _careers = new();
+
     protected override async Task OnInitializedAsync()
     {
+        _nationalities = await CatalogSvc.GetNationalitiesAsync();
+        _careers = await CatalogSvc.GetCareersAsync();
         await LoadAllAsync();
     }
 
@@ -340,13 +410,67 @@ else if (!_loading)
 
     private static string GetNatTagClass(string? code) => code switch
     {
-        "CN" => "tag-red",
-        "KR" => "tag-blue",
-        "JP" => "tag-purple",
-        "TW" => "tag-green",
-        "IN" => "tag-orange",
-        "US" => "tag-blue",
-        "MY" => "tag-teal",
-        _ => "tag-blue"
+        "CN" => "tag-red", "KR" => "tag-blue", "JP" => "tag-purple",
+        "TW" => "tag-green", "IN" => "tag-orange", "US" => "tag-blue",
+        "MY" => "tag-teal", _ => "tag-blue"
     };
+
+    // ══════ THÊM ══════
+    private void OpenAddDialog()
+    {
+        _dlgEditing = false; _dlgEditId = 0; _dlgCompany = _selectedCompany;
+        _f = new Employee { IDCompany = _selectedCompany?.IDCompany ?? 0, Gender = 1 };
+        _dlgVisible = true;
+    }
+
+    // ══════ SỬA ══════
+    private void OpenEditDialog(Employee e)
+    {
+        _dlgEditing = true; _dlgEditId = e.IDEmployee; _dlgCompany = e.Company;
+        _f = new Employee
+        {
+            StaffName = e.StaffName, Gender = e.Gender, Birthday = e.Birthday,
+            Nationality = e.Nationality, Passport = e.Passport, IDCompany = e.IDCompany,
+            IDCareer = e.IDCareer, WorkPermit = e.WorkPermit, TemporaryStay = e.TemporaryStay,
+            Note = e.Note, WorkPermitNumber = e.WorkPermitNumber, Address = e.Address,
+            FamilyVisit = e.FamilyVisit, FamilyVisitRelativeName = e.FamilyVisitRelativeName,
+            FamilyVisitRelationship = e.FamilyVisitRelationship, FamilyVisitEndDate = e.FamilyVisitEndDate
+        };
+        _dlgVisible = true;
+    }
+
+    // ══════ LƯU ══════
+    private async Task SaveEmployeeAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_f.StaffName)) { Snackbar.Add("❌ Họ tên không được trống", Severity.Error); return; }
+        if (_f.IDCompany == 0) { Snackbar.Add("❌ Chưa chọn công ty", Severity.Error); return; }
+        try
+        {
+            if (_dlgEditing) { _f.IDEmployee = _dlgEditId; await EmployeeSvc.UpdateAsync(_f); Snackbar.Add($"✅ Đã cập nhật \"{_f.StaffName}\"", Severity.Success); }
+            else { await EmployeeSvc.CreateAsync(_f); Snackbar.Add($"✅ Đã thêm \"{_f.StaffName}\"", Severity.Success); }
+            _dlgVisible = false; await LoadAllAsync();
+        }
+        catch (Exception ex) { Snackbar.Add($"❌ Lỗi: {ex.Message}", Severity.Error); }
+    }
+
+    // ══════ XÓA ══════
+    private async Task ConfirmDelete(Employee emp)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Xóa nhân viên \"{emp.StaffName}\"?");
+        if (confirmed) { await EmployeeSvc.DeleteAsync(emp.IDEmployee); Snackbar.Add($"✅ Đã xóa", Severity.Success); await LoadAllAsync(); }
+    }
+
+    // ══════ CHI TIẾT ══════
+    private void OpenDetailDialog(Employee e) { _detEmp = e; _detVisible = true; }
+
+    private static string GetExpiryStyle(Employee e)
+    {
+        var color = e.DaysUntilExpiry switch
+        {
+            <= 7 => "#dc2626",
+            <= 30 => "#d97706",
+            _ => "#059669"
+        };
+        return $"font-weight:700; color:{color};";
+    }
 }

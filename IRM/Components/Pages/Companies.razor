@@ -7,6 +7,8 @@
 @inject CatalogService CatalogSvc
 @inject ExportService ExportSvc
 @inject IJSRuntime JS
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>Quản lý Công ty - IRM v2.0</PageTitle>
 
@@ -40,19 +42,6 @@
                 <MudSelectItem T="int?" Value="@((int?)f.IDField)">@f.FieldName</MudSelectItem>
             }
         </MudSelect>
-
-        <MudSelect T="string"
-                   @bind-Value="_selectedTracker"
-                   @bind-Value:after="LoadDataAsync"
-                   Placeholder="Tất cả cán bộ"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   Clearable="true"
-                   Style="min-width: 180px;">
-            <MudSelectItem T="string" Value="@("Nguyễn Văn A")">Nguyễn Văn A</MudSelectItem>
-            <MudSelectItem T="string" Value="@("Trần Thị B")">Trần Thị B</MudSelectItem>
-            <MudSelectItem T="string" Value="@("Lê Văn C")">Lê Văn C</MudSelectItem>
-        </MudSelect>
     </MudStack>
 
     <MudStack Row="true" Spacing="2">
@@ -76,7 +65,8 @@
         </MudButton>
         <MudButton Variant="Variant.Filled"
                    StartIcon="@Icons.Material.Filled.Add"
-                   Color="Color.Primary">
+                   Color="Color.Primary"
+                   OnClick="OpenAddDialog">
             + Thêm công ty
         </MudButton>
     </MudStack>
@@ -129,16 +119,19 @@
                 <span class="tag tag-blue">@context.Item.AmountOfExemption</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Cán bộ TD">
+        <TemplateColumn Title="Cán bộ TĐ">
             <CellTemplate>
                 <MudText Typo="Typo.body2">@(context.Item.Tracker?.Name)</MudText>
             </CellTemplate>
         </TemplateColumn>
         <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
             <CellTemplate>
-                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" />
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning" />
-                <MudIconButton Icon="@Icons.Material.Filled.People" Size="Size.Small" Color="Color.Info" />
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary"
+                               OnClick="@(() => OpenDetailDialog(context.Item))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning"
+                               OnClick="@(() => OpenEditDialog(context.Item))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                               OnClick="@(() => ConfirmDelete(context.Item))" />
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -147,13 +140,157 @@
     </PagerContent>
 </MudDataGrid>
 
+@* ══════ DIALOG THÊM/SỬA CÔNG TY ══════ *@
+<MudDialog @bind-Visible="_dialogVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent>
+        <MudText Typo="Typo.h6" Style="font-weight: 700;">@(_isEditing ? "✏️ Sửa công ty" : "➕ Thêm công ty mới")</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="8">
+                <MudTextField T="string" Label="Tên công ty *" @bind-Value="_form.CompanyName"
+                              Variant="Variant.Outlined" Required="true" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudTextField T="string" Label="Loại hình doanh nghiệp" @bind-Value="_form.TypeOfBusiniess"
+                              Variant="Variant.Outlined" Placeholder="VD: FDI, Liên doanh..." />
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudSelect T="int" Label="Lĩnh vực" @bind-Value="_form.IDField" Variant="Variant.Outlined">
+                    @foreach (var f in _fields)
+                    {
+                        <MudSelectItem Value="@f.IDField">@f.FieldName</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField T="string" Label="Người đại diện pháp lý" @bind-Value="_form.LegalRepresentative"
+                              Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField T="string" Label="Địa chỉ" @bind-Value="_form.Address"
+                              Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="6" md="3">
+                <MudNumericField T="int" Label="Tổng LĐ" @bind-Value="_form.TotalAmount"
+                                 Variant="Variant.Outlined" Min="0" />
+            </MudItem>
+            <MudItem xs="6" md="3">
+                <MudNumericField T="int" Label="Có GPLĐ" @bind-Value="_form.QuantityAvailable"
+                                 Variant="Variant.Outlined" Min="0" />
+            </MudItem>
+            <MudItem xs="6" md="3">
+                <MudNumericField T="int" Label="Chưa có GPLĐ" @bind-Value="_form.QuantityNotYet"
+                                 Variant="Variant.Outlined" Min="0" />
+            </MudItem>
+            <MudItem xs="6" md="3">
+                <MudNumericField T="int" Label="Miễn GPLĐ" @bind-Value="_form.AmountOfExemption"
+                                 Variant="Variant.Outlined" Min="0" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField T="string" Label="Ghi chú" @bind-Value="_form.Note"
+                              Variant="Variant.Outlined" Lines="2" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="@(() => _dialogVisible = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCompanyAsync"
+                   Disabled="@(string.IsNullOrWhiteSpace(_form.CompanyName))">
+            @(_isEditing ? "💾 Cập nhật" : "➕ Thêm mới")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@* ══════ DIALOG CHI TIẾT CÔNG TY ══════ *@
+<MudDialog @bind-Visible="_detailVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent>
+        <MudText Typo="Typo.h6" Style="font-weight: 700;">🏢 Chi tiết công ty</MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_detailCompany != null)
+        {
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h5" Style="font-weight: 800;">@_detailCompany.CompanyName</MudText>
+                </MudItem>
+                <MudItem xs="6" md="4">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Loại hình</MudText>
+                    <MudText Typo="Typo.body1" Style="font-weight: 600;">@(_detailCompany.TypeOfBusiniess ?? "—")</MudText>
+                </MudItem>
+                <MudItem xs="6" md="4">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Lĩnh vực</MudText>
+                    <MudText Typo="Typo.body1" Style="font-weight: 600;">@(_detailCompany.Field?.FieldName ?? "—")</MudText>
+                </MudItem>
+                <MudItem xs="6" md="4">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Người đại diện</MudText>
+                    <MudText Typo="Typo.body1" Style="font-weight: 600;">@(_detailCompany.LegalRepresentative ?? "—")</MudText>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Địa chỉ</MudText>
+                    <MudText Typo="Typo.body1">@(_detailCompany.Address ?? "—")</MudText>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudDivider Class="my-2" />
+                </MudItem>
+                <MudItem xs="3">
+                    <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
+                        <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight: 800;">@_detailCompany.TotalAmount</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Tổng LĐ</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
+                        <MudText Typo="Typo.h4" Color="Color.Success" Style="font-weight: 800;">@_detailCompany.QuantityAvailable</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Có GPLĐ</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
+                        <MudText Typo="Typo.h4" Color="Color.Warning" Style="font-weight: 800;">@_detailCompany.QuantityNotYet</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Chưa có</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
+                        <MudText Typo="Typo.h4" Color="Color.Info" Style="font-weight: 800;">@_detailCompany.AmountOfExemption</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Miễn GPLĐ</MudText>
+                    </MudPaper>
+                </MudItem>
+                @if (!string.IsNullOrWhiteSpace(_detailCompany.Note))
+                {
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Info" Dense="true">📝 @_detailCompany.Note</MudAlert>
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" OnClick="@(() => _detailVisible = false)">Đóng</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Edit"
+                   OnClick="@(() => { _detailVisible = false; if (_detailCompany != null) OpenEditDialog(_detailCompany); })">
+            Sửa
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     private List<Company> _companies = new();
     private List<Field> _fields = new();
     private string? _searchText;
     private int? _selectedFieldId;
-    private string? _selectedTracker;
     private bool _loading = true;
+
+    // Dialog state
+    private bool _dialogVisible;
+    private bool _isEditing;
+    private Company _form = new();
+    private int _editingId;
+
+    // Detail dialog
+    private bool _detailVisible;
+    private Company? _detailCompany;
 
     protected override async Task OnInitializedAsync()
     {
@@ -181,15 +318,7 @@
         _loading = true;
         try
         {
-            var data = await CompanySvc.GetAllAsync(_searchText, _selectedFieldId);
-            if (!string.IsNullOrWhiteSpace(_selectedTracker))
-            {
-                data = data
-                    .Where(c => string.Equals(c.Tracker?.Name, _selectedTracker, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-
-            _companies = data;
+            _companies = await CompanySvc.GetAllAsync(_searchText, _selectedFieldId);
         }
         catch
         {
@@ -201,6 +330,101 @@
         }
     }
 
+    // ══════ THÊM ══════
+    private void OpenAddDialog()
+    {
+        _isEditing = false;
+        _editingId = 0;
+        _form = new Company
+        {
+            IDField = _fields.FirstOrDefault()?.IDField ?? 0
+        };
+        _dialogVisible = true;
+    }
+
+    // ══════ SỬA ══════
+    private void OpenEditDialog(Company company)
+    {
+        _isEditing = true;
+        _editingId = company.IDCompany;
+        _form = new Company
+        {
+            CompanyName = company.CompanyName,
+            TypeOfBusiniess = company.TypeOfBusiniess,
+            IDField = company.IDField,
+            LegalRepresentative = company.LegalRepresentative,
+            Address = company.Address,
+            TotalAmount = company.TotalAmount,
+            QuantityAvailable = company.QuantityAvailable,
+            QuantityNotYet = company.QuantityNotYet,
+            AmountOfExemption = company.AmountOfExemption,
+            Note = company.Note,
+            TrackerID = company.TrackerID
+        };
+        _dialogVisible = true;
+    }
+
+    // ══════ LƯU ══════
+    private async Task SaveCompanyAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_form.CompanyName))
+        {
+            Snackbar.Add("❌ Tên công ty không được để trống", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            if (_isEditing)
+            {
+                _form.IDCompany = _editingId;
+                await CompanySvc.UpdateAsync(_form);
+                Snackbar.Add($"✅ Đã cập nhật công ty \"{_form.CompanyName}\"", Severity.Success);
+            }
+            else
+            {
+                await CompanySvc.CreateAsync(_form);
+                Snackbar.Add($"✅ Đã thêm công ty \"{_form.CompanyName}\"", Severity.Success);
+            }
+
+            _dialogVisible = false;
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"❌ Lỗi: {ex.Message}", Severity.Error);
+        }
+    }
+
+    // ══════ XÓA ══════
+    private async Task ConfirmDelete(Company company)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm",
+            $"Bạn có chắc muốn xóa công ty \"{company.CompanyName}\"?");
+
+        if (confirmed)
+        {
+            try
+            {
+                await CompanySvc.DeleteAsync(company.IDCompany);
+                Snackbar.Add($"✅ Đã xóa công ty \"{company.CompanyName}\"", Severity.Success);
+                await LoadDataAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"❌ Lỗi: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    // ══════ CHI TIẾT ══════
+    private void OpenDetailDialog(Company company)
+    {
+        _detailCompany = company;
+        _detailVisible = true;
+    }
+
+    // ══════ XUẤT EXCEL ══════
     private async Task ExportExcelAsync()
     {
         try

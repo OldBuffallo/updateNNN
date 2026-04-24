@@ -1,4 +1,4 @@
-@page "/admin"
+﻿@page "/admin"
 @page "/admin/{SectionKey}"
 
 @using IRM.Services
@@ -11,11 +11,11 @@
 @inject NavigationManager Nav
 @inject ISnackbar Snackbar
 
-<PageTitle>Quan tri - IRM v2.0</PageTitle>
+<PageTitle>Quản trị - IRM v2.0</PageTitle>
 
 <div class="section-header">
-    <h3>Quan tri he thong</h3>
-    <span class="section-meta">Quan ly danh muc va cau hinh he thong</span>
+    <h3>Quản trị hệ thống</h3>
+    <span class="section-meta">Quản lý danh mục và cấu hình hệ thống</span>
 </div>
 
 <div class="admin-grid">
@@ -39,7 +39,7 @@
     <div class="section-header mt-6">
         <h3>@_activeSectionTitle</h3>
         <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick='() => Nav.NavigateTo("/admin")'
-                   StartIcon="@Icons.Material.Filled.ArrowBack">Ve trang quan tri</MudButton>
+                   StartIcon="@Icons.Material.Filled.ArrowBack">Về trang quản trị</MudButton>
     </div>
 }
 
@@ -53,19 +53,19 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
     {
         case "accounts":
             <MudPaper Class="pa-4 mb-4">
-                <MudText Typo="Typo.subtitle2" Class="mb-2">@(_editingAccount ? "Cap nhat tai khoan" : "Them tai khoan")</MudText>
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@(_editingAccount ? "Cập nhật tài khoản" : "Thêm tài khoản")</MudText>
                 <MudGrid>
                     <MudItem xs="12" md="3">
                         <MudTextField T="string" Label="Username" @bind-Value="_accountForm.Username" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="3">
-                        <MudTextField T="string" Label="Ho ten" @bind-Value="_accountForm.Name" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Họ tên" @bind-Value="_accountForm.Name" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="3">
-                        <MudTextField T="string" Label="Mat khau" InputType="InputType.Password" @bind-Value="_accountForm.Password" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Mật khẩu" InputType="InputType.Password" @bind-Value="_accountForm.Password" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="2">
-                        <MudSelect T="int" Label="Quyen" @bind-Value="_accountForm.Permission" Variant="Variant.Outlined">
+                        <MudSelect T="int" Label="Quyền" @bind-Value="_accountForm.Permission" Variant="Variant.Outlined">
                             <MudSelectItem Value="1">Admin</MudSelectItem>
                             <MudSelectItem Value="0">User</MudSelectItem>
                         </MudSelect>
@@ -75,14 +75,14 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAccountAsync">
                                 @(_editingAccount ? "Luu" : "Them")
                             </MudButton>
-                            <MudButton Variant="Variant.Text" OnClick="ResetAccountForm">Huy</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetAccountForm">Hủy</MudButton>
                         </MudStack>
                     </MudItem>
                 </MudGrid>
             </MudPaper>
 
             <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
-                <thead><tr><th>Username</th><th>Ho ten</th><th>Quyen</th><th>Trang thai</th><th></th></tr></thead>
+                <thead><tr><th>Username</th><th>Họ tên</th><th>Quyền</th><th>Trạng thái</th><th></th></tr></thead>
                 <tbody>
                     @foreach (var acc in _accounts)
                     {
@@ -90,11 +90,11 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                             <td>@acc.Username</td>
                             <td>@acc.Name</td>
                             <td><MudChip T="string" Size="Size.Small" Color="Color.Primary">@acc.PermissionString</MudChip></td>
-                            <td><MudChip T="string" Size="Size.Small" Color="Color.Success">Hoat dong</MudChip></td>
+                            <td><MudChip T="string" Size="Size.Small" Color="Color.Success">Hoạt động</MudChip></td>
                             <td>
                                 <MudStack Row="true" Spacing="1">
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditAccount(acc))">Sua</MudButton>
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteAccountAsync(acc.IDUser))">Xoa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditAccount(acc))">Sửa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteAccountAsync(acc.IDUser))">Xóa</MudButton>
                                 </MudStack>
                             </td>
                         </tr>
@@ -115,7 +115,7 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                     <MudItem xs="12" md="2" Class="d-flex align-center">
                         <MudStack Row="true" Spacing="1">
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveFieldAsync">@(_editingField ? "Luu" : "Them")</MudButton>
-                            <MudButton Variant="Variant.Text" OnClick="ResetFieldForm">Huy</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetFieldForm">Hủy</MudButton>
                         </MudStack>
                     </MudItem>
                 </MudGrid>
@@ -131,8 +131,8 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                             <td>@f.Description</td>
                             <td>
                                 <MudStack Row="true" Spacing="1">
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditField(f))">Sua</MudButton>
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteFieldAsync(f.IDField))">Xoa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditField(f))">Sửa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteFieldAsync(f.IDField))">Xóa</MudButton>
                                 </MudStack>
                             </td>
                         </tr>
@@ -158,7 +158,7 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                     <MudItem xs="12" md="4" Class="d-flex align-center">
                         <MudStack Row="true" Spacing="1">
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCareerAsync">@(_editingCareer ? "Luu" : "Them")</MudButton>
-                            <MudButton Variant="Variant.Text" OnClick="ResetCareerForm">Huy</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetCareerForm">Hủy</MudButton>
                         </MudStack>
                     </MudItem>
                 </MudGrid>
@@ -174,8 +174,8 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                             <td>@(c.CareerGroup?.CareerGroupName ?? "")</td>
                             <td>
                                 <MudStack Row="true" Spacing="1">
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditCareer(c))">Sua</MudButton>
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteCareerAsync(c.IDCareer))">Xoa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditCareer(c))">Sửa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteCareerAsync(c.IDCareer))">Xóa</MudButton>
                                 </MudStack>
                             </td>
                         </tr>
@@ -196,7 +196,7 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                     <MudItem xs="12" md="3" Class="d-flex align-center">
                         <MudStack Row="true" Spacing="1">
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveNationalityAsync">@(_editingNationality ? "Luu" : "Them")</MudButton>
-                            <MudButton Variant="Variant.Text" OnClick="ResetNationalityForm">Huy</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetNationalityForm">Hủy</MudButton>
                         </MudStack>
                     </MudItem>
                 </MudGrid>
@@ -211,8 +211,8 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                             <td>@n.NationalityName</td>
                             <td>
                                 <MudStack Row="true" Spacing="1">
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditNationality(n))">Sua</MudButton>
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteNationalityAsync(n.IDNationality))">Xoa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditNationality(n))">Sửa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteNationalityAsync(n.IDNationality))">Xóa</MudButton>
                                 </MudStack>
                             </td>
                         </tr>
@@ -230,7 +230,7 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                     <MudItem xs="12" md="4" Class="d-flex align-center">
                         <MudStack Row="true" Spacing="1">
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveDistrictAsync">@(_editingDistrict ? "Luu" : "Them")</MudButton>
-                            <MudButton Variant="Variant.Text" OnClick="ResetDistrictForm">Huy</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetDistrictForm">Hủy</MudButton>
                         </MudStack>
                     </MudItem>
                 </MudGrid>
@@ -245,8 +245,8 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                             <td>@d.DisTrictName</td>
                             <td>
                                 <MudStack Row="true" Spacing="1">
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditDistrict(d))">Sua</MudButton>
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteDistrictAsync(d.IDDistrict))">Xoa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditDistrict(d))">Sửa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteDistrictAsync(d.IDDistrict))">Xóa</MudButton>
                                 </MudStack>
                             </td>
                         </tr>
@@ -264,7 +264,7 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                     <MudItem xs="12" md="4" Class="d-flex align-center">
                         <MudStack Row="true" Spacing="1">
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveWardAsync">@(_editingWard ? "Luu" : "Them")</MudButton>
-                            <MudButton Variant="Variant.Text" OnClick="ResetWardForm">Huy</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="ResetWardForm">Hủy</MudButton>
                         </MudStack>
                     </MudItem>
                 </MudGrid>
@@ -279,8 +279,8 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                             <td>@w.WardName</td>
                             <td>
                                 <MudStack Row="true" Spacing="1">
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditWard(w))">Sua</MudButton>
-                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteWardAsync(w.IDWard))">Xoa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => EditWard(w))">Sửa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteWardAsync(w.IDWard))">Xóa</MudButton>
                                 </MudStack>
                             </td>
                         </tr>
@@ -310,7 +310,7 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                 </MudGrid>
             </MudPaper>
             <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
-                <thead><tr><th>Thoi gian</th><th>User</th><th>Action</th><th>Loai</th><th>Mo ta</th></tr></thead>
+                <thead><tr><th>Thời gian</th><th>User</th><th>Action</th><th>Loai</th><th>Mo ta</th></tr></thead>
                 <tbody>
                     @foreach (var log in _auditLogs)
                     {
@@ -332,7 +332,7 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
 
         case "import-history":
             <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
-                <thead><tr><th>Thoi gian</th><th>Session</th><th>File</th><th>Cong ty</th><th>+Moi</th><th>~Cap nhat</th><th>Loi</th><th>Trang thai</th><th>User</th></tr></thead>
+                <thead><tr><th>Thời gian</th><th>Session</th><th>File</th><th>Công ty</th><th>+Moi</th><th>~Cap nhat</th><th>Loi</th><th>Trạng thái</th><th>User</th></tr></thead>
                 <tbody>
                     @foreach (var item in _importHistory)
                     {
@@ -496,13 +496,13 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
     private void BuildCards()
     {
         _adminCards.Clear();
-        _adminCards.Add(new("accounts", Icons.Material.Filled.ManageAccounts, "Tai khoan", $"{_accounts.Count} tai khoan"));
-        _adminCards.Add(new("fields", Icons.Material.Filled.Business, "Linh vuc", $"{_fields.Count} linh vuc"));
-        _adminCards.Add(new("careers", Icons.Material.Filled.Work, "Nganh nghe", $"{_careers.Count} nganh"));
-        _adminCards.Add(new("nationalities", Icons.Material.Filled.Public, "Quoc tich", $"{_nationalities.Count} quoc tich"));
-        _adminCards.Add(new("districts", Icons.Material.Filled.Map, "Quan / Huyen", $"{_districts.Count} quan/huyen"));
+        _adminCards.Add(new("accounts", Icons.Material.Filled.ManageAccounts, "Tài khoản", $"{_accounts.Count} tai khoan"));
+        _adminCards.Add(new("fields", Icons.Material.Filled.Business, "Lĩnh vực", $"{_fields.Count} linh vuc"));
+        _adminCards.Add(new("careers", Icons.Material.Filled.Work, "Ngành nghề", $"{_careers.Count} nganh"));
+        _adminCards.Add(new("nationalities", Icons.Material.Filled.Public, "Quốc tịch", $"{_nationalities.Count} quoc tich"));
+        _adminCards.Add(new("districts", Icons.Material.Filled.Map, "Quận / Huyện", $"{_districts.Count} quan/huyen"));
         _adminCards.Add(new("wards", Icons.Material.Filled.Place, "Phuong / Xa", $"{_wards.Count} phuong/xa"));
-        _adminCards.Add(new("audit", Icons.Material.Filled.ReceiptLong, "Nhat ky he thong", "Audit log"));
+        _adminCards.Add(new("audit", Icons.Material.Filled.ReceiptLong, "Nhật ký hệ thống", "Audit log"));
         _adminCards.Add(new("import-history", Icons.Material.Filled.CloudUpload, "Lich su Import", "Lich su phien import"));
     }
 
@@ -542,12 +542,12 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
             if (_editingAccount)
             {
                 await AuthSvc.UpdateAccountAsync(_accountForm);
-                Snackbar.Add("Cap nhat tai khoan thanh cong.", Severity.Success);
+                Snackbar.Add("Cập nhật tài khoản thành công.", Severity.Success);
             }
             else
             {
                 await AuthSvc.CreateAccountAsync(_accountForm);
-                Snackbar.Add("Them tai khoan thanh cong.", Severity.Success);
+                Snackbar.Add("Thêm tài khoản thành công.", Severity.Success);
             }
             _accounts = await AuthSvc.GetAllAccountsAsync();
             BuildCards();
