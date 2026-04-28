@@ -1,0 +1,314 @@
+@page "/students"
+
+@using IRM.Services
+@using IRM.Data.Models
+@inject StudentService StudentSvc
+@inject CatalogService CatalogSvc
+@inject ExportService ExportSvc
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+
+<PageTitle>Du học sinh - IRM v2.0</PageTitle>
+
+<div class="section-header">
+    <h3>🎓 Danh sách Du học sinh</h3>
+    <span class="section-meta">
+        @if (_showExpiring)
+        {
+            <text>Tổng: @_students.Count du học sinh sắp hết hạn visa</text>
+        }
+        else
+        {
+            <text>Tổng: @_students.Count du học sinh</text>
+        }
+    </span>
+</div>
+
+<div class="page-actions-bar">
+    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Style="flex-wrap:wrap;">
+        <MudSelect T="string" @bind-Value="_fltNationality" @bind-Value:after="ApplyFilters"
+                   Placeholder="Quốc tịch" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true" Style="min-width:150px;">
+            @foreach (var n in _nationalities)
+            {
+                <MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>
+            }
+        </MudSelect>
+        <MudTextField T="string" @bind-Value="_fltSchool" @bind-Value:after="ApplyFilters"
+                      Placeholder="Trường" Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Style="min-width:180px;" />
+        <MudTextField T="string" @bind-Value="_fltMajor" @bind-Value:after="ApplyFilters"
+                      Placeholder="Ngành" Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Style="min-width:150px;" />
+        <MudSelect T="int?" @bind-Value="_fltEdu" @bind-Value:after="ApplyFilters"
+                   Placeholder="Trình độ" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true" Style="min-width:130px;">
+            <MudSelectItem T="int?" Value="0">Đại học</MudSelectItem>
+            <MudSelectItem T="int?" Value="1">Thạc sĩ</MudSelectItem>
+            <MudSelectItem T="int?" Value="2">Tiến sĩ</MudSelectItem>
+            <MudSelectItem T="int?" Value="3">Ngắn hạn</MudSelectItem>
+            <MudSelectItem T="int?" Value="4">Khác</MudSelectItem>
+        </MudSelect>
+        <MudSelect T="int?" @bind-Value="_fltScholarship" @bind-Value:after="ApplyFilters"
+                   Placeholder="Học bổng" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true" Style="min-width:150px;">
+            <MudSelectItem T="int?" Value="0">Tự túc</MudSelectItem>
+            <MudSelectItem T="int?" Value="1">HB Chính phủ VN</MudSelectItem>
+            <MudSelectItem T="int?" Value="2">HB nước ngoài</MudSelectItem>
+            <MudSelectItem T="int?" Value="3">Khác</MudSelectItem>
+        </MudSelect>
+        <MudSelect T="int?" @bind-Value="_fltStatus" @bind-Value:after="ApplyFilters"
+                   Placeholder="Trạng thái" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true" Style="min-width:140px;">
+            <MudSelectItem T="int?" Value="0">Đang học</MudSelectItem>
+            <MudSelectItem T="int?" Value="1">Đã TN</MudSelectItem>
+            <MudSelectItem T="int?" Value="2">Tạm nghỉ</MudSelectItem>
+            <MudSelectItem T="int?" Value="3">Đã về nước</MudSelectItem>
+        </MudSelect>
+    </MudStack>
+    <MudStack Row="true" Spacing="2">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Download" Color="Color.Default" OnClick="ExportExcelAsync">📥 Xuất Excel</MudButton>
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PersonAdd" Color="Color.Primary" OnClick="OpenAddDialog">+ Thêm DHS</MudButton>
+    </MudStack>
+</div>
+
+<MudStack Row="true" Spacing="2" Class="mb-3">
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadAllAsync" Size="Size.Small">Tất cả</MudButton>
+    <MudButton Variant="@(_showExpiring ? Variant.Filled : Variant.Outlined)" Color="Color.Warning" OnClick="LoadExpiringAsync" Size="Size.Small" StartIcon="@Icons.Material.Filled.Warning">Sắp hết hạn visa</MudButton>
+</MudStack>
+
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+}
+
+@if (_students.Any())
+{
+    <MudDataGrid Items="@_students" T="Student" Filterable="true" Sortable="true" Dense="true" Hover="true" Striped="false" RowsPerPage="10">
+        <Columns>
+            <TemplateColumn Title="STT" Sortable="false" Filterable="false">
+                <CellTemplate><MudText Typo="Typo.body2">@(_students.IndexOf(context.Item) + 1)</MudText></CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.FullName" Title="Họ tên" Style="font-weight:600;" />
+            <TemplateColumn Title="Quốc tịch">
+                <CellTemplate>
+                    @{ var natName = context.Item.NationalityNav?.NationalityName ?? context.Item.Nationality; }
+                    <span class="tag tag-blue">@natName</span>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Hộ chiếu">
+                <CellTemplate><MudText Typo="Typo.body2" Style="font-family:monospace;font-size:12px;background:var(--mud-palette-background);padding:2px 8px;border-radius:4px;">@context.Item.Passport</MudText></CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.SchoolName" Title="Trường" />
+            <PropertyColumn Property="x => x.Major" Title="Ngành" />
+            <TemplateColumn Title="Trình độ">
+                <CellTemplate><span class="tag tag-purple">@context.Item.EducationLevelString</span></CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Học bổng">
+                <CellTemplate>
+                    @{ var schTag = context.Item.ScholarshipType == 0 ? "tag-orange" : "tag-green"; }
+                    <span class="tag @schTag">@context.Item.ScholarshipTypeString</span>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Hạn visa" SortBy="@(x => x.VisaExpiry)">
+                <CellTemplate><MudText Typo="Typo.body2">@(context.Item.VisaExpiry?.ToString("dd/MM/yyyy") ?? "-")</MudText></CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Còn lại" SortBy="@(x => x.DaysUntilVisaExpiry ?? 9999)">
+                <CellTemplate>
+                    @{ var days = context.Item.DaysUntilVisaExpiry ?? 999;
+                       var dStyle = days <= 7 ? "color:var(--red);font-weight:700;" : days <= 30 ? "color:var(--orange);font-weight:700;" : ""; }
+                    <MudText Typo="Typo.body2" Style="@dStyle">@(days < 999 ? $"{days} ngày" : "-")</MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Trạng thái">
+                <CellTemplate>
+                    @{ var stTag = context.Item.Status switch { 0 => "tag-green", 1 => "tag-blue", 2 => "tag-orange", 3 => "tag-red", _ => "tag-blue" }; }
+                    <span class="tag @stTag">@context.Item.StatusString</span>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OpenDetailDialog(context.Item))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning" OnClick="@(() => OpenEditDialog(context.Item))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => ConfirmDelete(context.Item))" />
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent><MudDataGridPager T="Student" /></PagerContent>
+    </MudDataGrid>
+}
+else if (!_loading)
+{
+    <MudPaper Elevation="0" Class="pa-8 rounded-lg text-center empty-state-card">
+        <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-2">Chưa có du học sinh nào hoặc chọn bộ lọc để xem</MudText>
+    </MudPaper>
+}
+
+@* ══════ DIALOG THÊM/SỬA ══════ *@
+<MudDialog @bind-Visible="_dlgVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent><MudText Typo="Typo.h6" Style="font-weight:700;">@(_dlgEditing ? "✏️ Sửa du học sinh" : "➕ Thêm du học sinh")</MudText></TitleContent>
+    <DialogContent>
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6"><MudTextField T="string" Label="Họ tên *" @bind-Value="_f.FullName" Variant="Variant.Outlined" Required="true" /></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="int" Label="Giới tính" @bind-Value="_f.Gender" Variant="Variant.Outlined"><MudSelectItem Value="1">Nam</MudSelectItem><MudSelectItem Value="0">Nữ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudDatePicker Label="Ngày sinh" @bind-Date="_f.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="string" Label="Quốc tịch" @bind-Value="_f.Nationality" Variant="Variant.Outlined" Clearable="true">@foreach(var n in _nationalities){<MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>}</MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Số hộ chiếu" @bind-Value="_f.Passport" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="12" md="4"><MudTextField T="string" Label="Địa chỉ tại VN" @bind-Value="_f.Address" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="12" md="6"><MudTextField T="string" Label="Trường *" @bind-Value="_f.SchoolName" Variant="Variant.Outlined" Required="true" /></MudItem>
+            <MudItem xs="6" md="3"><MudTextField T="string" Label="Ngành học" @bind-Value="_f.Major" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="6" md="3"><MudTextField T="string" Label="Mã sinh viên" @bind-Value="_f.StudentCode" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="int" Label="Trình độ" @bind-Value="_f.EducationLevel" Variant="Variant.Outlined"><MudSelectItem Value="0">Đại học</MudSelectItem><MudSelectItem Value="1">Thạc sĩ</MudSelectItem><MudSelectItem Value="2">Tiến sĩ</MudSelectItem><MudSelectItem Value="3">Ngắn hạn</MudSelectItem><MudSelectItem Value="4">Khác</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="int" Label="Học bổng" @bind-Value="_f.ScholarshipType" Variant="Variant.Outlined"><MudSelectItem Value="0">Tự túc</MudSelectItem><MudSelectItem Value="1">HB Chính phủ VN</MudSelectItem><MudSelectItem Value="2">HB nước ngoài</MudSelectItem><MudSelectItem Value="3">Khác</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudDatePicker Label="Ngày nhập học" @bind-Date="_f.EnrollmentDate" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            <MudItem xs="6" md="3"><MudDatePicker Label="Dự kiến TN" @bind-Date="_f.ExpectedGraduation" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Số Visa" @bind-Value="_f.VisaNumber" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="6" md="4"><MudDatePicker Label="Hạn Visa" @bind-Date="_f.VisaExpiry" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            <MudItem xs="6" md="4"><MudDatePicker Label="Hạn tạm trú" @bind-Date="_f.TemporaryStay" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="int" Label="Trạng thái" @bind-Value="_f.Status" Variant="Variant.Outlined"><MudSelectItem Value="0">Đang học</MudSelectItem><MudSelectItem Value="1">Đã tốt nghiệp</MudSelectItem><MudSelectItem Value="2">Tạm nghỉ</MudSelectItem><MudSelectItem Value="3">Đã về nước</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="12" md="8"><MudTextField T="string" Label="Ghi chú" @bind-Value="_f.Note" Variant="Variant.Outlined" Lines="2" /></MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="@(() => _dlgVisible = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="@(string.IsNullOrWhiteSpace(_f.FullName))">@(_dlgEditing ? "💾 Cập nhật" : "➕ Thêm")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@* ══════ DIALOG CHI TIẾT ══════ *@
+<MudDialog @bind-Visible="_detVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent><MudText Typo="Typo.h6" Style="font-weight:700;">🎓 Hồ sơ du học sinh</MudText></TitleContent>
+    <DialogContent>
+        @if (_det != null)
+        {
+            <MudGrid Spacing="2">
+                <MudItem xs="12"><MudText Typo="Typo.h5" Style="font-weight:800;">@_det.FullName</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Giới tính</MudText><MudText Style="font-weight:600;">@_det.GenderString</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Ngày sinh</MudText><MudText Style="font-weight:600;">@(_det.Birthday?.ToString("dd/MM/yyyy") ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Quốc tịch</MudText><MudText Style="font-weight:600;">@(_det.NationalityNav?.NationalityName ?? _det.Nationality ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Hộ chiếu</MudText><MudText Style="font-weight:600;">@(_det.Passport ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Địa chỉ</MudText><MudText Style="font-weight:600;">@(_det.Address ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Trạng thái</MudText><span class="tag @(_det.Status == 0 ? "tag-green" : "tag-blue")">@_det.StatusString</span></MudItem>
+                <MudItem xs="12"><MudDivider Class="my-1" /><MudText Typo="Typo.subtitle2" Style="font-weight:700;">📚 Thông tin học tập</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Trường</MudText><MudText Style="font-weight:600;">@(_det.SchoolName ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Ngành</MudText><MudText Style="font-weight:600;">@(_det.Major ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Mã SV</MudText><MudText Style="font-weight:600;">@(_det.StudentCode ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Trình độ</MudText><span class="tag tag-purple">@_det.EducationLevelString</span></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Học bổng</MudText><span class="tag @(_det.ScholarshipType == 0 ? "tag-orange" : "tag-green")">@_det.ScholarshipTypeString</span></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Nhập học</MudText><MudText Style="font-weight:600;">@(_det.EnrollmentDate?.ToString("dd/MM/yyyy") ?? "—")</MudText></MudItem>
+                <MudItem xs="12"><MudDivider Class="my-1" /><MudText Typo="Typo.subtitle2" Style="font-weight:700;">📋 Visa & Tạm trú</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Số Visa</MudText><MudText Style="font-weight:600;">@(_det.VisaNumber ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Hạn Visa</MudText><MudText Style="font-weight:600;">@(_det.VisaExpiry?.ToString("dd/MM/yyyy") ?? "—")</MudText></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Còn lại</MudText><MudText Style="@GetExpiryStyle(_det)">@(_det.DaysUntilVisaExpiry.HasValue ? $"{_det.DaysUntilVisaExpiry} ngày" : "—")</MudText></MudItem>
+            </MudGrid>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" OnClick="@(() => _detVisible = false)">Đóng</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Edit" OnClick="@(() => { _detVisible = false; if (_det != null) OpenEditDialog(_det); })">Sửa</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<Student> _allStudents = new();
+    private List<Student> _students = new();
+    private bool _loading; private bool _showExpiring;
+
+    // Filters
+    private string? _fltNationality; private string? _fltSchool; private string? _fltMajor;
+    private int? _fltEdu; private int? _fltScholarship; private int? _fltStatus;
+
+    // Dialog
+    private bool _dlgVisible; private bool _dlgEditing; private Student _f = new(); private int _dlgEditId;
+    private bool _detVisible; private Student? _det;
+    private List<NationalityEntity> _nationalities = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _nationalities = await CatalogSvc.GetNationalitiesAsync();
+        await LoadAllAsync();
+    }
+
+    private async Task LoadAllAsync()
+    {
+        _loading = true; _showExpiring = false;
+        try { _allStudents = await StudentSvc.GetAllVisibleAsync(); ApplyFilters(); }
+        catch { _allStudents = new(); _students = new(); }
+        finally { _loading = false; }
+    }
+
+    private async Task LoadExpiringAsync()
+    {
+        _loading = true; _showExpiring = true;
+        try { _allStudents = await StudentSvc.GetExpiringVisaAsync(90); ApplyFilters(); }
+        catch { _allStudents = new(); _students = new(); }
+        finally { _loading = false; }
+    }
+
+    private void ApplyFilters()
+    {
+        IEnumerable<Student> q = _allStudents;
+        if (!string.IsNullOrWhiteSpace(_fltNationality)) q = q.Where(s => s.Nationality == _fltNationality);
+        if (!string.IsNullOrWhiteSpace(_fltSchool)) q = q.Where(s => s.SchoolName != null && s.SchoolName.Contains(_fltSchool, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrWhiteSpace(_fltMajor)) q = q.Where(s => s.Major != null && s.Major.Contains(_fltMajor, StringComparison.OrdinalIgnoreCase));
+        if (_fltEdu.HasValue) q = q.Where(s => s.EducationLevel == _fltEdu.Value);
+        if (_fltScholarship.HasValue) q = q.Where(s => s.ScholarshipType == _fltScholarship.Value);
+        if (_fltStatus.HasValue) q = q.Where(s => s.Status == _fltStatus.Value);
+        _students = q.ToList();
+    }
+
+    private async Task ExportExcelAsync()
+    {
+        try
+        {
+            var bytes = await ExportSvc.ExportStudentsAsync(_fltNationality, _fltSchool, _fltEdu, _fltScholarship, _fltStatus, _showExpiring);
+            var base64 = Convert.ToBase64String(bytes);
+            await JS.InvokeVoidAsync("irmInterop.downloadFile", $"DuHocSinh_{DateTime.Now:yyyyMMdd}.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", base64);
+        }
+        catch { }
+    }
+
+    private void OpenAddDialog()
+    {
+        _dlgEditing = false; _dlgEditId = 0;
+        _f = new Student { Gender = 1 };
+        _dlgVisible = true;
+    }
+
+    private void OpenEditDialog(Student s)
+    {
+        _dlgEditing = true; _dlgEditId = s.IDStudent;
+        _f = new Student
+        {
+            FullName = s.FullName, Gender = s.Gender, Birthday = s.Birthday,
+            Nationality = s.Nationality, Passport = s.Passport, Address = s.Address,
+            SchoolName = s.SchoolName, Major = s.Major, StudentCode = s.StudentCode,
+            EducationLevel = s.EducationLevel, EnrollmentDate = s.EnrollmentDate,
+            ExpectedGraduation = s.ExpectedGraduation, VisaNumber = s.VisaNumber,
+            VisaExpiry = s.VisaExpiry, TemporaryStay = s.TemporaryStay,
+            ScholarshipType = s.ScholarshipType, Status = s.Status, Note = s.Note
+        };
+        _dlgVisible = true;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_f.FullName)) { Snackbar.Add("❌ Họ tên không được trống", Severity.Error); return; }
+        try
+        {
+            if (_dlgEditing) { _f.IDStudent = _dlgEditId; await StudentSvc.UpdateAsync(_f); Snackbar.Add($"✅ Đã cập nhật \"{_f.FullName}\"", Severity.Success); }
+            else { await StudentSvc.CreateAsync(_f); Snackbar.Add($"✅ Đã thêm \"{_f.FullName}\"", Severity.Success); }
+            _dlgVisible = false; await LoadAllAsync();
+        }
+        catch (Exception ex) { Snackbar.Add($"❌ Lỗi: {ex.Message}", Severity.Error); }
+    }
+
+    private async Task ConfirmDelete(Student s)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Xóa du học sinh \"{s.FullName}\"?");
+        if (confirmed) { await StudentSvc.DeleteAsync(s.IDStudent); Snackbar.Add("✅ Đã xóa", Severity.Success); await LoadAllAsync(); }
+    }
+
+    private void OpenDetailDialog(Student s) { _det = s; _detVisible = true; }
+
+    private static string GetExpiryStyle(Student s)
+    {
+        var color = s.DaysUntilVisaExpiry switch { <= 7 => "#dc2626", <= 30 => "#d97706", _ => "#059669" };
+        return $"font-weight:700; color:{color};";
+    }
+}

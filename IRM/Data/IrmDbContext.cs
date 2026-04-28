@@ -26,6 +26,9 @@ public class IrmDbContext : DbContext
     public DbSet<Ward> Wards { get; set; }
     public DbSet<Attach> Attachments { get; set; }
 
+    // === Du học sinh ===
+    public DbSet<Student> Students { get; set; }
+
     // === Bảng mới ===
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<ImportHistory> ImportHistories { get; set; }
@@ -85,6 +88,27 @@ public class IrmDbContext : DbContext
             e.Property(emp => emp.FamilyVisitStartDate).HasColumnName("FamilyVisitStartDate");
             e.Property(emp => emp.FamilyVisitEndDate).HasColumnName("FamilyVisitEndDate");
             e.Property(emp => emp.FamilyVisitNote).HasColumnName("FamilyVisitNote");
+        });
+
+        // ── Students (Du học sinh) ──
+        modelBuilder.Entity<Student>(e =>
+        {
+            e.ToTable("Students");
+            e.HasKey(s => s.IDStudent);
+            e.HasOne(s => s.NationalityNav)
+                .WithMany()
+                .HasForeignKey(s => s.Nationality)
+                .HasPrincipalKey(n => n.NationalityCode);
+            e.Property(s => s.Birthday).HasColumnName("Birthday");
+            e.Property(s => s.TemporaryStay).HasColumnName("TemporaryStay");
+            e.Property(s => s.DateCreated).HasColumnName("DateCreated");
+            e.Property(s => s.EnrollmentDate).HasColumnName("EnrollmentDate");
+            e.Property(s => s.ExpectedGraduation).HasColumnName("ExpectedGraduation");
+            e.Property(s => s.VisaExpiry).HasColumnName("VisaExpiry");
+            e.Property(s => s.Hidden_flag).HasDefaultValue(0);
+            e.Property(s => s.Status).HasDefaultValue(0);
+            e.Property(s => s.ScholarshipType).HasDefaultValue(0);
+            e.Property(s => s.EducationLevel).HasDefaultValue(0);
         });
 
         // ── Fields ──

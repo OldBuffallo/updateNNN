@@ -1,8 +1,7 @@
 name: Deploy Demo to GitHub Pages
 
+# CHỈ chạy thủ công — tiết kiệm GitHub Actions minutes (free tier: 2000 min/tháng)
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

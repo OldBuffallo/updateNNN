@@ -84,6 +84,16 @@ else if (_error != null)
         </div>
         <div class="kpi-icon">🔔</div>
     </div>
+
+    <div class="kpi-card kpi-cyan kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/students")' @onkeydown='e => OnCardKeyDown(e, "/students")'>
+        <div>
+            <span class="kpi-label">Du học sinh</span>
+            <span class="kpi-value" id="kpiStudents">@_totalStudents.ToString("N0")</span>
+            <span class="kpi-change up">Đang học tại VN</span>
+        </div>
+        <div class="kpi-icon">🎓</div>
+    </div>
 </div>
 
 @* ═══ CHARTS ROW 1: Bar + Doughnut (Chart.js canvas) ═══ *@
@@ -155,6 +165,8 @@ else if (_error != null)
     private int _withPermit;
     private int _familyVisitCount;
     private int _familyVisitExpiringCount;
+    private int _totalStudents;
+    private int _studentVisaExpiringCount;
     // Removed hardcoded "new this month" — showing real-time DB data only
 
     // Chart data for JS interop
@@ -180,6 +192,8 @@ else if (_error != null)
             _withPermit = data.WithWorkPermit;
             _familyVisitCount = data.FamilyVisitCount;
             _familyVisitExpiringCount = data.FamilyVisitExpiringCount;
+            _totalStudents = data.TotalStudents;
+            _studentVisaExpiringCount = data.StudentVisaExpiringCount;
             _expiringEmployees = data.ExpiringEmployees;
 
             if (data.NationalityStats.Any())
@@ -268,6 +282,7 @@ else if (_error != null)
             await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiPermit", _withPermit, 1300);
             await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiFamilyVisit", _familyVisitCount, 1000);
             await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiFamilyExpiring", _familyVisitExpiringCount, 900);
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiStudents", _totalStudents, 1100);
         }
         catch { /* JS interop may fail during prerender */ }
     }

@@ -362,6 +362,84 @@ public class ExportService
         return WorkbookToBytes(wb);
     }
 
+    /// <summary>Export danh sách du học sinh ra Excel</summary>
+    public async Task<byte[]> ExportStudentsAsync(
+        string? nationality = null, string? school = null,
+        int? educationLevel = null, int? scholarshipType = null,
+        int? status = null, bool expiringOnly = false)
+    {
+        using var db = await _dbFactory.CreateDbContextAsync();
+        IQueryable<Student> query = db.Students
+            .Include(s => s.NationalityNav)
+            .Where(s => s.Hidden_flag == 0)
+            .OrderBy(s => s.FullName);
+
+        if (!string.IsNullOrWhiteSpace(nationality))
+            query = query.Where(s => s.Nationality == nationality);
+        if (!string.IsNullOrWhiteSpace(school))
+            query = query.Where(s => s.SchoolName != null && s.SchoolName.Contains(school));
+        if (educationLevel.HasValue)
+            query = query.Where(s => s.EducationLevel == educationLevel.Value);
+        if (scholarshipType.HasValue)
+            query = query.Where(s => s.ScholarshipType == scholarshipType.Value);
+        if (status.HasValue)
+            query = query.Where(s => s.Status == status.Value);
+        if (expiringOnly)
+        {
+            var cutoff = DateTime.Today.AddDays(90);
+            query = query.Where(s => s.VisaExpiry != null && s.VisaExpiry >= DateTime.Today && s.VisaExpiry <= cutoff);
+        }
+
+        var students = await query.ToListAsync();
+
+        using var wb = new XLWorkbook();
+        var ws = wb.Worksheets.Add("Danh sách Du học sinh");
+
+        var headers = new[] { "STT", "Họ tên", "Giới tính", "Ngày sinh", "Quốc tịch", "Hộ chiếu",
+            "Trường", "Ngành", "Mã SV", "Trình độ", "Học bổng", "Ngày nhập học",
+            "Dự kiến TN", "Số Visa", "Hạn Visa", "Hạn tạm trú", "Còn lại (ngày)", "Trạng thái", "Ghi chú" };
+        for (int i = 0; i < headers.Length; i++)
+        {
+            ws.Cell(1, i + 1).Value = headers[i];
+            ws.Cell(1, i + 1).Style.Font.Bold = true;
+            ws.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#0891b2");
+            ws.Cell(1, i + 1).Style.Font.FontColor = XLColor.White;
+        }
+
+        for (int r = 0; r < students.Count; r++)
+        {
+            var s = students[r];
+            var days = s.DaysUntilVisaExpiry;
+            ws.Cell(r + 2, 1).Value = r + 1;
+            ws.Cell(r + 2, 2).Value = s.FullName;
+            ws.Cell(r + 2, 3).Value = s.GenderString;
+            ws.Cell(r + 2, 4).Value = s.Birthday?.ToString("dd/MM/yyyy") ?? "";
+            ws.Cell(r + 2, 5).Value = s.NationalityNav?.NationalityName ?? s.Nationality;
+            ws.Cell(r + 2, 6).Value = s.Passport;
+            ws.Cell(r + 2, 7).Value = s.SchoolName;
+            ws.Cell(r + 2, 8).Value = s.Major;
+            ws.Cell(r + 2, 9).Value = s.StudentCode;
+            ws.Cell(r + 2, 10).Value = s.EducationLevelString;
+            ws.Cell(r + 2, 11).Value = s.ScholarshipTypeString;
+            ws.Cell(r + 2, 12).Value = s.EnrollmentDate?.ToString("dd/MM/yyyy") ?? "";
+            ws.Cell(r + 2, 13).Value = s.ExpectedGraduation?.ToString("dd/MM/yyyy") ?? "";
+            ws.Cell(r + 2, 14).Value = s.VisaNumber;
+            ws.Cell(r + 2, 15).Value = s.VisaExpiry?.ToString("dd/MM/yyyy") ?? "";
+            ws.Cell(r + 2, 16).Value = s.TemporaryStay?.ToString("dd/MM/yyyy") ?? "";
+            ws.Cell(r + 2, 17).Value = days.HasValue ? days.Value.ToString() : "";
+            ws.Cell(r + 2, 18).Value = s.StatusString;
+            ws.Cell(r + 2, 19).Value = s.Note;
+
+            if (days.HasValue && days.Value <= 7)
+                ws.Row(r + 2).Style.Font.FontColor = XLColor.Red;
+            else if (days.HasValue && days.Value <= 30)
+                ws.Row(r + 2).Style.Font.FontColor = XLColor.FromHtml("#d97706");
+        }
+
+        ws.Columns().AdjustToContents();
+        return WorkbookToBytes(wb);
+    }
+
     private static byte[] WorkbookToBytes(XLWorkbook wb)
     {
         using var ms = new MemoryStream();

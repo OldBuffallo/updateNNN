@@ -46,6 +46,9 @@
     --teal: #0d9488;
     --teal-bg: #f0fdfa;
     --teal-border: #99f6e4;
+    --cyan: #0891b2;
+    --cyan-bg: #ecfeff;
+    --cyan-border: #a5f3fc;
 
     --radius-sm: 8px;
     --radius: 10px;
@@ -584,6 +587,14 @@ body {
 
 .kpi-red .kpi-value {
     color: var(--red);
+}
+
+.kpi-cyan::before {
+    background: linear-gradient(90deg, #0891b2, #22d3ee);
+}
+
+.kpi-cyan .kpi-value {
+    color: var(--cyan);
 }
 
 .chart-card {

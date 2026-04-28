@@ -69,6 +69,27 @@ public class SearchService
                 .ToListAsync();
         }
 
+        // Tìm du học sinh
+        if (filter == "all" || filter == "student")
+        {
+            result.Students = await _db.Students
+                .Include(s => s.NationalityNav)
+                .Where(s => s.Hidden_flag == 0 && (
+                    s.FullName.ToLower().Contains(kw) ||
+                    (s.Passport != null && s.Passport.ToLower().Contains(kw)) ||
+                    (s.SchoolName != null && s.SchoolName.ToLower().Contains(kw)) ||
+                    (s.Major != null && s.Major.ToLower().Contains(kw)) ||
+                    (s.VisaNumber != null && s.VisaNumber.ToLower().Contains(kw)) ||
+                    (s.StudentCode != null && s.StudentCode.ToLower().Contains(kw)) ||
+                    (s.Address != null && s.Address.ToLower().Contains(kw)) ||
+                    (s.Note != null && s.Note.ToLower().Contains(kw)) ||
+                    (s.NationalityNav != null && s.NationalityNav.NationalityName.ToLower().Contains(kw))
+                ))
+                .OrderBy(s => s.FullName)
+                .Take(100)
+                .ToListAsync();
+        }
+
         return result;
     }
 }
@@ -78,5 +99,6 @@ public class SearchResult
     public string Keyword { get; set; } = "";
     public List<Employee> Employees { get; set; } = new();
     public List<Company> Companies { get; set; } = new();
-    public int TotalCount => Employees.Count + Companies.Count;
+    public List<Student> Students { get; set; } = new();
+    public int TotalCount => Employees.Count + Companies.Count + Students.Count;
 }

@@ -81,6 +81,15 @@ public class DashboardService
             .Take(50)
             .ToListAsync();
 
+        // Du học sinh
+        data.TotalStudents = await _db.Students.CountAsync(s =>
+            s.Hidden_flag == 0 && s.Status == 0);
+        data.StudentVisaExpiringCount = await _db.Students.CountAsync(s =>
+            s.Hidden_flag == 0 && s.Status == 0
+            && s.VisaExpiry != null
+            && s.VisaExpiry >= today
+            && s.VisaExpiry <= in30Days);
+
         return data;
     }
 }
@@ -94,6 +103,8 @@ public class DashboardData
     public int WithWorkPermit { get; set; }
     public int FamilyVisitCount { get; set; }
     public int FamilyVisitExpiringCount { get; set; }
+    public int TotalStudents { get; set; }
+    public int StudentVisaExpiringCount { get; set; }
     public List<ChartItem> NationalityStats { get; set; } = new();
     public List<ChartItem> WorkPermitStats { get; set; } = new();
     public List<Employee> ExpiringEmployees { get; set; } = new();

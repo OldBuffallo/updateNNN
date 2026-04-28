@@ -28,6 +28,14 @@
                 OnClick='@(() => NotifyPageChanged("Quản lý Nhân viên"))'>
         Nhân viên
     </MudNavLink>
+    <MudNavLink Href="/students"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Filled.School"
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Quản lý Du học sinh"))'>
+        Du học sinh
+    </MudNavLink>
     <MudNavLink Href="/import"
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.UploadFile"

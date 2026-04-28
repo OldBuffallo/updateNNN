@@ -89,7 +89,9 @@ public static class DatabaseSeeder
                 new NationalityEntity { NationalityCode = "ID", NationalityName = "Indonesia" },
                 new NationalityEntity { NationalityCode = "US", NationalityName = "Hoa Kỳ" },
                 new NationalityEntity { NationalityCode = "GB", NationalityName = "Anh Quốc" },
-                new NationalityEntity { NationalityCode = "AU", NationalityName = "Úc" }
+                new NationalityEntity { NationalityCode = "AU", NationalityName = "Úc" },
+                new NationalityEntity { NationalityCode = "LA", NationalityName = "Lào" },
+                new NationalityEntity { NationalityCode = "KH", NationalityName = "Campuchia" }
             );
             await db.SaveChangesAsync();
         }
@@ -270,6 +272,59 @@ public static class DatabaseSeeder
             await db.SaveChangesAsync();
         }
 
+        // ── Students (Du học sinh) ──
+        if (!await db.Students.AnyAsync())
+        {
+            var now = DateTime.Now;
+            db.Students.AddRange(
+                // Lào
+                Stu("Khamphone Souliyavong", 1, 1999, 5, 12, "LA", "L11223344",
+                    "Đại học Bách Khoa Hà Nội", "Kỹ thuật Điện", "BK20220101", 0,
+                    now.AddMonths(-24), now.AddMonths(24), "VS-2024-001", now.AddDays(20), now.AddDays(25), 1, 0, "HB Chính phủ VN"),
+                Stu("Bounmy Chanthavong", 0, 2000, 8, 3, "LA", "L22334455",
+                    "Đại học Quốc gia Hà Nội", "Ngôn ngữ Việt Nam", "QG20220201", 0,
+                    now.AddMonths(-18), now.AddMonths(30), "VS-2024-002", now.AddMonths(6), now.AddMonths(6), 1, 0, ""),
+                // Campuchia
+                Stu("Sokha Pich", 1, 1998, 3, 20, "KH", "K33445566",
+                    "Đại học Y Hà Nội", "Y đa khoa", "YH20210301", 0,
+                    now.AddMonths(-36), now.AddMonths(36), "VS-2023-010", now.AddDays(8), now.AddDays(10), 1, 0, "HB Chính phủ VN"),
+                Stu("Chenda Mao", 0, 2001, 11, 15, "KH", "K44556677",
+                    "Đại học Ngoại thương", "Kinh doanh quốc tế", "NT20230101", 0,
+                    now.AddMonths(-12), now.AddMonths(36), "VS-2025-005", now.AddMonths(12), now.AddMonths(12), 0, 0, ""),
+                // Trung Quốc
+                Stu("Li Xiaoming", 1, 1997, 7, 8, "CN", "G55667788",
+                    "Đại học Bách Khoa Hà Nội", "CNTT", "BK20200501", 1,
+                    now.AddMonths(-30), now.AddMonths(6), "VS-2023-020", now.AddDays(45), now.AddDays(50), 0, 0, ""),
+                Stu("Wang Mei", 0, 1999, 1, 22, "CN", "G66778899",
+                    "Đại học Quốc gia TP.HCM", "Kinh tế", "QG20220601", 0,
+                    now.AddMonths(-20), now.AddMonths(28), "VS-2024-030", now.AddMonths(8), now.AddMonths(9), 2, 0, ""),
+                // Hàn Quốc
+                Stu("Park Jiyeon", 0, 2000, 4, 10, "KR", "M77889900",
+                    "Đại học Hà Nội", "Ngôn ngữ Việt Nam", "DH20230201", 0,
+                    now.AddMonths(-14), now.AddMonths(34), "VS-2025-011", now.AddMonths(10), now.AddMonths(11), 0, 0, ""),
+                Stu("Kim Taehyung", 1, 1998, 9, 30, "KR", "M88990011",
+                    "Đại học Ngoại thương", "Quản trị kinh doanh", "NT20210901", 1,
+                    now.AddMonths(-36), now.AddMonths(0), "VS-2023-012", now.AddDays(-5), now.AddDays(3), 0, 1, "Đã tốt nghiệp tháng 9"),
+                // Nhật Bản
+                Stu("Tanaka Yuto", 1, 2001, 2, 14, "JP", "TJ99001122",
+                    "Đại học Bách Khoa Đà Nẵng", "Cơ khí", "BK20240101", 0,
+                    now.AddMonths(-4), now.AddMonths(44), "VS-2025-041", now.AddMonths(18), now.AddMonths(20), 2, 0, "HB JASSO"),
+                // Ấn Độ
+                Stu("Priya Patel", 0, 1996, 6, 5, "IN", "IN00112233",
+                    "Đại học Y Hà Nội", "Y đa khoa", "YH20190601", 2,
+                    now.AddMonths(-60), now.AddMonths(12), "VS-2022-050", now.AddDays(30), now.AddDays(35), 1, 0, ""),
+                // Indonesia
+                Stu("Ahmad Rizki", 1, 2000, 12, 1, "ID", "ID11223300",
+                    "Đại học Quốc gia Hà Nội", "Quan hệ quốc tế", "QG20230901", 0,
+                    now.AddMonths(-8), now.AddMonths(40), "VS-2025-060", now.AddMonths(14), now.AddMonths(15), 1, 0, "HB Chính phủ VN"),
+                // Thái Lan
+                Stu("Siriporn Worawat", 0, 1999, 10, 18, "TH", "TH22334411",
+                    "Đại học Hà Nội", "Du lịch", "DH20220301", 0,
+                    now.AddMonths(-24), now.AddMonths(24), "VS-2024-070", now.AddDays(15), now.AddDays(18), 0, 0, "")
+            );
+            await db.SaveChangesAsync();
+        }
+
         // ── Districts ──
         if (!await db.Districts.AnyAsync())
         {
@@ -302,6 +357,25 @@ public static class DatabaseSeeder
             Nationality = nat, Passport = passport, IDCareer = careerId,
             WorkPermit = workPermit, TemporaryStay = tempStay,
             IDUser = 1, IDCompany = company.IDCompany, DateCreated = DateTime.Now
+        };
+    }
+
+    private static Student Stu(string name, int gender, int y, int m, int d,
+        string nat, string passport, string school, string major, string studentCode,
+        int eduLevel, DateTime enrollment, DateTime graduation,
+        string visa, DateTime visaExpiry, DateTime tempStay,
+        int scholarship, int status, string note)
+    {
+        return new Student
+        {
+            FullName = name, Gender = gender, Birthday = new DateTime(y, m, d),
+            Nationality = nat, Passport = passport,
+            SchoolName = school, Major = major, StudentCode = studentCode,
+            EducationLevel = eduLevel, EnrollmentDate = enrollment,
+            ExpectedGraduation = graduation, VisaNumber = visa,
+            VisaExpiry = visaExpiry, TemporaryStay = tempStay,
+            ScholarshipType = scholarship, Status = status, Note = note,
+            IDUser = 1, DateCreated = DateTime.Now, Hidden_flag = 0
         };
     }
 }

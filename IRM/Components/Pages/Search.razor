@@ -46,6 +46,7 @@
         <MudChip Value="@("all")" Default="true" Variant="Variant.Outlined" Color="Color.Primary">📋 Tất cả</MudChip>
         <MudChip Value="@("employee")" Variant="Variant.Outlined" Color="Color.Success">👥 Nhân viên</MudChip>
         <MudChip Value="@("company")" Variant="Variant.Outlined" Color="Color.Info">🏢 Công ty</MudChip>
+        <MudChip Value="@("student")" Variant="Variant.Outlined" Color="Color.Warning">🎓 Du học sinh</MudChip>
     </MudChipSet>
 </div>
 
@@ -55,7 +56,8 @@
         Tìm thấy <strong>@_result.TotalCount</strong> kết quả cho "<em>@_result.Keyword</em>"
         @if (_filterType != "all")
         {
-            <text> — Lọc: <strong>@(_filterType == "employee" ? "Nhân viên" : "Công ty")</strong></text>
+            var filterName = _filterType switch { "employee" => "Nhân viên", "company" => "Công ty", "student" => "Du học sinh", _ => "" };
+            <text> — Lọc: <strong>@filterName</strong></text>
         }
     </div>
 
@@ -67,6 +69,10 @@
         <div class="stat-mini-card">
             <span class="stat-mini-num">@_result.Companies.Count</span>
             <span class="stat-mini-label">Công ty</span>
+        </div>
+        <div class="stat-mini-card">
+            <span class="stat-mini-num">@_result.Students.Count</span>
+            <span class="stat-mini-label">Du học sinh</span>
         </div>
     </div>
 
@@ -116,6 +122,35 @@
                 </div>
                 <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
                            Href="/companies">Xem →</MudButton>
+            </div>
+        }
+    }
+
+    @if (_result.Students.Any())
+    {
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-2 mt-4">🎓 Du học sinh (@_result.Students.Count)</MudText>
+        @foreach (var stu in _result.Students)
+        {
+            <div class="search-result-item">
+                <div class="result-type">🎓</div>
+                <div class="result-body">
+                    <h4>@((MarkupString)HighlightKeyword(stu.FullName ?? "")) — @((MarkupString)HighlightKeyword(stu.NationalityNav?.NationalityName ?? stu.Nationality ?? ""))</h4>
+                    <p>
+                        HC: @((MarkupString)HighlightKeyword(stu.Passport ?? "")) ·
+                        @((MarkupString)HighlightKeyword(stu.SchoolName ?? "")) ·
+                        @((MarkupString)HighlightKeyword(stu.Major ?? "")) ·
+                        @stu.EducationLevelString ·
+                        Hạn visa: @(stu.VisaExpiry?.ToString("dd/MM/yyyy") ?? "-")
+                        @if (stu.DaysUntilVisaExpiry.HasValue)
+                        {
+                            var days = stu.DaysUntilVisaExpiry.Value;
+                            var color = days <= 7 ? "#dc2626" : days <= 30 ? "#d97706" : "#059669";
+                            <text> · </text><span style="font-weight:700;color:@color">@days ngày</span>
+                        }
+                    </p>
+                </div>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
+                           Href="/students">Xem →</MudButton>
             </div>
         }
     }
