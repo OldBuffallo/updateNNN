@@ -1,7 +1,9 @@
 @inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Web
+@using IRM.Services
 @inject IJSRuntime JS
 @inject NavigationManager Nav
+@inject AuthService AuthSvc
 @inject Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage.ProtectedSessionStorage SessionStore
 
 <MudThemeProvider Theme="_theme" IsDarkMode="@_isDarkMode" />
@@ -155,8 +157,16 @@
 
         <MudMainContent Class="irm-main">
             <MudContainer MaxWidth="MaxWidth.False" Class="irm-main-container">
-                @Body
+                <CascadingValue Value="_isAdmin" Name="IsAdmin">
+                    @Body
+                </CascadingValue>
             </MudContainer>
+
+            <footer class="irm-copyright-footer">
+                <MudText Typo="Typo.caption" Align="Align.Center" Class="irm-copyright-text">
+                    Phần mềm phiên bản update bởi <strong>Cyber Team</strong> dựa trên reportManager (từ Dữ liệu được thu thập, bổ sung và cập nhật bởi <strong>Hồ Thanh Hà</strong>)
+                </MudText>
+            </footer>
         </MudMainContent>
     </MudLayout>
 
@@ -323,6 +333,8 @@
     private bool _isDarkMode;
     private bool _helpOpen;
     private bool _isLoggedIn;
+    private bool _isAdmin;   // Permission == 1
+    private string _loggedInUsername = "";
     private string _pageTitle = "Dashboard";
     private string _breadcrumbText = "Dashboard";
     private string? _topSearchQuery;
@@ -419,6 +431,11 @@
                 if (result.Success && result.Value && !_isLoggedIn)
                 {
                     _isLoggedIn = true;
+                    // Restore permission
+                    var permResult = await SessionStore.GetAsync<bool>("irm_is_admin");
+                    _isAdmin = permResult.Success && permResult.Value;
+                    var userResult = await SessionStore.GetAsync<string>("irm_username");
+                    _loggedInUsername = userResult.Success ? userResult.Value ?? "" : "";
                     StateHasChanged();
                 }
             }
@@ -439,14 +456,30 @@
 
     private async Task HandleLogin()
     {
-        if (_loginModel.Password != "demo")
+        try
         {
-            _loginError = "❌ Sai mật khẩu. Mật khẩu mặc định: demo";
-            return;
+            var account = await AuthSvc.LoginAsync(_loginModel.Username, _loginModel.Password);
+            if (account == null)
+            {
+                _loginError = "❌ Sai tài khoản hoặc mật khẩu";
+                return;
+            }
+            _loginError = null;
+            _isLoggedIn = true;
+            _isAdmin = account.Permission == 1;
+            _loggedInUsername = account.Username;
+            try
+            {
+                await SessionStore.SetAsync("irm_logged_in", true);
+                await SessionStore.SetAsync("irm_is_admin", _isAdmin);
+                await SessionStore.SetAsync("irm_username", _loggedInUsername);
+            }
+            catch { }
         }
-        _loginError = null;
-        _isLoggedIn = true;
-        try { await SessionStore.SetAsync("irm_logged_in", true); } catch { }
+        catch (Exception ex)
+        {
+            _loginError = $"❌ Lỗi đăng nhập: {ex.Message}";
+        }
     }
 
     private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
@@ -478,6 +511,14 @@
     private async Task Logout()
     {
         _isLoggedIn = false;
-        try { await SessionStore.DeleteAsync("irm_logged_in"); } catch { }
+        _isAdmin = false;
+        _loggedInUsername = "";
+        try
+        {
+            await SessionStore.DeleteAsync("irm_logged_in");
+            await SessionStore.DeleteAsync("irm_is_admin");
+            await SessionStore.DeleteAsync("irm_username");
+        }
+        catch { }
     }
 }

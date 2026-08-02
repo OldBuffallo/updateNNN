@@ -1,4 +1,4 @@
-#Requires -RunAsAdministrator
+﻿#Requires -RunAsAdministrator
 <#
 .SYNOPSIS
     IRM v2.0 — Cài đặt 1 lần (One-Click Deploy)

@@ -164,11 +164,8 @@ sqlcmd -S localhost -Q "RESTORE DATABASE ReportManagerDB FROM DISK='C:\Backup\Re
 
 ## Thông Tin Đăng Nhập
 
-| Tài khoản | Mật khẩu |
-|---|---|
-| admin | demo |
-
-> ⚠️ **Lưu ý:** Đổi mật khẩu trước khi đưa vào sản xuất thực tế.
+> ⚠️ **Lưu ý:** Tài khoản mặc định được cấu hình trong `DatabaseSeeder.cs`. Đổi mật khẩu trước khi đưa vào sản xuất thực tế.
+> Credentials production được bàn giao qua kênh bảo mật riêng, KHÔNG lưu trong source code.
 
 ---
 

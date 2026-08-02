@@ -130,8 +130,11 @@
                                OnClick="@(() => OpenDetailDialog(context.Item))" />
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning"
                                OnClick="@(() => OpenEditDialog(context.Item))" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
-                               OnClick="@(() => ConfirmDelete(context.Item))" />
+                @if (_isAdmin)
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                   OnClick="@(() => ConfirmDelete(context.Item))" />
+                }
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -280,6 +283,9 @@
     private List<Field> _fields = new();
     private string? _searchText;
     private int? _selectedFieldId;
+    [CascadingParameter(Name = "IsAdmin")]
+    private bool _isAdmin { get; set; }
+
     private bool _loading = true;
 
     // Dialog state

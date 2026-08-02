@@ -56,14 +56,14 @@ public class CompanyService
     public async Task CreateAsync(Company company)
     {
         company.Delete_flag = 0;
-        company.UpdateDay = DateTime.Now.ToString("yyyy-MM-dd");
+        company.UpdateDay = DateTime.Now;
         _db.Companies.Add(company);
         await _db.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(Company company)
     {
-        company.UpdateDay = DateTime.Now.ToString("yyyy-MM-dd");
+        company.UpdateDay = DateTime.Now;
         _db.Companies.Update(company);
         await _db.SaveChangesAsync();
     }

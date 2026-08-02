@@ -32,47 +32,98 @@
 
 <div class="page-actions-bar">
     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-        <MudAutocomplete T="Company"
-                         Value="_selectedCompany"
-                         ValueChanged="OnCompanyChanged"
-                         Placeholder="Tất cả công ty"
-                         SearchFunc="SearchCompanyAsync"
-                         ToStringFunc="@(c => c?.CompanyName ?? "")"
-                         Variant="Variant.Outlined"
-                         Margin="Margin.Dense"
-                         Dense="true"
-                         Style="min-width: 300px;"
-                         ResetValueOnEmptyText="true"
-                         Immediate="true" />
+        <MudMenu Icon="@Icons.Material.Filled.FilterList"
+                 Label="@_filterLabel"
+                 Variant="Variant.Outlined"
+                 EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                 AnchorOrigin="Origin.BottomLeft"
+                 TransformOrigin="Origin.TopLeft"
+                 Dense="true">
+            <div style="padding: 12px 16px; min-width: 320px;">
+                <MudText Typo="Typo.subtitle2" Style="font-weight: 700; margin-bottom: 8px; color: var(--mud-palette-text-secondary);">
+                    🔍 Bộ lọc nhân viên
+                </MudText>
+                <MudDivider Class="mb-2" />
 
-        <MudSelect T="string"
-                   @bind-Value="_selectedNationality"
-                   @bind-Value:after="ApplyFilters"
-                   Placeholder="Tất cả quốc tịch"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   Clearable="true"
-                   Style="min-width: 170px;">
-            <MudSelectItem T="string" Value="@("CN")">Trung Quốc</MudSelectItem>
-            <MudSelectItem T="string" Value="@("KR")">Hàn Quốc</MudSelectItem>
-            <MudSelectItem T="string" Value="@("JP")">Nhật Bản</MudSelectItem>
-            <MudSelectItem T="string" Value="@("TW")">Đài Loan</MudSelectItem>
-            <MudSelectItem T="string" Value="@("IN")">Ấn Độ</MudSelectItem>
-            <MudSelectItem T="string" Value="@("US")">Hoa Kỳ</MudSelectItem>
-        </MudSelect>
+                @* ── Công ty ── *@
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-1">Công ty</MudText>
+                <MudAutocomplete T="Company"
+                                 Value="_selectedCompany"
+                                 ValueChanged="OnCompanyChanged"
+                                 Placeholder="Tất cả công ty"
+                                 SearchFunc="SearchCompanyAsync"
+                                 ToStringFunc="@(c => c?.CompanyName ?? "")"
+                                 Variant="Variant.Outlined"
+                                 Margin="Margin.Dense"
+                                 Dense="true"
+                                 ResetValueOnEmptyText="true"
+                                 Immediate="true"
+                                 Style="margin-bottom: 10px;" />
 
-        <MudSelect T="string"
-                   @bind-Value="_selectedPermit"
-                   @bind-Value:after="ApplyFilters"
-                   Placeholder="Tất cả GPLĐ"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   Clearable="true"
-                   Style="min-width: 170px;">
-            <MudSelectItem T="string" Value="@("1")">Đã có GPLĐ</MudSelectItem>
-            <MudSelectItem T="string" Value="@("0")">Miễn GPLĐ</MudSelectItem>
-            <MudSelectItem T="string" Value="@("2")">Chưa có GPLĐ</MudSelectItem>
-        </MudSelect>
+                @* ── Quốc tịch ── *@
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-1">Quốc tịch</MudText>
+                <MudSelect T="string"
+                           @bind-Value="_selectedNationality"
+                           @bind-Value:after="ApplyFilters"
+                           Placeholder="Tất cả quốc tịch"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           Clearable="true"
+                           Dense="true"
+                           Style="margin-bottom: 10px;">
+                    <MudSelectItem T="string" Value="@("CN")">🇨🇳 Trung Quốc</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("KR")">🇰🇷 Hàn Quốc</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("JP")">🇯🇵 Nhật Bản</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("TW")">🇹🇼 Đài Loan</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("IN")">🇮🇳 Ấn Độ</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("US")">🇺🇸 Hoa Kỳ</MudSelectItem>
+                </MudSelect>
+
+                @* ── GPLĐ ── *@
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-1">Giấy phép lao động</MudText>
+                <MudSelect T="string"
+                           @bind-Value="_selectedPermit"
+                           @bind-Value:after="ApplyFilters"
+                           Placeholder="Tất cả GPLĐ"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           Clearable="true"
+                           Dense="true"
+                           Style="margin-bottom: 8px;">
+                    <MudSelectItem T="string" Value="@("1")">✅ Đã có GPLĐ</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("0")">🔵 Miễn GPLĐ</MudSelectItem>
+                    <MudSelectItem T="string" Value="@("2")">🟡 Chưa có GPLĐ</MudSelectItem>
+                </MudSelect>
+
+                @* ── Nút xoá bộ lọc ── *@
+                <MudButton Variant="Variant.Text" Color="Color.Secondary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.ClearAll"
+                           OnClick="ClearAllFilters" FullWidth="true"
+                           Style="margin-top: 4px;">
+                    Xoá tất cả bộ lọc
+                </MudButton>
+            </div>
+        </MudMenu>
+
+        @* ── Chip hiển thị filter đang chọn ── *@
+        @if (_selectedCompany != null)
+        {
+            <MudChip T="string" Color="Color.Primary" Size="Size.Small" OnClose="@(async () => { _selectedCompany = null; await LoadAllAsync(); })">
+                🏢 @_selectedCompany.CompanyName
+            </MudChip>
+        }
+        @if (!string.IsNullOrEmpty(_selectedNationality))
+        {
+            <MudChip T="string" Color="Color.Info" Size="Size.Small" OnClose="@(() => { _selectedNationality = null; ApplyFilters(); })">
+                🌍 @GetNationalityName(_selectedNationality)
+            </MudChip>
+        }
+        @if (!string.IsNullOrEmpty(_selectedPermit))
+        {
+            <MudChip T="string" Color="Color.Warning" Size="Size.Small" OnClose="@(() => { _selectedPermit = null; ApplyFilters(); })">
+                📋 @GetPermitName(_selectedPermit)
+            </MudChip>
+        }
     </MudStack>
 
     <MudStack Row="true" Spacing="2">
@@ -80,6 +131,17 @@
                    OnClick="ExportExcelAsync">
             📥 Xuất Excel
         </MudButton>
+        @if (_isAdmin)
+        {
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.DeleteSweep" Color="Color.Error"
+                       OnClick="OpenArchiveTemporaryStayDialog">
+                🗑️ Xóa hết hạn tạm trú
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.FamilyRestroom" Color="Color.Error"
+                       OnClick="OpenArchiveFamilyVisitDialog">
+                🗑️ Xóa hết hạn thăm thân
+            </MudButton>
+        }
         <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PersonAdd" Color="Color.Primary"
                    OnClick="OpenAddDialog">
             + Thêm nhân viên
@@ -187,8 +249,15 @@
             </TemplateColumn>
             <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
                 <CellTemplate>
-                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary"
+                                   OnClick="@(() => OpenDetailDialog(context.Item))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning"
+                                   OnClick="@(() => OpenEditDialog(context.Item))" />
+                    @if (_isAdmin)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                       OnClick="@(() => ConfirmDelete(context.Item))" />
+                    }
                 </CellTemplate>
             </TemplateColumn>
         </Columns>
@@ -264,6 +333,43 @@ else if (!_loading)
     </DialogActions>
 </MudDialog>
 
+@* ══════ DIALOG XÁC NHẬN XÓA HẾT HẠN ══════ *@
+<MudDialog @bind-Visible="_archiveDialogVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
+    <TitleContent>
+        <MudText Typo="Typo.h6" Style="font-weight: 700; color: var(--red);">
+            ⚠️ Xác nhận xóa @_archiveDialogTitle
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
+            <strong>@_archiveCount</strong> nhân viên @_archiveDialogTitle sẽ được di chuyển sang bảng lưu trữ.
+        </MudAlert>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">
+            Bạn có muốn xóa tất cả những người này không?
+        </MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">
+            Dữ liệu sẽ được lưu vào bảng <strong>Lưu trữ</strong> và ẩn khỏi danh sách chính.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="@(() => _archiveDialogVisible = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error"
+                   StartIcon="@Icons.Material.Filled.DeleteForever"
+                   OnClick="ExecuteArchiveAsync"
+                   Disabled="@(_archiveProcessing || _archiveCount == 0)">
+            @if (_archiveProcessing)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <text>Đang xử lý...</text>
+            }
+            else
+            {
+                <text>Xóa @_archiveCount người</text>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     private List<Employee> _allEmployees = new();
     private List<Employee> _employees = new();
@@ -273,9 +379,32 @@ else if (!_loading)
     private bool _loading;
     private bool _showExpiring;
 
+    // Computed filter label
+    private string _filterLabel
+    {
+        get
+        {
+            var count = (_selectedCompany != null ? 1 : 0)
+                      + (!string.IsNullOrEmpty(_selectedNationality) ? 1 : 0)
+                      + (!string.IsNullOrEmpty(_selectedPermit) ? 1 : 0);
+            return count > 0 ? $"Bộ lọc ({count})" : "Bộ lọc";
+        }
+    }
+
+    // Permission from MainLayout
+    [CascadingParameter(Name = "IsAdmin")]
+    private bool _isAdmin { get; set; }
+
     // Dialog state
     private bool _dlgVisible; private bool _dlgEditing; private Employee _f = new(); private int _dlgEditId; private Company? _dlgCompany;
     private bool _detVisible; private Employee? _detEmp;
+
+    // Archive dialog state
+    private bool _archiveDialogVisible;
+    private string _archiveDialogTitle = "";
+    private string _archiveType = "";  // "TAM_TRU" or "THAM_THAN"
+    private int _archiveCount;
+    private bool _archiveProcessing;
     private List<NationalityEntity> _nationalities = new();
     private List<Career> _careers = new();
 
@@ -456,8 +585,22 @@ else if (!_loading)
     // ══════ XÓA ══════
     private async Task ConfirmDelete(Employee emp)
     {
-        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Xóa nhân viên \"{emp.StaffName}\"?");
-        if (confirmed) { await EmployeeSvc.DeleteAsync(emp.IDEmployee); Snackbar.Add($"✅ Đã xóa", Severity.Success); await LoadAllAsync(); }
+        var confirmed = await JS.InvokeAsync<bool>("confirm",
+            $"Bạn có chắc muốn xóa nhân viên \"{emp.StaffName}\"?");
+
+        if (confirmed)
+        {
+            try
+            {
+                await EmployeeSvc.DeleteAsync(emp.IDEmployee);
+                Snackbar.Add($"✅ Đã xóa nhân viên \"{emp.StaffName}\"", Severity.Success);
+                await LoadAllAsync();
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"❌ Lỗi: {ex.Message}", Severity.Error);
+            }
+        }
     }
 
     // ══════ CHI TIẾT ══════
@@ -473,4 +616,76 @@ else if (!_loading)
         };
         return $"font-weight:700; color:{color};";
     }
+
+    // ══════ XÓA HÀNG LOẠT ══════
+    private async Task OpenArchiveTemporaryStayDialog()
+    {
+        _archiveType = "TAM_TRU";
+        _archiveDialogTitle = "hết hạn tạm trú";
+        _archiveCount = await EmployeeSvc.CountExpiredTemporaryStayAsync();
+        _archiveProcessing = false;
+        _archiveDialogVisible = true;
+    }
+
+    private async Task OpenArchiveFamilyVisitDialog()
+    {
+        _archiveType = "THAM_THAN";
+        _archiveDialogTitle = "hết hạn thăm thân";
+        _archiveCount = await EmployeeSvc.CountExpiredFamilyVisitAsync();
+        _archiveProcessing = false;
+        _archiveDialogVisible = true;
+    }
+
+    private async Task ExecuteArchiveAsync()
+    {
+        _archiveProcessing = true;
+        StateHasChanged();
+
+        try
+        {
+            int count = _archiveType == "TAM_TRU"
+                ? await EmployeeSvc.ArchiveExpiredTemporaryStayAsync("admin")
+                : await EmployeeSvc.ArchiveExpiredFamilyVisitAsync("admin");
+
+            _archiveDialogVisible = false;
+            Snackbar.Add($"✅ Đã di chuyển {count} nhân viên {_archiveDialogTitle} sang bảng lưu trữ", Severity.Success);
+            await LoadAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"❌ Lỗi: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _archiveProcessing = false;
+        }
+    }
+
+    // ══════ FILTER HELPERS ══════
+    private async Task ClearAllFilters()
+    {
+        _selectedCompany = null;
+        _selectedNationality = null;
+        _selectedPermit = null;
+        await LoadAllAsync();
+    }
+
+    private static string GetNationalityName(string? code) => code switch
+    {
+        "CN" => "Trung Quốc",
+        "KR" => "Hàn Quốc",
+        "JP" => "Nhật Bản",
+        "TW" => "Đài Loan",
+        "IN" => "Ấn Độ",
+        "US" => "Hoa Kỳ",
+        _ => code ?? ""
+    };
+
+    private static string GetPermitName(string? permit) => permit switch
+    {
+        "1" => "Đã có GPLĐ",
+        "0" => "Miễn GPLĐ",
+        "2" => "Chưa có GPLĐ",
+        _ => permit ?? ""
+    };
 }

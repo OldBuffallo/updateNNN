@@ -90,4 +90,113 @@ public class EmployeeService
         return await _db.Employees.AnyAsync(e =>
             e.Passport == passport && e.Hidden_flag == 0 && e.IDEmployee != excludeId);
     }
+
+    /// <summary>
+    /// Đếm số lao động đã hết hạn tạm trú (TemporaryStay < hôm nay)
+    /// </summary>
+    public async Task<int> CountExpiredTemporaryStayAsync()
+    {
+        return await _db.Employees.CountAsync(e =>
+            e.Hidden_flag == 0 && e.WorkingStatus == 0
+            && e.TemporaryStay != null && e.TemporaryStay < DateTime.Today);
+    }
+
+    /// <summary>
+    /// Đếm số lao động đã hết hạn thăm thân (FamilyVisitEndDate < hôm nay)
+    /// </summary>
+    public async Task<int> CountExpiredFamilyVisitAsync()
+    {
+        return await _db.Employees.CountAsync(e =>
+            e.Hidden_flag == 0 && e.FamilyVisit == 1
+            && e.FamilyVisitEndDate != null && e.FamilyVisitEndDate < DateTime.Today);
+    }
+
+    /// <summary>
+    /// Di chuyển tất cả lao động hết hạn tạm trú sang bảng ArchivedEmployees
+    /// </summary>
+    public async Task<int> ArchiveExpiredTemporaryStayAsync(string? archivedBy = null)
+    {
+        var expired = await _db.Employees
+            .Include(e => e.Company)
+            .Include(e => e.Career)
+            .Where(e => e.Hidden_flag == 0 && e.WorkingStatus == 0
+                && e.TemporaryStay != null && e.TemporaryStay < DateTime.Today)
+            .ToListAsync();
+
+        if (!expired.Any()) return 0;
+
+        foreach (var emp in expired)
+        {
+            _db.ArchivedEmployees.Add(MapToArchive(emp, "HET_HAN_TAM_TRU", archivedBy));
+            emp.Hidden_flag = 1; // soft delete from main table
+        }
+
+        await _db.SaveChangesAsync();
+        return expired.Count;
+    }
+
+    /// <summary>
+    /// Di chuyển tất cả lao động hết hạn thăm thân sang bảng ArchivedEmployees
+    /// </summary>
+    public async Task<int> ArchiveExpiredFamilyVisitAsync(string? archivedBy = null)
+    {
+        var expired = await _db.Employees
+            .Include(e => e.Company)
+            .Include(e => e.Career)
+            .Where(e => e.Hidden_flag == 0 && e.FamilyVisit == 1
+                && e.FamilyVisitEndDate != null && e.FamilyVisitEndDate < DateTime.Today)
+            .ToListAsync();
+
+        if (!expired.Any()) return 0;
+
+        foreach (var emp in expired)
+        {
+            _db.ArchivedEmployees.Add(MapToArchive(emp, "HET_HAN_THAM_THAN", archivedBy));
+            emp.Hidden_flag = 1;
+        }
+
+        await _db.SaveChangesAsync();
+        return expired.Count;
+    }
+
+    private static ArchivedEmployee MapToArchive(Employee emp, string reason, string? archivedBy)
+    {
+        return new ArchivedEmployee
+        {
+            OriginalId = emp.IDEmployee,
+            StaffName = emp.StaffName,
+            Gender = emp.Gender,
+            Birthday = emp.Birthday,
+            Nationality = emp.Nationality,
+            Passport = emp.Passport,
+            Address = emp.Address,
+            IDCareer = emp.IDCareer,
+            WorkPermit = emp.WorkPermit,
+            WorkPermitNumber = emp.WorkPermitNumber,
+            VisaNumber = emp.VisaNumber,
+            TemporaryStay = emp.TemporaryStay,
+            Note = emp.Note,
+            SettlementResults = emp.SettlementResults,
+            SettlementResultsString = emp.SettlementResultsString,
+            IDUser = emp.IDUser,
+            IDCompany = emp.IDCompany,
+            DateCreated = emp.DateCreated,
+            CardCreationDate = emp.CardCreationDate,
+            WorkingStatus = emp.WorkingStatus,
+            DateOfJoin = emp.DateOfJoin,
+            DateOfLeave = emp.DateOfLeave,
+            FamilyVisit = emp.FamilyVisit,
+            FamilyVisitRelativeName = emp.FamilyVisitRelativeName,
+            FamilyVisitRelationship = emp.FamilyVisitRelationship,
+            FamilyVisitRelativeIdCard = emp.FamilyVisitRelativeIdCard,
+            FamilyVisitStartDate = emp.FamilyVisitStartDate,
+            FamilyVisitEndDate = emp.FamilyVisitEndDate,
+            FamilyVisitNote = emp.FamilyVisitNote,
+            CompanyName = emp.Company?.CompanyName,
+            CareerName = emp.Career?.CareerName,
+            ArchiveReason = reason,
+            ArchivedBy = archivedBy,
+            ArchivedAt = DateTime.Now
+        };
+    }
 }

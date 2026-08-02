@@ -80,7 +80,7 @@
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 # Nếu dùng SQL Server Authentication
-.\backup-old-server.ps1 -SqlInstance ".\BIRDIEPO" -SqlUser "sa" -SqlPassword "123456"
+.\backup-old-server.ps1 -SqlInstance ".\BIRDIEPO" -SqlUser "sa" -SqlPassword "<your-password>"
 
 # Nếu dùng Windows Authentication  
 .\backup-old-server.ps1 -SqlInstance ".\SQLEXPRESS"
@@ -99,7 +99,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ### Bước 2: Đóng gói trên máy Dev
 
 ```powershell
-cd d:\ATTT\immigration-reportmanager-master
+cd <đường-dẫn-repo>/immigration-reportmanager-master
 .\deploy\build-package.ps1
 
 # Hoặc tạo luôn file ZIP

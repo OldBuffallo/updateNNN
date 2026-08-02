@@ -1,32 +1,36 @@
-# Build outputs
+# ============================================================
+#  IRM v2.0 — .gitignore
+# ============================================================
+
+# === Build outputs ===
 *.exe
 *.dll
 *.pdb
 *.user
 *.suo
 
-# IDE
+# === IDE ===
 .vs/
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS
+# === OS ===
 Thumbs.db
 desktop.ini
 .DS_Store
 
-# Packages
+# === .NET packages & build ===
 packages/
 node_modules/
 bin/
 obj/
 
-# Gemini
+# === AI / Gemini ===
 .gemini/
 
-# Large binary files
+# === Large binary files ===
 *.zip
 *.rar
 *.7z
@@ -34,12 +38,29 @@ obj/
 *.msi
 *.msp
 
-# SQL Server installer
+# === SQL Server installer (quá lớn cho git) ===
 deploy/SQLEXPRWT_x64_2014/
+
+# === Test project build ===
 TestExcelGen/bin/
 TestExcelGen/obj/
 
-# Temp
+# === Publish / Temp ===
 IRM/publish-temp/
+deploy-package/
+
+# === SQLite database (auto-generated) ===
 *.db
+
+# === Build output packages (quá lớn) ===
+build-output/
+
+# === Log files ===
+*.log
+local-run.*.log
+
+# === Runtime installers (quá lớn, ~106MB) ===
+deploy/SQLEXPRWT_x64_2014/
+
+# === Tách credentials scripts (chứa thông tin nhạy cảm) ===
 create-*.ps1

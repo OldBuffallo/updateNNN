@@ -21,7 +21,7 @@ public class Company
     public string? DescriptionOfActivities { get; set; }
     public int TrackerID { get; set; }
     public string? Note { get; set; }
-    public string? UpdateDay { get; set; }
+    public DateTime? UpdateDay { get; set; }
     public int Delete_flag { get; set; }
 
     // Navigation properties

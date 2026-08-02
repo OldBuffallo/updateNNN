@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Backup database ReportManagerDB từ máy chủ cũ (SQL Server 2014)
 .DESCRIPTION

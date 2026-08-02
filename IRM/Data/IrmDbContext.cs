@@ -33,6 +33,7 @@ public class IrmDbContext : DbContext
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<ImportHistory> ImportHistories { get; set; }
     public DbSet<ImportBackup> ImportBackups { get; set; }
+    public DbSet<ArchivedEmployee> ArchivedEmployees { get; set; }
     public DbSet<ColumnMappingTemplate> ColumnMappingTemplates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -148,6 +149,7 @@ public class IrmDbContext : DbContext
         {
             e.ToTable("Investment");
             e.HasKey(i => i.IDInvestment);
+            e.Property(i => i.AmountOfMoney).HasPrecision(18, 2);
             e.HasOne(i => i.Company)
                 .WithMany(c => c.Investments)
                 .HasForeignKey(i => i.IDCompany);
@@ -225,6 +227,15 @@ public class IrmDbContext : DbContext
         {
             e.ToTable("ColumnMappingTemplates");
             e.HasKey(t => t.Id);
+        });
+
+        // ── ArchivedEmployee (bảng lưu trữ) ──
+        modelBuilder.Entity<ArchivedEmployee>(e =>
+        {
+            e.ToTable("ArchivedEmployees");
+            e.HasKey(a => a.Id);
+            e.HasIndex(a => a.OriginalId);
+            e.HasIndex(a => a.ArchiveReason);
         });
     }
 }

@@ -5,28 +5,17 @@
 
 ---
 
-## 🎬 Video Demo Toàn Bộ Flow
-
-![Demo recording toàn bộ flow](C:/Users/OTP/.gemini/antigravity/brain/2f23a5d3-a84b-44c0-ad23-345381150a49/demo_recording.webp)
-
----
-
 ## 📱 Các Màn Hình Chính
 
-### 1. 🔐 Đăng nhập — Bảo mật HTTPS
-
-![Trang đăng nhập với thiết kế hiện đại, kết nối bảo mật](C:/Users/OTP/.gemini/antigravity/brain/2f23a5d3-a84b-44c0-ad23-345381150a49/screenshot_dashboard.png)
+### 1. 🔐 Đăng nhập — Bảo mật
 
 - Giao diện đăng nhập hiện đại, tối giản
 - Mật khẩu được mã hóa (hash), không lưu plain text
 - Khóa tài khoản sau 5 lần đăng nhập sai
-- Kết nối HTTPS bảo mật
 
 ---
 
 ### 2. 📊 Dashboard — Tổng quan hệ thống
-
-![Dashboard với KPI cards, biểu đồ cột, biểu đồ tròn](C:/Users/OTP/.gemini/antigravity/brain/2f23a5d3-a84b-44c0-ad23-345381150a49/screenshot_companies.png)
 
 **Tính năng mới:**
 - 4 thẻ KPI: Tổng CT, Tổng NLĐ, Sắp hết hạn, Đã có GPLĐ
@@ -39,8 +28,6 @@
 
 ### 3. 🔍 Tìm kiếm toàn cục — Full-text Search
 
-![Tìm kiếm toàn cục với kết quả phân loại và thống kê](C:/Users/OTP/.gemini/antigravity/brain/2f23a5d3-a84b-44c0-ad23-345381150a49/screenshot_search.png)
-
 **Tính năng mới:**
 - Tìm kiếm trên **tất cả trường dữ liệu** cùng lúc
 - Kết quả phân loại: Nhân viên / Công ty
@@ -52,8 +39,6 @@
 
 ### 4. 📝 Báo cáo tự tạo — Report Builder
 
-![Report Builder với panel chọn cột, điều kiện lọc và preview](C:/Users/OTP/.gemini/antigravity/brain/2f23a5d3-a84b-44c0-ad23-345381150a49/screenshot_reports.png)
-
 **Tính năng mới:**
 - Chọn cột hiển thị (tick/bỏ tick)
 - Đặt điều kiện lọc linh hoạt (VD: Hạn tạm trú ≤ 30 ngày)
@@ -64,9 +49,27 @@
 
 ---
 
-### 5. ⚙️ Quản trị hệ thống
+### 5. 📤 Import Excel — Wizard 4 bước
 
-![Trang quản trị với 8 thẻ chức năng](C:/Users/OTP/.gemini/antigravity/brain/2f23a5d3-a84b-44c0-ad23-345381150a49/screenshot_admin.png)
+| Bước | Mô tả |
+|---|---|
+| 1. Upload | Kéo thả hoặc chọn file .xlsx |
+| 2. Ghép cột | Auto-detect + chỉnh sửa mapping |
+| 3. Preview | Xem trước dữ liệu, đánh dấu lỗi |
+| 4. Kết quả | Thống kê: thêm mới / cập nhật / lỗi |
+
+---
+
+### 6. 🎓 Quản lý Du học sinh
+
+**Tính năng mới (CR-001):**
+- Danh sách du học sinh với DataGrid
+- Thông tin: trường, chuyên ngành, visa, học bổng
+- Lọc theo trạng thái: Đang học / Tốt nghiệp / Thôi học
+
+---
+
+### 7. ⚙️ Quản trị hệ thống
 
 - Quản lý: Tài khoản, Lĩnh vực, Ngành nghề, Quốc tịch, Quận/Huyện, Phường/Xã
 - **MỚI:** Nhật ký hệ thống (Audit Log) — ghi lại mọi thao tác
@@ -81,7 +84,7 @@
 | **Cài đặt trên máy trạm** | ❌ Phải cài từng máy | ✅ Không cần — chỉ mở trình duyệt |
 | **Cập nhật phần mềm** | ❌ Copy file từng máy | ✅ Cập nhật 1 chỗ trên server |
 | **Bảo mật SQL** | ❌ Mở port 1433 ra mạng | ✅ SQL chỉ cho localhost truy cập |
-| **Mật khẩu** | ❌ Lưu plain text | ✅ Hash BCrypt |
+| **Mật khẩu** | ❌ Lưu plain text | ✅ Hash mã hóa |
 | **Dashboard** | ❌ Không có | ✅ 4 KPI + 4 biểu đồ + cảnh báo |
 | **Import Excel** | ⚠️ Nhập số cột thủ công | ✅ Auto-detect, preview, xử lý trùng |
 | **Tìm kiếm** | ⚠️ Chỉ theo từng trường | ✅ Full-text trên mọi trường |
@@ -102,8 +105,7 @@ Gửi khách hàng thư mục `mockup-demo/`, hướng dẫn:
 5. Trang **Tìm kiếm**: nhấn nút "Tìm kiếm" để xem kết quả
 6. Trang **Báo cáo**: xem preview bảng bên phải + template đã lưu
 
-> [!TIP]
-> Demo hoạt động offline, không cần internet. Chỉ cần gửi 3 file: `index.html`, `style.css`, `app.js`.
+> **Lưu ý:** Demo hoạt động offline, không cần internet. Chỉ cần gửi 3 file: `index.html`, `style.css`, `app.js`.
 
 ---
 

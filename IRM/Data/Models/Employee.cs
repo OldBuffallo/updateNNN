@@ -23,7 +23,7 @@ public class Employee
     public int IDUser { get; set; }
     public int IDCompany { get; set; }
     public DateTime? DateCreated { get; set; }
-    public string? CardCreationDate { get; set; }
+    public DateTime? CardCreationDate { get; set; }
     public int WorkingStatus { get; set; }
     public DateTime? DateOfJoin { get; set; }
     public DateTime? DateOfLeave { get; set; }

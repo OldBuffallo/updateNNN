@@ -382,6 +382,24 @@ body {
     overflow-x: hidden;
 }
 
+.irm-copyright-footer {
+    padding: 16px 28px 20px;
+    text-align: center;
+    border-top: 1px solid var(--mud-palette-divider);
+    margin-top: 32px;
+}
+
+.irm-copyright-text {
+    color: var(--text-muted) !important;
+    font-size: 11.5px !important;
+    letter-spacing: 0.2px;
+}
+
+.irm-copyright-text strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
 .help-drawer .mud-drawer-content {
     background: var(--bg-surface);
 }
