@@ -237,3 +237,43 @@ Cho tới khi đủ sáu mục trên, verdict production giữ nguyên: **CHANGE
 - Hostname `nip.io` chỉ dành cho demo. Go-live cần domain chính thức, chính sách TLS, secrets và giám sát production.
 
 Verdict sau deploy: **APPROVED FOR DEMO/STAGING ONLY**. Verdict production vẫn là **CHANGES REQUESTED — NOT APPROVED FOR PRODUCTION**.
+
+## 14. Redeploy artifact chính thức — 17/08/2026
+
+### Version và provenance
+
+- Phiên bản ứng dụng không đổi: `v0.1.0`.
+- Source candidate: tag `v0.1.0`, commit sạch `0723e4ea85ab36fd1172f721a0b433e49cedb9fb`.
+- Image bất biến: `irm:0.1.0-0723e4e`; OCI id `sha256:ec1b2e9dabc8a6106de7a714acf5e740aca22b7e931d5e0934979f487b43b0d4`.
+- Release archive: `/opt/irm/releases/irm-0.1.0-0723e4e-d50a8b8d.tar`; SHA-256 `d50a8b8d1ed2ddf4e5dd7786f80f39eac10394bc06fb19a87d848051963482cd`.
+- Openship deployment mới: `dep_HW3aH3BKVfSKa_1z`, version 4, trạng thái `ready`.
+
+Artifact trước hiển thị cùng `v0.1.0` nhưng được build từ `8c1d8b0-dirty`. Redeploy này không phải bump lên `v0.1.1`; mục tiêu là thay bản không tái tạo được bằng artifact có Git SHA rõ ràng. Header comment `IRM v2.0` trong `irm-interop.js` là nhãn mã nguồn cũ, không phải version assembly/UI/runtime.
+
+### Backup và rollback trước cutover
+
+- SQLite backup mode 600 tại `/opt/irm/backups/20260817T085503Z-pre-0723e4e/IRM-v0.1.0-demo.db`; SHA-256 `28d80a6885d672ee3cf71987952718852ee1e0629e5629dab83219a35a03a88a`.
+- Restore rehearsal: `integrity=ok`, 43 bảng, 291 dòng và toàn bộ row-count khớp.
+- Runtime files/Data Protection keys đã archive cùng thư mục backup.
+- Image cũ được giữ bằng tag `irm:rollback-pre-0723e4e-20260817T085503Z` và archive `/opt/irm/releases/irm-rollback-pre-0723e4e-20260817T085503Z.tar`.
+
+### Giải thích credential local và VPS
+
+Local và VPS không dùng chung database. Khi local SQLite rỗng, `DatabaseSeeder` tạo các tài khoản demo; VPS đã xoay toàn bộ mật khẩu sau deployment đầu và lưu chúng trong volume `openship-irm-v010-irm-v010-data`. Seeder chỉ tạo account khi bảng `Accounts` rỗng, nên redeploy image không thay hoặc reset admin VPS. `WebCredentials` chứa hash cho web; cột legacy `Accounts.Password` tiếp tục tồn tại vì yêu cầu tương thích WPF. Đây là khác biệt môi trường có chủ đích, không phải version drift.
+
+### Hậu kiểm
+
+| Kiểm tra | Kết quả |
+|---|---:|
+| Build / xUnit / Compose | PASS — 0 warning, 0 error; 17/17; config hợp lệ |
+| Local candidate container | PASS — non-root, `/login` 200, hiển thị `v0.1.0` |
+| Openship compose service | PASS — 1/1 service, deployment `ready` |
+| Rootfs container/candidate | PASS — layer list khớp image `0723e4e` |
+| SQLite sau deploy | PASS — integrity `ok`, business row-count giữ nguyên |
+| Admin VPS | PASS — đăng nhập bằng credential hiện hành, không ghi secret vào log/report |
+| 7 trang nghiệp vụ | PASS — `/`, thăm thân, lưu trú, kiểm tra, thống kê, công ty, quản trị trả 200 sau xác thực |
+| Cookie auth | PASS — `Secure`, `HttpOnly`, `SameSite=Strict` |
+
+Hai cảnh báo còn mở cho demo: chưa có endpoint `/api/health`; ASP.NET Core chưa tin `X-Forwarded-Proto` từ Docker bridge nên redirect chưa đăng nhập có thể sinh URL `http` trước khi OpenResty nâng lại HTTPS. Port ứng dụng chỉ bind `127.0.0.1`, cookie vẫn `Secure`; tuy vậy cần sửa cấu hình forwarded headers và thêm health check trước production.
+
+Verdict không thay đổi: **APPROVED FOR DEMO/STAGING ONLY — NOT APPROVED FOR PRODUCTION**.

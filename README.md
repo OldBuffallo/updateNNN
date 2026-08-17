@@ -2,7 +2,7 @@
 
 Hệ thống quản lý người nước ngoài với web Blazor và WPF chạy song song trên cùng database. v0.1.0 dùng mô hình mở rộng additive, không thay đổi cột của các bảng legacy.
 
-> **Deployment status:** demo/staging đã chạy tại `https://irm.180.93.103.206.nip.io`; customer production chưa được phê duyệt. Xem [báo cáo triển khai và nghiệm thu kỹ thuật](docs/IRM-v0.1.0-implementation-report.md).
+> **Deployment status:** demo/staging `v0.1.0` từ commit `0723e4e`, deployment `dep_HW3aH3BKVfSKa_1z`, đang chạy tại `https://irm.180.93.103.206.nip.io`; customer production chưa được phê duyệt. Xem [báo cáo triển khai và nghiệm thu kỹ thuật](docs/IRM-v0.1.0-implementation-report.md).
 
 ## 📌 Trạng thái dự án
 
@@ -13,7 +13,7 @@ Hệ thống quản lý người nước ngoài với web Blazor và WPF chạy 
 | GĐ3 | Demo Khách hàng | ✅ Done |
 | GĐ4 | Chỉnh sửa theo Yêu cầu | ✅ Dev/Test complete |
 | GĐ5 | Deploy Test Server Thật | ✅ Demo/staging verified |
-| GĐ6 | Kiểm tra & Sửa lỗi | 🔄 15 automated tests pass; UAT pending |
+| GĐ6 | Kiểm tra & Sửa lỗi | 🔄 17 automated tests pass; UAT pending |
 | GĐ7 | Bàn giao & Hướng dẫn | 📋 Todo |
 
 > Xem chi tiết tại [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md).
