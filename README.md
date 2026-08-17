@@ -2,7 +2,7 @@
 
 Hệ thống quản lý người nước ngoài với web Blazor và WPF chạy song song trên cùng database. v0.1.1 là bản hotfix giao diện trên nền schema additive v0.1.0, không thay đổi cột của các bảng legacy.
 
-> **Deployment status:** demo/staging `v0.1.0` từ commit `0723e4e`, deployment `dep_HW3aH3BKVfSKa_1z`, đang chạy tại `https://irm.180.93.103.206.nip.io`; customer production chưa được phê duyệt. Xem [báo cáo triển khai và nghiệm thu kỹ thuật](docs/IRM-v0.1.0-implementation-report.md).
+> **Deployment status:** demo/staging `v0.1.1` từ tag `v0.1.1`, commit `7f0bb51`, deployment `dep_K7mcqFSJCIRJaFsE`, đang chạy tại `https://irm.180.93.103.206.nip.io`; customer production chưa được phê duyệt. Xem [báo cáo hotfix v0.1.1](docs/IRM-v0.1.1-hotfix-report.md) và [báo cáo triển khai v0.1.0](docs/IRM-v0.1.0-implementation-report.md).
 
 ## 📌 Trạng thái dự án
 
@@ -20,9 +20,9 @@ Hệ thống quản lý người nước ngoài với web Blazor và WPF chạy 
 
 ## Demo trực tiếp
 
-**[Xem demo tại đây →](https://oldbuffallo.github.io/updateNNN/)**
+**[Xem demo IRM v0.1.1 tại đây →](https://irm.180.93.103.206.nip.io/)**
 
-> Demo tĩnh cũ không phải bằng chứng nghiệm thu hoặc production của v0.1.0.
+> Đây là môi trường demo/staging, không phải production của khách hàng.
 
 ## Tính năng chính
 

@@ -277,3 +277,11 @@ Local và VPS không dùng chung database. Khi local SQLite rỗng, `DatabaseSee
 Hai cảnh báo còn mở cho demo: chưa có endpoint `/api/health`; ASP.NET Core chưa tin `X-Forwarded-Proto` từ Docker bridge nên redirect chưa đăng nhập có thể sinh URL `http` trước khi OpenResty nâng lại HTTPS. Port ứng dụng chỉ bind `127.0.0.1`, cookie vẫn `Secure`; tuy vậy cần sửa cấu hình forwarded headers và thêm health check trước production.
 
 Verdict không thay đổi: **APPROVED FOR DEMO/STAGING ONLY — NOT APPROVED FOR PRODUCTION**.
+
+## 15. Hotfix v0.1.1 — 17/08/2026
+
+Sau phản hồi trang có khung giao diện nhưng mất dữ liệu và tương tác, log xác nhận Blazor circuit bị kết thúc bởi bản `irm-interop.js` cũ trong browser cache. Hotfix v0.1.1 đã cache-bust tài nguyên, cô lập lỗi JS tiện ích khỏi circuit và được deploy bằng Openship tại deployment `dep_K7mcqFSJCIRJaFsE`.
+
+Backup/restore rehearsal đạt `integrity=ok` với 43 bảng/294 dòng. Hậu kiểm đăng nhập và sáu trang nghiệp vụ đều trả 200, dữ liệu demo được giữ nguyên, container không restart và log không còn circuit/interop exception. Xem toàn bộ provenance, SHA-256, RCA và rollback tại [IRM-v0.1.1-hotfix-report.md](IRM-v0.1.1-hotfix-report.md).
+
+Verdict vẫn là **APPROVED FOR DEMO/STAGING ONLY — NOT APPROVED FOR PRODUCTION**.

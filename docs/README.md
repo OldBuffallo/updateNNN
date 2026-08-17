@@ -1,7 +1,8 @@
-# Tài liệu IRM v0.1.0
+# Tài liệu IRM v0.1.x
 
 | Tài liệu | Nội dung | Trạng thái |
 |---|---|---|
+| [IRM-v0.1.1-hotfix-report.md](IRM-v0.1.1-hotfix-report.md) | RCA lỗi Blazor circuit/cache, bằng chứng deploy và nghiệm thu hotfix v0.1.1 | Current |
 | [IRM-v0.1.0-implementation-report.md](IRM-v0.1.0-implementation-report.md) | Mapping 9 yêu cầu, kiến trúc, threat model, migration/test evidence và verdict | Current |
 | [IRM-v0.1.0-database-architecture-report.md](IRM-v0.1.0-database-architecture-report.md) | ERD tổng thể/theo miền, catalog 43 bảng, quan hệ, index và vòng đời dữ liệu | Current |
 | [diagrams/irm-v0.1.0-database-overview.svg](diagrams/irm-v0.1.0-database-overview.svg) | Sơ đồ database tổng thể dạng vector, có thể mở/phóng to trực tiếp | Current |

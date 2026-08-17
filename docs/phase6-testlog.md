@@ -45,3 +45,19 @@ Phạm vi xUnit: passport normalization, duplicate/overlap, distinct/as-of, insp
 ## Quality gate
 
 Full build `--no-incremental` đạt 0 warning/0 error. Reviewer verdict là `APPROVED FOR DEMO/STAGING ONLY`; production gate vẫn phụ thuộc WPF build, UAT và bản restore database khách hàng như bảng trên.
+
+## Hotfix v0.1.1 — 17/08/2026
+
+| Kiểm tra | Kết quả |
+|---|---|
+| Build Release | PASS — 0 warning, 0 error |
+| xUnit | PASS — 17/17 |
+| JavaScript syntax | PASS — `node --check` |
+| Candidate container | PASS — `/login` 200, nhãn v0.1.1 |
+| Backup → restore rehearsal | PASS — integrity `ok`, 43 bảng/294 dòng |
+| Openship deployment `dep_K7mcqFSJCIRJaFsE` | PASS — version 5, `ready` |
+| Authenticated business routes | PASS — 6/6 route trả 200 và có dữ liệu |
+| Chrome sạch / cache-busted interop | PASS — `irm-interop.js?v=0.1.1` |
+| Circuit/runtime error log | PASS — không có CircuitHost/unhandled/interop failure sau smoke |
+
+Chi tiết RCA, artifact và rollback nằm tại [IRM-v0.1.1-hotfix-report.md](IRM-v0.1.1-hotfix-report.md).
