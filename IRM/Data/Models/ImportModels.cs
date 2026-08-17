@@ -113,7 +113,7 @@ public static class SystemFields
         { "DocumentValidFrom",        "Giấy tờ hiệu lực từ" },
         { "DocumentValidTo",          "Giấy tờ hiệu lực đến (phân cách ;)" },
         { "AdministrativeUnitCode",   "Mã xã/phường/đặc khu" },
-        { "ResidenceAddress",         "Địa chỉ lưu trú v0.1.0" },
+        { "ResidenceAddress",         "Địa chỉ lưu trú" },
         { "ResidenceValidFrom",       "Lưu trú từ ngày" },
         { "ResidenceValidTo",         "Lưu trú đến ngày" },
         { "CompanyName",    "Công ty (CQ bảo lãnh)" },

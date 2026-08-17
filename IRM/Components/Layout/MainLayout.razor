@@ -4,6 +4,7 @@
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject ILogger<MainLayout> Logger
 @implements IDisposable
 
 <MudThemeProvider Theme="_theme" IsDarkMode="_darkMode" />
@@ -27,7 +28,7 @@
                         <MudIcon Icon="@Icons.Material.Filled.FactCheck" Size="Size.Small" Color="Color.Inherit" />
                     </div>
                     <MudText Typo="Typo.subtitle1" Class="topbar-title ml-2 font-weight-bold">IRM</MudText>
-                    <span class="topbar-version-badge ml-2">v0.1.0</span>
+                    <span class="topbar-version-badge ml-2">v0.1.1</span>
                 </div>
 
                 <!-- Global Spotlight Search Trigger -->
@@ -164,7 +165,7 @@
                             <span class="status-indicator-dot online"></span>
                             <span class="drawer-footer-text ml-2">Hệ thống sẵn sàng</span>
                         </div>
-                        <span class="drawer-version-tag">v0.1.0</span>
+                        <span class="drawer-version-tag">v0.1.1</span>
                     </div>
                 </div>
             </MudDrawer>
@@ -189,7 +190,7 @@
                     <div class="login-logo">
                         <div class="logo-icon"><MudIcon Icon="@Icons.Material.Filled.FactCheck" Color="Color.Inherit" /></div>
                         <h1>Immigration Report Manager</h1>
-                        <p class="login-subtitle">Quản lý người nước ngoài · Phiên bản v0.1.0</p>
+                        <p class="login-subtitle">Quản lý người nước ngoài · Phiên bản v0.1.1</p>
                     </div>
                     <form method="post" action="/auth/login">
                         <div class="input-group">
@@ -279,9 +280,28 @@
         if (firstRender)
         {
             _dotNetRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("irmInterop.registerShortcutHandler", _dotNetRef);
-            var saved = await JS.InvokeAsync<string>("irmInterop.getTheme");
-            _darkMode = saved == "dark";
+
+            try
+            {
+                await JS.InvokeVoidAsync("irmInterop.registerShortcutHandler", _dotNetRef);
+            }
+            catch (JSException ex)
+            {
+                // Global shortcuts are progressive enhancement. A stale client-side
+                // asset must never terminate the Blazor circuit.
+                Logger.LogWarning(ex, "Unable to register the global shortcut handler");
+            }
+
+            try
+            {
+                var saved = await JS.InvokeAsync<string>("irmInterop.getTheme");
+                _darkMode = saved == "dark";
+            }
+            catch (JSException ex)
+            {
+                Logger.LogWarning(ex, "Unable to restore the saved theme");
+            }
+
             StateHasChanged();
         }
     }

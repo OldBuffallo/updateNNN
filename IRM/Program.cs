@@ -26,7 +26,9 @@ if (!string.IsNullOrWhiteSpace(dataProtectionKeysPath))
     Directory.CreateDirectory(dataProtectionKeysPath);
     builder.Services.AddDataProtection()
         .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath))
-        .SetApplicationName("IRM-v0.1.0");
+        // Keep the discriminator stable across application releases so valid
+        // authentication cookies are not coupled to the display version.
+        .SetApplicationName("IRM");
 }
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

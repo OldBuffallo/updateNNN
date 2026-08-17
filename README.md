@@ -1,6 +1,6 @@
-# Immigration Report Manager v0.1.0 (IRM)
+# Immigration Report Manager v0.1.1 (IRM)
 
-Hệ thống quản lý người nước ngoài với web Blazor và WPF chạy song song trên cùng database. v0.1.0 dùng mô hình mở rộng additive, không thay đổi cột của các bảng legacy.
+Hệ thống quản lý người nước ngoài với web Blazor và WPF chạy song song trên cùng database. v0.1.1 là bản hotfix giao diện trên nền schema additive v0.1.0, không thay đổi cột của các bảng legacy.
 
 > **Deployment status:** demo/staging `v0.1.0` từ commit `0723e4e`, deployment `dep_HW3aH3BKVfSKa_1z`, đang chạy tại `https://irm.180.93.103.206.nip.io`; customer production chưa được phê duyệt. Xem [báo cáo triển khai và nghiệm thu kỹ thuật](docs/IRM-v0.1.0-implementation-report.md).
 
@@ -173,4 +173,4 @@ Yêu cầu server: RAM ≥ 2GB · Disk ≥ 200MB · CPU ≥ 2 nhân
 
 ---
 
-*IRM v0.1.0 — quản lý người nước ngoài theo dữ liệu hợp nhất và lịch sử hiệu lực.*
+*IRM v0.1.1 — quản lý người nước ngoài theo dữ liệu hợp nhất và lịch sử hiệu lực.*

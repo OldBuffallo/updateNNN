@@ -1,6 +1,6 @@
 services:
   app:
-    image: irm:0.1.0
+    image: irm:0.1.1
     build:
       context: .
       dockerfile: Dockerfile.openship-prebuilt

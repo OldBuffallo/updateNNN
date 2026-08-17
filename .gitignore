@@ -60,6 +60,7 @@ build-output/
 # === Log files ===
 *.log
 local-run.*.log
+.local-run/
 
 # === Runtime installers (quá lớn, ~106MB) ===
 deploy/SQLEXPRWT_x64_2014/
