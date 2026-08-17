@@ -9,7 +9,7 @@
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
 
-<PageTitle>Import Excel — IRM v2.0</PageTitle>
+<PageTitle>Import Excel — IRM v0.1.0</PageTitle>
 
 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
     <MudStack Spacing="0">
@@ -194,7 +194,7 @@
 
             <MudStack AlignItems="AlignItems.Center" Class="mt-4">
                 <InputFile OnChange="HandleFileUpload" accept=".xlsx,.xls" id="fileInput" style="display:none" />
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" HtmlTag="label" For="fileInput"
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" HtmlTag="label" for="fileInput"
                            StartIcon="@Icons.Material.Filled.AttachFile">
                     Chọn file Excel
                 </MudButton>
@@ -210,7 +210,7 @@
 
         <MudGrid Spacing="3" Class="mt-3">
             <MudItem xs="6">
-                <MudAutocomplete T="Company" @bind-Value="_selectedCompany" Label="Chọn công ty (tùy chọn)"
+                <MudAutocomplete T="Company" @bind-Value="_selectedCompany" Label="Công ty mặc định (dùng khi file không có cột Công ty)"
                                  SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")"
                                  Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
                                  ResetValueOnEmptyText="true" Immediate="true" />
@@ -229,6 +229,9 @@
 
         <MudAlert Severity="Severity.Info" Dense="true" Class="mt-3">
             💡 <strong>An toàn dữ liệu:</strong> Mỗi lần import tạo phiên riêng. Bạn có thể <strong>hoàn tác</strong> bất cứ lúc nào từ Lịch sử Import.
+        </MudAlert>
+        <MudAlert Severity="Severity.Success" Dense="true" Class="mt-2">
+            🏢 <strong>Tự động ghép công ty:</strong> Nếu file Excel có cột <strong>"Công ty"</strong> hoặc <strong>"CQ bảo lãnh"</strong>, hệ thống sẽ tự động ghép công ty theo từng dòng. Không cần chọn công ty ở trên.
         </MudAlert>
 
         <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
@@ -293,7 +296,7 @@
         @if (_saveTemplate)
         {
             <MudTextField @bind-Value="_templateName" Label="Tên template" Variant="Variant.Outlined"
-                          Dense="true" Margin="Margin.Dense" Class="mb-3"
+                          Margin="Margin.Dense" Class="mb-3"
                           Placeholder="VD: Template Samsung" />
         }
 
@@ -316,7 +319,7 @@
         </MudAlert>
 
         <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px; max-height: 400px; overflow-y: auto;">
-            <thead><tr><th>Dòng</th><th>TT</th><th>Họ tên</th><th>Quốc tịch</th><th>Hộ chiếu</th><th>Nghề nghiệp</th><th>GPLĐ</th><th>Xử lý</th></tr></thead>
+            <thead><tr><th>Dòng</th><th>TT</th><th>Họ tên</th><th>Quốc tịch</th><th>Hộ chiếu</th><th>Công ty</th><th>Nghề nghiệp</th><th>GPLĐ</th><th>Xử lý</th></tr></thead>
             <tbody>
                 @foreach (var row in _previewRows)
                 {
@@ -344,6 +347,19 @@
                         <td>@row.StaffName</td>
                         <td>@row.NationalityDisplay</td>
                         <td><code>@row.Passport</code></td>
+                        <td>
+                            @if (row.CompanyDisplay != null)
+                            {
+                                @if (row.CompanyDisplay.StartsWith("❌"))
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Error">@row.CompanyDisplay</MudText>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.caption">@row.CompanyDisplay</MudText>
+                                }
+                            }
+                        </td>
                         <td>@row.CareerDisplay</td>
                         <td>@row.WorkPermitDisplay</td>
                         <td>
@@ -554,9 +570,9 @@
     // STEP 2: COLUMN MAPPING
     // ══════════════════════════════════════════
 
-    private async Task GoToStep2()
+    private Task GoToStep2()
     {
-        if (_fileStream == null) return;
+        if (_fileStream == null) return Task.CompletedTask;
 
         _isProcessing = true;
         _processingMessage = "Đang đọc cấu trúc file Excel...";
@@ -593,6 +609,7 @@
         {
             _isProcessing = false;
         }
+        return Task.CompletedTask;
     }
 
     private void OnMappingChanged(ColumnMapping mapping, string newValue)
@@ -619,7 +636,7 @@
             // Save template if checked
             if (_saveTemplate && !string.IsNullOrWhiteSpace(_templateName))
             {
-                await ImportSvc.SaveTemplateAsync(_templateName, _selectedCompany.IDCompany, _columnMappings, "admin");
+                await ImportSvc.SaveTemplateAsync(_templateName, _selectedCompany?.IDCompany, _columnMappings, "admin");
                 await LoadTemplatesAsync();
                 Snackbar.Add($"✅ Đã lưu template '{_templateName}'", Severity.Success);
             }

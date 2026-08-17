@@ -14,19 +14,26 @@ RUN dotnet publish IRM/IRM.csproj -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
-# Create data directory for SQLite
-RUN mkdir -p /app/data
+# Persistent demo data and private legal-document storage.
+RUN mkdir -p /app/data/private-files /app/data/dataprotection-keys && chown -R app:app /app/data
 
 COPY --from=build /app/publish .
 
-# Use SQLite for cloud deployment (no SQL Server needed)
+# VPS demo profile. Production SQL Server must be configured explicitly and
+# must pass the backup/restore + schema migration gate before deployment.
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://+:10000
-ENV ConnectionStrings__DefaultConnection=""
+ENV ASPNETCORE_URLS=http://+:5050
+ENV Database__Provider=Sqlite
+ENV ConnectionStrings__Sqlite="Data Source=/app/data/IRM-v0.1.0-demo.db"
+ENV FileStorage__Root=/app/data/private-files
+ENV DataProtection__KeysPath=/app/data/dataprotection-keys
 # Disable file watchers to avoid inotify limit on Render
 ENV DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false
 ENV DOTNET_USE_POLLING_FILE_WATCHER=true
 
-EXPOSE 10000
+VOLUME ["/app/data"]
+EXPOSE 5050
+
+USER app
 
 ENTRYPOINT ["dotnet", "IRM.dll"]

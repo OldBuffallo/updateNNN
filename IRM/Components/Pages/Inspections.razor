@@ -1,0 +1,457 @@
+@page "/inspections"
+@using IRM.Data.Models
+@inject IInspectionService Service
+@inject CatalogService Catalog
+@inject ISnackbar Snackbar
+
+<PageTitle>Kiểm tra người nước ngoài - IRM v0.1.0</PageTitle>
+
+<div class="section-header">
+    <div class="d-flex align-center justify-space-between flex-wrap gap-2">
+        <div>
+            <h3>🔍 Đợt kiểm tra & Kết quả hiện trường</h3>
+            <span class="section-meta">
+                Quản lý các đợt kiểm tra lưu trú, doanh nghiệp, giấy tờ và xử lý vi phạm người nước ngoài
+            </span>
+        </div>
+        <div class="d-flex align-center gap-2">
+            <AuthorizeView Roles="ADMIN,INSPECTOR">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.AddModerator"
+                           OnClick="OpenAdd">
+                    Tạo đợt kiểm tra mới
+                </MudButton>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ STATS SUMMARY CARDS ════════════ -->
+<MudGrid Class="mb-4">
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-blue">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.FactCheck" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count</span>
+                <span class="stat-mini-label">Tổng đợt kiểm tra</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-teal">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Sum(x => x.Subjects.Count)</span>
+                <span class="stat-mini-label">Lượt NNN đã kiểm tra</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-rose">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Sum(x => x.Subjects.Count(s => s.ResultCode == "VIOLATION"))</span>
+                <span class="stat-mini-label">Phát hiện vi phạm</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-purple">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_checkedCount</span>
+                <span class="stat-mini-label">Đã kiểm tra gần đây</span>
+            </div>
+        </div>
+    </MudItem>
+</MudGrid>
+
+<!-- ════════════ FILTER TOOLBAR ════════════ -->
+<MudPaper Class="pa-4 mb-4 page-filter-card" Elevation="0">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="4">
+            <MudDateRangePicker @bind-DateRange="_range"
+                                Label="Khoảng thời gian kiểm tra"
+                                Variant="Variant.Outlined"
+                                Margin="Margin.Dense"
+                                DateFormat="dd/MM/yyyy" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="int?" @bind-Value="_unitId" Label="Địa bàn xã/phường" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                @foreach (var unit in _units)
+                {
+                    <MudSelectItem T="int?" Value="unit.Id">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="2">
+            <MudNumericField T="int" @bind-Value="_lookbackDays" Label="Khoảng nhìn lại (ngày)" Min="1" Max="3650" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" sm="2" Class="d-flex align-center gap-1">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FilterAlt" OnClick="Load" FullWidth="true">
+                Tra cứu
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<!-- ════════════ DATA GRID ════════════ -->
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-3" />
+}
+else
+{
+    <MudDataGrid T="Inspection"
+                 Items="_items"
+                 Dense="true"
+                 Hover="true"
+                 Striped="true"
+                 Class="irm-data-table"
+                 Elevation="0">
+        <Columns>
+            <TemplateColumn Title="Thời gian kiểm tra" SortBy="x => x.InspectedAt">
+                <CellTemplate>
+                    <div class="d-flex align-center">
+                        <MudIcon Icon="@Icons.Material.Filled.AccessTime" Size="Size.Small" Class="mr-2 text-muted" />
+                        <div>
+                            <div class="font-weight-bold">@context.Item.InspectedAt.ToString("dd/MM/yyyy")</div>
+                            <div class="text-caption text-muted">@context.Item.InspectedAt.ToString("HH:mm")</div>
+                        </div>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Loại đợt kiểm tra" SortBy="x => x.TypeCode">
+                <CellTemplate>
+                    @{
+                        var (label, colorClass) = GetTypeMeta(context.Item.TypeCode);
+                    }
+                    <span class="type-pill @colorClass">@label</span>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Địa điểm & Địa bàn">
+                <CellTemplate>
+                    <div class="font-weight-bold">@context.Item.LocationText</div>
+                    <div class="text-caption text-muted">📍 @(context.Item.AdministrativeUnit?.Name ?? "Chưa rõ địa bàn")</div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Đoàn kiểm tra">
+                <CellTemplate>
+                    <div>@(context.Item.InspectorNames ?? "—")</div>
+                    <div class="text-caption text-muted">@(context.Item.InspectionUnit ?? "")</div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Số đối tượng">
+                <CellTemplate>
+                    <span class="subject-count-badge">
+                        <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="mr-1" />
+                        @context.Item.Subjects.Count người
+                    </span>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Kết quả vi phạm">
+                <CellTemplate>
+                    @{
+                        var violationCount = context.Item.Subjects.Count(x => x.ResultCode == "VIOLATION");
+                    }
+                    @if (violationCount > 0)
+                    {
+                        <span class="violation-badge violation-danger">
+                            <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" Class="mr-1" />
+                            @violationCount vi phạm
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="violation-badge violation-ok">
+                            <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Class="mr-1" />
+                            0 vi phạm
+                        </span>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Thao tác" CellStyle="text-align: right;">
+                <CellTemplate>
+                    <div class="d-flex align-center justify-end gap-1">
+                        <AuthorizeView Roles="ADMIN,INSPECTOR" Context="permissionContext">
+                            <MudTooltip Text="Ghi nhận đối tượng kiểm tra">
+                                <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
+                                               Size="Size.Small"
+                                               Color="Color.Primary"
+                                               OnClick="@(() => OpenSubject(context.Item))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Chỉnh sửa đợt kiểm tra">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                               Size="Size.Small"
+                                               OnClick="@(() => OpenEdit(context.Item))" />
+                            </MudTooltip>
+                        </AuthorizeView>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+}
+
+<!-- ════════════ DIALOG: TẠO / SỬA ĐỢT KIỂM TRA ════════════ -->
+<MudDialog @bind-Visible="_dialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@(_edit.Id > 0 ? Icons.Material.Filled.Edit : Icons.Material.Filled.AddModerator)" Color="Color.Primary" Class="mr-2" />
+            <span>@(_edit.Id > 0 ? "Cập nhật đợt kiểm tra" : "Tạo mới đợt kiểm tra người nước ngoài")</span>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="_inspectionDate" Label="Ngày kiểm tra *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect T="string" @bind-Value="_edit.TypeCode" Label="Loại đợt kiểm tra" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@("PLANNED")">Theo kế hoạch</MudSelectItem>
+                    <MudSelectItem Value="@("PERIODIC")">Định kỳ</MudSelectItem>
+                    <MudSelectItem Value="@("AD_HOC")">Đột xuất</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_edit.LocationText" Label="Địa điểm kiểm tra cụ thể *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect T="int?" @bind-Value="_edit.AdministrativeUnitId" Label="Địa bàn xã/phường" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var unit in _units)
+                    {
+                        <MudSelectItem T="int?" Value="unit.Id">@unit.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_edit.InspectorNames" Label="Người / Thành viên đoàn kiểm tra" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_edit.InspectionUnit" Label="Đơn vị chủ trì kiểm tra" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_edit.Summary" Label="Tóm tắt nội dung & kết quả kiểm tra" Lines="2" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_edit.Note" Label="Ghi chú thêm" Lines="2" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _dialog = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Save">Lưu đợt kiểm tra</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- ════════════ DIALOG: GHI NHẬN KẾT QUẢ ĐỐI TƯỢNG ════════════ -->
+<MudDialog @bind-Visible="_subjectDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.PersonSearch" Color="Color.Primary" Class="mr-2" />
+            <span>Ghi nhận đối tượng & kết quả hiện trường</span>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_person.FullName" Label="Họ và tên NNN *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="3">
+                <MudTextField @bind-Value="_person.PassportNumber" Label="Số hộ chiếu" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="3">
+                <MudTextField @bind-Value="_person.NationalityCode" Label="Mã quốc tịch" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect T="string" @bind-Value="_subject.PurposeCodeSnapshot" Label="Thuộc diện cư trú" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@StayPurposeCodes.Work">Lao động</MudSelectItem>
+                    <MudSelectItem Value="@StayPurposeCodes.FamilyVisit">Thăm thân</MudSelectItem>
+                    <MudSelectItem Value="@StayPurposeCodes.Study">Du học</MudSelectItem>
+                    <MudSelectItem Value="@StayPurposeCodes.Tourism">Du lịch</MudSelectItem>
+                    <MudSelectItem Value="@StayPurposeCodes.Other">Khác</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect T="string" @bind-Value="_subject.ResultCode" Label="Kết luận kiểm tra *" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@("VALID")">✅ Hợp lệ</MudSelectItem>
+                    <MudSelectItem Value="@("VIOLATION")">❌ Vi phạm</MudSelectItem>
+                    <MudSelectItem Value="@("VERIFY")">🔍 Cần xác minh thêm</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_subject.DocumentsSnapshot" Label="Giấy tờ xuất trình tại thời điểm kiểm tra" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_subject.WorkDescriptionSnapshot" Label="Công việc / Làm việc cho ai" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_subject.AddressSnapshot" Label="Nơi ở tại thời điểm kiểm tra" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            @if (_subject.ResultCode == "VIOLATION" || _subject.ResultCode == "VERIFY")
+            {
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_subject.ViolationDetails" Label="Chi tiết hành vi vi phạm / Nội dung cần xác minh *" Lines="2" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_subject.ActionTaken" Label="Biện pháp đã xử lý tại chỗ" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+            }
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _subjectDialog = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveSubject">Lưu kết quả</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<Inspection> _items = new();
+    private List<AdministrativeUnit> _units = new();
+    private DateRange? _range;
+    private int? _unitId;
+    private int _lookbackDays = 90;
+    private int _checkedCount;
+    private bool _loading;
+
+    // Inspection dialog
+    private bool _dialog;
+    private Inspection _edit = new();
+    private DateTime? _inspectionDate = DateTime.Today;
+
+    // Subject finding dialog
+    private bool _subjectDialog;
+    private int _inspectionId;
+    private FamilyVisitInput _person = new();
+    private InspectionSubject _subject = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _units = await Catalog.GetAdministrativeUnitsAsync();
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        _loading = true;
+        try
+        {
+            _items = (await Service.SearchAsync(_range?.Start, _range?.End, _unitId)).ToList();
+            var checkedIds = await Service.GetCheckedPersonIdsAsync(
+                DateTime.Today.AddDays(-_lookbackDays), DateTime.Today, _unitId);
+            _checkedCount = checkedIds.Count;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private (string Label, string ColorClass) GetTypeMeta(string code) => code switch
+    {
+        "PLANNED" => ("Theo kế hoạch", "type-blue"),
+        "PERIODIC" => ("Định kỳ", "type-purple"),
+        "AD_HOC" => ("Đột xuất", "type-rose"),
+        _ => ("Khác", "type-gray")
+    };
+
+    private void OpenAdd()
+    {
+        _edit = new Inspection
+        {
+            InspectedAt = DateTime.Now,
+            TypeCode = "PLANNED"
+        };
+        _inspectionDate = DateTime.Today;
+        _dialog = true;
+    }
+
+    private void OpenEdit(Inspection item)
+    {
+        _edit = new Inspection
+        {
+            Id = item.Id,
+            InspectedAt = item.InspectedAt,
+            LocationText = item.LocationText,
+            AdministrativeUnitId = item.AdministrativeUnitId,
+            AccommodationId = item.AccommodationId,
+            CompanySiteId = item.CompanySiteId,
+            InspectorNames = item.InspectorNames,
+            InspectionUnit = item.InspectionUnit,
+            TypeCode = item.TypeCode,
+            Summary = item.Summary,
+            Note = item.Note,
+            CreatedByAccountId = item.CreatedByAccountId,
+            CreatedAt = item.CreatedAt
+        };
+        _inspectionDate = item.InspectedAt;
+        _dialog = true;
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(_edit.LocationText))
+        {
+            Snackbar.Add("Vui lòng nhập địa điểm kiểm tra.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var date = _inspectionDate ?? DateTime.Today;
+            _edit.InspectedAt = date.Date.Add(DateTime.Now.TimeOfDay);
+            await Service.SaveAsync(_edit);
+            _dialog = false;
+            await Load();
+            Snackbar.Add("Đã lưu đợt kiểm tra.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private void OpenSubject(Inspection item)
+    {
+        _inspectionId = item.Id;
+        _person = new FamilyVisitInput();
+        _subject = new InspectionSubject
+        {
+            PurposeCodeSnapshot = StayPurposeCodes.Work,
+            ResultCode = "VALID"
+        };
+        _subjectDialog = true;
+    }
+
+    private async Task SaveSubject()
+    {
+        if (string.IsNullOrWhiteSpace(_person.FullName))
+        {
+            Snackbar.Add("Vui lòng nhập họ tên đối tượng.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            await Service.AddSubjectAsync(_inspectionId, _person, _subject);
+            _subjectDialog = false;
+            await Load();
+            Snackbar.Add("Đã lưu kết quả hiện trường.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+}

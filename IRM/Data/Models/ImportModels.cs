@@ -42,8 +42,13 @@ public class ImportPreviewRow
     public string? VisaNumber { get; set; }
     public string? TemporaryStayDisplay { get; set; }
 
+    // Công ty (resolve từ Excel)
+    public string? CompanyDisplay { get; set; }
+    public int? ResolvedCompanyId { get; set; }
+
     // Dữ liệu thực tế (để insert/update)
     public Employee? ParsedEmployee { get; set; }
+    public Dictionary<string, string> ExtendedFields { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
 /// <summary>Kết quả import</summary>
@@ -99,6 +104,19 @@ public static class SystemFields
         { "FamilyVisitStartDate",     "Ngày bắt đầu thăm thân" },
         { "FamilyVisitEndDate",       "Hạn thăm thân" },
         { "FamilyVisitNote",          "Ghi chú thăm thân" },
+        { "StayPurposeCode",          "Diện cư trú (WORK/STUDY/FAMILY_VISIT/TOURISM/OTHER)" },
+        { "StayValidFrom",            "Diện cư trú từ ngày" },
+        { "StayValidTo",              "Diện cư trú đến ngày" },
+        { "ElectronicIdentityNumber", "Số định danh điện tử" },
+        { "DocumentTypeCode",         "Loại giấy tờ (phân cách ; nếu nhiều)" },
+        { "DocumentNumber",           "Số thị thực/gia hạn/thẻ (phân cách ;)" },
+        { "DocumentValidFrom",        "Giấy tờ hiệu lực từ" },
+        { "DocumentValidTo",          "Giấy tờ hiệu lực đến (phân cách ;)" },
+        { "AdministrativeUnitCode",   "Mã xã/phường/đặc khu" },
+        { "ResidenceAddress",         "Địa chỉ lưu trú v0.1.0" },
+        { "ResidenceValidFrom",       "Lưu trú từ ngày" },
+        { "ResidenceValidTo",         "Lưu trú đến ngày" },
+        { "CompanyName",    "Công ty (CQ bảo lãnh)" },
         { "skip",          "— Bỏ qua —" }
     };
 
@@ -124,5 +142,18 @@ public static class SystemFields
         { "FamilyVisitRelativeIdCard",new[] { "cmnd người thân", "cccd người thân", "cmnd nguoi than", "id card", "căn cước người thân" } },
         { "FamilyVisitStartDate",     new[] { "ngày thăm thân", "ngay tham than", "bắt đầu thăm thân", "bat dau tham than" } },
         { "FamilyVisitEndDate",       new[] { "hạn thăm thân", "han tham than", "hết hạn thăm thân", "het han tham than", "family visit expiry" } },
+        { "StayPurposeCode",          new[] { "diện cư trú", "dien cu tru", "stay purpose", "purpose code" } },
+        { "StayValidFrom",            new[] { "diện từ ngày", "dien tu ngay", "stay valid from" } },
+        { "StayValidTo",              new[] { "diện đến ngày", "dien den ngay", "stay valid to" } },
+        { "ElectronicIdentityNumber", new[] { "số định danh điện tử", "so dinh danh dien tu", "electronic identity", "eid" } },
+        { "DocumentTypeCode",         new[] { "loại giấy tờ", "loai giay to", "document type" } },
+        { "DocumentNumber",           new[] { "số giấy tờ", "so giay to", "document number", "số thẻ", "so the" } },
+        { "DocumentValidFrom",        new[] { "giấy tờ từ ngày", "giay to tu ngay", "document valid from" } },
+        { "DocumentValidTo",          new[] { "giấy tờ đến ngày", "giay to den ngay", "document valid to" } },
+        { "AdministrativeUnitCode",   new[] { "mã địa bàn", "ma dia ban", "administrative unit code" } },
+        { "ResidenceAddress",         new[] { "địa chỉ lưu trú", "dia chi luu tru", "residence address" } },
+        { "ResidenceValidFrom",       new[] { "lưu trú từ ngày", "luu tru tu ngay", "residence valid from" } },
+        { "ResidenceValidTo",         new[] { "lưu trú đến ngày", "luu tru den ngay", "residence valid to" } },
+        { "CompanyName",               new[] { "công ty", "cong ty", "company", "cq bảo lãnh", "cq bao lanh", "đơn vị", "don vi", "doanh nghiệp", "doanh nghiep", "tên công ty", "ten cong ty" } },
     };
 }

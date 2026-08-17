@@ -6,6 +6,7 @@ namespace IRM.Data;
 /// <summary>
 /// DbContext chính — map tới database ReportManagerDB hiện có.
 /// Sử dụng Fluent API để map chính xác tên bảng/cột theo schema cũ.
+/// v0.1.0 dùng các bảng mở rộng riêng, không thêm cột vào schema legacy.
 /// </summary>
 public class IrmDbContext : DbContext
 {
@@ -29,12 +30,38 @@ public class IrmDbContext : DbContext
     // === Du học sinh ===
     public DbSet<Student> Students { get; set; }
 
-    // === Bảng mới ===
+    // === Bảng mở rộng trước v0.1.0 ===
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<ImportHistory> ImportHistories { get; set; }
     public DbSet<ImportBackup> ImportBackups { get; set; }
     public DbSet<ArchivedEmployee> ArchivedEmployees { get; set; }
     public DbSet<ColumnMappingTemplate> ColumnMappingTemplates { get; set; }
+
+    // === Mô hình mở rộng v0.1.0 ===
+    public DbSet<SchemaVersion> SchemaVersions { get; set; }
+    public DbSet<ForeignPerson> ForeignPersons { get; set; }
+    public DbSet<ForeignPersonSourceLink> ForeignPersonSourceLinks { get; set; }
+    public DbSet<StayCase> StayCases { get; set; }
+    public DbSet<FamilyVisitDetail> FamilyVisitDetails { get; set; }
+    public DbSet<AdministrativeUnit> AdministrativeUnits { get; set; }
+    public DbSet<ResidencePeriod> ResidencePeriods { get; set; }
+    public DbSet<ImmigrationDocument> ImmigrationDocuments { get; set; }
+    public DbSet<ElectronicIdentity> ElectronicIdentities { get; set; }
+    public DbSet<CompanyProfile> CompanyProfiles { get; set; }
+    public DbSet<CompanySite> CompanySites { get; set; }
+    public DbSet<Accommodation> Accommodations { get; set; }
+    public DbSet<CompanyAccommodationAgreement> CompanyAccommodationAgreements { get; set; }
+    public DbSet<EconomicZone> EconomicZones { get; set; }
+    public DbSet<SiteZoneMembership> SiteZoneMemberships { get; set; }
+    public DbSet<CompanyRepresentative> CompanyRepresentatives { get; set; }
+    public DbSet<CompanyLegalDocument> CompanyLegalDocuments { get; set; }
+    public DbSet<StoredFile> StoredFiles { get; set; }
+    public DbSet<Inspection> Inspections { get; set; }
+    public DbSet<InspectionSubject> InspectionSubjects { get; set; }
+    public DbSet<WebCredential> WebCredentials { get; set; }
+    public DbSet<WebRoleAssignment> WebRoleAssignments { get; set; }
+    public DbSet<LegacyChangeEvent> LegacyChangeEvents { get; set; }
+    public DbSet<MigrationIssue> MigrationIssues { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -111,6 +138,8 @@ public class IrmDbContext : DbContext
             e.Property(s => s.ScholarshipType).HasDefaultValue(0);
             e.Property(s => s.EducationLevel).HasDefaultValue(0);
         });
+
+        ConfigureV010(modelBuilder);
 
         // ── Fields ──
         modelBuilder.Entity<Field>(e =>
@@ -237,5 +266,124 @@ public class IrmDbContext : DbContext
             e.HasIndex(a => a.OriginalId);
             e.HasIndex(a => a.ArchiveReason);
         });
+    }
+
+    private static void ConfigureV010(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SchemaVersion>(e => { e.ToTable("SchemaVersions"); e.HasKey(x => x.Id); e.HasIndex(x => x.Version).IsUnique(); });
+        modelBuilder.Entity<ForeignPerson>(e =>
+        {
+            e.ToTable("ForeignPersons"); e.HasKey(x => x.Id); e.HasIndex(x => x.PassportSearchKey);
+            e.HasOne(x => x.Nationality).WithMany().HasForeignKey(x => x.NationalityCode).HasPrincipalKey(x => x.NationalityCode).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<ForeignPersonSourceLink>(e =>
+        {
+            e.ToTable("ForeignPersonSourceLinks"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.SourceType, x.SourceId }).IsUnique();
+            e.HasOne(x => x.ForeignPerson).WithMany(x => x.SourceLinks).HasForeignKey(x => x.ForeignPersonId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<StayCase>(e =>
+        {
+            e.ToTable("StayCases"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.ForeignPersonId, x.ValidFrom, x.ValidTo });
+            e.HasOne(x => x.ForeignPerson).WithMany(x => x.StayCases).HasForeignKey(x => x.ForeignPersonId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.SponsorCompany).WithMany().HasForeignKey(x => x.SponsorCompanyId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.SponsorForeignPerson).WithMany().HasForeignKey(x => x.SponsorForeignPersonId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<FamilyVisitDetail>(e =>
+        {
+            e.ToTable("FamilyVisitDetails"); e.HasKey(x => x.StayCaseId);
+            e.HasOne(x => x.StayCase).WithOne(x => x.FamilyVisitDetail).HasForeignKey<FamilyVisitDetail>(x => x.StayCaseId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<AdministrativeUnit>(e =>
+        {
+            e.ToTable("AdministrativeUnits"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.Code, x.ValidFrom }).IsUnique();
+            e.HasOne(x => x.Parent).WithMany().HasForeignKey(x => x.ParentId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Predecessor).WithMany().HasForeignKey(x => x.PredecessorId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<ResidencePeriod>(e =>
+        {
+            e.ToTable("ResidencePeriods"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.AdministrativeUnitId, x.ValidFrom, x.ValidTo });
+            e.HasOne(x => x.ForeignPerson).WithMany(x => x.ResidencePeriods).HasForeignKey(x => x.ForeignPersonId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Accommodation).WithMany(x => x.ResidencePeriods).HasForeignKey(x => x.AccommodationId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.AdministrativeUnit).WithMany().HasForeignKey(x => x.AdministrativeUnitId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.ResponsibleCompany).WithMany().HasForeignKey(x => x.ResponsibleCompanyId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<ImmigrationDocument>(e =>
+        {
+            e.ToTable("ImmigrationDocuments"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.ForeignPersonId, x.TypeCode, x.ValidTo });
+            e.HasOne(x => x.ForeignPerson).WithMany(x => x.ImmigrationDocuments).HasForeignKey(x => x.ForeignPersonId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<ElectronicIdentity>(e =>
+        {
+            e.ToTable("ElectronicIdentities"); e.HasKey(x => x.Id); e.HasIndex(x => x.IdentitySearchKey);
+            e.HasOne(x => x.ForeignPerson).WithMany(x => x.ElectronicIdentities).HasForeignKey(x => x.ForeignPersonId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<CompanyProfile>(e =>
+        {
+            e.ToTable("CompanyProfiles"); e.HasKey(x => x.CompanyId);
+            e.HasOne(x => x.Company).WithOne().HasForeignKey<CompanyProfile>(x => x.CompanyId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<CompanySite>(e =>
+        {
+            e.ToTable("CompanySites"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.CompanyId, x.ValidFrom, x.ValidTo });
+            e.HasOne(x => x.Company).WithMany().HasForeignKey(x => x.CompanyId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.AdministrativeUnit).WithMany().HasForeignKey(x => x.AdministrativeUnitId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<EconomicZone>(e => { e.ToTable("EconomicZones"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.Code, x.ValidFrom }).IsUnique(); });
+        modelBuilder.Entity<SiteZoneMembership>(e =>
+        {
+            e.ToTable("SiteZoneMemberships"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.CompanySiteId, x.EconomicZoneId, x.ValidFrom }).IsUnique();
+            e.HasOne(x => x.CompanySite).WithMany(x => x.ZoneMemberships).HasForeignKey(x => x.CompanySiteId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.EconomicZone).WithMany(x => x.SiteMemberships).HasForeignKey(x => x.EconomicZoneId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<Accommodation>(e =>
+        {
+            e.ToTable("AccommodationsV010"); e.HasKey(x => x.Id); e.HasIndex(x => x.AdministrativeUnitId);
+            e.HasOne(x => x.AdministrativeUnit).WithMany().HasForeignKey(x => x.AdministrativeUnitId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<CompanyAccommodationAgreement>(e =>
+        {
+            e.ToTable("CompanyAccommodationAgreements"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.CompanyId, x.AccommodationId, x.ValidFrom });
+            e.HasOne(x => x.Company).WithMany().HasForeignKey(x => x.CompanyId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Accommodation).WithMany(x => x.CompanyAgreements).HasForeignKey(x => x.AccommodationId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<CompanyRepresentative>(e =>
+        {
+            e.ToTable("CompanyRepresentatives"); e.HasKey(x => x.Id);
+            e.HasOne(x => x.Company).WithMany().HasForeignKey(x => x.CompanyId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<StoredFile>(e => { e.ToTable("StoredFiles"); e.HasKey(x => x.Id); e.HasIndex(x => x.Sha256); });
+        modelBuilder.Entity<CompanyLegalDocument>(e =>
+        {
+            e.ToTable("CompanyLegalDocuments"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.CompanyId, x.TypeCode, x.DocumentNumber });
+            e.HasOne(x => x.Company).WithMany().HasForeignKey(x => x.CompanyId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.StoredFile).WithMany().HasForeignKey(x => x.StoredFileId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.LegacyAttach).WithMany().HasForeignKey(x => x.LegacyAttachId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<Inspection>(e =>
+        {
+            e.ToTable("InspectionsV010"); e.HasKey(x => x.Id); e.HasIndex(x => x.InspectedAt);
+            e.HasOne(x => x.AdministrativeUnit).WithMany().HasForeignKey(x => x.AdministrativeUnitId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Accommodation).WithMany().HasForeignKey(x => x.AccommodationId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.CompanySite).WithMany().HasForeignKey(x => x.CompanySiteId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<InspectionSubject>(e =>
+        {
+            e.ToTable("InspectionSubjects"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.ForeignPersonId, x.InspectionId }).IsUnique();
+            e.HasOne(x => x.Inspection).WithMany(x => x.Subjects).HasForeignKey(x => x.InspectionId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.ForeignPerson).WithMany().HasForeignKey(x => x.ForeignPersonId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<WebCredential>(e =>
+        {
+            e.ToTable("WebCredentials"); e.HasKey(x => x.AccountId);
+            e.HasOne(x => x.Account).WithOne().HasForeignKey<WebCredential>(x => x.AccountId).OnDelete(DeleteBehavior.Cascade);
+        });
+        modelBuilder.Entity<WebRoleAssignment>(e =>
+        {
+            e.ToTable("WebRoleAssignments"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.AccountId, x.RoleCode, x.AdministrativeUnitId }).IsUnique();
+            e.HasOne(x => x.Account).WithMany().HasForeignKey(x => x.AccountId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.AdministrativeUnit).WithMany().HasForeignKey(x => x.AdministrativeUnitId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<LegacyChangeEvent>(e => { e.ToTable("LegacyChangeEvents"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.StatusCode, x.OccurredAt }); });
+        modelBuilder.Entity<MigrationIssue>(e => { e.ToTable("MigrationIssues"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.StatusCode, x.SourceType }); });
     }
 }

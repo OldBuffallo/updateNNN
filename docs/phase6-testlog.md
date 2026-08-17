@@ -1,69 +1,47 @@
-# Giai đoạn 6 — Log Kiểm tra & Sửa lỗi
+# Giai đoạn 6 — Test log IRM v0.1.0
 
-> **Trạng thái:** 📋 Todo
+**Ngày chạy:** 16/08/2026
 
-## Hướng dẫn
+## Automated
 
-Khi bắt đầu giai đoạn kiểm tra, ghi kết quả vào các bảng dưới đây.
+| Suite | Kết quả |
+|---|---|
+| Web full build | PASS, 0 warnings / 0 errors |
+| xUnit | PASS — 17/17 |
+| SQLite startup/login | PASS |
+| SQL Server migration first/second run | PASS/PASS |
+| SQL Server backfill first/second run | PASS/PASS |
+| Seed 54 địa bàn | PASS |
+| 5 legacy trigger | PASS |
+| WPF explicit-column insert SQL smoke | PASS, rolled back |
 
-## Test Cases — Chức năng
+Phạm vi xUnit: passport normalization, duplicate/overlap, distinct/as-of, inspection lookback, temporal filter, password hash upgrade/lockout, RBAC/account claim, export formula injection, import mở rộng nhiều giấy tờ/lịch sử và rollback sạch, seed idempotency, MIME/signature và simulated malware failure cleanup.
 
-| # | Chức năng | Hành động test | Kết quả | Bug ID | Ghi chú |
-|---|---|---|---|---|---|
-| TC-001 | Đăng nhập | Đăng nhập đúng username/password | ⬜ | | |
-| TC-002 | Đăng nhập | Đăng nhập sai password | ⬜ | | |
-| TC-003 | Đăng xuất | Click đăng xuất | ⬜ | | |
-| TC-004 | Đổi mật khẩu | Đổi mật khẩu thành công | ⬜ | | |
-| TC-005 | Dashboard | KPI cards hiển thị đúng số liệu | ⬜ | | |
-| TC-006 | Dashboard | Biểu đồ quốc tịch render đúng | ⬜ | | |
-| TC-007 | Dashboard | Bảng cảnh báo hết hạn đúng | ⬜ | | |
-| TC-008 | Công ty | Thêm mới công ty | ⬜ | | |
-| TC-009 | Công ty | Sửa thông tin công ty | ⬜ | | |
-| TC-010 | Công ty | Xóa công ty | ⬜ | | |
-| TC-011 | Công ty | Lọc theo lĩnh vực | ⬜ | | |
-| TC-012 | NLĐ | Thêm mới nhân viên | ⬜ | | |
-| TC-013 | NLĐ | Sửa thông tin nhân viên | ⬜ | | |
-| TC-014 | NLĐ | Xóa nhân viên | ⬜ | | |
-| TC-015 | NLĐ | Lưu trữ nhân viên (Archive) | ⬜ | | |
-| TC-016 | NLĐ | Thêm thông tin thăm thân | ⬜ | | |
-| TC-017 | Du học sinh | CRUD du học sinh | ⬜ | | |
-| TC-018 | Import Excel | Upload file .xlsx hợp lệ | ⬜ | | |
-| TC-019 | Import Excel | Upload file định dạng sai | ⬜ | | |
-| TC-020 | Import Excel | Ghép cột tự động | ⬜ | | |
-| TC-021 | Import Excel | Preview trước khi commit | ⬜ | | |
-| TC-022 | Import Excel | Rollback sau import | ⬜ | | |
-| TC-023 | Tìm kiếm | Tìm theo tên | ⬜ | | |
-| TC-024 | Tìm kiếm | Tìm theo hộ chiếu | ⬜ | | |
-| TC-025 | Tìm kiếm | Tìm theo công ty | ⬜ | | |
-| TC-026 | Báo cáo | Chọn cột và lọc | ⬜ | | |
-| TC-027 | Báo cáo | Xuất Excel | ⬜ | | |
-| TC-028 | Báo cáo | Lưu template | ⬜ | | |
-| TC-029 | Admin | Quản lý tài khoản | ⬜ | | |
-| TC-030 | Admin | Xem Audit Log | ⬜ | | |
-| TC-031 | Admin | Xem lịch sử Import | ⬜ | | |
+## Blocked/not run
 
-**Chú thích:** ⬜ Chưa test · ✅ Pass · ❌ Fail
+| Hạng mục | Trạng thái | Lý do |
+|---|---|---|
+| WPF binary build | BLOCKED | Thiếu .NET Framework 4.5.2 Developer Pack (`MSB3644`) |
+| WPF manual UI smoke | NOT RUN | Phụ thuộc binary build và dữ liệu restore |
+| Web nghiệp vụ UAT | NOT RUN | Cần tester nghiệp vụ và dữ liệu đại diện của khách hàng |
+| Defender real-file UAT | NOT RUN | Chỉ test failure bằng scanner giả lập |
+| Customer backup/restore | NOT RUN | Chưa có phê duyệt/connection/evidence |
+| Customer production deploy | NOT RUN | Production gate chưa đạt |
 
-## Test Cases — Bảo mật
+## Demo/staging VPS — Openship
 
-| # | Kiểm tra | Kết quả | Ghi chú |
-|---|---|---|---|
-| SEC-001 | Không truy cập được trang khi chưa đăng nhập | ⬜ | |
-| SEC-002 | User không thể xóa dữ liệu (chỉ Admin) | ⬜ | |
-| SEC-003 | Audit log ghi đầy đủ thao tác nhạy cảm | ⬜ | |
+| Kiểm tra | Kết quả |
+|---|---|
+| Deployment `dep_xrAPbwO0_JlJhLog` | PASS — active/ready |
+| HTTPS login + nhãn v0.1.0 | PASS |
+| Login cookie Secure/HttpOnly | PASS |
+| Authenticated home/family/accommodation/inspection/statistics/company/admin | PASS — 200 |
+| Restart và giữ session/Data Protection key/SQLite | PASS |
+| Port app chỉ bind `127.0.0.1:5050` | PASS |
+| Rotate 4 demo credentials; old admin password rejected/new accepted | PASS |
+| SQLite post-rotation backup → restore → integrity/row-count | PASS — 43 bảng, 284 dòng |
+| GH-600 regression health | PASS — 200 |
 
-## Test Cases — Hiệu năng
+## Quality gate
 
-| # | Kiểm tra | Ngưỡng | Kết quả | Thực tế |
-|---|---|---|---|---|
-| PERF-001 | Load danh sách 1000+ bản ghi | < 3 giây | ⬜ | |
-| PERF-002 | Import file Excel 500 dòng | < 30 giây | ⬜ | |
-| PERF-003 | Tìm kiếm toàn văn | < 1 giây | ⬜ | |
-
-## Bug Log
-
-| Bug ID | Ngày | Mô tả | Mức độ | Người fix | Trạng thái |
-|---|---|---|---|---|---|
-| BUG-001 | — | — | — | — | — |
-
-**Mức độ:** 🔴 Critical · 🟡 High · 🟢 Medium · ⚪ Low
+Full build `--no-incremental` đạt 0 warning/0 error. Reviewer verdict là `APPROVED FOR DEMO/STAGING ONLY`; production gate vẫn phụ thuộc WPF build, UAT và bản restore database khách hàng như bảng trên.

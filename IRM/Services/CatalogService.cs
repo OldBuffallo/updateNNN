@@ -10,7 +10,9 @@ namespace IRM.Services;
 public class CatalogService
 {
     private readonly IrmDbContext _db;
+    private readonly IServiceAuthorizationGuard? _guard;
     public CatalogService(IrmDbContext db) => _db = db;
+    public CatalogService(IrmDbContext db, IServiceAuthorizationGuard guard) : this(db) => _guard = guard;
 
     // ── Fields (Lĩnh vực) ──
     public async Task<List<Field>> GetFieldsAsync()
@@ -43,8 +45,35 @@ public class CatalogService
         => await _db.Wards.Where(w => w.Delete_flag == 0)
             .OrderBy(w => w.WardName).ToListAsync();
 
+    public async Task<List<AdministrativeUnit>> GetAdministrativeUnitsAsync(DateTime? asOfDate = null)
+    {
+        var at = (asOfDate ?? DateTime.Today).Date;
+        return await _db.AdministrativeUnits.AsNoTracking()
+            .Where(x => !x.IsDeleted && x.ValidFrom <= at && (!x.ValidTo.HasValue || x.ValidTo.Value >= at))
+            .OrderBy(x => x.TypeCode).ThenBy(x => x.Name).ToListAsync();
+    }
+
+    public async Task<List<EconomicZone>> GetEconomicZonesAsync(DateTime? asOfDate = null)
+    {
+        var at = (asOfDate ?? DateTime.Today).Date;
+        return await _db.EconomicZones.AsNoTracking()
+            .Where(x => !x.IsDeleted && x.ValidFrom <= at && (!x.ValidTo.HasValue || x.ValidTo.Value >= at))
+            .OrderBy(x => x.Name).ToListAsync();
+    }
+
+    public async Task<int> SaveEconomicZoneAsync(EconomicZone zone)
+    {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
+        if (string.IsNullOrWhiteSpace(zone.Code) || string.IsNullOrWhiteSpace(zone.Name))
+            throw new ArgumentException("Mã và tên khu/cụm là bắt buộc.");
+        if (zone.Id == 0) _db.EconomicZones.Add(zone); else _db.EconomicZones.Update(zone);
+        await _db.SaveChangesAsync();
+        return zone.Id;
+    }
+
     public async Task<Field> CreateFieldAsync(Field field)
     {
+        await RequireCatalogEditorAsync();
         field.Delete_flag = 0;
         _db.Fields.Add(field);
         await _db.SaveChangesAsync();
@@ -53,6 +82,7 @@ public class CatalogService
 
     public async Task<bool> UpdateFieldAsync(Field field)
     {
+        await RequireCatalogEditorAsync();
         var existing = await _db.Fields.FirstOrDefaultAsync(f => f.IDField == field.IDField && f.Delete_flag == 0);
         if (existing == null) return false;
 
@@ -64,6 +94,7 @@ public class CatalogService
 
     public async Task<bool> DeleteFieldAsync(int id)
     {
+        await RequireCatalogEditorAsync();
         var existing = await _db.Fields.FirstOrDefaultAsync(f => f.IDField == id && f.Delete_flag == 0);
         if (existing == null) return false;
 
@@ -74,6 +105,7 @@ public class CatalogService
 
     public async Task<Career> CreateCareerAsync(Career career)
     {
+        await RequireCatalogEditorAsync();
         career.Delete_flag = 0;
         _db.Careers.Add(career);
         await _db.SaveChangesAsync();
@@ -82,6 +114,7 @@ public class CatalogService
 
     public async Task<bool> UpdateCareerAsync(Career career)
     {
+        await RequireCatalogEditorAsync();
         var existing = await _db.Careers.FirstOrDefaultAsync(c => c.IDCareer == career.IDCareer && c.Delete_flag == 0);
         if (existing == null) return false;
 
@@ -93,6 +126,7 @@ public class CatalogService
 
     public async Task<bool> DeleteCareerAsync(int id)
     {
+        await RequireCatalogEditorAsync();
         var existing = await _db.Careers.FirstOrDefaultAsync(c => c.IDCareer == id && c.Delete_flag == 0);
         if (existing == null) return false;
 
@@ -103,6 +137,7 @@ public class CatalogService
 
     public async Task<NationalityEntity> CreateNationalityAsync(NationalityEntity nationality)
     {
+        await RequireCatalogEditorAsync();
         nationality.Delete_flag = 0;
         _db.Nationality.Add(nationality);
         await _db.SaveChangesAsync();
@@ -111,6 +146,7 @@ public class CatalogService
 
     public async Task<bool> UpdateNationalityAsync(NationalityEntity nationality)
     {
+        await RequireCatalogEditorAsync();
         var existing = await _db.Nationality.FirstOrDefaultAsync(n => n.IDNationality == nationality.IDNationality && n.Delete_flag == 0);
         if (existing == null) return false;
 
@@ -122,6 +158,7 @@ public class CatalogService
 
     public async Task<bool> DeleteNationalityAsync(int id)
     {
+        await RequireCatalogEditorAsync();
         var existing = await _db.Nationality.FirstOrDefaultAsync(n => n.IDNationality == id && n.Delete_flag == 0);
         if (existing == null) return false;
 
@@ -132,6 +169,7 @@ public class CatalogService
 
     public async Task<District> CreateDistrictAsync(District district)
     {
+        await RequireCatalogEditorAsync();
         district.Delete_flag = 0;
         _db.Districts.Add(district);
         await _db.SaveChangesAsync();
@@ -140,6 +178,7 @@ public class CatalogService
 
     public async Task<bool> UpdateDistrictAsync(District district)
     {
+        await RequireCatalogEditorAsync();
         var existing = await _db.Districts.FirstOrDefaultAsync(d => d.IDDistrict == district.IDDistrict && d.Delete_flag == 0);
         if (existing == null) return false;
 
@@ -150,6 +189,7 @@ public class CatalogService
 
     public async Task<bool> DeleteDistrictAsync(int id)
     {
+        await RequireCatalogEditorAsync();
         var existing = await _db.Districts.FirstOrDefaultAsync(d => d.IDDistrict == id && d.Delete_flag == 0);
         if (existing == null) return false;
 
@@ -160,6 +200,7 @@ public class CatalogService
 
     public async Task<Ward> CreateWardAsync(Ward ward)
     {
+        await RequireCatalogEditorAsync();
         ward.Delete_flag = 0;
         _db.Wards.Add(ward);
         await _db.SaveChangesAsync();
@@ -168,6 +209,7 @@ public class CatalogService
 
     public async Task<bool> UpdateWardAsync(Ward ward)
     {
+        await RequireCatalogEditorAsync();
         var existing = await _db.Wards.FirstOrDefaultAsync(w => w.IDWard == ward.IDWard && w.Delete_flag == 0);
         if (existing == null) return false;
 
@@ -178,6 +220,7 @@ public class CatalogService
 
     public async Task<bool> DeleteWardAsync(int id)
     {
+        await RequireCatalogEditorAsync();
         var existing = await _db.Wards.FirstOrDefaultAsync(w => w.IDWard == id && w.Delete_flag == 0);
         if (existing == null) return false;
 
@@ -185,4 +228,8 @@ public class CatalogService
         await _db.SaveChangesAsync();
         return true;
     }
+
+    private Task RequireCatalogEditorAsync() => _guard is null
+        ? Task.CompletedTask
+        : _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
 }

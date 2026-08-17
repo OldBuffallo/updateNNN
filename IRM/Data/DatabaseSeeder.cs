@@ -378,4 +378,58 @@ public static class DatabaseSeeder
             IDUser = 1, DateCreated = DateTime.Now, Hidden_flag = 0
         };
     }
+
+    // ═══════════════════════════════════════
+    // v0.1.0: Seed dữ liệu mới
+    // ═══════════════════════════════════════
+
+    public static async Task SeedV010Async(IrmDbContext db)
+    {
+        if (!await db.AdministrativeUnits.AnyAsync())
+        {
+            var validFrom = new DateTime(2025, 7, 1);
+            var communes = new[]
+            {
+                "Quảng La", "Thống Nhất", "Hải Hòa", "Tiên Yên", "Điền Xá", "Đông Ngũ",
+                "Hải Lạng", "Lương Minh", "Kỳ Thượng", "Ba Chẽ", "Quảng Tân", "Đầm Hà",
+                "Quảng Hà", "Đường Hoa", "Quảng Đức", "Hoành Mô", "Lục Hồn", "Bình Liêu",
+                "Hải Sơn", "Hải Ninh", "Vĩnh Thực", "Cái Chiên"
+            };
+            var wards = new[]
+            {
+                "An Sinh", "Đông Triều", "Bình Khê", "Mạo Khê", "Hoàng Quế", "Yên Tử",
+                "Vàng Danh", "Uông Bí", "Đông Mai", "Hiệp Hòa", "Quảng Yên", "Hà An",
+                "Phong Cốc", "Liên Hòa", "Tuần Châu", "Việt Hưng", "Bãi Cháy", "Hà Tu",
+                "Hà Lầm", "Cao Xanh", "Hồng Gai", "Hạ Long", "Hoành Bồ", "Mông Dương",
+                "Quang Hanh", "Cẩm Phả", "Cửa Ông", "Móng Cái 1", "Móng Cái 2", "Móng Cái 3"
+            };
+
+            db.AdministrativeUnits.AddRange(communes.Select((name, i) => new AdministrativeUnit
+            {
+                Code = $"QN-C-{i + 1:000}", Name = name,
+                TypeCode = AdministrativeUnitTypeCodes.Commune, ValidFrom = validFrom
+            }));
+            db.AdministrativeUnits.AddRange(wards.Select((name, i) => new AdministrativeUnit
+            {
+                Code = $"QN-W-{i + 1:000}", Name = name,
+                TypeCode = AdministrativeUnitTypeCodes.Ward, ValidFrom = validFrom
+            }));
+            db.AdministrativeUnits.AddRange(
+                new AdministrativeUnit { Code = "QN-S-001", Name = "Vân Đồn", TypeCode = AdministrativeUnitTypeCodes.SpecialZone, ValidFrom = validFrom },
+                new AdministrativeUnit { Code = "QN-S-002", Name = "Cô Tô", TypeCode = AdministrativeUnitTypeCodes.SpecialZone, ValidFrom = validFrom });
+        }
+
+        if (!await db.SchemaVersions.AnyAsync(x => x.Version == "0.1.0"))
+        {
+            db.SchemaVersions.Add(new SchemaVersion
+            {
+                Version = "0.1.0",
+                Description = "IRM extension schema for local SQLite demonstration",
+                Checksum = "LOCAL-ENSURECREATED",
+                AppliedBy = "DatabaseSeeder"
+            });
+        }
+
+        await db.SaveChangesAsync();
+    }
 }

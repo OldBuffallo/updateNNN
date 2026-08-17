@@ -10,14 +10,22 @@ namespace IRM.Services;
 /// </summary>
 public class ImportService
 {
+    private static readonly HashSet<string> V010ImportFields = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "StayPurposeCode", "StayValidFrom", "StayValidTo", "ElectronicIdentityNumber",
+        "DocumentTypeCode", "DocumentNumber", "DocumentValidFrom", "DocumentValidTo",
+        "AdministrativeUnitCode", "ResidenceAddress", "ResidenceValidFrom", "ResidenceValidTo"
+    };
     private readonly IrmDbContext _db;
     private readonly AuditService _audit;
+    private readonly IServiceAuthorizationGuard? _guard;
 
     public ImportService(IrmDbContext db, AuditService audit)
     {
         _db = db;
         _audit = audit;
     }
+    public ImportService(IrmDbContext db, AuditService audit, IServiceAuthorizationGuard guard) : this(db, audit) => _guard = guard;
 
     // ══════════════════════════════════════════
     // AUTO-MAP COLUMNS
@@ -79,12 +87,17 @@ public class ImportService
     public async Task<List<ImportPreviewRow>> GeneratePreviewAsync(
         Stream stream, List<ColumnMapping> mappings, int companyId)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         var allRows = ExcelReaderHelper.ReadAllRows(stream, mappings);
         var previewRows = new List<ImportPreviewRow>();
 
         // Cache dữ liệu lookup
         var nationalities = await _db.Nationality.Where(n => n.Delete_flag == 0).ToListAsync();
         var careers = await _db.Careers.Where(c => c.Delete_flag == 0).ToListAsync();
+        var companies = await _db.Companies.Where(c => c.Delete_flag == 0).ToListAsync();
+
+        // Kiểm tra xem có cột CompanyName được map không
+        var hasCompanyColumn = mappings.Any(m => m.SystemField == "CompanyName");
 
         int rowNum = 0;
         foreach (var rowData in allRows)
@@ -94,9 +107,65 @@ public class ImportService
 
             try
             {
+                // Resolve công ty theo từng dòng
+                int resolvedCompanyId = companyId;
+                string? companyDisplay = null;
+
+                if (hasCompanyColumn && rowData.TryGetValue("CompanyName", out var companyName)
+                    && !string.IsNullOrWhiteSpace(companyName))
+                {
+                    var companyNameTrimmed = companyName.Trim();
+                    var matchedCompany = companies.FirstOrDefault(c =>
+                        c.CompanyName.Equals(companyNameTrimmed, StringComparison.OrdinalIgnoreCase)
+                        || c.CompanyName.Contains(companyNameTrimmed, StringComparison.OrdinalIgnoreCase)
+                        || companyNameTrimmed.Contains(c.CompanyName, StringComparison.OrdinalIgnoreCase));
+
+                    if (matchedCompany != null)
+                    {
+                        resolvedCompanyId = matchedCompany.IDCompany;
+                        companyDisplay = matchedCompany.CompanyName;
+                    }
+                    else
+                    {
+                        preview.Status = "error";
+                        preview.ErrorMessage = $"Công ty \"{companyNameTrimmed}\" không tồn tại trong hệ thống";
+                        preview.CompanyDisplay = $"❌ {companyNameTrimmed}";
+                        previewRows.Add(preview);
+                        continue;
+                    }
+                }
+                else if (hasCompanyColumn)
+                {
+                    // Có cột CompanyName nhưng ô trống → dùng công ty dropdown (nếu có)
+                    if (companyId > 0)
+                    {
+                        var fallbackCompany = companies.FirstOrDefault(c => c.IDCompany == companyId);
+                        companyDisplay = fallbackCompany?.CompanyName ?? "(Công ty mặc định)";
+                    }
+                    else
+                    {
+                        preview.Status = "error";
+                        preview.ErrorMessage = "Thiếu tên công ty (ô trống) và không chọn công ty mặc định";
+                        previewRows.Add(preview);
+                        continue;
+                    }
+                }
+                else if (companyId > 0)
+                {
+                    // Không có cột CompanyName → dùng dropdown (hành vi cũ)
+                    var fallbackCompany = companies.FirstOrDefault(c => c.IDCompany == companyId);
+                    companyDisplay = fallbackCompany?.CompanyName;
+                }
+
+                preview.ResolvedCompanyId = resolvedCompanyId;
+                preview.CompanyDisplay = companyDisplay;
+
                 // Parse row data
-                var employee = ParseRowToEmployee(rowData, companyId, nationalities, careers);
+                var employee = ParseRowToEmployee(rowData, resolvedCompanyId, nationalities, careers);
                 preview.ParsedEmployee = employee;
+                preview.ExtendedFields = rowData
+                    .Where(item => V010ImportFields.Contains(item.Key) && !string.IsNullOrWhiteSpace(item.Value))
+                    .ToDictionary(item => item.Key, item => item.Value.Trim(), StringComparer.OrdinalIgnoreCase);
 
                 // Set display values
                 preview.StaffName = employee.StaffName;
@@ -149,6 +218,7 @@ public class ImportService
         return previewRows;
     }
 
+
     // ══════════════════════════════════════════
     // EXECUTE IMPORT
     // ══════════════════════════════════════════
@@ -163,6 +233,8 @@ public class ImportService
         string fileName,
         string? username = null)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
+        var accountId = _guard is null ? 1 : await _guard.GetRequiredAccountIdAsync();
         var sessionId = $"IMP-{DateTime.Now:yyyy}-{DateTime.Now:MMddHHmmss}";
         var result = new ImportResult { SessionId = sessionId };
 
@@ -188,10 +260,12 @@ public class ImportService
                     {
                         var emp = row.ParsedEmployee;
                         emp.DateCreated = DateTime.Now;
+                        emp.IDUser = accountId;
                         emp.Hidden_flag = 0;
                         emp.WorkingStatus = 0;
                         _db.Employees.Add(emp);
                         await _db.SaveChangesAsync();
+                        var v010Changes = await UpsertV010ExtensionsAsync(emp, row.ExtendedFields, row.ResolvedCompanyId ?? companyId);
 
                         // Lưu backup record (để rollback có thể xóa)
                         _db.ImportBackups.Add(new ImportBackup
@@ -199,6 +273,7 @@ public class ImportService
                             ImportSessionId = sessionId,
                             ActionType = "INSERT",
                             EmployeeId = emp.IDEmployee,
+                            OldData = JsonSerializer.Serialize(new { V010Changes = v010Changes }),
                             CreatedAt = DateTime.Now
                         });
 
@@ -245,14 +320,15 @@ public class ImportService
                                     existing.FamilyVisitNote
                                 });
 
-                                _db.ImportBackups.Add(new ImportBackup
+                                var backupRecord = new ImportBackup
                                 {
                                     ImportSessionId = sessionId,
                                     ActionType = "UPDATE",
                                     EmployeeId = existing.IDEmployee,
                                     OldData = oldDataJson,
                                     CreatedAt = DateTime.Now
-                                });
+                                };
+                                _db.ImportBackups.Add(backupRecord);
 
                                 // Cập nhật dữ liệu mới
                                 var newData = row.ParsedEmployee;
@@ -279,6 +355,14 @@ public class ImportService
                                     existing.FamilyVisitNote = newData.FamilyVisitNote;
 
                                 await _db.SaveChangesAsync();
+                                var v010Changes = await UpsertV010ExtensionsAsync(existing, row.ExtendedFields, row.ResolvedCompanyId ?? companyId);
+                                using (var oldDocument = JsonDocument.Parse(backupRecord.OldData!))
+                                {
+                                    var rollbackData = oldDocument.RootElement.EnumerateObject()
+                                        .ToDictionary(property => property.Name, property => (object?)property.Value.Clone());
+                                    rollbackData["V010Changes"] = v010Changes;
+                                    backupRecord.OldData = JsonSerializer.Serialize(rollbackData);
+                                }
                                 updated++;
                             }
                         }
@@ -296,13 +380,36 @@ public class ImportService
             }
 
             // Lưu lịch sử import
-            var company = await _db.Companies.FindAsync(companyId);
+            var distinctCompanyIds = previewRows
+                .Where(r => r.ResolvedCompanyId.HasValue && r.ResolvedCompanyId > 0)
+                .Select(r => r.ResolvedCompanyId!.Value)
+                .Distinct()
+                .ToList();
+            string? historyCompanyName;
+            int historyCompanyId;
+            if (distinctCompanyIds.Count > 1)
+            {
+                historyCompanyId = 0;
+                historyCompanyName = $"Nhiều công ty ({distinctCompanyIds.Count})";
+            }
+            else if (distinctCompanyIds.Count == 1)
+            {
+                historyCompanyId = distinctCompanyIds[0];
+                var comp = await _db.Companies.FindAsync(historyCompanyId);
+                historyCompanyName = comp?.CompanyName;
+            }
+            else
+            {
+                historyCompanyId = companyId;
+                var comp = companyId > 0 ? await _db.Companies.FindAsync(companyId) : null;
+                historyCompanyName = comp?.CompanyName;
+            }
             var history = new ImportHistory
             {
                 SessionId = sessionId,
                 FileName = fileName,
-                CompanyId = companyId,
-                CompanyName = company?.CompanyName,
+                CompanyId = historyCompanyId,
+                CompanyName = historyCompanyName,
                 TotalRows = previewRows.Count,
                 AddedRows = added,
                 UpdatedRows = updated,
@@ -349,6 +456,7 @@ public class ImportService
     /// </summary>
     public async Task<bool> RollbackImportAsync(string sessionId)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin);
         var history = await _db.ImportHistories
             .FirstOrDefaultAsync(h => h.SessionId == sessionId);
         if (history == null || history.Status == "rolledback") return false;
@@ -363,6 +471,7 @@ public class ImportService
         {
             foreach (var backup in backups)
             {
+                await RollbackV010ChangesAsync(backup.OldData);
                 if (backup.ActionType == "INSERT")
                 {
                     // Xóa record đã insert (soft delete)
@@ -478,6 +587,7 @@ public class ImportService
     /// </summary>
     public async Task SaveTemplateAsync(string name, int? companyId, List<ColumnMapping> mappings, string? username)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         var json = JsonSerializer.Serialize(mappings.Select(m => new { m.ExcelColumnIndex, m.SystemField }));
 
         var existing = await _db.ColumnMappingTemplates
@@ -544,6 +654,184 @@ public class ImportService
     // ══════════════════════════════════════════
     // PRIVATE HELPERS
     // ══════════════════════════════════════════
+
+    private async Task<V010ImportChanges> UpsertV010ExtensionsAsync(Employee employee, Dictionary<string, string> fields, int companyId)
+    {
+        var changes = new V010ImportChanges();
+        if (fields.Count == 0) return changes;
+
+        var sourceId = employee.IDEmployee.ToString();
+        var link = await _db.ForeignPersonSourceLinks
+            .Include(item => item.ForeignPerson)
+            .SingleOrDefaultAsync(item => item.SourceType == "EMPLOYEE" && item.SourceId == sourceId);
+        var person = link?.ForeignPerson;
+        var createdSourceLink = false;
+        var passport = FamilyVisitorService.NormalizePassport(employee.Passport);
+        var passportKey = FamilyVisitorService.SearchKey(passport);
+        if (person is null && passportKey is not null)
+            person = await _db.ForeignPersons.SingleOrDefaultAsync(item => item.PassportSearchKey == passportKey && !item.IsDeleted);
+        if (person is null)
+        {
+            person = new ForeignPerson
+            {
+                FullName = employee.StaffName.Trim(), Gender = employee.Gender, Birthday = employee.Birthday,
+                NationalityCode = employee.Nationality, PassportNumber = passport, PassportSearchKey = passportKey,
+                IsDataIncomplete = passportKey is null
+            };
+            _db.ForeignPersons.Add(person);
+            changes.CreatedForeignPerson = true;
+        }
+        if (link is null)
+        {
+            link = new ForeignPersonSourceLink
+            {
+                ForeignPerson = person, SourceType = "EMPLOYEE", SourceId = sourceId,
+                SourceFingerprint = $"IMPORT:{employee.DateCreated:O}"
+            };
+            _db.ForeignPersonSourceLinks.Add(link);
+            createdSourceLink = true;
+        }
+        await _db.SaveChangesAsync();
+        changes.ForeignPersonId = person.Id;
+        if (createdSourceLink) changes.CreatedSourceLinkId = link.Id;
+
+        if (fields.TryGetValue("StayPurposeCode", out var purposeValue))
+        {
+            var purpose = purposeValue.Trim().ToUpperInvariant();
+            if (!StayPurposeCodes.All.Contains(purpose)) throw new InvalidOperationException($"Diện cư trú không hợp lệ: {purposeValue}.");
+            var validFrom = ParseImportDate(fields.GetValueOrDefault("StayValidFrom"), employee.DateCreated ?? DateTime.Today);
+            var validTo = ParseNullableImportDate(fields.GetValueOrDefault("StayValidTo"));
+            if (validTo.HasValue && validTo < validFrom) throw new InvalidOperationException("Khoảng hiệu lực diện cư trú không hợp lệ.");
+            var overlap = await _db.StayCases.FirstOrDefaultAsync(item => item.ForeignPersonId == person.Id && item.IsPrimary
+                && item.StatusCode != "DELETED" && item.ValidFrom <= (validTo ?? DateTime.MaxValue)
+                && (!item.ValidTo.HasValue || item.ValidTo.Value >= validFrom));
+            if (overlap is null)
+            {
+                var stay = new StayCase { ForeignPersonId = person.Id, PurposeCode = purpose, IsPrimary = true,
+                    SponsorCompanyId = purpose == StayPurposeCodes.Work ? companyId : null, ValidFrom = validFrom, ValidTo = validTo };
+                _db.StayCases.Add(stay); changes.CreatedStayCases.Add(stay);
+            }
+            else if (overlap.PurposeCode != purpose)
+                throw new InvalidOperationException("Diện cư trú import chồng lấn một diện chính khác.");
+        }
+
+        if (fields.TryGetValue("ElectronicIdentityNumber", out var identityNumber))
+        {
+            var identityKey = FamilyVisitorService.SearchKey(identityNumber)!;
+            if (!await _db.ElectronicIdentities.AnyAsync(item => item.ForeignPersonId == person.Id && item.IdentitySearchKey == identityKey))
+            {
+                var identity = new ElectronicIdentity { ForeignPersonId = person.Id,
+                    IdentityNumber = identityNumber.Trim(), IdentitySearchKey = identityKey,
+                    ValidFrom = ParseImportDate(fields.GetValueOrDefault("StayValidFrom"), employee.DateCreated ?? DateTime.Today) };
+                _db.ElectronicIdentities.Add(identity); changes.CreatedIdentities.Add(identity);
+            }
+        }
+
+        if (fields.TryGetValue("DocumentNumber", out var documentValue))
+        {
+            var numbers = SplitImportValues(documentValue);
+            var types = SplitImportValues(fields.GetValueOrDefault("DocumentTypeCode"));
+            var validToValues = SplitImportValues(fields.GetValueOrDefault("DocumentValidTo"));
+            var validFrom = ParseImportDate(fields.GetValueOrDefault("DocumentValidFrom"), employee.DateCreated ?? DateTime.Today);
+            for (var index = 0; index < numbers.Length; index++)
+            {
+                var type = (index < types.Length ? types[index] : ImmigrationDocumentTypeCodes.Visa).ToUpperInvariant();
+                var allowedTypes = new[] { ImmigrationDocumentTypeCodes.Visa, ImmigrationDocumentTypeCodes.VisaExtension,
+                    ImmigrationDocumentTypeCodes.TemporaryResidenceCard, ImmigrationDocumentTypeCodes.VisaExemption, ImmigrationDocumentTypeCodes.Other };
+                if (!allowedTypes.Contains(type)) throw new InvalidOperationException($"Loại giấy tờ không hợp lệ: {type}.");
+                var number = numbers[index];
+                if (await _db.ImmigrationDocuments.AnyAsync(item => item.ForeignPersonId == person.Id && item.TypeCode == type && item.Number == number)) continue;
+                var document = new ImmigrationDocument { ForeignPersonId = person.Id, TypeCode = type,
+                    Number = number, ValidFrom = validFrom,
+                    ValidTo = index < validToValues.Length ? ParseNullableImportDate(validToValues[index]) : null };
+                _db.ImmigrationDocuments.Add(document); changes.CreatedDocuments.Add(document);
+            }
+        }
+
+        if (fields.TryGetValue("AdministrativeUnitCode", out var unitCode)
+            && fields.TryGetValue("ResidenceAddress", out var residenceAddress))
+        {
+            var unit = await _db.AdministrativeUnits.SingleOrDefaultAsync(item => item.Code == unitCode && !item.IsDeleted)
+                ?? throw new InvalidOperationException($"Không tìm thấy mã địa bàn: {unitCode}.");
+            var residenceFrom = ParseImportDate(fields.GetValueOrDefault("ResidenceValidFrom"), employee.DateCreated ?? DateTime.Today);
+            var residenceTo = ParseNullableImportDate(fields.GetValueOrDefault("ResidenceValidTo"));
+            if (residenceTo.HasValue && residenceTo < residenceFrom) throw new InvalidOperationException("Khoảng lịch sử lưu trú không hợp lệ.");
+            if (!await _db.ResidencePeriods.AnyAsync(item => item.ForeignPersonId == person.Id
+                && item.AdministrativeUnitId == unit.Id && item.AddressLine == residenceAddress && item.ValidFrom == residenceFrom))
+            {
+                var residence = new ResidencePeriod { ForeignPersonId = person.Id, AdministrativeUnitId = unit.Id,
+                    AddressLine = residenceAddress, ResponsibleCompanyId = companyId, ValidFrom = residenceFrom, ValidTo = residenceTo };
+                _db.ResidencePeriods.Add(residence); changes.CreatedResidences.Add(residence);
+            }
+        }
+
+        await _db.SaveChangesAsync();
+        changes.CreatedStayCaseIds = changes.CreatedStayCases.Select(item => item.Id).ToList();
+        changes.CreatedDocumentIds = changes.CreatedDocuments.Select(item => item.Id).ToList();
+        changes.CreatedIdentityIds = changes.CreatedIdentities.Select(item => item.Id).ToList();
+        changes.CreatedResidenceIds = changes.CreatedResidences.Select(item => item.Id).ToList();
+        return changes;
+    }
+
+    private async Task RollbackV010ChangesAsync(string? oldData)
+    {
+        if (string.IsNullOrWhiteSpace(oldData)) return;
+        using var document = JsonDocument.Parse(oldData);
+        if (!document.RootElement.TryGetProperty("V010Changes", out var element)) return;
+        var changes = element.Deserialize<V010ImportChanges>();
+        if (changes is null) return;
+        _db.StayCases.RemoveRange(await _db.StayCases.Where(item => changes.CreatedStayCaseIds.Contains(item.Id)).ToListAsync());
+        _db.ImmigrationDocuments.RemoveRange(await _db.ImmigrationDocuments.Where(item => changes.CreatedDocumentIds.Contains(item.Id)).ToListAsync());
+        _db.ElectronicIdentities.RemoveRange(await _db.ElectronicIdentities.Where(item => changes.CreatedIdentityIds.Contains(item.Id)).ToListAsync());
+        _db.ResidencePeriods.RemoveRange(await _db.ResidencePeriods.Where(item => changes.CreatedResidenceIds.Contains(item.Id)).ToListAsync());
+        if (changes.CreatedSourceLinkId.HasValue)
+        {
+            var sourceLink = await _db.ForeignPersonSourceLinks.FindAsync(changes.CreatedSourceLinkId.Value);
+            if (sourceLink is not null) _db.ForeignPersonSourceLinks.Remove(sourceLink);
+        }
+        if (changes.CreatedForeignPerson && changes.ForeignPersonId.HasValue)
+        {
+            var createdLinkId = changes.CreatedSourceLinkId ?? -1;
+            var hasAnotherSource = await _db.ForeignPersonSourceLinks.AnyAsync(item => item.ForeignPersonId == changes.ForeignPersonId
+                && item.Id != createdLinkId);
+            var hasInspection = await _db.InspectionSubjects.AnyAsync(item => item.ForeignPersonId == changes.ForeignPersonId);
+            if (!hasAnotherSource && !hasInspection)
+            {
+                var person = await _db.ForeignPersons.FindAsync(changes.ForeignPersonId.Value);
+                if (person is not null) _db.ForeignPersons.Remove(person);
+            }
+        }
+        await _db.SaveChangesAsync();
+    }
+
+    private sealed class V010ImportChanges
+    {
+        public V010ImportChanges() { }
+        public int? ForeignPersonId { get; set; }
+        public bool CreatedForeignPerson { get; set; }
+        public int? CreatedSourceLinkId { get; set; }
+        public List<int> CreatedStayCaseIds { get; set; } = [];
+        public List<int> CreatedDocumentIds { get; set; } = [];
+        public List<int> CreatedIdentityIds { get; set; } = [];
+        public List<int> CreatedResidenceIds { get; set; } = [];
+        [System.Text.Json.Serialization.JsonIgnore] public List<StayCase> CreatedStayCases { get; } = [];
+        [System.Text.Json.Serialization.JsonIgnore] public List<ImmigrationDocument> CreatedDocuments { get; } = [];
+        [System.Text.Json.Serialization.JsonIgnore] public List<ElectronicIdentity> CreatedIdentities { get; } = [];
+        [System.Text.Json.Serialization.JsonIgnore] public List<ResidencePeriod> CreatedResidences { get; } = [];
+    }
+
+    private static string[] SplitImportValues(string? value) => string.IsNullOrWhiteSpace(value)
+        ? [] : value.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    private DateTime ParseImportDate(string? value, DateTime fallback) =>
+        ParseNullableImportDate(value) ?? fallback.Date;
+
+    private DateTime? ParseNullableImportDate(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        if (DateTime.TryParse(value, out var parsed) || TryParseVietnameseDate(value, out parsed)) return parsed.Date;
+        throw new InvalidOperationException($"Ngày không hợp lệ: {value}.");
+    }
 
     private Employee ParseRowToEmployee(
         Dictionary<string, string> rowData,

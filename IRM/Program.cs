@@ -1,61 +1,73 @@
 using IRM.Components;
 using IRM.Data;
 using IRM.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddMudServices();
-
-// === Database ===
-// Thử SQL Server trước, nếu không kết nối được thì dùng SQLite
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var useSqlite = string.IsNullOrEmpty(connectionString);
-
-// Kiểm tra SQL Server có khả dụng không
-if (!string.IsNullOrEmpty(connectionString) && !connectionString.Contains("Sqlite"))
+builder.Services.AddHttpContextAccessor();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    try
-    {
-        using var testConn = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
-        testConn.Open();
-        testConn.Close();
-        useSqlite = false;
-    }
-    catch
-    {
-        Console.WriteLine("⚠️ SQL Server không khả dụng, chuyển sang SQLite");
-        useSqlite = true;
-    }
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+});
+
+var dataProtectionKeysPath = builder.Configuration["DataProtection:KeysPath"];
+if (!string.IsNullOrWhiteSpace(dataProtectionKeysPath))
+{
+    Directory.CreateDirectory(dataProtectionKeysPath);
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath))
+        .SetApplicationName("IRM-v0.1.0");
 }
 
-if (useSqlite)
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "irm.auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+        options.LoginPath = "/login";
+        options.AccessDeniedPath = "/login";
+    });
+builder.Services.AddAuthorization(options =>
 {
-    var sqlitePath = Path.Combine(AppContext.BaseDirectory, "ReportManagerDB.db");
-    Console.WriteLine($"📦 Sử dụng SQLite: {sqlitePath}");
+    options.AddPolicy("ManageData", p => p.RequireRole(IrmRoles.Admin, IrmRoles.DataEditor));
+    options.AddPolicy("Inspect", p => p.RequireRole(IrmRoles.Admin, IrmRoles.Inspector));
+    options.AddPolicy("Report", p => p.RequireRole(IrmRoles.Admin, IrmRoles.Reporter, IrmRoles.Viewer));
+    options.AddPolicy("AdminOnly", p => p.RequireRole(IrmRoles.Admin));
+});
 
-    builder.Services.AddDbContextFactory<IrmDbContext>(options =>
-        options.UseSqlite($"Data Source={sqlitePath}"));
-    builder.Services.AddDbContext<IrmDbContext>(options =>
-        options.UseSqlite($"Data Source={sqlitePath}"));
+var provider = builder.Configuration["Database:Provider"] ?? "SqlServer";
+var isSqlite = provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase);
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (isSqlite)
+{
+    connectionString = builder.Configuration.GetConnectionString("Sqlite")
+        ?? $"Data Source={Path.Combine(AppContext.BaseDirectory, "IRM-v0.1.0-demo.db")}";
+    builder.Services.AddDbContextFactory<IrmDbContext>(options => options.UseSqlite(connectionString));
+    builder.Services.AddDbContext<IrmDbContext>(options => options.UseSqlite(connectionString));
 }
 else
 {
-    Console.WriteLine("📦 Sử dụng SQL Server");
-
-    builder.Services.AddDbContextFactory<IrmDbContext>(options =>
-        options.UseSqlServer(connectionString,
-            sqlOptions => sqlOptions.CommandTimeout(60)));
-    builder.Services.AddDbContext<IrmDbContext>(options =>
-        options.UseSqlServer(connectionString));
+    if (string.IsNullOrWhiteSpace(connectionString)) throw new InvalidOperationException("Thiếu ConnectionStrings:DefaultConnection.");
+    builder.Services.AddDbContextFactory<IrmDbContext>(options => options.UseSqlServer(connectionString, sql => sql.CommandTimeout(60)));
+    builder.Services.AddDbContext<IrmDbContext>(options => options.UseSqlServer(connectionString, sql => sql.CommandTimeout(60)));
 }
 
-// === Services ===
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<CompanyService>();
 builder.Services.AddScoped<EmployeeService>();
@@ -66,232 +78,68 @@ builder.Services.AddScoped<CatalogService>();
 builder.Services.AddScoped<ImportService>();
 builder.Services.AddScoped<ExportService>();
 builder.Services.AddScoped<StudentService>();
+builder.Services.AddScoped<IForeignerRegistryService, FamilyVisitorService>();
+builder.Services.AddScoped<FamilyVisitorService>(sp => (FamilyVisitorService)sp.GetRequiredService<IForeignerRegistryService>());
+builder.Services.AddScoped<IResidenceService, ResidenceService>();
+builder.Services.AddScoped<ICompanyProfileService, CompanyProfileService>();
+builder.Services.AddScoped<IAccommodationService, AccommodationService>();
+builder.Services.AddScoped<AccommodationService>(sp => (AccommodationService)sp.GetRequiredService<IAccommodationService>());
+builder.Services.AddScoped<IInspectionService, InspectionService>();
+builder.Services.AddScoped<InspectionService>(sp => (InspectionService)sp.GetRequiredService<IInspectionService>());
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<StatisticsService>(sp => (StatisticsService)sp.GetRequiredService<IStatisticsService>());
+builder.Services.AddScoped<IStatisticsExportService, StatisticsExportService>();
+builder.Services.AddScoped<ILegalDocumentService, LegalDocumentService>();
+builder.Services.AddSingleton<IMalwareScanner, WindowsDefenderMalwareScanner>();
+builder.Services.AddScoped<ILegacySyncService, LegacySyncService>();
+builder.Services.AddScoped<ISchemaVersionService, SchemaVersionService>();
+builder.Services.AddScoped<IServiceAuthorizationGuard, ServiceAuthorizationGuard>();
+builder.Services.AddHostedService<LegacySyncWorker>();
 
 var app = builder.Build();
 
-// === Auto-create database + seed data ===
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<IrmDbContext>();
-
-    if (useSqlite)
+    if (isSqlite)
     {
-        // SQLite (demo/fallback): tạo toàn bộ schema + seed data mẫu
         await db.Database.EnsureCreatedAsync();
         await DatabaseSeeder.SeedAsync(db);
-        Console.WriteLine("✅ Database SQLite sẵn sàng");
+        await DatabaseSeeder.SeedV010Async(db);
+        await scope.ServiceProvider.GetRequiredService<IForeignerRegistryService>().BackfillLegacyAsync();
     }
     else
     {
-        // SQL Server production: DB đã có sẵn dữ liệu cũ
-        // Chỉ tạo các bảng MỚI nếu chưa có (AuditLogs, ImportHistories, Students...)
-        // KHÔNG gọi EnsureCreatedAsync() vì sẽ không tạo bảng thiếu trên DB đã tồn tại
-        try
-        {
-            // Kiểm tra DB có dữ liệu cũ không
-            var hasData = await db.Accounts.AnyAsync();
-            if (hasData)
-            {
-                Console.WriteLine("📦 SQL Server: Phát hiện dữ liệu cũ — bỏ qua seed");
-                // Tạo các bảng mới nếu thiếu (an toàn, dùng raw SQL)
-                await EnsureNewTablesAsync(db);
-            }
-            else
-            {
-                // DB trống (mới restore hoặc mới tạo)
-                await db.Database.EnsureCreatedAsync();
-                await DatabaseSeeder.SeedAsync(db);
-                Console.WriteLine("✅ Database SQL Server mới — đã seed data");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"⚠️ Lỗi kiểm tra DB: {ex.Message}");
-            // Fallback: thử tạo DB
-            await db.Database.EnsureCreatedAsync();
-            await DatabaseSeeder.SeedAsync(db);
-        }
-        Console.WriteLine("✅ Database SQL Server sẵn sàng");
+        await scope.ServiceProvider.GetRequiredService<ISchemaVersionService>().ValidateAsync();
     }
 }
 
-// Tạo các bảng mới trên database SQL Server cũ
-static async Task EnsureNewTablesAsync(IrmDbContext db)
-{
-    var tablesToCheck = new Dictionary<string, string>
-    {
-        ["AuditLogs"] = @"
-            CREATE TABLE [dbo].[AuditLogs] (
-                [Id]          BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                [Action]      NVARCHAR(50)   NOT NULL,
-                [EntityType]  NVARCHAR(100)  NOT NULL,
-                [EntityId]    INT            NULL,
-                [Description] NVARCHAR(MAX)  NULL,
-                [Username]    NVARCHAR(100)  NULL,
-                [Timestamp]   DATETIME       NOT NULL DEFAULT GETDATE(),
-                [IpAddress]   NVARCHAR(50)   NULL
-            )",
-        ["ImportHistories"] = @"
-            CREATE TABLE [dbo].[ImportHistories] (
-                [Id]           BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                [SessionId]    NVARCHAR(50)   NOT NULL,
-                [FileName]     NVARCHAR(500)  NOT NULL,
-                [CompanyId]    INT            NOT NULL DEFAULT 0,
-                [CompanyName]  NVARCHAR(500)  NULL,
-                [TotalRows]    INT            NOT NULL DEFAULT 0,
-                [AddedRows]    INT            NOT NULL DEFAULT 0,
-                [UpdatedRows]  INT            NOT NULL DEFAULT 0,
-                [ErrorRows]    INT            NOT NULL DEFAULT 0,
-                [Status]       NVARCHAR(20)   NOT NULL DEFAULT 'committed',
-                [Username]     NVARCHAR(100)  NULL,
-                [ImportDate]   DATETIME       NOT NULL DEFAULT GETDATE(),
-                [ErrorDetails] NVARCHAR(MAX)  NULL
-            )",
-        ["ImportBackups"] = @"
-            CREATE TABLE [dbo].[ImportBackups] (
-                [Id]              BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                [ImportSessionId] NVARCHAR(50)   NOT NULL,
-                [ActionType]      NVARCHAR(20)   NOT NULL,
-                [EmployeeId]      INT            NOT NULL,
-                [OldData]         NVARCHAR(MAX)  NULL,
-                [CreatedAt]       DATETIME       NOT NULL DEFAULT GETDATE()
-            )",
-        ["ColumnMappingTemplates"] = @"
-            CREATE TABLE [dbo].[ColumnMappingTemplates] (
-                [Id]           INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                [TemplateName] NVARCHAR(200)  NOT NULL,
-                [CompanyId]    INT            NULL,
-                [MappingJson]  NVARCHAR(MAX)  NOT NULL,
-                [CreatedBy]    NVARCHAR(100)  NULL,
-                [CreatedAt]    DATETIME       NOT NULL DEFAULT GETDATE(),
-                [UpdatedAt]    DATETIME       NULL
-            )",
-        ["Students"] = @"
-            CREATE TABLE [dbo].[Students] (
-                [IDStudent]           INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                [FullName]            NVARCHAR(200)  NOT NULL,
-                [Gender]              INT            NOT NULL DEFAULT 1,
-                [Birthday]            DATETIME       NULL,
-                [Nationality]         NVARCHAR(10)   NULL,
-                [Passport]            NVARCHAR(50)   NULL,
-                [Address]             NVARCHAR(500)  NULL,
-                [SchoolName]          NVARCHAR(500)  NULL,
-                [Major]               NVARCHAR(200)  NULL,
-                [StudentCode]         NVARCHAR(50)   NULL,
-                [EducationLevel]      INT            NOT NULL DEFAULT 0,
-                [EnrollmentDate]      DATETIME       NULL,
-                [ExpectedGraduation]  DATETIME       NULL,
-                [VisaNumber]          NVARCHAR(100)  NULL,
-                [VisaExpiry]          DATETIME       NULL,
-                [TemporaryStay]       DATETIME       NULL,
-                [ScholarshipType]     INT            NOT NULL DEFAULT 0,
-                [Status]              INT            NOT NULL DEFAULT 0,
-                [Note]                NVARCHAR(MAX)  NULL,
-                [IDUser]              INT            NOT NULL DEFAULT 1,
-                [DateCreated]         DATETIME       NULL DEFAULT GETDATE(),
-                [Hidden_flag]         INT            NOT NULL DEFAULT 0
-            )",
-        ["ArchivedEmployees"] = @"
-            CREATE TABLE [dbo].[ArchivedEmployees] (
-                [Id]                          BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                [OriginalId]                  INT            NOT NULL,
-                [StaffName]                   NVARCHAR(MAX)  NOT NULL,
-                [Gender]                      INT            NOT NULL DEFAULT 1,
-                [Birthday]                    DATETIME       NULL,
-                [Nationality]                 NVARCHAR(MAX)  NULL,
-                [Passport]                    NVARCHAR(MAX)  NULL,
-                [Address]                     NVARCHAR(MAX)  NULL,
-                [IDCareer]                    INT            NULL,
-                [WorkPermit]                  INT            NOT NULL DEFAULT 0,
-                [WorkPermitNumber]            NVARCHAR(MAX)  NULL,
-                [VisaNumber]                  NVARCHAR(MAX)  NULL,
-                [TemporaryStay]               DATETIME       NULL,
-                [Note]                        NVARCHAR(MAX)  NULL,
-                [SettlementResults]           INT            NOT NULL DEFAULT 0,
-                [SettlementResultsString]     NVARCHAR(MAX)  NULL,
-                [IDUser]                      INT            NOT NULL DEFAULT 1,
-                [IDCompany]                   INT            NOT NULL DEFAULT 0,
-                [DateCreated]                 DATETIME       NULL,
-                [CardCreationDate]            DATETIME       NULL,
-                [WorkingStatus]               INT            NOT NULL DEFAULT 0,
-                [DateOfJoin]                  DATETIME       NULL,
-                [DateOfLeave]                 DATETIME       NULL,
-                [FamilyVisit]                 INT            NOT NULL DEFAULT 0,
-                [FamilyVisitRelativeName]     NVARCHAR(200)  NULL,
-                [FamilyVisitRelationship]     NVARCHAR(100)  NULL,
-                [FamilyVisitRelativeIdCard]   NVARCHAR(50)   NULL,
-                [FamilyVisitStartDate]        DATETIME       NULL,
-                [FamilyVisitEndDate]          DATETIME       NULL,
-                [FamilyVisitNote]             NVARCHAR(500)  NULL,
-                [CompanyName]                 NVARCHAR(MAX)  NULL,
-                [CareerName]                  NVARCHAR(MAX)  NULL,
-                [ArchiveReason]               NVARCHAR(50)   NOT NULL DEFAULT '',
-                [ArchivedBy]                  NVARCHAR(100)  NULL,
-                [ArchivedAt]                  DATETIME       NOT NULL DEFAULT GETDATE()
-            )"
-    };
-
-    foreach (var (table, createSql) in tablesToCheck)
-    {
-        try
-        {
-            var exists = await db.Database.ExecuteSqlRawAsync(
-                $"IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '{table}') BEGIN {createSql} END");
-            Console.WriteLine($"  ✅ Bảng {table}: OK");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"  ⚠️ Bảng {table}: {ex.Message}");
-        }
-    }
-
-    try
-    {
-        await db.Database.ExecuteSqlRawAsync(@"
-            IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Employees') AND name = 'FamilyVisit')
-            BEGIN
-                ALTER TABLE [dbo].[Employees] ADD
-                    [FamilyVisit]               INT           NOT NULL DEFAULT 0,
-                    [FamilyVisitRelativeName]   NVARCHAR(200) NULL,
-                    [FamilyVisitRelationship]   NVARCHAR(100) NULL,
-                    [FamilyVisitRelativeIdCard] NVARCHAR(50)  NULL,
-                    [FamilyVisitStartDate]      DATETIME      NULL,
-                    [FamilyVisitEndDate]        DATETIME      NULL,
-                    [FamilyVisitNote]           NVARCHAR(500) NULL
-            END");
-        Console.WriteLine("  ✅ Cột FamilyVisit: OK");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"  ⚠️ Cột FamilyVisit: {ex.Message}");
-    }
-
-    // Thêm cột RegistrationProfileIndex vào Companies nếu chưa có
-    try
-    {
-        await db.Database.ExecuteSqlRawAsync(@"
-            IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Companies') AND name = 'RegistrationProfileIndex')
-            BEGIN
-                ALTER TABLE [dbo].[Companies] ADD [RegistrationProfileIndex] INT NOT NULL DEFAULT 0
-            END");
-        Console.WriteLine("  ✅ Cột RegistrationProfileIndex: OK");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"  ⚠️ Cột RegistrationProfileIndex: {ex.Message}");
-    }
-}
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-}
-
+app.UseForwardedHeaders();
+if (!app.Environment.IsDevelopment()) app.UseExceptionHandler("/Error", createScopeForErrors: true);
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapPost("/auth/login", async (HttpContext context, AuthService authService) =>
+{
+    var form = await context.Request.ReadFormAsync(context.RequestAborted);
+    var principal = await authService.AuthenticateWebAsync(form["username"].ToString(), form["password"].ToString(),
+        context.Connection.RemoteIpAddress?.ToString(), context.RequestAborted);
+    if (principal is null) return Results.LocalRedirect("/login?loginError=1");
+    await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+        new AuthenticationProperties { IsPersistent = false });
+    return Results.LocalRedirect("/");
+}).AllowAnonymous();
 
+app.MapPost("/auth/logout", async (HttpContext context) =>
+{
+    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Results.LocalRedirect("/");
+}).RequireAuthorization();
+
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.Run();
+
+public partial class Program;

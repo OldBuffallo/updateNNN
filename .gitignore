@@ -51,6 +51,8 @@ deploy-package/
 
 # === SQLite database (auto-generated) ===
 *.db
+*.db-shm
+*.db-wal
 
 # === Build output packages (quá lớn) ===
 build-output/
@@ -64,3 +66,9 @@ deploy/SQLEXPRWT_x64_2014/
 
 # === Tách credentials scripts (chứa thông tin nhạy cảm) ===
 create-*.ps1
+
+# === AI memory bank (workspace artifact, not project code) ===
+memory-bank/
+
+# === Debug/deployment logs ===
+paramiko_debug.log

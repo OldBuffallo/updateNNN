@@ -1,0 +1,363 @@
+@page "/statistics"
+@using IRM.Data.Models
+@inject IStatisticsService StatisticsService
+@inject IStatisticsExportService Exporter
+@inject CatalogService Catalog
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+
+<PageTitle>Thống kê địa bàn & lịch sử - IRM v0.1.0</PageTitle>
+
+<div class="section-header">
+    <div class="d-flex align-center justify-space-between flex-wrap gap-2">
+        <div>
+            <h3>📊 Thống kê Lịch sử & 54 Địa bàn</h3>
+            <span class="section-meta">
+                Hệ thống truy vấn theo mốc thời gian (As-Of) · Tổng người tính duy nhất theo ForeignPersonId
+            </span>
+        </div>
+        <div class="d-flex align-center gap-2">
+            <AuthorizeView Roles="ADMIN,REPORTER">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.FileDownload"
+                           OnClick="Export"
+                           Disabled="_exporting">
+                    @if (_exporting)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" />
+                        <text>Đang xuất...</text>
+                    }
+                    else
+                    {
+                        <text>Xuất Excel báo cáo</text>
+                    }
+                </MudButton>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+<MudAlert Severity="Severity.Info" Variant="Variant.Text" Class="mb-4" Style="background: rgba(37, 99, 235, 0.06); border-radius: 10px;">
+    <strong>ℹ️ Ghi chú:</strong> Dữ liệu từ thời điểm baseline v0.1.0 được cam kết độ chính xác theo dòng thời gian (Effective Dating).
+</MudAlert>
+
+<!-- ════════════ FILTER TOOLBAR ════════════ -->
+<MudPaper Class="pa-4 mb-4 page-filter-card" Elevation="0">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="4">
+            <MudSelect T="int?" @bind-Value="_filter.AdministrativeUnitId" Label="Chọn Xã/phường/đặc khu" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                @foreach (var unit in _units)
+                {
+                    <MudSelectItem T="int?" Value="unit.Id">@unit.Name (@unit.TypeCode)</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudDatePicker @bind-Date="_asOf" Label="Trạng thái tại ngày (AsOfDate)" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudSelect T="string" @bind-Value="_filter.StayPurposeCode" Label="Diện cư trú" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                <MudSelectItem Value="@StayPurposeCodes.Work">Lao động</MudSelectItem>
+                <MudSelectItem Value="@StayPurposeCodes.FamilyVisit">Thăm thân</MudSelectItem>
+                <MudSelectItem Value="@StayPurposeCodes.Study">Du học</MudSelectItem>
+                <MudSelectItem Value="@StayPurposeCodes.Tourism">Du lịch</MudSelectItem>
+                <MudSelectItem Value="@StayPurposeCodes.Other">Khác</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="2" Class="d-flex align-center">
+            <MudButton FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" OnClick="LoadTerritory">
+                Thống kê
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<!-- ════════════ TERRITORY RESULT CARDS ════════════ -->
+@if (_territory is not null)
+{
+    <div class="territory-header-badge mb-3">
+        <MudIcon Icon="@Icons.Material.Filled.LocationOn" Color="Color.Primary" Class="mr-2" />
+        <span class="font-weight-bold">@_territory.AdministrativeUnitName</span>
+        <span class="text-muted ml-2">· Trạng thái tại ngày @_filter.AsOfDate?.ToString("dd/MM/yyyy")</span>
+    </div>
+
+    <MudGrid Class="mb-4">
+        <MudItem xs="6" sm="4" md="2">
+            <div class="stat-mini-card stat-blue">
+                <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Small" /></div>
+                <div class="stat-mini-data">
+                    <span class="stat-mini-value">@_territory.TotalForeigners</span>
+                    <span class="stat-mini-label">Tổng NNN</span>
+                </div>
+            </div>
+        </MudItem>
+
+        @foreach (var item in _territory.PeopleByPurpose)
+        {
+            var (label, colorClass) = GetPurposeStatMeta(item.Key);
+            <MudItem xs="6" sm="4" md="2">
+                <div class="stat-mini-card @colorClass">
+                    <div class="stat-mini-icon"><MudIcon Icon="@GetPurposeIcon(item.Key)" Size="Size.Small" /></div>
+                    <div class="stat-mini-data">
+                        <span class="stat-mini-value">@item.Value</span>
+                        <span class="stat-mini-label">@label</span>
+                    </div>
+                </div>
+            </MudItem>
+        }
+
+        <MudItem xs="6" sm="4" md="2">
+            <div class="stat-mini-card stat-amber">
+                <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" /></div>
+                <div class="stat-mini-data">
+                    <span class="stat-mini-value">@_territory.CompanyCount</span>
+                    <span class="stat-mini-label">Doanh nghiệp</span>
+                </div>
+            </div>
+        </MudItem>
+
+        <MudItem xs="6" sm="4" md="2">
+            <div class="stat-mini-card stat-teal">
+                <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Hotel" Size="Size.Small" /></div>
+                <div class="stat-mini-data">
+                    <span class="stat-mini-value">@_territory.AccommodationCount</span>
+                    <span class="stat-mini-label">CSLT</span>
+                </div>
+            </div>
+        </MudItem>
+    </MudGrid>
+
+    <MudTabs Elevation="0" Rounded="true" Class="irm-tabs mb-5">
+        <MudTabPanel Text="Doanh nghiệp tại địa bàn" Icon="@Icons.Material.Filled.Business">
+            <MudDataGrid T="CompanySummary" Items="_territory.Companies" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+                <Columns>
+                    <PropertyColumn Property="x => x.CompanyName" Title="Tên doanh nghiệp" />
+                    <PropertyColumn Property="x => x.OwnershipTypeCode" Title="Loại hình" />
+                    <TemplateColumn Title="Số lao động NN đang làm việc">
+                        <CellTemplate>
+                            <span class="font-weight-bold text-primary">@context.Item.CurrentWorkerCount người</span>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        </MudTabPanel>
+
+        <MudTabPanel Text="Cơ sở lưu trú tại địa bàn" Icon="@Icons.Material.Filled.Hotel">
+            <MudDataGrid T="AccommodationSummary" Items="_territory.Accommodations" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+                <Columns>
+                    <PropertyColumn Property="x => x.Name" Title="Tên cơ sở lưu trú" />
+                    <PropertyColumn Property="x => x.TypeCode" Title="Loại hình" />
+                    <TemplateColumn Title="Số người đang ở">
+                        <CellTemplate>
+                            <span class="font-weight-bold text-teal">@context.Item.CurrentResidentCount người</span>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Property="x => x.Companies" Title="Doanh nghiệp thuê" />
+                </Columns>
+            </MudDataGrid>
+        </MudTabPanel>
+    </MudTabs>
+}
+
+<!-- ════════════ MULTI-VIEW SECTION: TỔNG QUAN, ĐỊNH DANH, KHU KINH TẾ ════════════ -->
+<div class="d-flex align-center justify-space-between flex-wrap gap-2 mb-3 mt-6">
+    <MudText Typo="Typo.subtitle1" Class="font-weight-bold">
+        📊 Chuyên đề phân tích mở rộng
+    </MudText>
+    <div class="d-flex align-center gap-2">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Map" OnClick="LoadOverview">
+            Tổng quan 54 địa bàn
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Fingerprint" OnClick="LoadDocuments">
+            Định danh & Giấy tờ
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Factory" OnClick="LoadZones">
+            Khu & Cụm kinh tế
+        </MudButton>
+    </div>
+</div>
+
+@if (_documents is not null)
+{
+    <MudPaper Class="pa-4 mb-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
+        <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+            🪪 Báo cáo Tỷ lệ Cấp số định danh điện tử & Giấy tờ
+        </MudText>
+        <MudGrid Class="mb-3">
+            <MudItem xs="12" sm="6">
+                <div class="eid-summary-card bg-green-soft pa-3 d-flex align-center justify-space-between" style="border-radius: 10px;">
+                    <div>
+                        <div class="font-weight-bold text-success">ĐÃ CẤP ĐỊNH DANH ĐIỆN TỬ</div>
+                        <div class="text-caption text-muted">Có mã định danh hoạt động</div>
+                    </div>
+                    <span class="font-weight-bold" style="font-size: 24px; color: #059669;">@_documents.WithElectronicIdentity</span>
+                </div>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <div class="eid-summary-card bg-amber-soft pa-3 d-flex align-center justify-space-between" style="border-radius: 10px;">
+                    <div>
+                        <div class="font-weight-bold text-warning">CHƯA CẤP ĐỊNH DANH ĐIỆN TỬ</div>
+                        <div class="text-caption text-muted">Cần rà soát bổ sung định danh</div>
+                    </div>
+                    <span class="font-weight-bold" style="font-size: 24px; color: #d97706;">@_documents.WithoutElectronicIdentity</span>
+                </div>
+            </MudItem>
+        </MudGrid>
+
+        <MudText Typo="Typo.caption" Class="text-muted font-weight-bold mb-2">PHÂN LOẠI GIẤY TỜ THEO LOẠI:</MudText>
+        <div class="d-flex flex-wrap gap-2">
+            @foreach (var item in _documents.DocumentsByType)
+            {
+                <span class="doc-type-pill">
+                    <span class="doc-type-name">@item.Key:</span>
+                    <span class="doc-type-val">@item.Value</span>
+                </span>
+            }
+        </div>
+    </MudPaper>
+}
+
+@if (_overview.Count > 0)
+{
+    <MudPaper Class="pa-4 mb-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
+        <div class="d-flex align-center justify-space-between mb-3">
+            <MudText Typo="Typo.subtitle2" Class="font-weight-bold">
+                🗺️ Tổng quan thống kê 54 xã / phường / đặc khu (@_overview.Count đơn vị)
+            </MudText>
+        </div>
+        <MudDataGrid T="TerritoryOverview" Items="_overview" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+            <Columns>
+                <PropertyColumn Property="x => x.Code" Title="Mã địa bàn" />
+                <PropertyColumn Property="x => x.Name" Title="Tên xã / phường / thị trấn" />
+                <PropertyColumn Property="x => x.TypeCode" Title="Loại đơn vị" />
+                <TemplateColumn Title="Tổng người nước ngoài">
+                    <CellTemplate>
+                        <span class="font-weight-bold @(context.Item.TotalForeigners > 0 ? "text-primary" : "text-muted")">
+                            @context.Item.TotalForeigners người
+                        </span>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </MudPaper>
+}
+
+@if (_zones.Count > 0)
+{
+    <MudPaper Class="pa-4 mb-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
+        <div class="d-flex align-center justify-space-between mb-3">
+            <MudText Typo="Typo.subtitle2" Class="font-weight-bold">
+                🏭 Thống kê theo Khu công nghiệp & Khu kinh tế (@_zones.Count khu)
+            </MudText>
+        </div>
+        <MudDataGrid T="ZoneStatistics" Items="_zones" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+            <Columns>
+                <PropertyColumn Property="x => x.ZoneName" Title="Tên khu / cụm kinh tế" />
+                <PropertyColumn Property="x => x.TypeCode" Title="Loại hình" />
+                <PropertyColumn Property="x => x.CompanyCount" Title="Số doanh nghiệp" />
+                <TemplateColumn Title="Số người nước ngoài">
+                    <CellTemplate>
+                        <span class="font-weight-bold text-primary">@context.Item.ForeignPersonCount người</span>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </MudPaper>
+}
+
+@code {
+    private List<AdministrativeUnit> _units = new();
+    private TemporalReportFilter _filter = new();
+    private DateTime? _asOf = DateTime.Today;
+    private TerritoryStatistics? _territory;
+    private DocumentIdentityStatistics? _documents;
+    private List<TerritoryOverview> _overview = new();
+    private List<ZoneStatistics> _zones = new();
+    private bool _exporting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _units = await Catalog.GetAdministrativeUnitsAsync();
+    }
+
+    private void Prepare()
+    {
+        _filter.AsOfDate = (_asOf ?? DateTime.Today).Date;
+        _filter.From = null;
+        _filter.To = null;
+    }
+
+    private async Task LoadTerritory()
+    {
+        try
+        {
+            Prepare();
+            _territory = await StatisticsService.GetTerritoryAsync(_filter);
+            Snackbar.Add($"Đã tải dữ liệu thống kê địa bàn {_territory?.AdministrativeUnitName}.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task LoadDocuments()
+    {
+        Prepare();
+        _documents = await StatisticsService.GetDocumentIdentityStatisticsAsync(_filter);
+    }
+
+    private async Task LoadOverview()
+    {
+        Prepare();
+        _overview = (await StatisticsService.GetTerritoryOverviewAsync(_filter)).ToList();
+    }
+
+    private async Task LoadZones()
+    {
+        Prepare();
+        _zones = (await StatisticsService.GetZoneStatisticsAsync(_filter)).ToList();
+    }
+
+    private async Task Export()
+    {
+        _exporting = true;
+        try
+        {
+            Prepare();
+            var bytes = await Exporter.ExportTerritoryAsync(_filter);
+            await JS.InvokeVoidAsync("irmInterop.downloadFile",
+                $"IRM-thong-ke-{DateTime.Now:yyyyMMddHHmm}.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                Convert.ToBase64String(bytes));
+            Snackbar.Add("Đã xuất file báo cáo Excel thành công.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi xuất file: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _exporting = false;
+        }
+    }
+
+    private static (string Label, string ColorClass) GetPurposeStatMeta(string code) => code switch
+    {
+        StayPurposeCodes.Work => ("Lao động", "stat-blue"),
+        StayPurposeCodes.FamilyVisit => ("Thăm thân", "stat-purple"),
+        StayPurposeCodes.Study => ("Du học", "stat-cyan"),
+        StayPurposeCodes.Tourism => ("Du lịch", "stat-amber"),
+        _ => ("Khác", "stat-teal")
+    };
+
+    private static string GetPurposeIcon(string code) => code switch
+    {
+        StayPurposeCodes.Work => Icons.Material.Filled.Engineering,
+        StayPurposeCodes.FamilyVisit => Icons.Material.Filled.FamilyRestroom,
+        StayPurposeCodes.Study => Icons.Material.Filled.School,
+        StayPurposeCodes.Tourism => Icons.Material.Filled.FlightTakeoff,
+        _ => Icons.Material.Filled.Category
+    };
+}

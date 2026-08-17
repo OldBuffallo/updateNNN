@@ -176,10 +176,15 @@ namespace ReportManager.ViewModels
                     DateTime today = DateTime.Now;
                     con.Open();
                     SqlCommand comm;
-                    string insertSQL = "insert into Attach values(" + AddAttach.IDCompany + ", " + AddAttach.Type + ", N'"
-                        + MethodHandler.convertStringOwned(AddAttach.Name) + "', N'"
-                        + MethodHandler.convertStringOwned(AddAttach.Folder) + "', '" + today.ToString("yyyy-MM-dd HH:mm:ss") + "', 0, null, null)";
+                    string insertSQL = @"INSERT INTO Attach
+                        (IDCompany, Type, Name, Folder, DateCreated, Delete_flag, DateModified, DateDelete)
+                        VALUES (@IDCompany, @Type, @Name, @Folder, @DateCreated, 0, NULL, NULL)";
                     comm = new SqlCommand(insertSQL, con);
+                    comm.Parameters.AddWithValue("@IDCompany", AddAttach.IDCompany);
+                    comm.Parameters.AddWithValue("@Type", AddAttach.Type);
+                    comm.Parameters.AddWithValue("@Name", AddAttach.Name ?? "");
+                    comm.Parameters.AddWithValue("@Folder", AddAttach.Folder ?? "");
+                    comm.Parameters.AddWithValue("@DateCreated", today);
                     comm.ExecuteNonQuery();
                     BtnExitCommand.Execute(true);
                 }

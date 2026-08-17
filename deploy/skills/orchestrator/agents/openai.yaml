@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrator"
+  short_description: "Route agentic SDLC tasks, gates, blockers, and handoffs."
+  default_prompt: "Read the project state, classify the request, update the queue and gates, and hand off to the right next agent."

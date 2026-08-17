@@ -99,8 +99,9 @@ namespace ReportManager.ViewModels
                     }
                     else
                     {
-                        string insertSQL = "insert into Wards values(N'" + MethodHandler.convertStringOwned(NewWard.WardName) + "', 0)";
+                        string insertSQL = "INSERT INTO Wards (WardName, Delete_flag) VALUES (@WardName, 0)";
                         comm = new SqlCommand(insertSQL, con);
+                        comm.Parameters.AddWithValue("@WardName", NewWard.WardName);
                     }
                     comm.ExecuteNonQuery();
                     BtnExitCommand.Execute(true);

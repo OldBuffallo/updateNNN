@@ -636,18 +636,37 @@ namespace ReportManager.ViewModels
                     con.Open();
                     SqlCommand comm;
                     string addressFull = NewEmployee.Address + ", " + SelectWard;
-                    string insertSQL = "insert into Employees values(N'" + MethodHandler.convertStringOwned(NewEmployee.StaffName) + "', " + NewEmployee.Gender + ", '" + MethodHandler.formatDatefromUsertoDatabase(NewEmployee.Birthday)
-                        + "', N'" + NewEmployee.Nationality.NationalityCode + "', N'" + NewEmployee.Passport + "', N'" + addressFull
-                        + "', " + NewEmployee.Career.IDCareer + ", " + NewEmployee.WorkPermit + ",N'"
-                        + (string.IsNullOrEmpty(NewEmployee.WorkPermitNumber) ? " " : NewEmployee.WorkPermitNumber) + "', N'" + NewEmployee.VisaNumber
-                        + "', '" + MethodHandler.formatDatefromUsertoDatabase(NewEmployee.TemporaryStay) + "'," + NewEmployee.SettlementResults + ", N'" + NewEmployee.SettlementResultsString
-                        + "', " + Constants.IdUser + ", " + Company.IDCompany + ", 0, N'"
-                        + (string.IsNullOrEmpty(NewEmployee.Note) ? " " : NewEmployee.Note)
-                        + "', '" + today.ToString("yyyy-MM-dd HH:mm:ss")
-                        + "', " + (string.IsNullOrWhiteSpace(cardCreationDate) ? "null" : "'" + MethodHandler.formatDatefromUsertoDatabase(cardCreationDate) + "'")
-                        + ", " + NewEmployee.WorkingStatus + ", "+ (string.IsNullOrWhiteSpace(NewEmployee.DateOfJoin) ? "null" : "'" + MethodHandler.formatDatefromUsertoDatabase(NewEmployee.DateOfJoin) + "'") 
-                        + ", "+ (string.IsNullOrWhiteSpace(NewEmployee.DateOfLeave) ? "null" : "'" + MethodHandler.formatDatefromUsertoDatabase(NewEmployee.DateOfLeave) + "'") + ")";
+                    string insertSQL = @"INSERT INTO Employees
+                        (StaffName, Gender, Birthday, Nationality, Passport, Address, IDCareer, WorkPermit,
+                         WorkPermitNumber, VisaNumber, TemporaryStay, SettlementResults, SettlementResultsString,
+                         IDUser, IDCompany, Hidden_flag, Note, DateCreated, CardCreationDate, WorkingStatus,
+                         DateOfJoin, DateOfLeave)
+                        VALUES (@StaffName, @Gender, @Birthday, @Nationality, @Passport, @Address, @IDCareer,
+                         @WorkPermit, @WorkPermitNumber, @VisaNumber, @TemporaryStay, @SettlementResults,
+                         @SettlementResultsString, @IDUser, @IDCompany, 0, @Note, @DateCreated,
+                         @CardCreationDate, @WorkingStatus, @DateOfJoin, @DateOfLeave)";
                     comm = new SqlCommand(insertSQL, con);
+                    comm.Parameters.AddWithValue("@StaffName", NewEmployee.StaffName);
+                    comm.Parameters.AddWithValue("@Gender", NewEmployee.Gender);
+                    comm.Parameters.AddWithValue("@Birthday", MethodHandler.formatDatefromUsertoDatabase(NewEmployee.Birthday));
+                    comm.Parameters.AddWithValue("@Nationality", NewEmployee.Nationality.NationalityCode);
+                    comm.Parameters.AddWithValue("@Passport", NewEmployee.Passport ?? "");
+                    comm.Parameters.AddWithValue("@Address", addressFull);
+                    comm.Parameters.AddWithValue("@IDCareer", NewEmployee.Career.IDCareer);
+                    comm.Parameters.AddWithValue("@WorkPermit", NewEmployee.WorkPermit);
+                    comm.Parameters.AddWithValue("@WorkPermitNumber", string.IsNullOrEmpty(NewEmployee.WorkPermitNumber) ? " " : NewEmployee.WorkPermitNumber);
+                    comm.Parameters.AddWithValue("@VisaNumber", NewEmployee.VisaNumber ?? "");
+                    comm.Parameters.AddWithValue("@TemporaryStay", MethodHandler.formatDatefromUsertoDatabase(NewEmployee.TemporaryStay));
+                    comm.Parameters.AddWithValue("@SettlementResults", NewEmployee.SettlementResults);
+                    comm.Parameters.AddWithValue("@SettlementResultsString", NewEmployee.SettlementResultsString ?? " ");
+                    comm.Parameters.AddWithValue("@IDUser", Constants.IdUser);
+                    comm.Parameters.AddWithValue("@IDCompany", Company.IDCompany);
+                    comm.Parameters.AddWithValue("@Note", string.IsNullOrEmpty(NewEmployee.Note) ? " " : NewEmployee.Note);
+                    comm.Parameters.AddWithValue("@DateCreated", today);
+                    comm.Parameters.AddWithValue("@CardCreationDate", string.IsNullOrWhiteSpace(cardCreationDate) ? (object)DBNull.Value : MethodHandler.formatDatefromUsertoDatabase(cardCreationDate));
+                    comm.Parameters.AddWithValue("@WorkingStatus", NewEmployee.WorkingStatus);
+                    comm.Parameters.AddWithValue("@DateOfJoin", string.IsNullOrWhiteSpace(NewEmployee.DateOfJoin) ? (object)DBNull.Value : MethodHandler.formatDatefromUsertoDatabase(NewEmployee.DateOfJoin));
+                    comm.Parameters.AddWithValue("@DateOfLeave", string.IsNullOrWhiteSpace(NewEmployee.DateOfLeave) ? (object)DBNull.Value : MethodHandler.formatDatefromUsertoDatabase(NewEmployee.DateOfLeave));
                     comm.ExecuteNonQuery();
                     if (_isEdit && checkConfirm)
                     {

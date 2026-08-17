@@ -1003,17 +1003,35 @@ namespace ReportManager.ViewModels
                     DateTime today = DateTime.Now;
                     con.Open();
                     SqlCommand comm;
-                    string insertSQL = "insert into Employees output INSERTED.IDEmployee values(N'" + MethodHandler.convertStringOwned(employee.StaffName) + "', " + employee.Gender + ", '" + MethodHandler.formatDatefromUsertoDatabase(employee.Birthday)
-                        + "', N'" + MethodHandler.convertStringOwned(employee.Nationality.NationalityCode) + "', N'" + MethodHandler.convertStringOwned(employee.Passport) + "', N'" + MethodHandler.convertStringOwned(employee.Address)
-                        + "', " + employee.Career.IDCareer + ", " + employee.WorkPermit + ",N'"
-                        + (string.IsNullOrEmpty(employee.WorkPermitNumber) ? " " : MethodHandler.convertStringOwned(employee.WorkPermitNumber)) + "', N'" + employee.VisaNumber
-                        + "', '" + MethodHandler.formatDatefromUsertoDatabase(employee.TemporaryStay) + "'," + employee.SettlementResults + ", N'"
-                        + (string.IsNullOrEmpty(employee.SettlementResultsString) ? " " : MethodHandler.convertStringOwned(employee.SettlementResultsString))
-                        + "', " + Constants.IdUser + ", " + _idCompany + ", 0, N'"
-                        + (string.IsNullOrEmpty(employee.Note) ? " " : MethodHandler.convertStringOwned(employee.Note)) + "', '"
-                        + today.ToString("yyyy-MM-dd HH:mm:ss") + "', "
-                        + (string.IsNullOrWhiteSpace(employee.CardCreationDate) ? "null" : "'" + MethodHandler.formatDatefromUsertoDatabase(employee.CardCreationDate) + "'") + ", 0, null, null)";
+                    string insertSQL = @"INSERT INTO Employees
+                        (StaffName, Gender, Birthday, Nationality, Passport, Address, IDCareer, WorkPermit,
+                         WorkPermitNumber, VisaNumber, TemporaryStay, SettlementResults, SettlementResultsString,
+                         IDUser, IDCompany, Hidden_flag, Note, DateCreated, CardCreationDate, WorkingStatus,
+                         DateOfJoin, DateOfLeave)
+                        OUTPUT INSERTED.IDEmployee
+                        VALUES (@StaffName, @Gender, @Birthday, @Nationality, @Passport, @Address, @IDCareer,
+                         @WorkPermit, @WorkPermitNumber, @VisaNumber, @TemporaryStay, @SettlementResults,
+                         @SettlementResultsString, @IDUser, @IDCompany, 0, @Note, @DateCreated,
+                         @CardCreationDate, 0, NULL, NULL)";
                     comm = new SqlCommand(insertSQL, con);
+                    comm.Parameters.AddWithValue("@StaffName", employee.StaffName);
+                    comm.Parameters.AddWithValue("@Gender", employee.Gender);
+                    comm.Parameters.AddWithValue("@Birthday", MethodHandler.formatDatefromUsertoDatabase(employee.Birthday));
+                    comm.Parameters.AddWithValue("@Nationality", employee.Nationality.NationalityCode);
+                    comm.Parameters.AddWithValue("@Passport", employee.Passport ?? "");
+                    comm.Parameters.AddWithValue("@Address", employee.Address ?? "");
+                    comm.Parameters.AddWithValue("@IDCareer", employee.Career.IDCareer);
+                    comm.Parameters.AddWithValue("@WorkPermit", employee.WorkPermit);
+                    comm.Parameters.AddWithValue("@WorkPermitNumber", string.IsNullOrEmpty(employee.WorkPermitNumber) ? " " : employee.WorkPermitNumber);
+                    comm.Parameters.AddWithValue("@VisaNumber", employee.VisaNumber ?? "");
+                    comm.Parameters.AddWithValue("@TemporaryStay", MethodHandler.formatDatefromUsertoDatabase(employee.TemporaryStay));
+                    comm.Parameters.AddWithValue("@SettlementResults", employee.SettlementResults);
+                    comm.Parameters.AddWithValue("@SettlementResultsString", string.IsNullOrEmpty(employee.SettlementResultsString) ? " " : employee.SettlementResultsString);
+                    comm.Parameters.AddWithValue("@IDUser", Constants.IdUser);
+                    comm.Parameters.AddWithValue("@IDCompany", _idCompany);
+                    comm.Parameters.AddWithValue("@Note", string.IsNullOrEmpty(employee.Note) ? " " : employee.Note);
+                    comm.Parameters.AddWithValue("@DateCreated", today);
+                    comm.Parameters.AddWithValue("@CardCreationDate", string.IsNullOrWhiteSpace(employee.CardCreationDate) ? (object)DBNull.Value : MethodHandler.formatDatefromUsertoDatabase(employee.CardCreationDate));
                     int idNewEmployeeCreated = (int)comm.ExecuteScalar();
                     if (isExist)
                     {

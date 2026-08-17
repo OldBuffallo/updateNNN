@@ -101,8 +101,9 @@ namespace ReportManager.ViewModels
                     }
                     else
                     {
-                        string insertSQL = "insert into Districts values(N'" + MethodHandler.convertStringOwned(NewDistrict.DisTrictName) + "', 0)";
+                        string insertSQL = "INSERT INTO Districts (DisTrictName, Delete_flag) VALUES (@DistrictName, 0)";
                         comm = new SqlCommand(insertSQL, con);
+                        comm.Parameters.AddWithValue("@DistrictName", NewDistrict.DisTrictName);
                     }
                     comm.ExecuteNonQuery();
                     BtnExitCommand.Execute(true);

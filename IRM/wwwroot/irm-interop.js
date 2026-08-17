@@ -265,5 +265,29 @@ window.irmInterop = {
                 chart.update();
             }
         });
+    },
+
+    // ── Global Shortcut Listener (Ctrl+K / Cmd+K) ──
+    _dotNetRef: null,
+    registerShortcutHandler: function (dotNetHelper) {
+        window.irmInterop._dotNetRef = dotNetHelper;
+    },
+    initGlobalShortcuts: function () {
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+                e.preventDefault();
+                if (window.irmInterop._dotNetRef) {
+                    window.irmInterop._dotNetRef.invokeMethodAsync('OpenSpotlight');
+                } else {
+                    var btn = document.getElementById('btnGlobalSpotlight');
+                    if (btn) btn.click();
+                }
+            }
+        });
     }
 };
+
+// Initialize shortcuts on load
+document.addEventListener('DOMContentLoaded', function () {
+    window.irmInterop.initGlobalShortcuts();
+});

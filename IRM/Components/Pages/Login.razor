@@ -1,0 +1,24 @@
+@page "/login"
+@attribute [AllowAnonymous]
+@layout IRM.Components.Layout.LoginLayout
+@inject NavigationManager Navigation
+
+<PageTitle>Đăng nhập - IRM v0.1.0</PageTitle>
+<div class="login-screen active-screen">
+    <div class="login-bg">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="logo-icon"><MudIcon Icon="@Icons.Material.Filled.FactCheck" Color="Color.Inherit" /></div>
+                <h1>Immigration Report Manager</h1>
+                <p class="login-subtitle">Quản lý người nước ngoài · v0.1.0</p>
+            </div>
+            <form method="post" action="/auth/login">
+                <div class="input-group"><label for="loginUser">Tài khoản</label><input type="text" id="loginUser" name="username" autocomplete="username" required /></div>
+                <div class="input-group"><label for="loginPass">Mật khẩu</label><input type="password" id="loginPass" name="password" autocomplete="current-password" required /></div>
+                @if (Navigation.Uri.Contains("loginError=1", StringComparison.Ordinal)) { <div style="color:#dc2626;margin-bottom:12px;text-align:center">Sai thông tin đăng nhập hoặc tài khoản tạm khóa.</div> }
+                <button type="submit" class="btn-login">Đăng nhập</button>
+            </form>
+            <div class="login-footer"><span class="secure-badge">Cookie bảo mật · RBAC phía máy chủ</span></div>
+        </div>
+    </div>
+</div>

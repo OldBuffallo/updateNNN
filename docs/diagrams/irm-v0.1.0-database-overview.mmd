@@ -1,0 +1,87 @@
+flowchart LR
+  subgraph LEGACY["Dữ liệu nghiệp vụ có trước v0.1.0"]
+    ACC[Accounts]
+    COM[Companies]
+    EMP[Employees]
+    STU[Students]
+    NAT[Nationality]
+    CAT[Fields / Careers / CareerGroups]
+    CONTACT[Investment / PhoneNumbers / Emails / Attach]
+  end
+
+  subgraph PERSON["Hồ sơ người nước ngoài v0.1.0"]
+    FP[ForeignPersons]
+    LINK[ForeignPersonSourceLinks]
+    STAY[StayCases]
+    FAMILY[FamilyVisitDetails]
+    RES[ResidencePeriods]
+    DOC[ImmigrationDocuments]
+    EID[ElectronicIdentities]
+  end
+
+  subgraph PLACE["Địa bàn / doanh nghiệp / lưu trú"]
+    AU[AdministrativeUnits]
+    PROFILE[CompanyProfiles]
+    SITE[CompanySites]
+    ZONE[EconomicZones]
+    MEMBER[SiteZoneMemberships]
+    ACM[AccommodationsV010]
+    AGREEMENT[CompanyAccommodationAgreements]
+    REP[CompanyRepresentatives]
+    LEGAL[CompanyLegalDocuments]
+    FILE[StoredFiles]
+  end
+
+  subgraph INSPECT["Kiểm tra"]
+    INS[InspectionsV010]
+    SUBJECT[InspectionSubjects]
+  end
+
+  subgraph PLATFORM["Bảo mật / đồng bộ / vận hành"]
+    CRED[WebCredentials]
+    ROLE[WebRoleAssignments]
+    EVENT[LegacyChangeEvents]
+    ISSUE[MigrationIssues]
+    AUDIT[AuditLogs]
+    VERSION[SchemaVersions]
+  end
+
+  ACC --> COM
+  COM --> EMP
+  NAT --> EMP
+  NAT --> STU
+  CAT --> EMP
+  COM --> CONTACT
+
+  EMP -. "SourceType + SourceId" .-> LINK
+  STU -. "SourceType + SourceId" .-> LINK
+  LINK --> FP
+  FP --> STAY --> FAMILY
+  FP --> RES
+  FP --> DOC
+  FP --> EID
+  NAT --> FP
+
+  COM --> PROFILE
+  COM --> SITE --> MEMBER --> ZONE
+  COM --> AGREEMENT --> ACM
+  COM --> REP
+  COM --> LEGAL --> FILE
+  AU --> SITE
+  AU --> ACM
+  AU --> RES
+  ACM --> RES
+  COM --> RES
+
+  AU --> INS
+  SITE --> INS
+  ACM --> INS
+  INS --> SUBJECT --> FP
+
+  ACC --> CRED
+  ACC --> ROLE
+  AU --> ROLE
+  EVENT -. "worker idempotent" .-> LINK
+  ISSUE -. "manual resolution" .-> LINK
+  ACC -. "username/entity" .-> AUDIT
+  VERSION -. "schema gate" .-> FP

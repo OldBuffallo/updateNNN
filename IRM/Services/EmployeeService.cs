@@ -10,7 +10,9 @@ namespace IRM.Services;
 public class EmployeeService
 {
     private readonly IrmDbContext _db;
+    private readonly IServiceAuthorizationGuard? _guard;
     public EmployeeService(IrmDbContext db) => _db = db;
+    public EmployeeService(IrmDbContext db, IServiceAuthorizationGuard guard) : this(db) => _guard = guard;
 
     public async Task<List<Employee>> GetAllActiveAsync()
     {
@@ -62,6 +64,7 @@ public class EmployeeService
 
     public async Task CreateAsync(Employee employee)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         employee.Hidden_flag = 0;
         employee.DateCreated = DateTime.Now;
         _db.Employees.Add(employee);
@@ -70,12 +73,14 @@ public class EmployeeService
 
     public async Task UpdateAsync(Employee employee)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         _db.Employees.Update(employee);
         await _db.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(int id)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         var emp = await _db.Employees.FindAsync(id);
         if (emp != null)
         {
@@ -116,6 +121,7 @@ public class EmployeeService
     /// </summary>
     public async Task<int> ArchiveExpiredTemporaryStayAsync(string? archivedBy = null)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         var expired = await _db.Employees
             .Include(e => e.Company)
             .Include(e => e.Career)
@@ -140,6 +146,7 @@ public class EmployeeService
     /// </summary>
     public async Task<int> ArchiveExpiredFamilyVisitAsync(string? archivedBy = null)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         var expired = await _db.Employees
             .Include(e => e.Company)
             .Include(e => e.Career)

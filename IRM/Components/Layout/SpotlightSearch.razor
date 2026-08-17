@@ -1,0 +1,369 @@
+@using IRM.Services
+@using IRM.Data.Models
+@inject NavigationManager Nav
+@inject SearchService SearchSvc
+@inject IForeignerRegistryService Registry
+@inject IJSRuntime JS
+
+<MudDialog @bind-Visible="IsOpen" Options="_dialogOptions" Class="spotlight-dialog">
+    <DialogContent>
+        <div class="spotlight-container">
+            <div class="spotlight-input-wrapper">
+                <MudIcon Icon="@Icons.Material.Filled.Search" Class="spotlight-search-icon" />
+                <input type="text"
+                       @ref="_inputRef"
+                       @bind="_query"
+                       @bind:event="oninput"
+                       @onkeyup="HandleKeyUp"
+                       placeholder="Tìm nhanh người nước ngoài, công ty, địa bàn hoặc trang chức năng... (↑↓ để chọn)"
+                       class="spotlight-native-input" />
+                @if (!string.IsNullOrEmpty(_query))
+                {
+                    <button class="spotlight-clear-btn" @onclick="ClearQuery">
+                        <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
+                    </button>
+                }
+                <span class="spotlight-badge">ESC để đóng</span>
+            </div>
+
+            <div class="spotlight-results">
+                @if (_loading)
+                {
+                    <div class="spotlight-loading">
+                        <MudProgressCircular Indeterminate="true" Size="Size.Small" Color="Color.Primary" />
+                        <span class="ml-2">Đang tìm kiếm...</span>
+                    </div>
+                }
+                else if (string.IsNullOrWhiteSpace(_query))
+                {
+                    @* Navigation shortcuts *@
+                    <div class="spotlight-section-title">TRUY CẬP NHANH</div>
+                    <div class="spotlight-items-list">
+                        @foreach (var (item, index) in _quickNavs.Select((v, i) => (v, i)))
+                        {
+                            <div class="spotlight-item @(index == _selectedIndex ? "selected" : "")"
+                                 @onclick="@(() => NavigateTo(item.Url))">
+                                <div class="spotlight-item-icon @item.ColorClass">
+                                    <MudIcon Icon="@item.Icon" Size="Size.Small" />
+                                </div>
+                                <div class="spotlight-item-content">
+                                    <span class="spotlight-item-title">@item.Title</span>
+                                    <span class="spotlight-item-desc">@item.Description</span>
+                                </div>
+                                <MudIcon Icon="@Icons.Material.Filled.ChevronRight" Size="Size.Small" Class="spotlight-item-arrow" />
+                            </div>
+                        }
+                    </div>
+
+                    <div class="spotlight-section-title mt-3">HÀNH ĐỘNG NHANH</div>
+                    <div class="spotlight-quick-actions">
+                        <button class="spotlight-action-pill" @onclick='() => NavigateTo("/foreign-persons")'>
+                            <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Small" />
+                            <span>Hồ sơ NNN</span>
+                        </button>
+                        <button class="spotlight-action-pill" @onclick='() => NavigateTo("/inspections")'>
+                            <MudIcon Icon="@Icons.Material.Filled.FactCheck" Size="Size.Small" />
+                            <span>Đợt kiểm tra</span>
+                        </button>
+                        <button class="spotlight-action-pill" @onclick='() => NavigateTo("/statistics")'>
+                            <MudIcon Icon="@Icons.Material.Filled.BarChart" Size="Size.Small" />
+                            <span>Thống kê địa bàn</span>
+                        </button>
+                        <button class="spotlight-action-pill" @onclick='() => NavigateTo("/reports")'>
+                            <MudIcon Icon="@Icons.Material.Filled.Assessment" Size="Size.Small" />
+                            <span>Báo cáo định kỳ</span>
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    @* Search results *@
+                    @if (_searchResults.Count == 0)
+                    {
+                        <div class="spotlight-empty">
+                            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-2" Style="opacity: 0.4;" />
+                            <div>Không tìm thấy kết quả nào cho "<strong>@_query</strong>"</div>
+                            <div class="spotlight-empty-hint">Thử tìm theo tên, số hộ chiếu, công ty, hoặc mã định danh.</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="spotlight-section-title">KẾT QUẢ (@_searchResults.Count)</div>
+                        <div class="spotlight-items-list">
+                            @foreach (var (res, index) in _searchResults.Select((v, i) => (v, i)))
+                            {
+                                <div class="spotlight-item @(index == _selectedIndex ? "selected" : "")"
+                                     @onclick="@(() => NavigateTo(res.Url))">
+                                    <div class="spotlight-item-icon @res.ColorClass">
+                                        <MudIcon Icon="@res.Icon" Size="Size.Small" />
+                                    </div>
+                                    <div class="spotlight-item-content">
+                                        <div class="d-flex align-center">
+                                            <span class="spotlight-item-title">@res.Title</span>
+                                            @if (!string.IsNullOrEmpty(res.Badge))
+                                            {
+                                                <span class="spotlight-tag @res.BadgeColorClass ml-2">@res.Badge</span>
+                                            }
+                                        </div>
+                                        <span class="spotlight-item-desc">@res.Subtitle</span>
+                                    </div>
+                                    <span class="spotlight-item-type">@res.Category</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+
+            <div class="spotlight-footer">
+                <div class="d-flex align-center gap-3">
+                    <span><kbd>↑</kbd><kbd>↓</kbd> để điều hướng</span>
+                    <span><kbd>↵</kbd> để chọn</span>
+                    <span><kbd>ESC</kbd> để đóng</span>
+                </div>
+                <span class="spotlight-footer-brand">IRM v0.1.0 Spotlight</span>
+            </div>
+        </div>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private ElementReference _inputRef;
+    private string _query = "";
+    private bool _loading;
+    private int _selectedIndex = 0;
+    private List<SpotlightResultItem> _searchResults = new();
+
+    private readonly DialogOptions _dialogOptions = new()
+    {
+        NoHeader = true,
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        BackdropClick = true
+    };
+
+    private record QuickNav(string Title, string Description, string Url, string Icon, string ColorClass);
+
+    private readonly List<QuickNav> _quickNavs = new()
+    {
+        new("Tổng quan (Dashboard)", "Xem các chỉ số KPI, biểu đồ và cảnh báo hạn visa", "/", Icons.Material.Filled.Dashboard, "bg-blue"),
+        new("Hồ sơ NNN hợp nhất", "Quản lý toàn diện người nước ngoài tại địa phương", "/foreign-persons", Icons.Material.Filled.Badge, "bg-indigo"),
+        new("Danh sách Nhân viên", "Quản lý lao động nước ngoài tại các doanh nghiệp", "/employees", Icons.Material.Filled.Groups, "bg-emerald"),
+        new("Hồ sơ Doanh nghiệp", "Quản lý công ty, địa bàn, FDI và tài liệu pháp nhân", "/company-profiles", Icons.Material.Filled.DomainVerification, "bg-amber"),
+        new("Người thăm thân", "Quản lý thân nhân của công dân VN và người gốc VN", "/family-visitors", Icons.Material.Filled.FamilyRestroom, "bg-purple"),
+        new("Cơ sở lưu trú", "Quản lý khách sạn, nhà trọ, KTX doanh nghiệp thuê", "/accommodations", Icons.Material.Filled.Hotel, "bg-teal"),
+        new("Kiểm tra NNN", "Quản lý đợt kiểm tra hiện trường và vi phạm", "/inspections", Icons.Material.Filled.FactCheck, "bg-rose"),
+        new("Thống kê lịch sử & địa bàn", "Tra cứu theo 54 xã/phường, khu kinh tế, định danh", "/statistics", Icons.Material.Filled.BarChart, "bg-cyan"),
+        new("Báo cáo định kỳ", "Xuất các biểu mẫu báo cáo cơ quan xuất nhập cảnh", "/reports", Icons.Material.Filled.Assessment, "bg-blue"),
+        new("Tìm kiếm toàn cục", "Tra cứu chi tiết trên toàn bộ cơ sở dữ liệu", "/search", Icons.Material.Filled.Search, "bg-slate")
+    };
+
+    public class SpotlightResultItem
+    {
+        public string Title { get; set; } = "";
+        public string Subtitle { get; set; } = "";
+        public string Category { get; set; } = "";
+        public string Url { get; set; } = "";
+        public string Icon { get; set; } = Icons.Material.Filled.Search;
+        public string ColorClass { get; set; } = "bg-blue";
+        public string? Badge { get; set; }
+        public string? BadgeColorClass { get; set; }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (IsOpen)
+        {
+            _query = "";
+            _searchResults.Clear();
+            _selectedIndex = 0;
+            StateHasChanged();
+        }
+    }
+
+    private void ClearQuery()
+    {
+        _query = "";
+        _searchResults.Clear();
+        _selectedIndex = 0;
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await CloseAsync();
+            return;
+        }
+
+        var maxItems = string.IsNullOrWhiteSpace(_query) ? _quickNavs.Count : _searchResults.Count;
+
+        if (e.Key == "ArrowDown")
+        {
+            if (maxItems > 0)
+            {
+                _selectedIndex = (_selectedIndex + 1) % maxItems;
+            }
+            return;
+        }
+        if (e.Key == "ArrowUp")
+        {
+            if (maxItems > 0)
+            {
+                _selectedIndex = (_selectedIndex - 1 + maxItems) % maxItems;
+            }
+            return;
+        }
+        if (e.Key == "Enter")
+        {
+            if (string.IsNullOrWhiteSpace(_query) && _selectedIndex >= 0 && _selectedIndex < _quickNavs.Count)
+            {
+                await NavigateTo(_quickNavs[_selectedIndex].Url);
+            }
+            else if (_searchResults.Count > 0 && _selectedIndex >= 0 && _selectedIndex < _searchResults.Count)
+            {
+                await NavigateTo(_searchResults[_selectedIndex].Url);
+            }
+            return;
+        }
+
+        await ExecuteSearchAsync();
+    }
+
+    private async Task ExecuteSearchAsync()
+    {
+        var text = _query.Trim();
+        if (text.Length < 2)
+        {
+            _searchResults.Clear();
+            _selectedIndex = 0;
+            return;
+        }
+
+        _loading = true;
+        StateHasChanged();
+
+        try
+        {
+            var results = new List<SpotlightResultItem>();
+
+            // Match pages
+            foreach (var nav in _quickNavs)
+            {
+                if (nav.Title.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+                    nav.Description.Contains(text, StringComparison.OrdinalIgnoreCase))
+                {
+                    results.Add(new SpotlightResultItem
+                    {
+                        Title = nav.Title,
+                        Subtitle = nav.Description,
+                        Category = "Chức năng",
+                        Url = nav.Url,
+                        Icon = nav.Icon,
+                        ColorClass = nav.ColorClass
+                    });
+                }
+            }
+
+            // Query DB via SearchService
+            var searchData = await SearchSvc.SearchAsync(text);
+
+            if (searchData.Employees.Count > 0)
+            {
+                foreach (var emp in searchData.Employees.Take(5))
+                {
+                    results.Add(new SpotlightResultItem
+                    {
+                        Title = emp.StaffName,
+                        Subtitle = $"Hộ chiếu: {emp.Passport ?? "N/A"} · Công ty: {emp.Company?.CompanyName ?? "N/A"} · {emp.GenderString}",
+                        Category = "Lao động",
+                        Url = $"/employees",
+                        Icon = Icons.Material.Filled.Person,
+                        ColorClass = "bg-emerald",
+                        Badge = emp.WorkPermitString,
+                        BadgeColorClass = "tag-success"
+                    });
+                }
+            }
+
+            // Query Foreign Persons
+            var foreigners = await Registry.SearchAsync(text, DateTime.Today);
+            if (foreigners.Count > 0)
+            {
+                foreach (var fp in foreigners.Take(4))
+                {
+                    results.Add(new SpotlightResultItem
+                    {
+                        Title = fp.FullName,
+                        Subtitle = $"HC: {fp.PassportNumber ?? "N/A"} · QT: {fp.NationalityCode ?? "N/A"}",
+                        Category = "Hồ sơ NNN",
+                        Url = "/foreign-persons",
+                        Icon = Icons.Material.Filled.Badge,
+                        ColorClass = "bg-indigo"
+                    });
+                }
+            }
+
+            if (searchData.Companies.Count > 0)
+            {
+                foreach (var comp in searchData.Companies.Take(4))
+                {
+                    results.Add(new SpotlightResultItem
+                    {
+                        Title = comp.CompanyName,
+                        Subtitle = $"Địa chỉ: {comp.Address ?? "N/A"} · Loại hình: {comp.TypeOfBusiniess ?? "Doanh nghiệp"}",
+                        Category = "Doanh nghiệp",
+                        Url = $"/company-profiles",
+                        Icon = Icons.Material.Filled.Business,
+                        ColorClass = "bg-amber",
+                        Badge = comp.Field?.FieldName,
+                        BadgeColorClass = "tag-info"
+                    });
+                }
+            }
+
+            if (searchData.Students.Count > 0)
+            {
+                foreach (var stu in searchData.Students.Take(3))
+                {
+                    results.Add(new SpotlightResultItem
+                    {
+                        Title = stu.FullName,
+                        Subtitle = $"Trường: {stu.SchoolName ?? "N/A"} · Ngành: {stu.Major ?? "N/A"}",
+                        Category = "Du học sinh",
+                        Url = $"/students",
+                        Icon = Icons.Material.Filled.School,
+                        ColorClass = "bg-cyan"
+                    });
+                }
+            }
+
+            _searchResults = results;
+            _selectedIndex = 0;
+        }
+        catch
+        {
+            // Silent fallback
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task NavigateTo(string url)
+    {
+        await CloseAsync();
+        Nav.NavigateTo(url);
+    }
+
+    private async Task CloseAsync()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+}

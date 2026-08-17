@@ -1,0 +1,14 @@
+services:
+  app:
+    image: irm:0.1.0
+    build:
+      context: .
+      dockerfile: Dockerfile.openship-prebuilt
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5050:5050"
+    volumes:
+      - irm-v010-data:/app/data
+
+volumes:
+  irm-v010-data:

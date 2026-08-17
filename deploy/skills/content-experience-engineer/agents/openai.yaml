@@ -1,0 +1,4 @@
+interface:
+  display_name: "Content Experience Engineer"
+  short_description: "Reuse approved content-generation patterns"
+  default_prompt: "Use $content-experience-engineer to turn approved content-generation experience into reusable presets and profiles."

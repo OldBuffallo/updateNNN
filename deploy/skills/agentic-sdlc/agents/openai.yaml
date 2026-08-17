@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agentic SDLC"
+  short_description: "Bootstrap and audit reusable agentic SDLC pipelines."
+  default_prompt: "Audit this repository and set up a reusable agentic SDLC pipeline with roles, gates, memory, and release guardrails."

@@ -8,7 +8,7 @@
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
 
-<PageTitle>Du học sinh - IRM v2.0</PageTitle>
+<PageTitle>Du học sinh - IRM v0.1.0</PageTitle>
 
 <div class="section-header">
     <h3>🎓 Danh sách Du học sinh</h3>
@@ -78,7 +78,7 @@
 
 @if (_students.Any())
 {
-    <MudDataGrid Items="@_students" T="Student" Filterable="true" Sortable="true" Dense="true" Hover="true" Striped="false" RowsPerPage="10">
+    <MudDataGrid Items="@_students" T="Student" Filterable="true" Dense="true" Hover="true" Striped="false" RowsPerPage="10">
         <Columns>
             <TemplateColumn Title="STT" Sortable="false" Filterable="false">
                 <CellTemplate><MudText Typo="Typo.body2">@(_students.IndexOf(context.Item) + 1)</MudText></CellTemplate>

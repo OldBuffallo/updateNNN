@@ -10,7 +10,9 @@ namespace IRM.Services;
 public class CompanyService
 {
     private readonly IrmDbContext _db;
+    private readonly IServiceAuthorizationGuard? _guard;
     public CompanyService(IrmDbContext db) => _db = db;
+    public CompanyService(IrmDbContext db, IServiceAuthorizationGuard guard) : this(db) => _guard = guard;
 
     public async Task<List<Company>> GetAllAsync(string? search = null, int? fieldId = null)
     {
@@ -55,6 +57,7 @@ public class CompanyService
 
     public async Task CreateAsync(Company company)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         company.Delete_flag = 0;
         company.UpdateDay = DateTime.Now;
         _db.Companies.Add(company);
@@ -63,6 +66,7 @@ public class CompanyService
 
     public async Task UpdateAsync(Company company)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         company.UpdateDay = DateTime.Now;
         _db.Companies.Update(company);
         await _db.SaveChangesAsync();
@@ -70,6 +74,7 @@ public class CompanyService
 
     public async Task DeleteAsync(int id)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         var company = await _db.Companies.FindAsync(id);
         if (company != null)
         {

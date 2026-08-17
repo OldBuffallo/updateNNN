@@ -630,13 +630,27 @@ namespace ReportManager.ViewModels
                     DateTime today = DateTime.Today;
                     con.Open();
                     SqlCommand comm;
-                    string insertSQL = "insert into Companies output INSERTED.IDCompany values (N'" + MethodHandler.convertStringOwned(AddComapany.CompanyName) + "', N'" + MethodHandler.convertStringOwned(AddComapany.TypeOfBusiniess) + "',"
-                        + " '" + AddComapany.Uptime.Trim() + "', N'" + AddComapany.Address.Trim() + ", " + SelectWard + "', " + SelectField.IDField + ", N'" + MethodHandler.convertStringOwned(AddComapany.LegalRepresentative) + "',"
-                        + " 0, 0, 0, 0, 0, N'" + MethodHandler.convertStringOwned(AddComapany.RegistrationProfile) + "', N' " + MethodHandler.convertStringOwned(AddComapany.Note) + "', '"
-                        + today.ToString("yyyy-MM-dd") + "', 0, N' "
-                        + (String.IsNullOrWhiteSpace(AddComapany.DescriptionOfActivities) ? "" : MethodHandler.convertStringOwned(AddComapany.DescriptionOfActivities))
-                        + "', " + Constants.IdUser.Trim() + ")";
+                    string insertSQL = @"INSERT INTO Companies
+                        (CompanyName, TypeOfBusiniess, Uptime, Address, IDField, LegalRepresentative,
+                         TotalAmount, AmountOfExemption, QuantityAvailable, QuantityNotYet,
+                         NumberOfPersonalities, RegistrationProfile, Note, UpdateDay, Delete_flag,
+                         DescriptionOfActivities, TrackerID)
+                        OUTPUT INSERTED.IDCompany
+                        VALUES (@CompanyName, @TypeOfBusiniess, @Uptime, @Address, @IDField,
+                         @LegalRepresentative, 0, 0, 0, 0, 0, @RegistrationProfile, @Note,
+                         @UpdateDay, 0, @DescriptionOfActivities, @TrackerID)";
                     comm = new SqlCommand(insertSQL, con);
+                    comm.Parameters.AddWithValue("@CompanyName", AddComapany.CompanyName);
+                    comm.Parameters.AddWithValue("@TypeOfBusiniess", AddComapany.TypeOfBusiniess ?? "");
+                    comm.Parameters.AddWithValue("@Uptime", AddComapany.Uptime.Trim());
+                    comm.Parameters.AddWithValue("@Address", AddComapany.Address.Trim() + ", " + SelectWard);
+                    comm.Parameters.AddWithValue("@IDField", SelectField.IDField);
+                    comm.Parameters.AddWithValue("@LegalRepresentative", AddComapany.LegalRepresentative ?? "");
+                    comm.Parameters.AddWithValue("@RegistrationProfile", AddComapany.RegistrationProfile ?? "");
+                    comm.Parameters.AddWithValue("@Note", AddComapany.Note ?? "");
+                    comm.Parameters.AddWithValue("@UpdateDay", today);
+                    comm.Parameters.AddWithValue("@DescriptionOfActivities", AddComapany.DescriptionOfActivities ?? "");
+                    comm.Parameters.AddWithValue("@TrackerID", Constants.IdUser.Trim());
                     idCompany = (int)comm.ExecuteScalar();
 
                     // insert investment

@@ -1,29 +1,20 @@
-# Giai đoạn 4 — Log Thay đổi theo Yêu cầu Khách hàng
+# Giai đoạn 4 — Changelog IRM v0.1.0
 
-> **Trạng thái:** 🔄 In Progress
+> **Trạng thái:** Development/test implementation complete; production approval pending.
 
-## Quy trình Change Request
+| CR | Yêu cầu | Trạng thái | Artifact chính |
+|---|---|---|---|
+| CR-010 | Hồ sơ thăm thân riêng và thân nhân NLĐ | Implemented | `ForeignPersons`, `StayCases`, `FamilyVisitDetails`, `/family-visitors` |
+| CR-011 | CSLT và doanh nghiệp thuê | Implemented | `AccommodationsV010`, agreements, residence history |
+| CR-012 | Kiểm tra hiện trường | Implemented | inspections + immutable snapshots + lookback |
+| CR-013 | KTCK 15 ngày | Deferred phase 2 | Blueprint only; no page in v0.1.0 |
+| CR-014 | Tra cứu lịch sử | Implemented from baseline | Temporal filter/as-of |
+| CR-015 | Giấy tờ và định danh | Implemented | Central profile, documents, identities, import Excel mở rộng, statistics |
+| CR-016 | Phân loại DN và khu vực | Implemented | Profiles/sites/zones/memberships |
+| CR-017 | Thống kê địa bàn | Implemented | 54 units, distinct person drill-down, export |
+| CR-018 | Pháp nhân DN | Implemented | representatives/legal documents/private files |
+| CR-019 | WPF compatibility | Implemented at SQL contract level | Parameterized explicit-column inserts + smoke SQL |
+| CR-019A | Bảo mật dịch vụ/export | Implemented | Cookie RBAC, service guards, account claim, formula neutralization, audit |
+| CR-020 | Production deployment | Not performed | Requires separate backup/restore approval |
 
-```
-Khách hàng yêu cầu
-        ↓
-Ghi vào bảng dưới đây (ngày, nội dung, độ ưu tiên)
-        ↓
-Tạo GitHub Issue → Tạo branch fix/cr-<số>-<mô-tả>
-        ↓
-Code → PR → Review → Merge vào main
-        ↓
-Demo lại cho khách hàng xác nhận
-```
-
-## Log Thay đổi
-
-| # | Ngày nhận | Yêu cầu | Độ ưu tiên | Người làm | Trạng thái |
-|---|---|---|---|---|---|
-| CR-001 | — | Thêm quản lý du học sinh (Students) | Cao | — | ✅ Done |
-| CR-002 | — | Thêm thông tin thăm thân (FamilyVisit) cho NLĐ | Cao | — | ✅ Done |
-| CR-003 | — | Thêm cột RegistrationProfileIndex cho Companies | Trung | — | ✅ Done |
-| CR-004 | — | Thêm chức năng lưu trữ NLĐ (Archive) | Trung | — | ✅ Done |
-| CR-005 | — | — | — | — | — |
-
-> **Hướng dẫn:** Khi nhận yêu cầu mới từ khách hàng, thêm 1 dòng vào bảng trên và tạo GitHub Issue tương ứng.
+Chi tiết verdict và evidence: [IRM-v0.1.0-implementation-report.md](IRM-v0.1.0-implementation-report.md).

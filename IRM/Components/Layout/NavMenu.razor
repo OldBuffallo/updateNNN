@@ -1,81 +1,173 @@
 @using Microsoft.AspNetCore.Components.Routing
 
-<MudNavMenu Class="irm-nav-menu">
-    <MudText Typo="Typo.overline" Class="nav-section-title">Tổng quan</MudText>
+<MudNavMenu Class="irm-nav-menu" Rounded="true" Margin="Margin.Dense" Color="Color.Primary">
+    <!-- ════════════ TỔNG QUAN ════════════ -->
+    <div class="nav-group-header">
+        <span class="nav-section-label">TỔNG QUAN</span>
+    </div>
+
     <MudNavLink Href="/"
                 Match="NavLinkMatch.All"
                 Icon="@Icons.Material.Filled.Dashboard"
                 Class="irm-nav-link"
                 ActiveClass="active"
                 OnClick='@(() => NotifyPageChanged("Dashboard"))'>
-        Dashboard
+        <span>Bảng điều khiển</span>
     </MudNavLink>
 
-    <MudText Typo="Typo.overline" Class="nav-section-title">Quản lý dữ liệu</MudText>
+    <!-- ════════════ QUẢN LÝ DỮ LIỆU ════════════ -->
+    <div class="nav-group-header">
+        <span class="nav-section-label">HỒ SƠ & DỮ LIỆU</span>
+    </div>
+
+    <MudNavLink Href="/foreign-persons"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Filled.Badge"
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Hồ sơ NNN hợp nhất"))'>
+        <div class="d-flex align-center justify-space-between w-100">
+            <span>Hồ sơ NNN hợp nhất</span>
+            <span class="nav-pill-badge badge-primary">Mới</span>
+        </div>
+    </MudNavLink>
+
+    <MudNavLink Href="/employees"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Filled.Groups"
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Nhân viên lao động"))'>
+        <span>Nhân viên lao động</span>
+    </MudNavLink>
+
     <MudNavLink Href="/companies"
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.Business"
                 Class="irm-nav-link"
                 ActiveClass="active"
                 OnClick='@(() => NotifyPageChanged("Quản lý Công ty"))'>
-        Công ty
+        <span>Doanh nghiệp</span>
     </MudNavLink>
-    <MudNavLink Href="/employees"
+
+    <MudNavLink Href="/company-profiles"
                 Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.Groups"
+                Icon="@Icons.Material.Filled.DomainVerification"
                 Class="irm-nav-link"
                 ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Quản lý Nhân viên"))'>
-        Nhân viên
+                OnClick='@(() => NotifyPageChanged("Hồ sơ doanh nghiệp"))'>
+        <div class="d-flex align-center justify-space-between w-100">
+            <span>Hồ sơ mở rộng</span>
+            <span class="nav-pill-badge badge-secondary">FDI/KKT</span>
+        </div>
     </MudNavLink>
+
     <MudNavLink Href="/students"
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.School"
                 Class="irm-nav-link"
                 ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Quản lý Du học sinh"))'>
-        Du học sinh
-    </MudNavLink>
-    <MudNavLink Href="/import"
-                Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.UploadFile"
-                Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Import Excel"))'>
-        <span>Import Excel</span>
-        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="nav-link-badge">Mới</MudChip>
+                OnClick='@(() => NotifyPageChanged("Du học sinh"))'>
+        <span>Du học sinh</span>
     </MudNavLink>
 
-    <MudText Typo="Typo.overline" Class="nav-section-title">Phân tích & báo cáo</MudText>
+    <MudNavLink Href="/family-visitors"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Filled.FamilyRestroom"
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Người thăm thân"))'>
+        <span>Người thăm thân</span>
+    </MudNavLink>
+
+    <MudNavLink Href="/accommodations"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Filled.Hotel"
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Cơ sở lưu trú"))'>
+        <span>Cơ sở lưu trú</span>
+    </MudNavLink>
+
+    <!-- ════════════ GIÁM SÁT & KIỂM TRA ════════════ -->
+    <div class="nav-group-header">
+        <span class="nav-section-label">GIÁM SÁT & KIỂM TRA</span>
+    </div>
+
+    <MudNavLink Href="/inspections"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Filled.FactCheck"
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Kiểm tra NNN"))'>
+        <div class="d-flex align-center justify-space-between w-100">
+            <span>Đợt kiểm tra NNN</span>
+            <span class="nav-pill-badge badge-warning">Hiện trường</span>
+        </div>
+    </MudNavLink>
+
+    <!-- ════════════ BÁO CÁO & THỐNG KÊ ════════════ -->
+    <div class="nav-group-header">
+        <span class="nav-section-label">BÁO CÁO & THỐNG KÊ</span>
+    </div>
+
     <MudNavLink Href="/search"
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.Search"
                 Class="irm-nav-link"
                 ActiveClass="active"
                 OnClick='@(() => NotifyPageChanged("Tìm kiếm"))'>
-        <span>Tìm kiếm</span>
-        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="nav-link-badge">Mới</MudChip>
+        <div class="d-flex align-center justify-space-between w-100">
+            <span>Tra cứu toàn cục</span>
+            <span class="nav-key-hint">Ctrl+K</span>
+        </div>
     </MudNavLink>
+
     <MudNavLink Href="/reports"
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Filled.Assessment"
                 Class="irm-nav-link"
                 ActiveClass="active"
                 OnClick='@(() => NotifyPageChanged("Báo cáo"))'>
-        <span>Báo cáo</span>
-        <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="nav-link-badge">Mới</MudChip>
+        <span>Báo cáo định kỳ</span>
     </MudNavLink>
 
-    <MudDivider Class="nav-divider" />
-
-    <MudNavLink Href="/admin"
+    <MudNavLink Href="/statistics"
                 Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.Settings"
+                Icon="@Icons.Material.Filled.BarChart"
                 Class="irm-nav-link"
                 ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Quản trị"))'>
-        Quản trị
+                OnClick='@(() => NotifyPageChanged("Thống kê"))'>
+        <div class="d-flex align-center justify-space-between w-100">
+            <span>Thống kê 54 địa bàn</span>
+            <span class="nav-pill-badge badge-cyan">v0.1.0</span>
+        </div>
     </MudNavLink>
+
+    <MudNavLink Href="/import"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Filled.UploadFile"
+                Class="irm-nav-link"
+                ActiveClass="active"
+                OnClick='@(() => NotifyPageChanged("Import Excel"))'>
+        <span>Nhập dữ liệu Excel</span>
+    </MudNavLink>
+
+    <!-- ════════════ HỆ THỐNG ════════════ -->
+    <AuthorizeView Roles="ADMIN" Context="adminCtx">
+        <div class="nav-group-header">
+            <span class="nav-section-label">HỆ THỐNG</span>
+        </div>
+
+        <MudNavLink Href="/admin"
+                    Match="NavLinkMatch.Prefix"
+                    Icon="@Icons.Material.Filled.AdminPanelSettings"
+                    Class="irm-nav-link"
+                    ActiveClass="active"
+                    OnClick='@(() => NotifyPageChanged("Quản trị"))'>
+            <span>Quản trị hệ thống</span>
+        </MudNavLink>
+    </AuthorizeView>
 </MudNavMenu>
 
 @code {

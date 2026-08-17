@@ -1,0 +1,464 @@
+@page "/accommodations"
+@using IRM.Data.Models
+@inject IAccommodationService Service
+@inject CatalogService Catalog
+@inject CompanyService Companies
+@inject ISnackbar Snackbar
+
+<PageTitle>Cơ sở lưu trú - IRM v0.1.0</PageTitle>
+
+<div class="section-header">
+    <div class="d-flex align-center justify-space-between flex-wrap gap-2">
+        <div>
+            <h3>🏠 Quản lý Cơ sở lưu trú</h3>
+            <span class="section-meta">
+                Quản lý các điểm lưu trú, nhà khách, KTX doanh nghiệp thuê cho người nước ngoài tạm trú
+            </span>
+        </div>
+        <div class="d-flex align-center gap-2">
+            <AuthorizeView Roles="ADMIN,DATA_EDITOR">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.AddBusiness"
+                           OnClick="OpenAdd">
+                    Thêm cơ sở lưu trú
+                </MudButton>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ STATS SUMMARY CARDS ════════════ -->
+<MudGrid Class="mb-4">
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-blue">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Hotel" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count</span>
+                <span class="stat-mini-label">Tổng cơ sở lưu trú</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-purple">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count(x => x.CompanyAgreements.Any(a => a.ValidFrom <= DateTime.Today && (!a.ValidTo.HasValue || a.ValidTo >= DateTime.Today)))</span>
+                <span class="stat-mini-label">Có DN đứng ra thuê</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-green">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.MeetingRoom" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Sum(x => x.Capacity ?? 0)</span>
+                <span class="stat-mini-label">Tổng sức chứa (người)</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-teal">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Sum(x => x.ResidencePeriods.Where(r => r.ValidFrom <= DateTime.Today && (!r.ValidTo.HasValue || r.ValidTo >= DateTime.Today)).Select(r => r.ForeignPersonId).Distinct().Count())</span>
+                <span class="stat-mini-label">Đang lưu trú thực tế</span>
+            </div>
+        </div>
+    </MudItem>
+</MudGrid>
+
+<!-- ════════════ FILTER TOOLBAR ════════════ -->
+<MudPaper Class="pa-4 mb-4 page-filter-card" Elevation="0">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="4">
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Tìm tên cơ sở, địa chỉ, người liên hệ..."
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Clearable="true"
+                          OnKeyUp="HandleSearchKeyUp" />
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudSelect T="int?" @bind-Value="_unitId" Label="Địa bàn xã/phường" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                @foreach (var unit in _units)
+                {
+                    <MudSelectItem T="int?" Value="unit.Id">@unit.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudSelect T="int?" @bind-Value="_companyId" Label="Doanh nghiệp thuê" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                @foreach (var company in _companies)
+                {
+                    <MudSelectItem T="int?" Value="company.IDCompany">@company.CompanyName</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="2" Class="d-flex align-center gap-1">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FilterAlt" OnClick="Load" FullWidth="true">
+                Lọc
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<!-- ════════════ DATA GRID ════════════ -->
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-3" />
+}
+else
+{
+    <MudDataGrid T="Accommodation"
+                 Items="_items"
+                 Dense="true"
+                 Hover="true"
+                 Striped="true"
+                 Class="irm-data-table"
+                 Elevation="0">
+        <Columns>
+            <TemplateColumn Title="Tên cơ sở lưu trú" SortBy="x => x.Name">
+                <CellTemplate>
+                    <div class="d-flex align-center">
+                        <div class="table-avatar mr-2 bg-teal-soft">
+                            <MudIcon Icon="@Icons.Material.Filled.Hotel" Size="Size.Small" Color="Color.Info" />
+                        </div>
+                        <div>
+                            <div class="font-weight-bold">@context.Item.Name</div>
+                            <div class="text-caption text-muted">@context.Item.AddressLine</div>
+                        </div>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Loại hình" SortBy="x => x.TypeCode">
+                <CellTemplate>
+                    @{
+                        var (label, colorClass) = GetTypeMeta(context.Item.TypeCode);
+                    }
+                    <span class="type-pill @colorClass">@label</span>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <PropertyColumn Property="x => x.AdministrativeUnit!.Name" Title="Địa bàn" />
+
+            <TemplateColumn Title="Doanh nghiệp đang thuê">
+                <CellTemplate>
+                    @{
+                        var activeAgreements = context.Item.CompanyAgreements
+                            .Where(x => x.ValidFrom <= DateTime.Today && (!x.ValidTo.HasValue || x.ValidTo >= DateTime.Today))
+                            .ToList();
+                    }
+                    @if (activeAgreements.Any())
+                    {
+                        <div class="d-flex flex-wrap gap-1">
+                            @foreach (var a in activeAgreements)
+                            {
+                                <span class="company-badge">
+                                    <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Class="mr-1" />
+                                    @(a.Company?.CompanyName ?? $"ID: {a.CompanyId}")
+                                </span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-muted">NNN tự thuê / Trống</span>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Sức chứa / Đang ở">
+                <CellTemplate>
+                    @{
+                        var currentCount = context.Item.ResidencePeriods
+                            .Where(x => x.ValidFrom <= DateTime.Today && (!x.ValidTo.HasValue || x.ValidTo >= DateTime.Today))
+                            .Select(x => x.ForeignPersonId)
+                            .Distinct()
+                            .Count();
+                        var capacity = context.Item.Capacity ?? 0;
+                    }
+                    <div class="d-flex align-center gap-1">
+                        <span class="resident-count font-weight-bold">@currentCount</span>
+                        <span class="text-muted">/ @(capacity > 0 ? capacity.ToString() : "—")</span>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Thao tác" CellStyle="text-align: right;">
+                <CellTemplate>
+                    <div class="d-flex align-center justify-end gap-1">
+                        <AuthorizeView Roles="ADMIN,DATA_EDITOR" Context="permissionContext">
+                            <MudTooltip Text="Sửa thông tin cơ sở">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                               Size="Size.Small"
+                                               OnClick="@(() => OpenEdit(context.Item))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Hợp đồng doanh nghiệp thuê">
+                                <MudIconButton Icon="@Icons.Material.Filled.Handshake"
+                                               Size="Size.Small"
+                                               Color="Color.Primary"
+                                               OnClick="@(() => OpenAgreement(context.Item))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Xóa cơ sở">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Size="Size.Small"
+                                               Color="Color.Error"
+                                               OnClick="@(() => Delete(context.Item.Id))" />
+                            </MudTooltip>
+                        </AuthorizeView>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+}
+
+<!-- ════════════ DIALOG: THÊM / SỬA CSLT ════════════ -->
+<MudDialog @bind-Visible="_dialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@(_edit.Id > 0 ? Icons.Material.Filled.Edit : Icons.Material.Filled.AddBusiness)" Color="Color.Primary" Class="mr-2" />
+            <span>@(_edit.Id > 0 ? "Cập nhật cơ sở lưu trú" : "Thêm mới cơ sở lưu trú")</span>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12" sm="8">
+                <MudTextField @bind-Value="_edit.Name" Label="Tên cơ sở lưu trú *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudSelect T="string" @bind-Value="_edit.TypeCode" Label="Loại hình" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@("COMPANY_GUESTHOUSE")">Nhà khách công ty</MudSelectItem>
+                    <MudSelectItem Value="@("SOCIAL_HOUSING")">Nhà ở xã hội</MudSelectItem>
+                    <MudSelectItem Value="@("RENTED_PROPERTY")">Nhà/căn hộ thuê</MudSelectItem>
+                    <MudSelectItem Value="@("OTHER")">Khác</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_edit.AddressLine" Label="Địa chỉ cụ thể *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect T="int?" @bind-Value="_edit.AdministrativeUnitId" Label="Địa bàn xã/phường" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var unit in _units)
+                    {
+                        <MudSelectItem T="int?" Value="unit.Id">@unit.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudNumericField T="int?" @bind-Value="_edit.Capacity" Label="Sức chứa tối đa (người)" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_edit.ContactName" Label="Người liên hệ / Chủ cơ sở" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_edit.ContactPhone" Label="Số điện thoại liên hệ" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _dialog = false)">Hủy</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save">Lưu cơ sở</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- ════════════ DIALOG: HỢP ĐỒNG DOANH NGHIỆP THUÊ ════════════ -->
+<MudDialog @bind-Visible="_agreementDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.Handshake" Color="Color.Primary" Class="mr-2" />
+            <span>Gán doanh nghiệp thuê cơ sở: @_selectedAccommodation?.Name</span>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudSelect T="int" @bind-Value="_agreement.CompanyId" Label="Chọn doanh nghiệp *" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var company in _companies)
+                    {
+                        <MudSelectItem Value="company.IDCompany">@company.CompanyName</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="_agreementValidFrom" Label="Ngày bắt đầu thuê *" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="_agreementValidTo" Label="Hạn đến ngày" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect T="string" @bind-Value="_agreement.ScopeCode" Label="Phạm vi thuê" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@("ENTIRE_PROPERTY")">Toàn bộ cơ sở</MudSelectItem>
+                    <MudSelectItem Value="@("ROOM_BLOCK")">Một phần / khối phòng</MudSelectItem>
+                    <MudSelectItem Value="@("OTHER")">Khác</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_agreement.UnitLabel" Label="Ký hiệu căn / phòng" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _agreementDialog = false)">Hủy</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveAgreement">Lưu hợp đồng</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<Accommodation> _items = new();
+    private List<AdministrativeUnit> _units = new();
+    private List<Company> _companies = new();
+    private string? _search;
+    private int? _unitId;
+    private int? _companyId;
+    private bool _loading;
+
+    // Edit dialog
+    private bool _dialog;
+    private Accommodation _edit = new();
+
+    // Agreement dialog
+    private bool _agreementDialog;
+    private Accommodation? _selectedAccommodation;
+    private CompanyAccommodationAgreement _agreement = new();
+    private DateTime? _agreementValidFrom = DateTime.Today;
+    private DateTime? _agreementValidTo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _units = await Catalog.GetAdministrativeUnitsAsync();
+        _companies = await Companies.GetAllAsync();
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        _loading = true;
+        try
+        {
+            _items = (await Service.SearchAsync(_search, _unitId, _companyId, DateTime.Today)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task HandleSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Load();
+        }
+    }
+
+    private (string Label, string ColorClass) GetTypeMeta(string code) => code switch
+    {
+        "COMPANY_GUESTHOUSE" => ("Nhà khách công ty", "type-purple"),
+        "SOCIAL_HOUSING" => ("Nhà ở xã hội", "type-blue"),
+        "RENTED_PROPERTY" => ("Nhà/Căn hộ thuê", "type-teal"),
+        _ => ("Khác", "type-gray")
+    };
+
+    private void OpenAdd()
+    {
+        _edit = new Accommodation { TypeCode = "COMPANY_GUESTHOUSE" };
+        _dialog = true;
+    }
+
+    private void OpenEdit(Accommodation item)
+    {
+        _edit = new Accommodation
+        {
+            Id = item.Id,
+            Name = item.Name,
+            TypeCode = item.TypeCode,
+            AddressLine = item.AddressLine,
+            AdministrativeUnitId = item.AdministrativeUnitId,
+            Capacity = item.Capacity,
+            ContactName = item.ContactName,
+            ContactPhone = item.ContactPhone
+        };
+        _dialog = true;
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(_edit.Name) || string.IsNullOrWhiteSpace(_edit.AddressLine))
+        {
+            Snackbar.Add("Vui lòng nhập tên và địa chỉ cơ sở lưu trú.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            await Service.SaveAsync(_edit);
+            _dialog = false;
+            await Load();
+            Snackbar.Add("Đã lưu thông tin cơ sở lưu trú.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private void OpenAgreement(Accommodation item)
+    {
+        _selectedAccommodation = item;
+        _agreement = new CompanyAccommodationAgreement
+        {
+            AccommodationId = item.Id,
+            ScopeCode = "ENTIRE_PROPERTY"
+        };
+        _agreementValidFrom = DateTime.Today;
+        _agreementValidTo = DateTime.Today.AddYears(1);
+        _agreementDialog = true;
+    }
+
+    private async Task SaveAgreement()
+    {
+        if (_agreement.CompanyId <= 0)
+        {
+            Snackbar.Add("Vui lòng chọn doanh nghiệp thuê.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            _agreement.ValidFrom = (_agreementValidFrom ?? DateTime.Today).Date;
+            _agreement.ValidTo = _agreementValidTo;
+            await Service.SaveAgreementAsync(_agreement);
+            _agreementDialog = false;
+            await Load();
+            Snackbar.Add("Đã lưu hợp đồng thuê cơ sở lưu trú.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        try
+        {
+            await Service.SoftDeleteAsync(id);
+            await Load();
+            Snackbar.Add("Đã xóa cơ sở lưu trú.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+}

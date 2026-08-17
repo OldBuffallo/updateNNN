@@ -10,7 +10,9 @@ namespace IRM.Services;
 public class StudentService
 {
     private readonly IrmDbContext _db;
+    private readonly IServiceAuthorizationGuard? _guard;
     public StudentService(IrmDbContext db) => _db = db;
+    public StudentService(IrmDbContext db, IServiceAuthorizationGuard guard) : this(db) => _guard = guard;
 
     public async Task<List<Student>> GetAllActiveAsync()
     {
@@ -61,6 +63,7 @@ public class StudentService
 
     public async Task CreateAsync(Student student)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         student.Hidden_flag = 0;
         student.DateCreated = DateTime.Now;
         _db.Students.Add(student);
@@ -69,12 +72,14 @@ public class StudentService
 
     public async Task UpdateAsync(Student student)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         _db.Students.Update(student);
         await _db.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(int id)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         var stu = await _db.Students.FindAsync(id);
         if (stu != null)
         {

@@ -8,15 +8,20 @@ namespace IRM.Services;
 public class ExportService
 {
     private readonly IDbContextFactory<IrmDbContext> _dbFactory;
+    private readonly AuditService? _audit;
+    private readonly IServiceAuthorizationGuard? _guard;
 
     public ExportService(IDbContextFactory<IrmDbContext> dbFactory)
     {
         _dbFactory = dbFactory;
     }
+    public ExportService(IDbContextFactory<IrmDbContext> dbFactory, AuditService audit, IServiceAuthorizationGuard guard) : this(dbFactory)
+    { _audit = audit; _guard = guard; }
 
     /// <summary>Export danh sách công ty ra Excel</summary>
     public async Task<byte[]> ExportCompaniesAsync(string? search = null, int? fieldId = null)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.Reporter);
         using var db = await _dbFactory.CreateDbContextAsync();
         IQueryable<Company> query = db.Companies
             .Include(c => c.Field)
@@ -59,12 +64,13 @@ public class ExportService
         }
 
         ws.Columns().AdjustToContents();
-        return WorkbookToBytes(wb);
+        return await CompleteExportAsync(wb, "Companies");
     }
 
     /// <summary>Export danh sách nhân viên ra Excel</summary>
     public async Task<byte[]> ExportEmployeesAsync(int? companyId = null, string? nationality = null, int? workPermit = null, bool expiringOnly = false)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.Reporter);
         using var db = await _dbFactory.CreateDbContextAsync();
         IQueryable<Employee> query = db.Employees
             .Include(e => e.Company)
@@ -121,7 +127,7 @@ public class ExportService
         }
 
         ws.Columns().AdjustToContents();
-        return WorkbookToBytes(wb);
+        return await CompleteExportAsync(wb, "Employees");
     }
 
     /// <summary>Export báo cáo tùy chỉnh — hỗ trợ bộ lọc và cột thăm thân</summary>
@@ -132,6 +138,7 @@ public class ExportService
         string? filterNationality = null,
         int? filterExpiringDays = null)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.Reporter);
         using var db = await _dbFactory.CreateDbContextAsync();
         IQueryable<Employee> query = db.Employees
             .Include(e => e.Company).ThenInclude(c => c!.Field)
@@ -262,7 +269,7 @@ public class ExportService
         }
 
         ws.Columns().AdjustToContents();
-        return WorkbookToBytes(wb);
+        return await CompleteExportAsync(wb, "LegacyReport");
     }
 
     /// <summary>Tạo file Excel mẫu để download</summary>
@@ -368,6 +375,7 @@ public class ExportService
         int? educationLevel = null, int? scholarshipType = null,
         int? status = null, bool expiringOnly = false)
     {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.Reporter);
         using var db = await _dbFactory.CreateDbContextAsync();
         IQueryable<Student> query = db.Students
             .Include(s => s.NationalityNav)
@@ -437,11 +445,24 @@ public class ExportService
         }
 
         ws.Columns().AdjustToContents();
-        return WorkbookToBytes(wb);
+        return await CompleteExportAsync(wb, "Students");
+    }
+
+    private async Task<byte[]> CompleteExportAsync(XLWorkbook workbook, string entityType)
+    {
+        var bytes = WorkbookToBytes(workbook);
+        if (_audit is not null) await _audit.LogAsync("EXPORT", entityType, null, $"Bytes={bytes.Length}");
+        return bytes;
     }
 
     private static byte[] WorkbookToBytes(XLWorkbook wb)
     {
+        foreach (var cell in wb.Worksheets.SelectMany(sheet => sheet.CellsUsed()))
+        {
+            if (cell.DataType != XLDataType.Text) continue;
+            var value = cell.GetString();
+            if (value.Length > 0 && "=+-@\t\r".Contains(value[0])) cell.Value = "'" + value;
+        }
         using var ms = new MemoryStream();
         wb.SaveAs(ms);
         return ms.ToArray();

@@ -1,6 +1,8 @@
-# Immigration Report Manager v2.0 (IRM)
+# Immigration Report Manager v0.1.0 (IRM)
 
-Hệ thống quản lý báo cáo người lao động nước ngoài — phiên bản web application hiện đại, thay thế hoàn toàn phần mềm desktop cũ.
+Hệ thống quản lý người nước ngoài với web Blazor và WPF chạy song song trên cùng database. v0.1.0 dùng mô hình mở rộng additive, không thay đổi cột của các bảng legacy.
+
+> **Deployment status:** demo/staging đã chạy tại `https://irm.180.93.103.206.nip.io`; customer production chưa được phê duyệt. Xem [báo cáo triển khai và nghiệm thu kỹ thuật](docs/IRM-v0.1.0-implementation-report.md).
 
 ## 📌 Trạng thái dự án
 
@@ -9,9 +11,9 @@ Hệ thống quản lý báo cáo người lao động nước ngoài — phiên
 | GĐ1 | Khảo sát Hệ thống Cũ | ✅ Done |
 | GĐ2 | Thiết kế Giải pháp | ✅ Done |
 | GĐ3 | Demo Khách hàng | ✅ Done |
-| GĐ4 | Chỉnh sửa theo Yêu cầu | 🔄 In Progress |
-| GĐ5 | Deploy Test Server Thật | 🔄 In Progress |
-| GĐ6 | Kiểm tra & Sửa lỗi | 📋 Todo |
+| GĐ4 | Chỉnh sửa theo Yêu cầu | ✅ Dev/Test complete |
+| GĐ5 | Deploy Test Server Thật | ✅ Demo/staging verified |
+| GĐ6 | Kiểm tra & Sửa lỗi | 🔄 15 automated tests pass; UAT pending |
 | GĐ7 | Bàn giao & Hướng dẫn | 📋 Todo |
 
 > Xem chi tiết tại [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md).
@@ -20,7 +22,7 @@ Hệ thống quản lý báo cáo người lao động nước ngoài — phiên
 
 **[Xem demo tại đây →](https://oldbuffallo.github.io/updateNNN/)**
 
-> Đăng nhập với tài khoản: `admin` / mật khẩu: bất kỳ
+> Demo tĩnh cũ không phải bằng chứng nghiệm thu hoặc production của v0.1.0.
 
 ## Tính năng chính
 
@@ -34,6 +36,10 @@ Hệ thống quản lý báo cáo người lao động nước ngoài — phiên
 | 🔍 Tìm kiếm toàn cục | Tìm theo tên, hộ chiếu, công ty, quốc tịch |
 | 📝 Báo cáo tùy chỉnh | Chọn cột, điều kiện lọc, nhóm, xuất Excel/PDF |
 | ⚙️ Quản trị | Tài khoản, danh mục, nhật ký hệ thống, lịch sử import |
+| 👨‍👩‍👧 Thăm thân | Hồ sơ người và thân nhân, sponsor công ty/người lao động |
+| 🏠 Lưu trú | CSLT, doanh nghiệp thuê, người ở và lịch sử địa chỉ |
+| ✅ Kiểm tra | Đợt kiểm tra, snapshot kết quả, lookback |
+| 📍 Thống kê địa bàn | As-of, distinct người, khu vực, giấy tờ/định danh |
 
 ## Tech Stack
 
@@ -43,7 +49,7 @@ Hệ thống quản lý báo cáo người lao động nước ngoài — phiên
 | **Frontend** | Blazor Server (Interactive Server-Side Rendering) |
 | **UI Framework** | MudBlazor v9.3 (Material Design) |
 | **ORM** | Entity Framework Core 8.0 |
-| **Database** | SQL Server 2014+ (production) / SQLite (fallback/demo) |
+| **Database** | SQL Server 2014+ (production) / SQLite (development/demo) |
 | **Excel** | ClosedXML 0.104.2 |
 | **Deploy** | Windows Service / Docker / GitHub Pages (demo) |
 
@@ -135,11 +141,15 @@ Yêu cầu server: RAM ≥ 2GB · Disk ≥ 200MB · CPU ≥ 2 nhân
 
 `Accounts`, `Companies`, `Employees`, `Fields`, `Careers`, `CareerGroups`, `Nationality`, `Investment`, `PhoneNumbers`, `Emails`, `Districts`, `Wards`, `Attach`
 
-### Bảng mới (thêm bởi IRM v2.0)
+### Bảng mở rộng có trước baseline v0.1.0
 
 `AuditLogs`, `ImportHistories`, `ImportBackups`, `ColumnMappingTemplates`, `Students`, `ArchivedEmployees`
 
-> **Lưu ý:** IRM v2.0 chạy song song với phần mềm desktop cũ, dùng CHUNG database. Migration chỉ THÊM bảng/cột mới, KHÔNG sửa/xóa dữ liệu cũ.
+### Bảng additive của v0.1.0
+
+`SchemaVersions`, `ForeignPersons`, `ForeignPersonSourceLinks`, `StayCases`, `FamilyVisitDetails`, `AdministrativeUnits`, `ResidencePeriods`, `ImmigrationDocuments`, `ElectronicIdentities`, `CompanyProfiles`, `CompanySites`, `EconomicZones`, `SiteZoneMemberships`, `AccommodationsV010`, `CompanyAccommodationAgreements`, `CompanyRepresentatives`, `StoredFiles`, `CompanyLegalDocuments`, `InspectionsV010`, `InspectionSubjects`, `WebCredentials`, `WebRoleAssignments`, `LegacyChangeEvents`, `MigrationIssues`
+
+> **Lưu ý:** IRM v0.1.0 chạy song song với phần mềm desktop cũ, dùng chung database. Migration v0.1.0 chỉ thêm bảng mới; ứng dụng không tự ALTER schema lúc khởi động.
 
 ## Tài liệu liên quan
 
@@ -150,6 +160,7 @@ Yêu cầu server: RAM ≥ 2GB · Disk ≥ 200MB · CPU ≥ 2 nhân
 | [deploy-guide.md](deploy-guide.md) | Hướng dẫn triển khai production |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Cấu hình server chi tiết |
 | [demo.md](demo.md) | Mô tả demo cho khách hàng |
+| [docs/IRM-v0.1.0-database-architecture-report.md](docs/IRM-v0.1.0-database-architecture-report.md) | ERD tổng thể/theo miền và catalog 43 bảng |
 | [docs/](docs/) | Tài liệu từng giai đoạn dự án |
 
 ## Thành viên
@@ -162,4 +173,4 @@ Yêu cầu server: RAM ≥ 2GB · Disk ≥ 200MB · CPU ≥ 2 nhân
 
 ---
 
-*IRM v2.0 — Quản lý lao động nước ngoài hiện đại, bảo mật, dễ dùng.*
+*IRM v0.1.0 — quản lý người nước ngoài theo dữ liệu hợp nhất và lịch sử hiệu lực.*

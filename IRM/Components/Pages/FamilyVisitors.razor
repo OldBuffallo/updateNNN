@@ -1,0 +1,406 @@
+@page "/family-visitors"
+@using IRM.Data.Models
+@inject IForeignerRegistryService Registry
+@inject CatalogService Catalog
+@inject ISnackbar Snackbar
+
+<PageTitle>Người thăm thân - IRM v0.1.0</PageTitle>
+
+<div class="section-header">
+    <div class="d-flex align-center justify-space-between flex-wrap gap-2">
+        <div>
+            <h3>👨‍👩‍👧‍👦 Quản lý Người nước ngoài Thăm thân</h3>
+            <span class="section-meta">
+                Hồ sơ NNN có thân nhân là công dân VN, người gốc VN hoặc người VN định cư ở nước ngoài
+            </span>
+        </div>
+        <div class="d-flex align-center gap-2">
+            <AuthorizeView Roles="ADMIN,DATA_EDITOR">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                           OnClick="OpenAdd">
+                    Thêm hồ sơ thăm thân
+                </MudButton>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ STATS SUMMARY CARDS ════════════ -->
+<MudGrid Class="mb-4">
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-purple">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.FamilyRestroom" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count</span>
+                <span class="stat-mini-label">Tổng người thăm thân</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-blue">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.PersonPin" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count(x => x.RelativeTypeCode == "VIETNAMESE_CITIZEN")</span>
+                <span class="stat-mini-label">Thân nhân công dân VN</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-teal">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Public" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count(x => x.RelativeTypeCode == "VIETNAMESE_ORIGIN" || x.RelativeTypeCode == "OVERSEAS_VIETNAMESE_DUAL")</span>
+                <span class="stat-mini-label">Gốc VN / 2 quốc tịch</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-green">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Fingerprint" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count(x => x.HasElectronicId)</span>
+                <span class="stat-mini-label">Đã cấp định danh ĐT</span>
+            </div>
+        </div>
+    </MudItem>
+</MudGrid>
+
+<!-- ════════════ FILTER TOOLBAR ════════════ -->
+<MudPaper Class="pa-4 mb-4 page-filter-card" Elevation="0">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="5">
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Tìm theo tên NNN, hộ chiếu hoặc tên thân nhân bảo lãnh..."
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Clearable="true"
+                          OnKeyUp="HandleSearchKeyUp" />
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudSelect T="int?" @bind-Value="_unitId" Label="Địa bàn xã/phường" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                @foreach (var unit in _units)
+                {
+                    <MudSelectItem T="int?" Value="unit.Id">@unit.Name (@unit.TypeCode)</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="2">
+            <MudDatePicker @bind-Date="_asOfNullable" Label="Tại ngày (AsOf)" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+        </MudItem>
+        <MudItem xs="12" sm="2" Class="d-flex align-center">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FilterAlt" OnClick="Load" FullWidth="true">
+                Tra cứu
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<!-- ════════════ DATA GRID ════════════ -->
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-3" />
+}
+else
+{
+    <MudDataGrid T="FamilyVisitor"
+                 Items="_items"
+                 Dense="true"
+                 Hover="true"
+                 Striped="true"
+                 Class="irm-data-table"
+                 Elevation="0">
+        <Columns>
+            <TemplateColumn Title="Họ tên người thăm thân" SortBy="x => x.FullName">
+                <CellTemplate>
+                    <div class="d-flex align-center">
+                        <div class="table-avatar mr-2 bg-purple-soft">
+                            @(!string.IsNullOrEmpty(context.Item.FullName) ? context.Item.FullName[0].ToString().ToUpper() : "V")
+                        </div>
+                        <div>
+                            <div class="font-weight-bold">@context.Item.FullName</div>
+                            <div class="text-caption text-muted">@context.Item.GenderString · HC: @(context.Item.Passport ?? "N/A")</div>
+                        </div>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Quốc tịch" SortBy="x => x.Nationality">
+                <CellTemplate>
+                    <span class="country-chip">
+                        <MudIcon Icon="@Icons.Material.Filled.Flag" Size="Size.Small" Class="mr-1" />
+                        @(context.Item.Nationality ?? "N/A")
+                    </span>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Thân nhân tại Việt Nam">
+                <CellTemplate>
+                    <div class="font-weight-bold">@context.Item.RelativeName</div>
+                    <div class="text-caption text-muted">
+                        <span class="badge-relationship">@context.Item.Relationship</span>
+                        <span>· @context.Item.RelativeTypeString</span>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <PropertyColumn Property="x => x.Address" Title="Địa chỉ tạm trú" />
+
+            <TemplateColumn Title="Thời hạn thăm thân">
+                <CellTemplate>
+                    <div class="font-weight-bold">
+                        @context.Item.VisitStartDate?.ToString("dd/MM/yyyy") – @(context.Item.VisitEndDate?.ToString("dd/MM/yyyy") ?? "Không thời hạn")
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Định danh điện tử">
+                <CellTemplate>
+                    @if (context.Item.HasElectronicId)
+                    {
+                        <span class="eid-chip eid-active">
+                            <span class="eid-dot"></span>
+                            @context.Item.ElectronicIdNumber
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="eid-chip eid-missing">Chưa cấp</span>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Thao tác" CellStyle="text-align: right;">
+                <CellTemplate>
+                    <div class="d-flex align-center justify-end gap-1">
+                        <AuthorizeView Roles="ADMIN,DATA_EDITOR" Context="permissionContext">
+                            <MudTooltip Text="Sửa hồ sơ">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                               Size="Size.Small"
+                                               OnClick="@(() => OpenEdit(context.Item))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Xóa hồ sơ">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Size="Size.Small"
+                                               Color="Color.Error"
+                                               OnClick="@(() => Delete(context.Item.ForeignPersonId))" />
+                            </MudTooltip>
+                        </AuthorizeView>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+}
+
+<!-- ════════════ DIALOG: THÊM / SỬA HỒ SƠ THĂM THÂN ════════════ -->
+<MudDialog @bind-Visible="_dialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true })">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@(_input.StayCaseId.HasValue ? Icons.Material.Filled.Edit : Icons.Material.Filled.PersonAdd)" Color="Color.Primary" Class="mr-2" />
+            <span>@(_input.StayCaseId.HasValue ? "Cập nhật hồ sơ thăm thân" : "Thêm mới hồ sơ người nước ngoài thăm thân")</span>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudTabs Elevation="0" Rounded="true">
+            <MudTabPanel Text="1. Thông tin người nước ngoài" Icon="@Icons.Material.Filled.Person">
+                <MudGrid>
+                    <MudItem xs="12" sm="6"><MudTextField @bind-Value="_input.FullName" Label="Họ và tên đầy đủ *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" sm="3"><MudTextField @bind-Value="_input.PassportNumber" Label="Số hộ chiếu" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" sm="3"><MudTextField @bind-Value="_input.NationalityCode" Label="Mã quốc tịch (VD: US, JP...)" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" sm="6"><MudTextField @bind-Value="_input.ResidenceAddress" Label="Địa chỉ tạm trú tại Việt Nam" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="int?" @bind-Value="_input.AdministrativeUnitId" Label="Địa bàn xã/phường tạm trú" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            @foreach (var unit in _units)
+                            {
+                                <MudSelectItem T="int?" Value="unit.Id">@unit.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="6"><MudDatePicker @bind-Date="_validFrom" Label="Ngày bắt đầu thăm thân *" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" /></MudItem>
+                    <MudItem xs="12" sm="6"><MudDatePicker @bind-Date="_validTo" Label="Hạn thăm thân đến ngày" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" /></MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <MudTabPanel Text="2. Thân nhân bảo lãnh tại VN" Icon="@Icons.Material.Filled.FamilyRestroom">
+                <MudGrid>
+                    <MudItem xs="12" sm="6"><MudTextField @bind-Value="_input.RelativeName" Label="Họ và tên thân nhân bảo lãnh *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" sm="3"><MudTextField @bind-Value="_input.Relationship" Label="Mối quan hệ (Vợ/chồng, con, cha mẹ...)" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" sm="3">
+                        <MudSelect T="string" @bind-Value="_input.RelativeTypeCode" Label="Phân loại thân nhân" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="@("VIETNAMESE_CITIZEN")">Công dân Việt Nam</MudSelectItem>
+                            <MudSelectItem Value="@("VIETNAMESE_ORIGIN")">Người gốc Việt Nam</MudSelectItem>
+                            <MudSelectItem Value="@("OVERSEAS_VIETNAMESE_DUAL")">Người VN định cư NN, hai quốc tịch</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4"><MudTextField @bind-Value="_input.RelativeIdNumber" Label="Số CCCD / CMND / Hộ chiếu thân nhân" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" sm="4"><MudTextField @bind-Value="_input.RelativePhone" Label="Số điện thoại thân nhân" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" sm="4"><MudTextField @bind-Value="_input.RelativeAddress" Label="Địa chỉ thường trú thân nhân" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <MudTabPanel Text="3. Giấy tờ & Định danh điện tử" Icon="@Icons.Material.Filled.Badge">
+                <MudGrid>
+                    <MudItem xs="12" sm="4">
+                        <MudSelect T="string" @bind-Value="_input.DocumentTypeCode" Label="Loại giấy tờ XNK" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="@ImmigrationDocumentTypeCodes.Visa">Thị thực (Visa)</MudSelectItem>
+                            <MudSelectItem Value="@ImmigrationDocumentTypeCodes.VisaExtension">Gia hạn</MudSelectItem>
+                            <MudSelectItem Value="@ImmigrationDocumentTypeCodes.TemporaryResidenceCard">Thẻ tạm trú</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4"><MudTextField @bind-Value="_input.DocumentNumber" Label="Số văn bản / Số thị thực" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12" sm="4"><MudDatePicker @bind-Date="_documentValidTo" Label="Hạn giấy tờ đến ngày" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" /></MudItem>
+                    <MudItem xs="12" sm="6"><MudTextField @bind-Value="_input.ElectronicIdentityNumber" Label="Mã số định danh điện tử" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="VD: EID-2026-XXXXX" /></MudItem>
+                    <MudItem xs="12" sm="6"><MudTextField @bind-Value="_input.SponsorCompanyId" Label="ID công ty bảo lãnh (nếu là thân nhân của NLĐ tại công ty)" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                    <MudItem xs="12"><MudTextField @bind-Value="_input.Note" Label="Ghi chú thêm" Lines="2" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                </MudGrid>
+            </MudTabPanel>
+        </MudTabs>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _dialog = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Save">Lưu hồ sơ</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<FamilyVisitor> _items = new();
+    private List<AdministrativeUnit> _units = new();
+    private string? _search;
+    private int? _unitId;
+    private DateTime _asOf = DateTime.Today;
+    private DateTime? _asOfNullable = DateTime.Today;
+    private bool _loading;
+
+    // Dialog state
+    private bool _dialog;
+    private FamilyVisitInput _input = new();
+    private DateTime? _validFrom = DateTime.Today;
+    private DateTime? _validTo;
+    private DateTime? _documentValidTo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _units = await Catalog.GetAdministrativeUnitsAsync();
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        _loading = true;
+        try
+        {
+            _asOf = (_asOfNullable ?? DateTime.Today).Date;
+            _items = (await Registry.SearchFamilyVisitsAsync(new ForeignerSearchFilter
+            {
+                Search = _search,
+                AdministrativeUnitId = _unitId,
+                AsOfDate = _asOf
+            })).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task HandleSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Load();
+        }
+    }
+
+    private void OpenAdd()
+    {
+        _input = new FamilyVisitInput
+        {
+            ValidFrom = DateTime.Today,
+            RelativeTypeCode = "VIETNAMESE_CITIZEN"
+        };
+        _validFrom = DateTime.Today;
+        _validTo = DateTime.Today.AddMonths(6);
+        _documentValidTo = null;
+        _dialog = true;
+    }
+
+    private void OpenEdit(FamilyVisitor item)
+    {
+        _input = new FamilyVisitInput
+        {
+            ForeignPersonId = item.ForeignPersonId,
+            StayCaseId = item.StayCaseId,
+            FullName = item.FullName,
+            PassportNumber = item.Passport,
+            NationalityCode = item.Nationality,
+            ValidFrom = item.VisitStartDate ?? DateTime.Today,
+            ValidTo = item.VisitEndDate,
+            RelativeName = item.RelativeName ?? "",
+            Relationship = item.Relationship ?? "",
+            RelativeTypeCode = item.RelativeTypeCode,
+            RelativeIdNumber = item.RelativeIdCard,
+            RelativePhone = item.RelativePhone,
+            RelativeAddress = item.RelativeAddress,
+            ResidenceAddress = item.Address,
+            ElectronicIdentityNumber = item.ElectronicIdNumber,
+            Note = item.Note
+        };
+        _validFrom = _input.ValidFrom;
+        _validTo = _input.ValidTo;
+        _documentValidTo = _input.DocumentValidTo;
+        _dialog = true;
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(_input.FullName))
+        {
+            Snackbar.Add("Vui lòng nhập họ và tên người thăm thân.", Severity.Warning);
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(_input.RelativeName))
+        {
+            Snackbar.Add("Vui lòng nhập họ tên thân nhân tại Việt Nam.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            _input.ValidFrom = (_validFrom ?? DateTime.Today).Date;
+            _input.ValidTo = _validTo;
+            _input.DocumentValidTo = _documentValidTo;
+            await Registry.SaveFamilyVisitAsync(_input);
+            _dialog = false;
+            await Load();
+            Snackbar.Add("Đã lưu hồ sơ người nước ngoài thăm thân.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task Delete(int foreignPersonId)
+    {
+        try
+        {
+            await Registry.SoftDeleteAsync(foreignPersonId);
+            await Load();
+            Snackbar.Add("Đã xóa hồ sơ thăm thân.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+}
+

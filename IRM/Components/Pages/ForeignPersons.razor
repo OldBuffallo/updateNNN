@@ -1,0 +1,516 @@
+@page "/foreign-persons"
+@using IRM.Data.Models
+@inject IForeignerRegistryService Registry
+@inject CatalogService Catalog
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<PageTitle>Hồ sơ NNN hợp nhất - IRM v0.1.0</PageTitle>
+
+<div class="section-header">
+    <div class="d-flex align-center justify-space-between flex-wrap gap-2">
+        <div>
+            <h3>🪪 Hồ sơ Người nước ngoài Hợp nhất</h3>
+            <span class="section-meta">
+                Quản lý định danh duy nhất theo mã ForeignPersonId · Lao động, thăm thân, du học, du lịch
+            </span>
+        </div>
+        <div class="d-flex align-center gap-2">
+            <AuthorizeView Roles="ADMIN,DATA_EDITOR">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                           OnClick="OpenAddPerson">
+                    Thêm hồ sơ NNN
+                </MudButton>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ STATS SUMMARY CARDS ════════════ -->
+<MudGrid Class="mb-4">
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-blue">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count</span>
+                <span class="stat-mini-label">Tổng hồ sơ</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-green">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count(x => x.ElectronicIdentities.Any(e => e.ValidFrom <= At && (!e.ValidTo.HasValue || e.ValidTo >= At) && e.StatusCode == "ACTIVE"))</span>
+                <span class="stat-mini-label">Đã cấp định danh</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-amber">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.HourglassEmpty" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count(x => !x.ElectronicIdentities.Any(e => e.ValidFrom <= At && (!e.ValidTo.HasValue || e.ValidTo >= At) && e.StatusCode == "ACTIVE"))</span>
+                <span class="stat-mini-label">Chưa có định danh</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-purple">
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count(x => x.ImmigrationDocuments.Any(d => d.ValidFrom <= At && (!d.ValidTo.HasValue || d.ValidTo >= At) && d.StatusCode == "VALID"))</span>
+                <span class="stat-mini-label">Có giấy tờ hiệu lực</span>
+            </div>
+        </div>
+    </MudItem>
+</MudGrid>
+
+<!-- ════════════ FILTER TOOLBAR ════════════ -->
+<MudPaper Class="pa-4 mb-4 page-filter-card" Elevation="0">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="5">
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Tìm kiếm theo tên, số hộ chiếu, quốc tịch..."
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Clearable="true"
+                          OnKeyUp="HandleSearchKeyUp" />
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudDatePicker @bind-Date="_asOf"
+                           Label="Trạng thái tại ngày (AsOf)"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           DateFormat="dd/MM/yyyy" />
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex align-center gap-2">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.FilterAlt"
+                       OnClick="Load"
+                       Class="flex-grow-1">
+                Lọc dữ liệu
+            </MudButton>
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Default"
+                       OnClick="ResetFilters">
+                Đặt lại
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<!-- ════════════ DATA GRID ════════════ -->
+@if (_loading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-3" />
+}
+else
+{
+    <MudDataGrid T="ForeignPerson"
+                 Items="_items"
+                 Dense="true"
+                 Hover="true"
+                 Striped="true"
+                 Class="irm-data-table"
+                 Elevation="0">
+        <Columns>
+            <TemplateColumn Title="Họ và tên" SortBy="x => x.FullName">
+                <CellTemplate>
+                    <div class="d-flex align-center">
+                        <div class="table-avatar mr-2">
+                            @(!string.IsNullOrEmpty(context.Item.FullName) ? context.Item.FullName[0].ToString().ToUpper() : "N")
+                        </div>
+                        <div>
+                            <div class="font-weight-bold">@context.Item.FullName</div>
+                            <div class="text-caption text-muted">ID: #@context.Item.Id</div>
+                        </div>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <PropertyColumn Property="x => x.PassportNumber" Title="Số hộ chiếu" />
+
+            <TemplateColumn Title="Quốc tịch" SortBy="x => x.NationalityCode">
+                <CellTemplate>
+                    <span class="country-chip">
+                        <MudIcon Icon="@Icons.Material.Filled.Flag" Size="Size.Small" Class="mr-1" />
+                        @(context.Item.NationalityCode ?? "N/A")
+                    </span>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Diện cư trú hiện tại">
+                <CellTemplate>
+                    @{
+                        var activeCases = context.Item.StayCases
+                            .Where(x => x.ValidFrom <= At && (!x.ValidTo.HasValue || x.ValidTo >= At) && x.StatusCode == "ACTIVE")
+                            .ToList();
+                    }
+                    @if (activeCases.Any())
+                    {
+                        <div class="d-flex flex-wrap gap-1">
+                            @foreach (var c in activeCases)
+                            {
+                                var (label, colorClass) = GetPurposeMeta(c.PurposeCode);
+                                <span class="purpose-chip @colorClass">@label</span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa đăng ký</span>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Giấy tờ thị thực / thẻ">
+                <CellTemplate>
+                    @{
+                        var validDocs = context.Item.ImmigrationDocuments
+                            .Where(x => x.ValidFrom <= At && (!x.ValidTo.HasValue || x.ValidTo >= At) && x.StatusCode == "VALID")
+                            .ToList();
+                    }
+                    @if (validDocs.Any())
+                    {
+                        <MudTooltip Text="@string.Join(", ", validDocs.Select(d => $"{d.TypeCode}: {d.Number}"))">
+                            <span class="doc-badge doc-valid">
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Class="mr-1" />
+                                @validDocs.Count giấy tờ
+                            </span>
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <span class="doc-badge doc-none">Chưa có</span>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Định danh điện tử">
+                <CellTemplate>
+                    @{
+                        var activeId = context.Item.ElectronicIdentities
+                            .FirstOrDefault(x => x.ValidFrom <= At && (!x.ValidTo.HasValue || x.ValidTo >= At) && x.StatusCode == "ACTIVE");
+                    }
+                    @if (activeId != null)
+                    {
+                        <MudTooltip Text="@($"Số định danh: {activeId.IdentityNumber}")">
+                            <span class="eid-chip eid-active">
+                                <span class="eid-dot"></span>
+                                @activeId.IdentityNumber
+                            </span>
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <span class="eid-chip eid-missing">Chưa cấp</span>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Thao tác" CellStyle="text-align: right;">
+                <CellTemplate>
+                    <div class="d-flex align-center justify-end gap-1">
+                        <AuthorizeView Roles="ADMIN,DATA_EDITOR" Context="permissionContext">
+                            <MudTooltip Text="Thêm giấy tờ xuất nhập cảnh">
+                                <MudIconButton Icon="@Icons.Material.Filled.NoteAdd"
+                                               Size="Size.Small"
+                                               Color="Color.Primary"
+                                               OnClick="@(() => OpenDocument(context.Item))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Cấp số định danh điện tử">
+                                <MudIconButton Icon="@Icons.Material.Filled.Fingerprint"
+                                               Size="Size.Small"
+                                               Color="Color.Secondary"
+                                               OnClick="@(() => OpenIdentity(context.Item))" />
+                            </MudTooltip>
+                        </AuthorizeView>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+}
+
+<!-- ════════════ DIALOG: THÊM HỒ SƠ NNN MỚI ════════════ -->
+<MudDialog @bind-Visible="_addPersonDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Color="Color.Primary" Class="mr-2" />
+            <span>Thêm hồ sơ người nước ngoài mới</span>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12" sm="8">
+                <MudTextField @bind-Value="_newPerson.FullName" Label="Họ và tên đầy đủ *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudSelect T="int" @bind-Value="_newPerson.Gender" Label="Giới tính" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="1">Nam</MudSelectItem>
+                    <MudSelectItem Value="0">Nữ</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_newPerson.PassportNumber" Label="Số hộ chiếu" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="_newPerson.NationalityCode" Label="Mã quốc tịch (VD: US, JP, KR, CN...)" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Date="_newPersonBirthday" Label="Ngày sinh" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect T="string" @bind-Value="_newPersonPurpose" Label="Diện đăng ký ban đầu" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@StayPurposeCodes.Work">Lao động</MudSelectItem>
+                    <MudSelectItem Value="@StayPurposeCodes.FamilyVisit">Thăm thân</MudSelectItem>
+                    <MudSelectItem Value="@StayPurposeCodes.Study">Du học</MudSelectItem>
+                    <MudSelectItem Value="@StayPurposeCodes.Tourism">Du lịch</MudSelectItem>
+                    <MudSelectItem Value="@StayPurposeCodes.Other">Khác</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _addPersonDialog = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveNewPerson">Tạo hồ sơ</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- ════════════ DIALOG: THÊM GIẤY TỜ XNK ════════════ -->
+<MudDialog @bind-Visible="_documentDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.Article" Color="Color.Primary" Class="mr-2" />
+            <span>Thêm giấy tờ xuất nhập cảnh</span>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudSelect T="string" @bind-Value="_document.TypeCode" Label="Loại giấy tờ *" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@ImmigrationDocumentTypeCodes.Visa">Thị thực (Visa)</MudSelectItem>
+                    <MudSelectItem Value="@ImmigrationDocumentTypeCodes.VisaExtension">Gia hạn tạm trú</MudSelectItem>
+                    <MudSelectItem Value="@ImmigrationDocumentTypeCodes.TemporaryResidenceCard">Thẻ tạm trú (TRC)</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_document.Number" Label="Số văn bản / Số thẻ *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudDatePicker @bind-Date="_documentFrom" Label="Từ ngày *" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudDatePicker @bind-Date="_documentTo" Label="Hạn đến ngày" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _documentDialog = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveDocument">Lưu giấy tờ</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- ════════════ DIALOG: CẤP ĐỊNH DANH ĐIỆN TỬ ════════════ -->
+<MudDialog @bind-Visible="_identityDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.Fingerprint" Color="Color.Secondary" Class="mr-2" />
+            <span>Cấp số định danh điện tử</span>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_identity.IdentityNumber" Label="Mã số định danh điện tử *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="VD: EID-2026-XXXXX" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudDatePicker @bind-Date="_identityFrom" Label="Ngày kích hoạt *" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _identityDialog = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="SaveIdentity">Lưu định danh</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<ForeignPerson> _items = new();
+    private string? _search;
+    private DateTime? _asOf = DateTime.Today;
+    private DateTime At = DateTime.Today;
+    private bool _loading;
+
+    // Document dialog
+    private bool _documentDialog;
+    private ImmigrationDocument _document = new();
+    private DateTime? _documentFrom = DateTime.Today;
+    private DateTime? _documentTo;
+
+    // Identity dialog
+    private bool _identityDialog;
+    private ElectronicIdentity _identity = new();
+    private DateTime? _identityFrom = DateTime.Today;
+
+    // Add Person dialog
+    private bool _addPersonDialog;
+    private FamilyVisitInput _newPerson = new();
+    private DateTime? _newPersonBirthday;
+    private string _newPersonPurpose = StayPurposeCodes.Work;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        _loading = true;
+        try
+        {
+            At = (_asOf ?? DateTime.Today).Date;
+            _items = (await Registry.SearchAsync(_search, At)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi tải dữ liệu: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task HandleSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Load();
+        }
+    }
+
+    private async Task ResetFilters()
+    {
+        _search = null;
+        _asOf = DateTime.Today;
+        await Load();
+    }
+
+    private (string Label, string ColorClass) GetPurposeMeta(string code) => code switch
+    {
+        StayPurposeCodes.Work => ("Lao động", "purpose-blue"),
+        StayPurposeCodes.FamilyVisit => ("Thăm thân", "purpose-purple"),
+        StayPurposeCodes.Study => ("Du học", "purpose-cyan"),
+        StayPurposeCodes.Tourism => ("Du lịch", "purpose-amber"),
+        _ => ("Khác", "purpose-gray")
+    };
+
+    private void OpenAddPerson()
+    {
+        _newPerson = new FamilyVisitInput
+        {
+            ValidFrom = DateTime.Today
+        };
+        _newPersonBirthday = null;
+        _newPersonPurpose = StayPurposeCodes.Work;
+        _addPersonDialog = true;
+    }
+
+    private async Task SaveNewPerson()
+    {
+        if (string.IsNullOrWhiteSpace(_newPerson.FullName))
+        {
+            Snackbar.Add("Vui lòng nhập họ và tên.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            _newPerson.Birthday = _newPersonBirthday;
+            await Registry.SaveFamilyVisitAsync(_newPerson);
+            _addPersonDialog = false;
+            await Load();
+            Snackbar.Add("Đã tạo hồ sơ người nước ngoài.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private void OpenDocument(ForeignPerson person)
+    {
+        _document = new ImmigrationDocument
+        {
+            ForeignPersonId = person.Id,
+            TypeCode = ImmigrationDocumentTypeCodes.Visa
+        };
+        _documentFrom = DateTime.Today;
+        _documentTo = DateTime.Today.AddMonths(6);
+        _documentDialog = true;
+    }
+
+    private async Task SaveDocument()
+    {
+        if (string.IsNullOrWhiteSpace(_document.Number))
+        {
+            Snackbar.Add("Vui lòng nhập số giấy tờ.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            _document.ValidFrom = (_documentFrom ?? DateTime.Today).Date;
+            _document.ValidTo = _documentTo;
+            await Registry.SaveDocumentAsync(_document);
+            _documentDialog = false;
+            await Load();
+            Snackbar.Add("Đã lưu giấy tờ xuất nhập cảnh.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private void OpenIdentity(ForeignPerson person)
+    {
+        _identity = new ElectronicIdentity
+        {
+            ForeignPersonId = person.Id,
+            IdentityNumber = $"EID-{DateTime.Today.Year}-{person.Id:D4}"
+        };
+        _identityFrom = DateTime.Today;
+        _identityDialog = true;
+    }
+
+    private async Task SaveIdentity()
+    {
+        if (string.IsNullOrWhiteSpace(_identity.IdentityNumber))
+        {
+            Snackbar.Add("Vui lòng nhập số định danh.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            _identity.ValidFrom = (_identityFrom ?? DateTime.Today).Date;
+            await Registry.SaveElectronicIdentityAsync(_identity);
+            _identityDialog = false;
+            await Load();
+            Snackbar.Add("Đã cấp số định danh điện tử thành công.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+}
