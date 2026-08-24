@@ -65,22 +65,39 @@ gitGraph
   merge release/v0.2.0 id: "v0.2.0" tag: "v0.2.0"
 ```
 
-### Branches
+### Hệ Thống Các Nhánh (Branching Model)
 
-| Branch | Mục đích | Quy tắc |
-|---|---|---|
-| `main` | Code ổn định, đã được tag version | Chỉ merge từ release branch, KHÔNG commit trực tiếp |
-| `release/vX.Y.Z` | Phát triển cho 1 version cụ thể | Tạo từ `main`, merge về `main` khi xong |
-| `hotfix/vX.Y.Z-mô-tả` | Sửa lỗi khẩn cấp trên version đã phát hành | Tạo từ tag, merge về cả `main` và release đang mở |
+Dự án sử dụng mô hình 4 nhánh tiêu chuẩn:
 
-### Quy trình branch cho mỗi version
+| Nhánh | Môi trường / Mục đích | Trigger CI/CD | Quy tắc |
+|---|---|---|---|
+| `main` | **Production Release**: Mã nguồn ổn định nhất, phiên bản chạy thực tế | CI test + Release build khi gắn tag | Chỉ nhận merge từ `test` qua PR |
+| `test` | **Staging / UAT**: Kiểm thử chất lượng, nghiệm thu chức năng | CI test + Auto build staging | Nhận merge từ `develop` để tiến hành test |
+| `develop` | **Development Integration**: Tích hợp các tính năng đang phát triển | CI test liên tục | Tích hợp code từ các nhánh `feature/*` |
+| `feature/*` | **Feature Branches**: Phát triển tính năng riêng lẻ (VD: `feature/v0.2.0-custom-reports`) | CI test | Rẽ nhánh từ `develop`, merge về `develop` qua PR |
 
-```
-1. Tạo branch:    git checkout -b release/v0.2.0 main
-2. Phát triển:    commit vào release/v0.2.0
-3. Khi hoàn tất:  merge release/v0.2.0 → main
-4. Tag:           git tag -a v0.2.0 -m "Release v0.2.0: ..."
-5. Push:          git push origin main --tags
+### Quy trình làm việc và đánh dấu Version đã chạy
+
+```bash
+# 1. Phát triển tính năng mới
+git checkout -b feature/v0.2.0-reports develop
+# ... viết code & commit ...
+
+# 2. Merge vào develop để tích hợp
+git checkout develop
+git merge feature/v0.2.0-reports
+git push origin develop
+
+# 3. Chuyển sang nhánh test để kiểm thử nghiệm thu (UAT)
+git checkout test
+git merge develop
+git push origin test
+
+# 4. Khi test PASS và sẵn sàng chạy Production -> Merge vào main & Đánh dấu Tag Version
+git checkout main
+git merge test
+git tag -a v0.2.0 -m "Release v0.2.0: Cập nhật tính năng Báo cáo tùy chỉnh"
+git push origin main --tags
 ```
 
 ---
