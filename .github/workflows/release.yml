@@ -1,0 +1,56 @@
+name: Release - Build & Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v0.1.1)'
+        required: true
+        default: 'v0.1.1'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-and-release:
+    name: Build Artifacts & Publish Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8.0 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore IRM/IRM.csproj
+
+      - name: Publish Windows x64 Build
+        run: |
+          dotnet publish IRM/IRM.csproj -c Release -r win-x64 --no-self-contained -o ./publish/win-x64
+          cd ./publish/win-x64 && zip -r ../../IRM-win-x64.zip . && cd ../..
+
+      - name: Publish Linux x64 Build
+        run: |
+          dotnet publish IRM/IRM.csproj -c Release -r linux-x64 --no-self-contained -o ./publish/linux-x64
+          cd ./publish/linux-x64 && zip -r ../../IRM-linux-x64.zip . && cd ../..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          tag_name: ${{ github.ref_name || inputs.version }}
+          name: Release ${{ github.ref_name || inputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            IRM-win-x64.zip
+            IRM-linux-x64.zip
