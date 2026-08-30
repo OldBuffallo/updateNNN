@@ -19,10 +19,10 @@ Tài liệu này định nghĩa **7 giai đoạn** của dự án, ánh xạ san
 | **GĐ1** | Khảo sát Hệ thống Cũ | [`docs/phase1-analysis.md`](docs/phase1-analysis.md) | ✅ |
 | **GĐ2** | Thiết kế Giải pháp | [`docs/phase2-design.md`](docs/phase2-design.md) | ✅ |
 | **GĐ3** | Demo Khách hàng | [`demo.md`](demo.md), [`mockup-demo/`](mockup-demo/) | ✅ |
-| **GĐ4** | Chỉnh sửa theo Yêu cầu | [`docs/phase4-changelog.md`](docs/phase4-changelog.md) | 🔄 |
-| **GĐ5** | Deploy Test Server Thật | [`deploy-guide.md`](deploy-guide.md), [`deploy/`](deploy/) | 🔄 |
-| **GĐ6** | Kiểm tra & Sửa lỗi | [`docs/phase6-testlog.md`](docs/phase6-testlog.md) | 📋 |
-| **GĐ7** | Bàn giao & Hướng dẫn | [`docs/phase7-handover.md`](docs/phase7-handover.md) | 📋 |
+| **GĐ4** | Chỉnh sửa theo Yêu cầu | [`docs/phase4-changelog.md`](docs/phase4-changelog.md) | ✅ |
+| **GĐ5** | Deploy Test Server Thật | [`deploy-guide.md`](deploy-guide.md), [`deploy/`](deploy/) | ✅ |
+| **GĐ6** | Kiểm tra & Sửa lỗi | [`docs/phase6-testlog.md`](docs/phase6-testlog.md) | ✅ |
+| **GĐ7** | Bàn giao & Hướng dẫn | [`docs/phase7-handover.md`](docs/phase7-handover.md) | 🔄 |
 
 **Chú thích:** ✅ Done · 🔄 In Progress · 📋 Todo
 

@@ -92,8 +92,15 @@ public class EmployeeService
     public async Task<bool> CheckDuplicatePassportAsync(string passport, int excludeId = 0)
     {
         if (string.IsNullOrWhiteSpace(passport)) return false;
-        return await _db.Employees.AnyAsync(e =>
-            e.Passport == passport && e.Hidden_flag == 0 && e.IDEmployee != excludeId);
+        var normalized = FamilyVisitorService.NormalizePassport(passport);
+        if (string.IsNullOrEmpty(normalized)) return false;
+
+        var candidates = await _db.Employees
+            .Where(e => e.Hidden_flag == 0 && e.IDEmployee != excludeId && e.Passport != null)
+            .Select(e => e.Passport!)
+            .ToListAsync();
+
+        return candidates.Any(p => FamilyVisitorService.NormalizePassport(p) == normalized);
     }
 
     /// <summary>
@@ -172,13 +179,13 @@ public class EmployeeService
         {
             OriginalId = emp.IDEmployee,
             StaffName = emp.StaffName,
-            Gender = emp.Gender,
+            Gender = (int)emp.Gender,
             Birthday = emp.Birthday,
             Nationality = emp.Nationality,
             Passport = emp.Passport,
             Address = emp.Address,
             IDCareer = emp.IDCareer,
-            WorkPermit = emp.WorkPermit,
+            WorkPermit = (int)emp.WorkPermit,
             WorkPermitNumber = emp.WorkPermitNumber,
             VisaNumber = emp.VisaNumber,
             TemporaryStay = emp.TemporaryStay,

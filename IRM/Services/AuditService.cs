@@ -29,6 +29,29 @@ public class AuditService
         await _db.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Ghi log với structured JSON diff cho phép truy vấn chính xác "ai đã thay đổi field X".
+    /// </summary>
+    public async Task LogWithChangesAsync(string action, string entityType, int? entityId,
+        string? description, List<FieldChange>? changes, string? username = null)
+    {
+        var log = new AuditLog
+        {
+            Action = action,
+            EntityType = entityType,
+            EntityId = entityId,
+            Description = description,
+            ChangesJson = changes != null ? System.Text.Json.JsonSerializer.Serialize(changes) : null,
+            Username = username,
+            Timestamp = DateTime.Now
+        };
+        _db.AuditLogs.Add(log);
+        await _db.SaveChangesAsync();
+    }
+
+    /// <summary>Một field thay đổi trong structured audit log.</summary>
+    public record FieldChange(string Field, string? Old, string? New);
+
     public async Task<List<AuditLog>> GetRecentAsync(int count = 100)
     {
         return await _db.AuditLogs

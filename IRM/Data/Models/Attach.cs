@@ -7,7 +7,7 @@ public class Attach
 {
     public int IDAttach { get; set; }
     public int IDCompany { get; set; }
-    public int Type { get; set; }
+    public AttachType Type { get; set; }
     public string? Name { get; set; }
     public string? Folder { get; set; }
     public DateTime? DateCreated { get; set; }
@@ -16,11 +16,6 @@ public class Attach
 
     public Company? Company { get; set; }
 
-    public string TypeString => Type switch
-    {
-        0 => "BC_NNN",
-        1 => "HSPN",
-        _ => ""
-    };
+    public string TypeString => Type.ToDisplay();
     public bool IsActive => Delete_flag == 0;
 }

@@ -221,8 +221,8 @@
                     @{
                         var wpTag = context.Item.WorkPermit switch
                         {
-                            1 or 4 => "tag-green",
-                            0 or 3 => "tag-blue",
+                            WorkPermitType.WorkerHasPermit or WorkPermitType.InvestorHasPermit => "tag-green",
+                            WorkPermitType.WorkerExempt or WorkPermitType.InvestorExempt => "tag-blue",
                             _ => "tag-orange"
                         };
                     }
@@ -282,13 +282,13 @@ else if (!_loading)
     <DialogContent>
         <MudGrid Spacing="3">
             <MudItem xs="12" md="6"><MudTextField T="string" Label="Họ tên *" @bind-Value="_f.StaffName" Variant="Variant.Outlined" Required="true" /></MudItem>
-            <MudItem xs="6" md="3"><MudSelect T="int" Label="Giới tính" @bind-Value="_f.Gender" Variant="Variant.Outlined"><MudSelectItem Value="1">Nam</MudSelectItem><MudSelectItem Value="0">Nữ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="Gender" Label="Giới tính" @bind-Value="_f.Gender" Variant="Variant.Outlined"><MudSelectItem Value="Gender.Male">Nam</MudSelectItem><MudSelectItem Value="Gender.Female">Nữ</MudSelectItem></MudSelect></MudItem>
             <MudItem xs="6" md="3"><MudDatePicker Label="Ngày sinh" @bind-Date="_f.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
             <MudItem xs="6" md="4"><MudSelect T="string" Label="Quốc tịch" @bind-Value="_f.Nationality" Variant="Variant.Outlined" Clearable="true">@foreach(var n in _nationalities){<MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>}</MudSelect></MudItem>
             <MudItem xs="6" md="4"><MudTextField T="string" Label="Số hộ chiếu" @bind-Value="_f.Passport" Variant="Variant.Outlined" /></MudItem>
             <MudItem xs="12" md="4"><MudAutocomplete T="Company" Label="Công ty *" Value="_dlgCompany" ValueChanged="v => { _dlgCompany = v; _f.IDCompany = v?.IDCompany ?? 0; }" SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")" Variant="Variant.Outlined" ResetValueOnEmptyText="true" /></MudItem>
             <MudItem xs="6" md="4"><MudSelect T="int?" Label="Nghề nghiệp" @bind-Value="_f.IDCareer" Variant="Variant.Outlined" Clearable="true">@foreach(var c in _careers){<MudSelectItem T="int?" Value="@((int?)c.IDCareer)">@c.CareerName</MudSelectItem>}</MudSelect></MudItem>
-            <MudItem xs="6" md="4"><MudSelect T="int" Label="GPLĐ" @bind-Value="_f.WorkPermit" Variant="Variant.Outlined"><MudSelectItem Value="0">Miễn GPLĐ</MudSelectItem><MudSelectItem Value="1">Đã có GPLĐ</MudSelectItem><MudSelectItem Value="2">Chưa có GPLĐ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="WorkPermitType" Label="GPLĐ" @bind-Value="_f.WorkPermit" Variant="Variant.Outlined"><MudSelectItem Value="WorkPermitType.WorkerExempt">Miễn GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.WorkerHasPermit">Đã có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.WorkerNoPermit">Chưa có GPLĐ</MudSelectItem></MudSelect></MudItem>
             <MudItem xs="6" md="4"><MudDatePicker Label="Hạn tạm trú" @bind-Date="_f.TemporaryStay" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
             <MudItem xs="12"><MudTextField T="string" Label="Ghi chú" @bind-Value="_f.Note" Variant="Variant.Outlined" Lines="2" /></MudItem>
         </MudGrid>
@@ -313,7 +313,7 @@ else if (!_loading)
                 <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Hộ chiếu</MudText><MudText Style="font-weight:600;">@(_detEmp.Passport ?? "—")</MudText></MudItem>
                 <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Công ty</MudText><MudText Style="font-weight:600;">@(_detEmp.Company?.CompanyName ?? "—")</MudText></MudItem>
                 <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Nghề nghiệp</MudText><MudText Style="font-weight:600;">@(_detEmp.Career?.CareerName ?? "—")</MudText></MudItem>
-                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">GPLĐ</MudText><span class="tag @(_detEmp.WorkPermit == 1 ? "tag-green" : _detEmp.WorkPermit == 0 ? "tag-blue" : "tag-orange")">@_detEmp.WorkPermitString</span></MudItem>
+                <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">GPLĐ</MudText><span class="tag @(_detEmp.WorkPermit == WorkPermitType.WorkerHasPermit ? "tag-green" : _detEmp.WorkPermit == WorkPermitType.WorkerExempt ? "tag-blue" : "tag-orange")">@_detEmp.WorkPermitString</span></MudItem>
                 <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Hạn tạm trú</MudText><MudText Style="font-weight:600;">@(_detEmp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "—")</MudText></MudItem>
                 <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Còn lại</MudText><MudText Style="@GetExpiryStyle(_detEmp)">@(_detEmp.DaysUntilExpiry.HasValue ? $"{_detEmp.DaysUntilExpiry} ngày" : "—")</MudText></MudItem>
                 @if (_detEmp.HasFamilyVisit)
@@ -508,7 +508,8 @@ else if (!_loading)
 
         if (!string.IsNullOrWhiteSpace(_selectedPermit) && int.TryParse(_selectedPermit, out var permitStatus))
         {
-            query = query.Where(e => e.WorkPermit == permitStatus);
+            var permitEnum = (WorkPermitType)permitStatus;
+            query = query.Where(e => e.WorkPermit == permitEnum);
         }
 
         _employees = query.ToList();
@@ -518,9 +519,9 @@ else if (!_loading)
     {
         try
         {
-            int? wpFilter = null;
+            WorkPermitType? wpFilter = null;
             if (!string.IsNullOrWhiteSpace(_selectedPermit) && int.TryParse(_selectedPermit, out var wp))
-                wpFilter = wp;
+                wpFilter = (WorkPermitType)wp;
 
             var bytes = await ExportSvc.ExportEmployeesAsync(
                 _selectedCompany?.IDCompany,
@@ -547,7 +548,7 @@ else if (!_loading)
     private void OpenAddDialog()
     {
         _dlgEditing = false; _dlgEditId = 0; _dlgCompany = _selectedCompany;
-        _f = new Employee { IDCompany = _selectedCompany?.IDCompany ?? 0, Gender = 1 };
+        _f = new Employee { IDCompany = _selectedCompany?.IDCompany ?? 0, Gender = Gender.Male };
         _dlgVisible = true;
     }
 

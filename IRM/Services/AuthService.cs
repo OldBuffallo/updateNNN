@@ -68,7 +68,7 @@ public sealed class AuthService
         var roles = await _db.WebRoleAssignments.Where(x => x.AccountId == account.IDUser).Select(x => x.RoleCode).Distinct().ToListAsync(cancellationToken);
         if (roles.Count == 0)
         {
-            roles.Add(account.Permission == 1 ? IrmRoles.Admin : IrmRoles.DataEditor);
+            roles.Add(account.Permission == AccountPermission.Admin ? IrmRoles.Admin : IrmRoles.DataEditor);
             _db.WebRoleAssignments.Add(new WebRoleAssignment { AccountId = account.IDUser, RoleCode = roles[0] });
         }
         await _db.SaveChangesAsync(cancellationToken);
@@ -102,7 +102,7 @@ public sealed class AuthService
             UpdatedAt = DateTime.UtcNow
         });
         _db.WebRoleAssignments.Add(new WebRoleAssignment { AccountId = account.IDUser,
-            RoleCode = account.Permission == 1 ? IrmRoles.Admin : IrmRoles.DataEditor });
+            RoleCode = account.Permission == AccountPermission.Admin ? IrmRoles.Admin : IrmRoles.DataEditor });
         await _db.SaveChangesAsync();
         await _audit.LogAsync("CREATE", "Account", account.IDUser, null, account.Username);
     }

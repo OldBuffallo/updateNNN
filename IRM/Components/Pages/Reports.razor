@@ -191,13 +191,13 @@
                     </MudItem>
                     <MudItem xs="3">
                         <div class="stat-mini-card">
-                            <span class="stat-mini-num" style="color: var(--green);">@_previewEmployees.Count(e => e.WorkPermit == 1 || e.WorkPermit == 4)</span>
+                            <span class="stat-mini-num" style="color: var(--green);">@_previewEmployees.Count(e => e.WorkPermit == WorkPermitType.WorkerHasPermit || e.WorkPermit == WorkPermitType.InvestorHasPermit)</span>
                             <span class="stat-mini-label">Đã có GPLĐ</span>
                         </div>
                     </MudItem>
                     <MudItem xs="3">
                         <div class="stat-mini-card">
-                            <span class="stat-mini-num" style="color: var(--orange);">@_previewEmployees.Count(e => e.WorkPermit == 0 || e.WorkPermit == 3)</span>
+                            <span class="stat-mini-num" style="color: var(--orange);">@_previewEmployees.Count(e => e.WorkPermit == WorkPermitType.WorkerExempt || e.WorkPermit == WorkPermitType.InvestorExempt)</span>
                             <span class="stat-mini-label">Miễn GPLĐ</span>
                         </div>
                     </MudItem>
@@ -302,7 +302,7 @@
 
             // Áp dụng bộ lọc
             if (!string.IsNullOrEmpty(_filterPermit) && int.TryParse(_filterPermit, out var wp))
-                _previewEmployees = _previewEmployees.Where(e => e.WorkPermit == wp).ToList();
+                _previewEmployees = _previewEmployees.Where(e => e.WorkPermit == (WorkPermitType)wp).ToList();
 
             if (!string.IsNullOrEmpty(_filterNationality))
                 _previewEmployees = _previewEmployees.Where(e =>
@@ -396,9 +396,9 @@
         _isExporting = true;
         try
         {
-            int? wpFilter = null;
+            WorkPermitType? wpFilter = null;
             if (!string.IsNullOrEmpty(_filterPermit) && int.TryParse(_filterPermit, out var wp))
-                wpFilter = wp;
+                wpFilter = (WorkPermitType)wp;
             int? expiringDays = null;
             if (!string.IsNullOrEmpty(_filterExpiring) && int.TryParse(_filterExpiring, out var ed))
                 expiringDays = ed;

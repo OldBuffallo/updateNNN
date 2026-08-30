@@ -37,27 +37,27 @@
                       Placeholder="Trường" Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Style="min-width:180px;" />
         <MudTextField T="string" @bind-Value="_fltMajor" @bind-Value:after="ApplyFilters"
                       Placeholder="Ngành" Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true" Style="min-width:150px;" />
-        <MudSelect T="int?" @bind-Value="_fltEdu" @bind-Value:after="ApplyFilters"
+        <MudSelect T="EducationLevel?" @bind-Value="_fltEdu" @bind-Value:after="ApplyFilters"
                    Placeholder="Trình độ" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true" Style="min-width:130px;">
-            <MudSelectItem T="int?" Value="0">Đại học</MudSelectItem>
-            <MudSelectItem T="int?" Value="1">Thạc sĩ</MudSelectItem>
-            <MudSelectItem T="int?" Value="2">Tiến sĩ</MudSelectItem>
-            <MudSelectItem T="int?" Value="3">Ngắn hạn</MudSelectItem>
-            <MudSelectItem T="int?" Value="4">Khác</MudSelectItem>
+            <MudSelectItem T="EducationLevel?" Value="EducationLevel.University">Đại học</MudSelectItem>
+            <MudSelectItem T="EducationLevel?" Value="EducationLevel.Master">Thạc sĩ</MudSelectItem>
+            <MudSelectItem T="EducationLevel?" Value="EducationLevel.Doctorate">Tiến sĩ</MudSelectItem>
+            <MudSelectItem T="EducationLevel?" Value="EducationLevel.ShortTerm">Ngắn hạn</MudSelectItem>
+            <MudSelectItem T="EducationLevel?" Value="EducationLevel.Other">Khác</MudSelectItem>
         </MudSelect>
-        <MudSelect T="int?" @bind-Value="_fltScholarship" @bind-Value:after="ApplyFilters"
+        <MudSelect T="ScholarshipType?" @bind-Value="_fltScholarship" @bind-Value:after="ApplyFilters"
                    Placeholder="Học bổng" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true" Style="min-width:150px;">
-            <MudSelectItem T="int?" Value="0">Tự túc</MudSelectItem>
-            <MudSelectItem T="int?" Value="1">HB Chính phủ VN</MudSelectItem>
-            <MudSelectItem T="int?" Value="2">HB nước ngoài</MudSelectItem>
-            <MudSelectItem T="int?" Value="3">Khác</MudSelectItem>
+            <MudSelectItem T="ScholarshipType?" Value="ScholarshipType.SelfFunded">Tự túc</MudSelectItem>
+            <MudSelectItem T="ScholarshipType?" Value="ScholarshipType.VietnamGovernment">HB Chính phủ VN</MudSelectItem>
+            <MudSelectItem T="ScholarshipType?" Value="ScholarshipType.ForeignScholarship">HB nước ngoài</MudSelectItem>
+            <MudSelectItem T="ScholarshipType?" Value="ScholarshipType.Other">Khác</MudSelectItem>
         </MudSelect>
-        <MudSelect T="int?" @bind-Value="_fltStatus" @bind-Value:after="ApplyFilters"
+        <MudSelect T="StudentStatus?" @bind-Value="_fltStatus" @bind-Value:after="ApplyFilters"
                    Placeholder="Trạng thái" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true" Style="min-width:140px;">
-            <MudSelectItem T="int?" Value="0">Đang học</MudSelectItem>
-            <MudSelectItem T="int?" Value="1">Đã TN</MudSelectItem>
-            <MudSelectItem T="int?" Value="2">Tạm nghỉ</MudSelectItem>
-            <MudSelectItem T="int?" Value="3">Đã về nước</MudSelectItem>
+            <MudSelectItem T="StudentStatus?" Value="StudentStatus.Studying">Đang học</MudSelectItem>
+            <MudSelectItem T="StudentStatus?" Value="StudentStatus.Graduated">Đã TN</MudSelectItem>
+            <MudSelectItem T="StudentStatus?" Value="StudentStatus.OnLeave">Tạm nghỉ</MudSelectItem>
+            <MudSelectItem T="StudentStatus?" Value="StudentStatus.Returned">Đã về nước</MudSelectItem>
         </MudSelect>
     </MudStack>
     <MudStack Row="true" Spacing="2">
@@ -116,7 +116,7 @@
             </TemplateColumn>
             <TemplateColumn Title="Trạng thái">
                 <CellTemplate>
-                    @{ var stTag = context.Item.Status switch { 0 => "tag-green", 1 => "tag-blue", 2 => "tag-orange", 3 => "tag-red", _ => "tag-blue" }; }
+                    @{ var stTag = context.Item.Status switch { StudentStatus.Studying => "tag-green", StudentStatus.Graduated => "tag-blue", StudentStatus.OnLeave => "tag-orange", StudentStatus.Returned => "tag-red", _ => "tag-blue" }; }
                     <span class="tag @stTag">@context.Item.StatusString</span>
                 </CellTemplate>
             </TemplateColumn>
@@ -144,7 +144,7 @@ else if (!_loading)
     <DialogContent>
         <MudGrid Spacing="3">
             <MudItem xs="12" md="6"><MudTextField T="string" Label="Họ tên *" @bind-Value="_f.FullName" Variant="Variant.Outlined" Required="true" /></MudItem>
-            <MudItem xs="6" md="3"><MudSelect T="int" Label="Giới tính" @bind-Value="_f.Gender" Variant="Variant.Outlined"><MudSelectItem Value="1">Nam</MudSelectItem><MudSelectItem Value="0">Nữ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="Gender" Label="Giới tính" @bind-Value="_f.Gender" Variant="Variant.Outlined"><MudSelectItem Value="Gender.Male">Nam</MudSelectItem><MudSelectItem Value="Gender.Female">Nữ</MudSelectItem></MudSelect></MudItem>
             <MudItem xs="6" md="3"><MudDatePicker Label="Ngày sinh" @bind-Date="_f.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
             <MudItem xs="6" md="4"><MudSelect T="string" Label="Quốc tịch" @bind-Value="_f.Nationality" Variant="Variant.Outlined" Clearable="true">@foreach(var n in _nationalities){<MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>}</MudSelect></MudItem>
             <MudItem xs="6" md="4"><MudTextField T="string" Label="Số hộ chiếu" @bind-Value="_f.Passport" Variant="Variant.Outlined" /></MudItem>
@@ -152,14 +152,14 @@ else if (!_loading)
             <MudItem xs="12" md="6"><MudTextField T="string" Label="Trường *" @bind-Value="_f.SchoolName" Variant="Variant.Outlined" Required="true" /></MudItem>
             <MudItem xs="6" md="3"><MudTextField T="string" Label="Ngành học" @bind-Value="_f.Major" Variant="Variant.Outlined" /></MudItem>
             <MudItem xs="6" md="3"><MudTextField T="string" Label="Mã sinh viên" @bind-Value="_f.StudentCode" Variant="Variant.Outlined" /></MudItem>
-            <MudItem xs="6" md="3"><MudSelect T="int" Label="Trình độ" @bind-Value="_f.EducationLevel" Variant="Variant.Outlined"><MudSelectItem Value="0">Đại học</MudSelectItem><MudSelectItem Value="1">Thạc sĩ</MudSelectItem><MudSelectItem Value="2">Tiến sĩ</MudSelectItem><MudSelectItem Value="3">Ngắn hạn</MudSelectItem><MudSelectItem Value="4">Khác</MudSelectItem></MudSelect></MudItem>
-            <MudItem xs="6" md="3"><MudSelect T="int" Label="Học bổng" @bind-Value="_f.ScholarshipType" Variant="Variant.Outlined"><MudSelectItem Value="0">Tự túc</MudSelectItem><MudSelectItem Value="1">HB Chính phủ VN</MudSelectItem><MudSelectItem Value="2">HB nước ngoài</MudSelectItem><MudSelectItem Value="3">Khác</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="EducationLevel" Label="Trình độ" @bind-Value="_f.EducationLevel" Variant="Variant.Outlined"><MudSelectItem Value="EducationLevel.University">Đại học</MudSelectItem><MudSelectItem Value="EducationLevel.Master">Thạc sĩ</MudSelectItem><MudSelectItem Value="EducationLevel.Doctorate">Tiến sĩ</MudSelectItem><MudSelectItem Value="EducationLevel.ShortTerm">Ngắn hạn</MudSelectItem><MudSelectItem Value="EducationLevel.Other">Khác</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="ScholarshipType" Label="Học bổng" @bind-Value="_f.ScholarshipType" Variant="Variant.Outlined"><MudSelectItem Value="ScholarshipType.SelfFunded">Tự túc</MudSelectItem><MudSelectItem Value="ScholarshipType.VietnamGovernment">HB Chính phủ VN</MudSelectItem><MudSelectItem Value="ScholarshipType.ForeignScholarship">HB nước ngoài</MudSelectItem><MudSelectItem Value="ScholarshipType.Other">Khác</MudSelectItem></MudSelect></MudItem>
             <MudItem xs="6" md="3"><MudDatePicker Label="Ngày nhập học" @bind-Date="_f.EnrollmentDate" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
             <MudItem xs="6" md="3"><MudDatePicker Label="Dự kiến TN" @bind-Date="_f.ExpectedGraduation" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
             <MudItem xs="6" md="4"><MudTextField T="string" Label="Số Visa" @bind-Value="_f.VisaNumber" Variant="Variant.Outlined" /></MudItem>
             <MudItem xs="6" md="4"><MudDatePicker Label="Hạn Visa" @bind-Date="_f.VisaExpiry" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
             <MudItem xs="6" md="4"><MudDatePicker Label="Hạn tạm trú" @bind-Date="_f.TemporaryStay" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
-            <MudItem xs="6" md="4"><MudSelect T="int" Label="Trạng thái" @bind-Value="_f.Status" Variant="Variant.Outlined"><MudSelectItem Value="0">Đang học</MudSelectItem><MudSelectItem Value="1">Đã tốt nghiệp</MudSelectItem><MudSelectItem Value="2">Tạm nghỉ</MudSelectItem><MudSelectItem Value="3">Đã về nước</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="StudentStatus" Label="Trạng thái" @bind-Value="_f.Status" Variant="Variant.Outlined"><MudSelectItem Value="StudentStatus.Studying">Đang học</MudSelectItem><MudSelectItem Value="StudentStatus.Graduated">Đã tốt nghiệp</MudSelectItem><MudSelectItem Value="StudentStatus.OnLeave">Tạm nghỉ</MudSelectItem><MudSelectItem Value="StudentStatus.Returned">Đã về nước</MudSelectItem></MudSelect></MudItem>
             <MudItem xs="12" md="8"><MudTextField T="string" Label="Ghi chú" @bind-Value="_f.Note" Variant="Variant.Outlined" Lines="2" /></MudItem>
         </MudGrid>
     </DialogContent>
@@ -210,7 +210,7 @@ else if (!_loading)
 
     // Filters
     private string? _fltNationality; private string? _fltSchool; private string? _fltMajor;
-    private int? _fltEdu; private int? _fltScholarship; private int? _fltStatus;
+    private EducationLevel? _fltEdu; private ScholarshipType? _fltScholarship; private StudentStatus? _fltStatus;
 
     // Dialog
     private bool _dlgVisible; private bool _dlgEditing; private Student _f = new(); private int _dlgEditId;
@@ -266,7 +266,7 @@ else if (!_loading)
     private void OpenAddDialog()
     {
         _dlgEditing = false; _dlgEditId = 0;
-        _f = new Student { Gender = 1 };
+        _f = new Student { Gender = Gender.Male };
         _dlgVisible = true;
     }
 
