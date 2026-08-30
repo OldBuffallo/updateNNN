@@ -79,6 +79,8 @@ public class IrmDbContext : DbContext
         {
             e.ToTable("Companies");
             e.HasKey(c => c.IDCompany);
+            e.HasIndex(c => c.IDField).HasDatabaseName("IX_Companies_IDField");
+            e.HasIndex(c => c.Delete_flag).HasDatabaseName("IX_Companies_DeleteFlag");
             e.HasOne(c => c.Field)
                 .WithMany(f => f.Companies)
                 .HasForeignKey(c => c.IDField);
@@ -92,6 +94,11 @@ public class IrmDbContext : DbContext
         {
             e.ToTable("Employees");
             e.HasKey(emp => emp.IDEmployee);
+            e.HasIndex(emp => emp.IDCompany).HasDatabaseName("IX_Employees_IDCompany");
+            e.HasIndex(emp => new { emp.WorkingStatus, emp.Hidden_flag }).HasDatabaseName("IX_Employees_WorkStatus");
+            e.HasIndex(emp => emp.Nationality).HasDatabaseName("IX_Employees_Nationality");
+            e.HasIndex(emp => emp.TemporaryStay).HasDatabaseName("IX_Employees_TemporaryStay");
+            e.HasIndex(emp => emp.FamilyVisit).HasDatabaseName("IX_Employees_FamilyVisit");
             e.HasOne(emp => emp.Company)
                 .WithMany(c => c.Employees)
                 .HasForeignKey(emp => emp.IDCompany);
@@ -123,6 +130,9 @@ public class IrmDbContext : DbContext
         {
             e.ToTable("Students");
             e.HasKey(s => s.IDStudent);
+            e.HasIndex(s => s.Nationality).HasDatabaseName("IX_Students_Nationality");
+            e.HasIndex(s => new { s.Status, s.Hidden_flag }).HasDatabaseName("IX_Students_StatusHidden");
+            e.HasIndex(s => s.VisaExpiry).HasDatabaseName("IX_Students_VisaExpiry");
             e.HasOne(s => s.NationalityNav)
                 .WithMany()
                 .HasForeignKey(s => s.Nationality)
@@ -134,9 +144,9 @@ public class IrmDbContext : DbContext
             e.Property(s => s.ExpectedGraduation).HasColumnName("ExpectedGraduation");
             e.Property(s => s.VisaExpiry).HasColumnName("VisaExpiry");
             e.Property(s => s.Hidden_flag).HasDefaultValue(0);
-            e.Property(s => s.Status).HasDefaultValue(0);
-            e.Property(s => s.ScholarshipType).HasDefaultValue(0);
-            e.Property(s => s.EducationLevel).HasDefaultValue(0);
+            e.Property(s => s.Status).HasDefaultValue(StudentStatus.Studying);
+            e.Property(s => s.ScholarshipType).HasDefaultValue(ScholarshipType.SelfFunded);
+            e.Property(s => s.EducationLevel).HasDefaultValue(EducationLevel.University);
         });
 
         ConfigureV010(modelBuilder);
@@ -249,6 +259,7 @@ public class IrmDbContext : DbContext
             e.ToTable("ImportBackups");
             e.HasKey(b => b.Id);
             e.HasIndex(b => b.ImportSessionId);
+            e.HasIndex(b => new { b.EntityType, b.EntityId }).HasDatabaseName("IX_ImportBackups_EntityTypeId");
         });
 
         // ── ColumnMappingTemplate (bảng mới) ──
@@ -298,6 +309,8 @@ public class IrmDbContext : DbContext
             e.ToTable("AdministrativeUnits"); e.HasKey(x => x.Id); e.HasIndex(x => new { x.Code, x.ValidFrom }).IsUnique();
             e.HasOne(x => x.Parent).WithMany().HasForeignKey(x => x.ParentId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.Predecessor).WithMany().HasForeignKey(x => x.PredecessorId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(x => x.LegacyDistrictId).HasDatabaseName("IX_AU_LegacyDistrictId");
+            e.HasIndex(x => x.LegacyWardId).HasDatabaseName("IX_AU_LegacyWardId");
         });
         modelBuilder.Entity<ResidencePeriod>(e =>
         {

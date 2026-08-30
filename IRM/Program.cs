@@ -112,7 +112,10 @@ using (var scope = app.Services.CreateScope())
     }
     else
     {
+        // Production SQL Server: apply pending migrations, validate, seed catalogs
+        await db.Database.MigrateAsync();
         await scope.ServiceProvider.GetRequiredService<ISchemaVersionService>().ValidateAsync();
+        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db);
     }
 }
 

@@ -26,8 +26,8 @@ public sealed class SecurityAndMigrationTests
     [Fact]
     public async Task LegacyPassword_IsUpgradedAndFailuresAreLocked()
     {
-        await using var database = new TestDatabase(); await database.InitializeAsync();
-        var account=new Account{Username="admin",Name="Admin",Password="legacy",Permission=1,Delete_flag=0};
+        await using var database = new TestDatabase(); await database.InitializeAsync(seedBaseline: false);
+        var account=new Account{Username="admin",Name="Admin",Password="legacy",Permission=AccountPermission.Admin,Delete_flag=0};
         database.Context.Accounts.Add(account);await database.Context.SaveChangesAsync();
         var service=new AuthService(database.Context,new AuditService(database.Context));
         var principal=await service.AuthenticateWebAsync("admin","legacy","127.0.0.1");
@@ -41,8 +41,8 @@ public sealed class SecurityAndMigrationTests
     public async Task AccountPasswordChange_ReplacesWebCredentialHash()
     {
         await using var database = new TestDatabase();
-        await database.InitializeAsync();
-        var account = new Account { Username = "admin", Name = "Admin", Password = "old-password", Permission = 1, Delete_flag = 0 };
+        await database.InitializeAsync(seedBaseline: false);
+        var account = new Account { Username = "admin", Name = "Admin", Password = "old-password", Permission = AccountPermission.Admin, Delete_flag = 0 };
         database.Context.Accounts.Add(account);
         await database.Context.SaveChangesAsync();
         var service = new AuthService(database.Context, new AuditService(database.Context));
@@ -58,7 +58,7 @@ public sealed class SecurityAndMigrationTests
     [Fact]
     public async Task SeedV010_IsIdempotentAndContains54Units()
     {
-        await using var database = new TestDatabase(); await database.InitializeAsync();
+        await using var database = new TestDatabase(); await database.InitializeAsync(seedBaseline: false);
         await DatabaseSeeder.SeedV010Async(database.Context);await DatabaseSeeder.SeedV010Async(database.Context);
         Assert.Equal(54,database.Context.AdministrativeUnits.Count());
         Assert.Single(database.Context.SchemaVersions.Where(x=>x.Version=="0.1.0"));
@@ -76,9 +76,9 @@ public sealed class SecurityAndMigrationTests
     [Fact]
     public async Task Import_ExtendedFieldsCreateUnifiedHistoryAndRollbackCleanly()
     {
-        await using var database = new TestDatabase(); await database.InitializeAsync();
+        await using var database = new TestDatabase(); await database.InitializeAsync(seedBaseline: false);
         await DatabaseSeeder.SeedV010Async(database.Context);
-        var account = new Account { Username="editor",Name="Editor",Password="legacy",Permission=1 };
+        var account = new Account { Username="editor",Name="Editor",Password="legacy",Permission=AccountPermission.Admin };
         var field = new Field { FieldName="Test" };
         database.Context.AddRange(account,field); await database.Context.SaveChangesAsync();
         var company = new Company { CompanyName="Import test",IDField=field.IDField,TrackerID=account.IDUser };

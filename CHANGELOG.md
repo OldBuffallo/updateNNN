@@ -4,9 +4,14 @@ Tất cả thay đổi đáng chú ý của dự án IRM được ghi lại tạ
 Format theo [Keep a Changelog](https://keepachangelog.com/).
 Versioning theo [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.0.0] - 2026-08-30
 
-_(Tính năng đang phát triển cho version tiếp theo)_
+### Added — Production Release & Hardening
+- **Enum Refactoring**: Chuẩn hóa toàn bộ Magic Numbers sang Enums có type safety (`Gender`, `WorkPermitType`, `StudentStatus`, `EducationLevel`, `ScholarshipType`, `AccountPermission`, `AttachType`).
+- **Database Seeder**: `SeedCatalogsIfEmptyAsync` khởi tạo danh mục tự động và an toàn khi deploy lần đầu trên database rỗng.
+- **SQL Server Indexes**: Tối ưu hóa hiệu năng truy vấn với hơn 10+ composite & foreign key indexes trên `Employees`, `Students`, `Companies`, `AdministrativeUnits`, `ImportBackups`.
+- **Test Suite**: Bổ sung bộ test xUnit đạt 83/83 test PASS (Enum roundtrip, Excel Import/Export enum parser, polymorphic import rollback, dashboard stats, RBAC auth).
+- **Self-Contained Deployment**: Gói đóng gói độc lập `IRM-production-deploy.zip` (.NET 8 runtime embedded, SQL scripts idempotent, PowerShell auto-installer).
 
 ---
 

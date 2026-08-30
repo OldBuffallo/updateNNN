@@ -31,16 +31,36 @@ public class DashboardService
 
         data.WithWorkPermit = await _db.Employees.CountAsync(e =>
             e.Hidden_flag == 0 && e.WorkingStatus == 0
-            && (e.WorkPermit == 1 || e.WorkPermit == 4));
+            && (e.WorkPermit == WorkPermitType.WorkerHasPermit || e.WorkPermit == WorkPermitType.InvestorHasPermit));
 
-        // Thăm thân
-        data.FamilyVisitCount = await _db.Employees.CountAsync(e =>
-            e.Hidden_flag == 0 && e.WorkingStatus == 0 && e.FamilyVisit == 1);
-        data.FamilyVisitExpiringCount = await _db.Employees.CountAsync(e =>
+        // Thăm thân — V0.1.0 nguồn chính + legacy fallback
+        var syncedEmpIds = await _db.ForeignPersonSourceLinks.AsNoTracking()
+            .Where(x => x.SourceType == "Employee")
+            .Select(x => x.SourceId)
+            .ToListAsync();
+        var syncedSet = new HashSet<int>(syncedEmpIds.Select(s => int.TryParse(s, out var id) ? id : -1));
+
+        var v010FamilyCount = await _db.StayCases.AsNoTracking()
+            .CountAsync(x => x.PurposeCode == StayPurposeCodes.FamilyVisit
+                && x.StatusCode == "ACTIVE"
+                && x.ValidFrom <= today
+                && (!x.ValidTo.HasValue || x.ValidTo.Value >= today));
+        var legacyOnlyFamilyCount = await _db.Employees.AsNoTracking().CountAsync(e =>
             e.Hidden_flag == 0 && e.WorkingStatus == 0 && e.FamilyVisit == 1
+            && !syncedSet.Contains(e.IDEmployee));
+        data.FamilyVisitCount = v010FamilyCount + legacyOnlyFamilyCount;
+
+        var v010FamilyExpiringCount = await _db.StayCases.AsNoTracking()
+            .CountAsync(x => x.PurposeCode == StayPurposeCodes.FamilyVisit
+                && x.StatusCode == "ACTIVE"
+                && x.ValidTo.HasValue && x.ValidTo.Value >= today && x.ValidTo.Value <= in30Days);
+        var legacyOnlyFamilyExpiringCount = await _db.Employees.AsNoTracking().CountAsync(e =>
+            e.Hidden_flag == 0 && e.WorkingStatus == 0 && e.FamilyVisit == 1
+            && !syncedSet.Contains(e.IDEmployee)
             && e.FamilyVisitEndDate != null
             && e.FamilyVisitEndDate >= today
             && e.FamilyVisitEndDate <= in30Days);
+        data.FamilyVisitExpiringCount = v010FamilyExpiringCount + legacyOnlyFamilyExpiringCount;
 
         // Top 10 quốc tịch
         data.NationalityStats = await _db.Employees
@@ -59,12 +79,12 @@ public class DashboardService
             .GroupBy(e => e.WorkPermit)
             .Select(g => new ChartItem
             {
-                Label = g.Key == 0 ? "Miễn GPLĐ" :
-                        g.Key == 1 ? "Đã có GPLĐ" :
-                        g.Key == 2 ? "Chưa có GPLĐ" :
-                        g.Key == 3 ? "NĐT miễn" :
-                        g.Key == 4 ? "NĐT đã có" :
-                        g.Key == 5 ? "NĐT chưa có" : "Khác",
+                Label = g.Key == WorkPermitType.WorkerExempt ? "Miễn GPLĐ" :
+                        g.Key == WorkPermitType.WorkerHasPermit ? "Đã có GPLĐ" :
+                        g.Key == WorkPermitType.WorkerNoPermit ? "Chưa có GPLĐ" :
+                        g.Key == WorkPermitType.InvestorExempt ? "NĐT miễn" :
+                        g.Key == WorkPermitType.InvestorHasPermit ? "NĐT đã có" :
+                        g.Key == WorkPermitType.InvestorNoPermit ? "NĐT chưa có" : "Khác",
                 Value = g.Count()
             })
             .ToListAsync();
@@ -83,9 +103,9 @@ public class DashboardService
 
         // Du học sinh
         data.TotalStudents = await _db.Students.CountAsync(s =>
-            s.Hidden_flag == 0 && s.Status == 0);
+            s.Hidden_flag == 0 && s.Status == StudentStatus.Studying);
         data.StudentVisaExpiringCount = await _db.Students.CountAsync(s =>
-            s.Hidden_flag == 0 && s.Status == 0
+            s.Hidden_flag == 0 && s.Status == StudentStatus.Studying
             && s.VisaExpiry != null
             && s.VisaExpiry >= today
             && s.VisaExpiry <= in30Days);
