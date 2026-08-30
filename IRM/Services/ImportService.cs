@@ -272,7 +272,8 @@ public class ImportService
                         {
                             ImportSessionId = sessionId,
                             ActionType = "INSERT",
-                            EmployeeId = emp.IDEmployee,
+                            EntityType = "Employee",
+                            EntityId = emp.IDEmployee,
                             OldData = JsonSerializer.Serialize(new { V010Changes = v010Changes }),
                             CreatedAt = DateTime.Now
                         });
@@ -324,7 +325,8 @@ public class ImportService
                                 {
                                     ImportSessionId = sessionId,
                                     ActionType = "UPDATE",
-                                    EmployeeId = existing.IDEmployee,
+                                    EntityType = "Employee",
+                                    EntityId = existing.IDEmployee,
                                     OldData = oldDataJson,
                                     CreatedAt = DateTime.Now
                                 };
@@ -475,7 +477,7 @@ public class ImportService
                 if (backup.ActionType == "INSERT")
                 {
                     // Xóa record đã insert (soft delete)
-                    var emp = await _db.Employees.FindAsync(backup.EmployeeId);
+                    var emp = await _db.Employees.FindAsync(backup.EntityId);
                     if (emp != null)
                     {
                         emp.Hidden_flag = 1;
@@ -485,14 +487,14 @@ public class ImportService
                 else if (backup.ActionType == "UPDATE" && !string.IsNullOrEmpty(backup.OldData))
                 {
                     // Khôi phục dữ liệu cũ
-                    var emp = await _db.Employees.FindAsync(backup.EmployeeId);
+                    var emp = await _db.Employees.FindAsync(backup.EntityId);
                     if (emp != null)
                     {
                         var oldData = JsonSerializer.Deserialize<JsonElement>(backup.OldData);
                         if (oldData.TryGetProperty("StaffName", out var name))
                             emp.StaffName = name.GetString() ?? "";
                         if (oldData.TryGetProperty("Gender", out var gender))
-                            emp.Gender = gender.GetInt32();
+                            emp.Gender = (Gender)gender.GetInt32();
                         if (oldData.TryGetProperty("Birthday", out var bday) && bday.ValueKind != JsonValueKind.Null)
                             emp.Birthday = bday.GetDateTime();
                         if (oldData.TryGetProperty("Nationality", out var nat))
@@ -504,7 +506,7 @@ public class ImportService
                         if (oldData.TryGetProperty("IDCareer", out var career) && career.ValueKind != JsonValueKind.Null)
                             emp.IDCareer = career.GetInt32();
                         if (oldData.TryGetProperty("WorkPermit", out var wp))
-                            emp.WorkPermit = wp.GetInt32();
+                            emp.WorkPermit = (WorkPermitType)wp.GetInt32();
                         if (oldData.TryGetProperty("WorkPermitNumber", out var wpn))
                             emp.WorkPermitNumber = wpn.GetString();
                         if (oldData.TryGetProperty("VisaNumber", out var visa))
@@ -674,7 +676,7 @@ public class ImportService
         {
             person = new ForeignPerson
             {
-                FullName = employee.StaffName.Trim(), Gender = employee.Gender, Birthday = employee.Birthday,
+                FullName = employee.StaffName.Trim(), Gender = (int)employee.Gender, Birthday = employee.Birthday,
                 NationalityCode = employee.Nationality, PassportNumber = passport, PassportSearchKey = passportKey,
                 IsDataIncomplete = passportKey is null
             };
@@ -854,8 +856,8 @@ public class ImportService
         {
             emp.Gender = gender.ToLower() switch
             {
-                "nam" or "male" or "1" or "m" => 1,
-                _ => 0
+                "nam" or "male" or "1" or "m" => Gender.Male,
+                _ => Gender.Female
             };
         }
 
@@ -893,13 +895,13 @@ public class ImportService
         {
             emp.WorkPermit = wp.ToLower() switch
             {
-                "có gplđ" or "đã có gplđ" or "có" or "1" => 1,
-                "chưa có gplđ" or "chưa có" or "2" => 2,
-                "miễn" or "miễn gplđ" or "0" => 0,
-                "nhà đầu tư miễn" or "3" => 3,
-                "nhà đầu tư có" or "4" => 4,
-                "nhà đầu tư chưa" or "5" => 5,
-                _ => 0
+                "có gplđ" or "đã có gplđ" or "có" or "1" => WorkPermitType.WorkerHasPermit,
+                "chưa có gplđ" or "chưa có" or "2" => WorkPermitType.WorkerNoPermit,
+                "miễn" or "miễn gplđ" or "0" => WorkPermitType.WorkerExempt,
+                "nhà đầu tư miễn" or "3" => WorkPermitType.InvestorExempt,
+                "nhà đầu tư có" or "4" => WorkPermitType.InvestorHasPermit,
+                "nhà đầu tư chưa" or "5" => WorkPermitType.InvestorNoPermit,
+                _ => WorkPermitType.WorkerExempt
             };
         }
 

@@ -68,7 +68,7 @@ public class ExportService
     }
 
     /// <summary>Export danh sách nhân viên ra Excel</summary>
-    public async Task<byte[]> ExportEmployeesAsync(int? companyId = null, string? nationality = null, int? workPermit = null, bool expiringOnly = false)
+    public async Task<byte[]> ExportEmployeesAsync(int? companyId = null, string? nationality = null, WorkPermitType? workPermit = null, bool expiringOnly = false)
     {
         if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.Reporter);
         using var db = await _dbFactory.CreateDbContextAsync();
@@ -134,7 +134,7 @@ public class ExportService
     public async Task<byte[]> ExportReportAsync(
         List<string> selectedColumns,
         string groupBy = "company",
-        int? filterWorkPermit = null,
+        WorkPermitType? filterWorkPermit = null,
         string? filterNationality = null,
         int? filterExpiringDays = null)
     {
@@ -372,8 +372,8 @@ public class ExportService
     /// <summary>Export danh sách du học sinh ra Excel</summary>
     public async Task<byte[]> ExportStudentsAsync(
         string? nationality = null, string? school = null,
-        int? educationLevel = null, int? scholarshipType = null,
-        int? status = null, bool expiringOnly = false)
+        EducationLevel? educationLevel = null, ScholarshipType? scholarshipType = null,
+        StudentStatus? status = null, bool expiringOnly = false)
     {
         if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.Reporter);
         using var db = await _dbFactory.CreateDbContextAsync();

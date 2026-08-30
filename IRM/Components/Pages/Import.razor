@@ -100,7 +100,7 @@
 
         <MudGrid Spacing="3">
             <MudItem xs="12" md="6"><MudTextField T="string" Label="Họ tên *" @bind-Value="_mf.StaffName" Variant="Variant.Outlined" Required="true" HelperText="Bắt buộc — Nhập đầy đủ họ và tên" /></MudItem>
-            <MudItem xs="6" md="3"><MudSelect T="int" Label="Giới tính" @bind-Value="_mf.Gender" Variant="Variant.Outlined"><MudSelectItem Value="1">Nam</MudSelectItem><MudSelectItem Value="0">Nữ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="Gender" Label="Giới tính" @bind-Value="_mf.Gender" Variant="Variant.Outlined"><MudSelectItem Value="Gender.Male">Nam</MudSelectItem><MudSelectItem Value="Gender.Female">Nữ</MudSelectItem></MudSelect></MudItem>
             <MudItem xs="6" md="3"><MudDatePicker Label="Ngày sinh" @bind-Date="_mf.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
 
             <MudItem xs="6" md="4"><MudSelect T="string" Label="Quốc tịch" @bind-Value="_mf.Nationality" Variant="Variant.Outlined" Clearable="true">@foreach(var n in _mfNationalities){<MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>}</MudSelect></MudItem>
@@ -108,7 +108,7 @@
             <MudItem xs="12" md="4"><MudAutocomplete T="Company" Label="Công ty *" Value="_mfCompany" ValueChanged="v => { _mfCompany = v; _mf.IDCompany = v?.IDCompany ?? 0; }" SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")" Variant="Variant.Outlined" ResetValueOnEmptyText="true" /></MudItem>
 
             <MudItem xs="6" md="4"><MudSelect T="int?" Label="Nghề nghiệp" @bind-Value="_mf.IDCareer" Variant="Variant.Outlined" Clearable="true">@foreach(var c in _mfCareers){<MudSelectItem T="int?" Value="@((int?)c.IDCareer)">@c.CareerName</MudSelectItem>}</MudSelect></MudItem>
-            <MudItem xs="6" md="4"><MudSelect T="int" Label="GPLĐ" @bind-Value="_mf.WorkPermit" Variant="Variant.Outlined"><MudSelectItem Value="0">Miễn GPLĐ</MudSelectItem><MudSelectItem Value="1">Đã có GPLĐ</MudSelectItem><MudSelectItem Value="2">Chưa có GPLĐ</MudSelectItem><MudSelectItem Value="3">NĐT miễn GPLĐ</MudSelectItem><MudSelectItem Value="4">NĐT đã có GPLĐ</MudSelectItem><MudSelectItem Value="5">NĐT chưa có GPLĐ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="WorkPermitType" Label="GPLĐ" @bind-Value="_mf.WorkPermit" Variant="Variant.Outlined"><MudSelectItem Value="WorkPermitType.WorkerExempt">Miễn GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.WorkerHasPermit">Đã có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.WorkerNoPermit">Chưa có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.InvestorExempt">NĐT miễn GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.InvestorHasPermit">NĐT đã có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.InvestorNoPermit">NĐT chưa có GPLĐ</MudSelectItem></MudSelect></MudItem>
             <MudItem xs="6" md="4"><MudDatePicker Label="Hạn tạm trú" @bind-Date="_mf.TemporaryStay" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" HelperText="Quan trọng — Cảnh báo hết hạn" /></MudItem>
 
             <MudItem xs="6" md="4"><MudTextField T="string" Label="Số GPLĐ" @bind-Value="_mf.WorkPermitNumber" Variant="Variant.Outlined" /></MudItem>
@@ -484,7 +484,7 @@
     private bool _manualMode = false;
 
     // Manual entry
-    private Employee _mf = new() { Gender = 1 };
+    private Employee _mf = new() { Gender = Gender.Male };
     private Company? _mfCompany;
     private List<NationalityEntity> _mfNationalities = new();
     private List<Career> _mfCareers = new();
@@ -814,7 +814,7 @@
 
     private void ResetManualForm()
     {
-        _mf = new Employee { Gender = 1 };
+        _mf = new Employee { Gender = Gender.Male };
         _mfCompany = null;
     }
 

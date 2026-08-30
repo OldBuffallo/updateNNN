@@ -18,7 +18,7 @@ public class StudentService
     {
         return await _db.Students
             .Include(s => s.NationalityNav)
-            .Where(s => s.Hidden_flag == 0 && s.Status == 0)
+            .Where(s => s.Hidden_flag == 0 && s.Status == StudentStatus.Studying)
             .OrderBy(s => s.FullName)
             .ToListAsync();
     }
@@ -41,9 +41,10 @@ public class StudentService
 
     public async Task<List<Student>> GetBySchoolAsync(string schoolName)
     {
+        var term = schoolName.ToLower();
         return await _db.Students
             .Include(s => s.NationalityNav)
-            .Where(s => s.Hidden_flag == 0 && s.SchoolName != null && s.SchoolName.Contains(schoolName))
+            .Where(s => s.Hidden_flag == 0 && s.SchoolName != null && s.SchoolName.ToLower().Contains(term))
             .OrderBy(s => s.FullName)
             .ToListAsync();
     }
@@ -53,7 +54,7 @@ public class StudentService
         var deadline = DateTime.Today.AddDays(days);
         return await _db.Students
             .Include(s => s.NationalityNav)
-            .Where(s => s.Hidden_flag == 0 && s.Status == 0
+            .Where(s => s.Hidden_flag == 0 && s.Status == StudentStatus.Studying
                 && s.VisaExpiry != null
                 && s.VisaExpiry >= DateTime.Today
                 && s.VisaExpiry <= deadline)

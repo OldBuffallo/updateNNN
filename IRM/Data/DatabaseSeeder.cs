@@ -1,4 +1,5 @@
 using IRM.Data.Models;
+using IRM.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace IRM.Data;
@@ -14,10 +15,10 @@ public static class DatabaseSeeder
         if (!await db.Accounts.AnyAsync())
         {
             db.Accounts.AddRange(
-                new Account { Username = "admin", Name = "Quản trị viên", Password = "123456", Permission = 1 },
-                new Account { Username = "nguyenvana", Name = "Nguyễn Văn A", Password = "123456", Permission = 0 },
-                new Account { Username = "tranthib", Name = "Trần Thị B", Password = "123456", Permission = 0 },
-                new Account { Username = "levanc", Name = "Lê Văn C", Password = "123456", Permission = 0 }
+                new Account { Username = "admin", Name = "Quản trị viên", Password = "***", Permission = AccountPermission.Admin },
+                new Account { Username = "nguyenvana", Name = "Nguyễn Văn A", Password = "***", Permission = AccountPermission.User },
+                new Account { Username = "tranthib", Name = "Trần Thị B", Password = "***", Permission = AccountPermission.User },
+                new Account { Username = "levanc", Name = "Lê Văn C", Password = "***", Permission = AccountPermission.User }
             );
             await db.SaveChangesAsync();
         }
@@ -353,9 +354,9 @@ public static class DatabaseSeeder
     {
         return new Employee
         {
-            StaffName = name, Gender = gender, Birthday = new DateTime(y, m, d),
+            StaffName = name, Gender = (Gender)gender, Birthday = new DateTime(y, m, d),
             Nationality = nat, Passport = passport, IDCareer = careerId,
-            WorkPermit = workPermit, TemporaryStay = tempStay,
+            WorkPermit = (WorkPermitType)workPermit, TemporaryStay = tempStay,
             IDUser = 1, IDCompany = company.IDCompany, DateCreated = DateTime.Now
         };
     }
@@ -368,13 +369,13 @@ public static class DatabaseSeeder
     {
         return new Student
         {
-            FullName = name, Gender = gender, Birthday = new DateTime(y, m, d),
+            FullName = name, Gender = (Gender)gender, Birthday = new DateTime(y, m, d),
             Nationality = nat, Passport = passport,
             SchoolName = school, Major = major, StudentCode = studentCode,
-            EducationLevel = eduLevel, EnrollmentDate = enrollment,
+            EducationLevel = (EducationLevel)eduLevel, EnrollmentDate = enrollment,
             ExpectedGraduation = graduation, VisaNumber = visa,
             VisaExpiry = visaExpiry, TemporaryStay = tempStay,
-            ScholarshipType = scholarship, Status = status, Note = note,
+            ScholarshipType = (ScholarshipType)scholarship, Status = (StudentStatus)status, Note = note,
             IDUser = 1, DateCreated = DateTime.Now, Hidden_flag = 0
         };
     }
@@ -385,7 +386,7 @@ public static class DatabaseSeeder
 
     public static async Task SeedV010Async(IrmDbContext db)
     {
-        if (!await db.AdministrativeUnits.AnyAsync())
+        if (!await db.AdministrativeUnits.AnyAsync(x => x.Code == "QN-C-001"))
         {
             var validFrom = new DateTime(2025, 7, 1);
             var communes = new[]
@@ -431,5 +432,91 @@ public static class DatabaseSeeder
         }
 
         await db.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Seed danh mục cần thiết cho production SQL Server deployment.
+    /// Chỉ seed catalog data (Fields, CareerGroups, Careers, Nationalities, Districts, Wards)
+    /// và tài khoản admin mặc định nếu database trống.
+    /// </summary>
+    public static async Task SeedCatalogsIfEmptyAsync(IrmDbContext db)
+    {
+        if (!await db.Accounts.AnyAsync())
+        {
+            var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Account>();
+            var admin = new Account
+            {
+                Username = "admin",
+                Name = "Quản trị viên",
+                Password = "***",
+                Permission = AccountPermission.Admin
+            };
+            db.Accounts.Add(admin);
+            await db.SaveChangesAsync();
+
+            db.WebCredentials.Add(new WebCredential
+            {
+                AccountId = admin.IDUser,
+                PasswordHash = hasher.HashPassword(admin, "123456"),
+                UpdatedAt = DateTime.UtcNow
+            });
+            db.WebRoleAssignments.Add(new WebRoleAssignment
+            {
+                AccountId = admin.IDUser,
+                RoleCode = IrmRoles.Admin
+            });
+            await db.SaveChangesAsync();
+        }
+
+        if (!await db.Fields.AnyAsync())
+        {
+            db.Fields.AddRange(
+                new Field { FieldName = "Sản xuất công nghiệp", Description = "Nhà máy, xưởng sản xuất" },
+                new Field { FieldName = "Điện tử", Description = "Linh kiện điện tử, bán dẫn" },
+                new Field { FieldName = "Thép", Description = "Luyện thép, gia công kim loại" },
+                new Field { FieldName = "Hóa chất", Description = "Hóa chất, vật liệu mới" },
+                new Field { FieldName = "Ô tô", Description = "Sản xuất, lắp ráp ô tô" },
+                new Field { FieldName = "Bán dẫn", Description = "Chip, bán dẫn, IC" },
+                new Field { FieldName = "Dệt may", Description = "Dệt, may mặc" },
+                new Field { FieldName = "Thực phẩm", Description = "Chế biến thực phẩm" }
+            );
+            await db.SaveChangesAsync();
+        }
+
+        if (!await db.CareerGroups.AnyAsync())
+        {
+            db.CareerGroups.AddRange(
+                new CareerGroup { CareerGroupName = "Quản lý" },
+                new CareerGroup { CareerGroupName = "Kỹ thuật" },
+                new CareerGroup { CareerGroupName = "Chuyên gia" },
+                new CareerGroup { CareerGroupName = "Lao động phổ thông" }
+            );
+            await db.SaveChangesAsync();
+
+            var groups = await db.CareerGroups.ToListAsync();
+            var ql = groups.First(g => g.CareerGroupName == "Quản lý").IDCG;
+            var kt = groups.First(g => g.CareerGroupName == "Kỹ thuật").IDCG;
+            var cg = groups.First(g => g.CareerGroupName == "Chuyên gia").IDCG;
+            var ld = groups.First(g => g.CareerGroupName == "Lao động phổ thông").IDCG;
+            db.Careers.AddRange(
+                new Career { CareerName = "Giám đốc", IDCG = ql },
+                new Career { CareerName = "Kỹ sư", IDCG = kt },
+                new Career { CareerName = "Chuyên gia tư vấn", IDCG = cg },
+                new Career { CareerName = "Công nhân", IDCG = ld }
+            );
+            await db.SaveChangesAsync();
+        }
+
+        if (!await db.SchemaVersions.AnyAsync(x => x.Version == "0.1.0"))
+        {
+            db.SchemaVersions.Add(new SchemaVersion
+            {
+                Version = "0.1.0",
+                Description = "IRM production schema with indexes and constraints",
+                Checksum = "MIGRATION-APPLIED",
+                AppliedBy = "DatabaseSeeder"
+            });
+            await db.SaveChangesAsync();
+        }
     }
 }

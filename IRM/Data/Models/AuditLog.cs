@@ -10,6 +10,7 @@ public class AuditLog
     public string EntityType { get; set; } = "";     // "Company", "Employee", "Account"...
     public int? EntityId { get; set; }
     public string? Description { get; set; }
+    public string? ChangesJson { get; set; }  // JSON: [{"Field":"Name","Old":"A","New":"B"}]
     public string? Username { get; set; }
     public DateTime Timestamp { get; set; } = DateTime.Now;
     public string? IpAddress { get; set; }
@@ -43,7 +44,8 @@ public class ImportBackup
     public long Id { get; set; }
     public string ImportSessionId { get; set; } = "";
     public string ActionType { get; set; } = "";       // "INSERT" hoặc "UPDATE"
-    public int EmployeeId { get; set; }
+    public string EntityType { get; set; } = "Employee"; // "Employee" | "Student" | "ForeignPerson"
+    public int EntityId { get; set; }
     public string? OldData { get; set; }                // JSON snapshot dữ liệu cũ (cho UPDATE)
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 }

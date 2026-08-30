@@ -1,4 +1,4 @@
-﻿@page "/admin"
+@page "/admin"
 @page "/admin/{SectionKey}"
 
 @using IRM.Services
@@ -65,9 +65,9 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
                         <MudTextField T="string" Label="Mật khẩu" InputType="InputType.Password" @bind-Value="_accountForm.Password" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="2">
-                        <MudSelect T="int" Label="Quyền" @bind-Value="_accountForm.Permission" Variant="Variant.Outlined">
-                            <MudSelectItem Value="1">Admin</MudSelectItem>
-                            <MudSelectItem Value="0">User</MudSelectItem>
+                        <MudSelect T="AccountPermission" Label="Quyền" @bind-Value="_accountForm.Permission" Variant="Variant.Outlined">
+                            <MudSelectItem Value="AccountPermission.Admin">Admin</MudSelectItem>
+                            <MudSelectItem Value="AccountPermission.User">User</MudSelectItem>
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" md="1" Class="d-flex align-center">
