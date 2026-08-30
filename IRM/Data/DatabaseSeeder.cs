@@ -15,10 +15,10 @@ public static class DatabaseSeeder
         if (!await db.Accounts.AnyAsync())
         {
             db.Accounts.AddRange(
-                new Account { Username = "admin", Name = "Quản trị viên", Password = "***", Permission = AccountPermission.Admin },
-                new Account { Username = "nguyenvana", Name = "Nguyễn Văn A", Password = "***", Permission = AccountPermission.User },
-                new Account { Username = "tranthib", Name = "Trần Thị B", Password = "***", Permission = AccountPermission.User },
-                new Account { Username = "levanc", Name = "Lê Văn C", Password = "***", Permission = AccountPermission.User }
+                new Account { Username = "admin", Name = "Quản trị viên", Password = "123456", Permission = AccountPermission.Admin },
+                new Account { Username = "nguyenvana", Name = "Nguyễn Văn A", Password = "123456", Permission = AccountPermission.User },
+                new Account { Username = "tranthib", Name = "Trần Thị B", Password = "123456", Permission = AccountPermission.User },
+                new Account { Username = "levanc", Name = "Lê Văn C", Password = "123456", Permission = AccountPermission.User }
             );
             await db.SaveChangesAsync();
         }
