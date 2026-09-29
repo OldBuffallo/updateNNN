@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 :root {
     --bg-body: #f0f4f8;
     --bg-surface: #ffffff;
@@ -1558,7 +1556,7 @@ body {
 }
 
 /* ========================================================= */
-/*  IRM v0.1.1 — MODERN ENTERPRISE UX ELEVATION STYLES       */
+/*  IRM v1.0.1 — MODERN ENTERPRISE UX ELEVATION STYLES       */
 /* ========================================================= */
 
 /* ── Topbar Brand & Search Trigger ── */

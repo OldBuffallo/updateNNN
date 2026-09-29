@@ -1,0 +1,43 @@
+{
+  "product": "Immigration Report Manager",
+  "version": "1.0.2",
+  "database": {
+    "product": "Microsoft SQL Server 2022 Express",
+    "cu": "CU27",
+    "kb": "KB5104824",
+    "build": "16.0.4295.3",
+    "databaseName": "IRM",
+    "tcpPort": 14331,
+    "maxServerMemoryMb": 1024,
+    "schemaChecksumSha256": "B737B48CE90D924B78303E3E22C9B5D465E880E37B0F6C93A7FA15809CA46CA2"
+  },
+  "minimumResources": {
+    "architecture": "x64",
+    "cpuCores": 2,
+    "cpuMhz": 2000,
+    "availableMemoryMb": 2048,
+    "freeDiskMbBeforeInstall": 10240,
+    "freeDiskMbAfterInstall": 4096
+  },
+  "runtime": {
+    "dotnet": "8.0-self-contained",
+    "gcHeapHardLimitBytes": 536870912,
+    "httpLoopbackPort": 5050,
+    "httpsLanPort": 5443
+  },
+  "windows": {
+    "rid": "win-x64",
+    "sqlBaseMedia": "SQLEXPR_x64_ENU.exe",
+    "sqlBaseSha256": "2E61C8BBDE6021F9026C54AD9DB4BBB1227E68761D4C00A6A50A2C70FE7AFE05",
+    "sqlCuMedia": "SQLServer2022-KB5104824-x64.exe",
+    "sqlCuSha256": "675E3CEDD6C7A3D0FFBE713E46E54A86A92AF7B96CA4A6BEB987AE99C79B96F5",
+    "artifact": "IRM-v1.0.2-windows-x64-offline-setup.exe"
+  },
+  "ubuntu": {
+    "release": "22.04",
+    "architecture": "amd64",
+    "rid": "linux-x64",
+    "mssqlPackageVersion": "16.0.4295.3-1",
+    "artifact": "IRM-v1.0.1-ubuntu22.04-amd64-offline.iso"
+  }
+}

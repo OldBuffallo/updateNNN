@@ -1,6 +1,7 @@
 @page "/import"
 @using IRM.Services
 @using IRM.Data.Models
+@using Microsoft.AspNetCore.Components.Authorization
 @inject ImportService ImportSvc
 @inject CompanyService CompanySvc
 @inject ExportService ExportSvc
@@ -8,8 +9,10 @@
 @inject CatalogService CatalogSvc
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthState
+@implements IDisposable
 
-<PageTitle>Import Excel — IRM v1.0.0</PageTitle>
+<PageTitle>Import Excel — IRM v1.0.2</PageTitle>
 
 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
     <MudStack Spacing="0">
@@ -113,6 +116,7 @@
 
             <MudItem xs="6" md="4"><MudTextField T="string" Label="Số GPLĐ" @bind-Value="_mf.WorkPermitNumber" Variant="Variant.Outlined" /></MudItem>
             <MudItem xs="6" md="4"><MudTextField T="string" Label="Số Visa" @bind-Value="_mf.VisaNumber" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Ký hiệu Visa" @bind-Value="_mf.VisaSymbol" Variant="Variant.Outlined" /></MudItem>
             <MudItem xs="12" md="4"><MudTextField T="string" Label="Địa chỉ" @bind-Value="_mf.Address" Variant="Variant.Outlined" /></MudItem>
 
             <MudItem xs="12"><MudTextField T="string" Label="Ghi chú" @bind-Value="_mf.Note" Variant="Variant.Outlined" Lines="2" /></MudItem>
@@ -636,7 +640,8 @@
             // Save template if checked
             if (_saveTemplate && !string.IsNullOrWhiteSpace(_templateName))
             {
-                await ImportSvc.SaveTemplateAsync(_templateName, _selectedCompany?.IDCompany, _columnMappings, "admin");
+                var templateUser = (await AuthState.GetAuthenticationStateAsync()).User.Identity?.Name ?? "unknown";
+                await ImportSvc.SaveTemplateAsync(_templateName, _selectedCompany?.IDCompany, _columnMappings, templateUser);
                 await LoadTemplatesAsync();
                 Snackbar.Add($"✅ Đã lưu template '{_templateName}'", Severity.Success);
             }
@@ -686,12 +691,13 @@
 
         try
         {
+            var currentUser = (await AuthState.GetAuthenticationStateAsync()).User.Identity?.Name ?? "unknown";
             _importResult = await ImportSvc.ExecuteImportAsync(
                 _previewRows,
                 _duplicateDecisions,
                 _selectedCompany?.IDCompany ?? 0,
                 _uploadedFileName ?? "unknown.xlsx",
-                "admin"
+                currentUser
             );
 
             await LoadHistoryAsync();
@@ -834,5 +840,10 @@
         {
             Snackbar.Add($"❌ Lỗi tải file mẫu: {ex.Message}", Severity.Error);
         }
+    }
+
+    public void Dispose()
+    {
+        _fileStream?.Dispose();
     }
 }

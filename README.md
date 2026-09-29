@@ -1,176 +1,92 @@
-# Immigration Report Manager v0.1.1 (IRM)
+# Immigration Report Manager v1.0.1
 
-Hệ thống quản lý người nước ngoài với web Blazor và WPF chạy song song trên cùng database. v0.1.1 là bản hotfix giao diện trên nền schema additive v0.1.0, không thay đổi cột của các bảng legacy.
+IRM là ứng dụng nội bộ quản lý hồ sơ người nước ngoài, doanh nghiệp, lưu trú, kiểm tra, import và báo cáo. Bản v1.0.1 sử dụng một mã nguồn và một schema SQL Server trên cả Windows lẫn Ubuntu.
 
-> **Deployment status:** demo/staging `v0.1.1` từ tag `v0.1.1`, commit `7f0bb51`, deployment `dep_K7mcqFSJCIRJaFsE`, đang chạy tại `https://irm.180.93.103.206.nip.io`; customer production chưa được phê duyệt. Xem [báo cáo hotfix v0.1.1](docs/IRM-v0.1.1-hotfix-report.md) và [báo cáo triển khai v0.1.0](docs/IRM-v0.1.0-implementation-report.md).
+## Trạng thái phát hành
 
-## 📌 Trạng thái dự án
+- Runtime phát hành chỉ hỗ trợ Microsoft SQL Server 2022 Express CU27, build `16.0.4295.3`.
+- Không có SQLite hoặc LocalDB trong gói ứng dụng.
+- Hai artifact dự kiến: `IRM-v1.0.1-windows-x64-setup.exe` và `IRM-v1.0.1-ubuntu22.04-amd64-offline.iso`.
+- Bộ cài hoạt động ngoại tuyến sau khi được build với đầy đủ media Microsoft.
+- Chưa được coi là sẵn sàng bàn giao cho đến khi hai artifact được tạo và vượt nghiệm thu trên máy sạch.
 
-| Giai đoạn | Tên | Trạng thái |
-|:---:|:---|:---:|
-| GĐ1 | Khảo sát Hệ thống Cũ | ✅ Done |
-| GĐ2 | Thiết kế Giải pháp | ✅ Done |
-| GĐ3 | Demo Khách hàng | ✅ Done |
-| GĐ4 | Chỉnh sửa theo Yêu cầu | ✅ Dev/Test complete |
-| GĐ5 | Deploy Test Server Thật | ✅ Demo/staging verified |
-| GĐ6 | Kiểm tra & Sửa lỗi | 🔄 17 automated tests pass; UAT pending |
-| GĐ7 | Bàn giao & Hướng dẫn | 📋 Todo |
+## Cấu hình tối thiểu
 
-> Xem chi tiết tại [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md).
-
-## Demo trực tiếp
-
-**[Xem demo IRM v0.1.1 tại đây →](https://irm.180.93.103.206.nip.io/)**
-
-> Đây là môi trường demo/staging, không phải production của khách hàng.
-
-## Tính năng chính
-
-| Tính năng | Mô tả |
+| Thành phần | Yêu cầu |
 |---|---|
-| 📊 Dashboard | KPI cards, biểu đồ quốc tịch/GPLĐ/hết hạn, bảng cảnh báo |
-| 🏢 Quản lý Công ty | Danh sách, thêm/sửa, lọc theo lĩnh vực |
-| 👥 Quản lý NLĐ | Theo dõi lao động nước ngoài, hộ chiếu, visa, thăm thân |
-| 🎓 Quản lý Du học sinh | Theo dõi du học sinh, trường học, visa, học bổng |
-| 📤 Import Excel | Wizard 4 bước: upload → ghép cột → xem trước → kết quả |
-| 🔍 Tìm kiếm toàn cục | Tìm theo tên, hộ chiếu, công ty, quốc tịch |
-| 📝 Báo cáo tùy chỉnh | Chọn cột, điều kiện lọc, nhóm, xuất Excel/PDF |
-| ⚙️ Quản trị | Tài khoản, danh mục, nhật ký hệ thống, lịch sử import |
-| 👨‍👩‍👧 Thăm thân | Hồ sơ người và thân nhân, sponsor công ty/người lao động |
-| 🏠 Lưu trú | CSLT, doanh nghiệp thuê, người ở và lịch sử địa chỉ |
-| ✅ Kiểm tra | Đợt kiểm tra, snapshot kết quả, lookback |
-| 📍 Thống kê địa bàn | As-of, distinct người, khu vực, giấy tờ/định danh |
+| CPU | x64/amd64, 2 core, 2 GHz |
+| RAM | 2 GB khả dụng trước khi cài |
+| Ổ đĩa | 10 GB trống trước khi cài và tối thiểu 4 GB sau khi cài |
+| Windows | Windows 11 hoặc Windows Server 2019/2022/2025 64-bit còn hỗ trợ |
+| Linux | Ubuntu 22.04 LTS amd64, ext4 hoặc XFS |
+| Internet | Không cần khi cài đặt hoặc vận hành |
 
-## Tech Stack
+Mốc RAM và ổ đĩa là tài nguyên còn trống trên máy đã có hệ điều hành, không phải tổng cấu hình máy.
 
-| Thành phần | Công nghệ |
-|---|---|
-| **Backend** | ASP.NET Core 8 (.NET 8) |
-| **Frontend** | Blazor Server (Interactive Server-Side Rendering) |
-| **UI Framework** | MudBlazor v9.3 (Material Design) |
-| **ORM** | Entity Framework Core 8.0 |
-| **Database** | SQL Server 2014+ (production) / SQLite (development/demo) |
-| **Excel** | ClosedXML 0.104.2 |
-| **Deploy** | Windows Service / Docker / GitHub Pages (demo) |
+## Thành phần chính
 
-## Cấu trúc dự án
+- ASP.NET Core 8 Blazor Interactive Server, publish self-contained.
+- Entity Framework Core SQL Server 8.0.31.
+- SQL Server 2022 Express CU27 với database `IRM`.
+- ClosedXML cho import và xuất Excel.
+- Microsoft Defender trên Windows, ClamAV quét theo yêu cầu trên Ubuntu.
+- Database migration, health check, backup nén và giới hạn lưu trữ.
 
-```
-immigration-reportmanager-master/
-├── IRM/                        # Web app Blazor Server (.NET 8)
-│   ├── Components/
-│   │   ├── Pages/              # 8 trang: Dashboard, Companies, Employees,
-│   │   │                       #          Students, Import, Search, Reports, Admin
-│   │   └── Layout/             # MainLayout, NavMenu
-│   ├── Data/
-│   │   ├── Models/             # 14 entity models
-│   │   ├── IrmDbContext.cs     # DbContext (19 DbSets)
-│   │   └── DatabaseSeeder.cs   # Seed data mẫu
-│   ├── Services/               # 11 services: Import, Export, Dashboard,
-│   │                           #              Search, Auth, Audit, Catalog...
-│   ├── wwwroot/                # Static files
-│   ├── appsettings.json        # Cấu hình DB + Port
-│   └── Program.cs              # Entry point + DB initialization
-├── deploy/                     # Scripts triển khai
-│   ├── build-package.ps1       # Đóng gói USB cho deploy
-│   ├── install.ps1             # Cài đặt 1-click (8 bước)
-│   ├── quick-install.ps1       # Cài đặt nhanh (auto-detect SQL)
-│   ├── uninstall.ps1           # Gỡ bỏ
-│   ├── backup-old-server.ps1   # Backup DB máy cũ
-│   └── sql/                    # SQL migration scripts
-├── mockup-demo/                # Demo tĩnh HTML/CSS/JS (GitHub Pages)
-├── docs/                       # Tài liệu dự án theo giai đoạn
-├── Dockerfile                  # Docker deploy (Render cloud)
-├── .github/workflows/          # GitHub Actions → GitHub Pages
-├── CONTRIBUTING.md             # Hướng dẫn đóng góp
-├── deploy-guide.md             # Hướng dẫn deploy production
-├── DEPLOYMENT.md               # Hướng dẫn triển khai chi tiết
-├── PROJECT_MANAGEMENT.md       # Quản lý dự án 7 giai đoạn
-└── demo.md                     # Mô tả tính năng demo
+## Phát triển và kiểm thử
+
+Máy phát triển cần một SQL Server tương thích. Đặt connection string qua biến môi trường, không lưu mật khẩu vào Git:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection = 'Server=127.0.0.1,14331;Database=IRM;User Id=irm_app;Password=...;Encrypt=True;TrustServerCertificate=True'
+dotnet run --project IRM/IRM.csproj
 ```
 
-## Yêu cầu phát triển
+SQLite chỉ được dùng trong test in-memory để kiểm thử nhanh và nằm riêng trong `IRM.Tests`; nó không được tham chiếu bởi project phát hành.
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- SQL Server 2014+ (hoặc để trống để dùng SQLite)
-- IDE: Visual Studio 2022 / VS Code / Rider
+```powershell
+dotnet test IRM.Tests/IRM.Tests.csproj -c Release
+```
 
-## Chạy locally
+## Tạo bộ cài
+
+### Windows
+
+1. Đặt media Microsoft đã ký vào `deploy/vendor/windows/`:
+   - `SQLEXPR_x64_ENU.exe`
+   - `SQLServer2022-KB5104824-x64.exe`
+2. Cài Inno Setup 6 trên máy build.
+3. Chạy:
+
+```powershell
+./deploy/windows/build-windows-installer.ps1
+```
+
+### Ubuntu
+
+Chạy trên máy build Ubuntu 22.04 amd64 đã cấu hình repository chính thức của Microsoft:
 
 ```bash
-cd IRM
-dotnet run
-# Mở http://localhost:5050
+sudo ./deploy/linux/build-ubuntu-offline.sh
 ```
 
-> Nếu không cấu hình SQL Server, app sẽ tự chuyển sang SQLite với data mẫu.
+Build tạo local APT repository, app self-contained, chữ ký ClamAV, SBOM và checksum trong ISO.
 
-## Build & Publish
+Chi tiết cài đặt, bảo mật và checklist nghiệm thu nằm trong [hướng dẫn phát hành](docs/INSTALLATION-v1.0.1.md). Trạng thái và các điều kiện còn thiếu được ghi tại [biên bản sẵn sàng](docs/RELEASE-READINESS-v1.0.1.md).
 
-```bash
-# Framework-dependent (nhẹ, cần .NET Runtime trên server)
-cd IRM
-dotnet publish -c Release -o ./publish
+## Bảo mật mặc định
 
-# Self-contained (không cần .NET Runtime, nặng hơn)
-cd IRM
-dotnet publish -c Release --self-contained -r win-x64 -o ./publish
-```
+- Không có mật khẩu quản trị mặc định.
+- Bộ cài chỉ yêu cầu đặt mật khẩu quản trị IRM và mật khẩu phục hồi `irm_dba`; mật khẩu bootstrap SQL được sinh ngẫu nhiên rồi tài khoản `sa` bị vô hiệu hóa.
+- Runtime dùng login `irm_app` với quyền đọc, ghi, thực thi và backup; không có quyền sysadmin.
+- Login `sa` bị vô hiệu hóa sau bootstrap; `irm_dba` được dùng cho phục hồi và bảo trì.
+- SQL Server chỉ lắng nghe tại loopback cổng `14331`.
+- HTTP chỉ chấp nhận trên loopback; truy cập LAN dùng HTTPS cổng `5443`.
+- Upload bị chặn nếu antivirus không hoạt động hoặc ổ đĩa còn dưới 1 GB.
 
-## Deploy production
+## Dữ liệu và backup
 
-Xem hướng dẫn chi tiết:
-- [deploy-guide.md](deploy-guide.md) — Quy trình triển khai 6 bước
-- [DEPLOYMENT.md](DEPLOYMENT.md) — Cấu hình server, database, troubleshooting
+Backup SQL được tạo hằng ngày, kiểm tra checksum rồi nén thành `IRM_*.bak.gz`. Hệ thống giữ tối đa 7 bản và tổng dung lượng tối đa 2 GB, nhưng không xóa bản hợp lệ cuối cùng. Công cụ phục hồi nằm trong `C:\ProgramData\IRM\tools` trên Windows và lệnh `restore-irm` trên Ubuntu.
 
-**Tóm tắt nhanh:**
-
-```bash
-# Trên máy dev: đóng gói
-.\deploy\build-package.ps1 -Zip
-
-# Trên máy chủ: cài đặt 1-click
-.\quick-install.ps1 -SqlInstance ".\SQLEXPRESS"
-```
-
-Yêu cầu server: RAM ≥ 2GB · Disk ≥ 200MB · CPU ≥ 2 nhân
-
-## Database
-
-### Bảng cũ (giữ nguyên từ hệ thống WPF)
-
-`Accounts`, `Companies`, `Employees`, `Fields`, `Careers`, `CareerGroups`, `Nationality`, `Investment`, `PhoneNumbers`, `Emails`, `Districts`, `Wards`, `Attach`
-
-### Bảng mở rộng có trước baseline v0.1.0
-
-`AuditLogs`, `ImportHistories`, `ImportBackups`, `ColumnMappingTemplates`, `Students`, `ArchivedEmployees`
-
-### Bảng additive của v0.1.0
-
-`SchemaVersions`, `ForeignPersons`, `ForeignPersonSourceLinks`, `StayCases`, `FamilyVisitDetails`, `AdministrativeUnits`, `ResidencePeriods`, `ImmigrationDocuments`, `ElectronicIdentities`, `CompanyProfiles`, `CompanySites`, `EconomicZones`, `SiteZoneMemberships`, `AccommodationsV010`, `CompanyAccommodationAgreements`, `CompanyRepresentatives`, `StoredFiles`, `CompanyLegalDocuments`, `InspectionsV010`, `InspectionSubjects`, `WebCredentials`, `WebRoleAssignments`, `LegacyChangeEvents`, `MigrationIssues`
-
-> **Lưu ý:** IRM v0.1.0 chạy song song với phần mềm desktop cũ, dùng chung database. Migration v0.1.0 chỉ thêm bảng mới; ứng dụng không tự ALTER schema lúc khởi động.
-
-## Tài liệu liên quan
-
-| Tài liệu | Nội dung |
-|---|---|
-| [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md) | Quản lý 7 giai đoạn, tasks, GitHub Issues |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Quy trình làm việc, branching, code review |
-| [deploy-guide.md](deploy-guide.md) | Hướng dẫn triển khai production |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Cấu hình server chi tiết |
-| [demo.md](demo.md) | Mô tả demo cho khách hàng |
-| [docs/IRM-v0.1.0-database-architecture-report.md](docs/IRM-v0.1.0-database-architecture-report.md) | ERD tổng thể/theo miền và catalog 43 bảng |
-| [docs/](docs/) | Tài liệu từng giai đoạn dự án |
-
-## Thành viên
-
-| Vai trò | Người phụ trách |
-|---|---|
-| Project Lead | — |
-| Dev A | Backend, DB, Import/Export, Deploy |
-| Dev B | Frontend, UI/UX, Dashboard, Reports |
-
----
-
-*IRM v0.1.1 — quản lý người nước ngoài theo dữ liệu hợp nhất và lịch sử hiệu lực.*
+- Database nghiệp vụ: `IRM`.
+- File đính kèm lưu ngoài database.
+- SQL Server Express giới hạn 10 GB mỗi database.

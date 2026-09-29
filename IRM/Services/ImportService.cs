@@ -174,6 +174,7 @@ public class ImportService
                 preview.Passport = employee.Passport;
                 preview.Address = employee.Address;
                 preview.VisaNumber = employee.VisaNumber;
+                preview.VisaSymbol = employee.VisaSymbol;
                 preview.TemporaryStayDisplay = employee.TemporaryStay?.ToString("dd/MM/yyyy");
                 preview.WorkPermitDisplay = employee.WorkPermitString;
 
@@ -310,6 +311,7 @@ public class ImportService
                                     existing.WorkPermit,
                                     existing.WorkPermitNumber,
                                     existing.VisaNumber,
+                                    existing.VisaSymbol,
                                     existing.TemporaryStay,
                                     existing.Note,
                                     existing.FamilyVisit,
@@ -343,6 +345,7 @@ public class ImportService
                                 existing.WorkPermit = newData.WorkPermit;
                                 existing.WorkPermitNumber = newData.WorkPermitNumber;
                                 existing.VisaNumber = newData.VisaNumber;
+                                existing.VisaSymbol = newData.VisaSymbol;
                                 existing.TemporaryStay = newData.TemporaryStay;
                                 if (!string.IsNullOrEmpty(newData.Note))
                                     existing.Note = newData.Note;
@@ -511,6 +514,8 @@ public class ImportService
                             emp.WorkPermitNumber = wpn.GetString();
                         if (oldData.TryGetProperty("VisaNumber", out var visa))
                             emp.VisaNumber = visa.GetString();
+                        if (oldData.TryGetProperty("VisaSymbol", out var visaSym))
+                            emp.VisaSymbol = visaSym.GetString();
                         if (oldData.TryGetProperty("TemporaryStay", out var ts) && ts.ValueKind != JsonValueKind.Null)
                             emp.TemporaryStay = ts.GetDateTime();
                         if (oldData.TryGetProperty("Note", out var note))
@@ -910,6 +915,9 @@ public class ImportService
 
         if (rowData.TryGetValue("VisaNumber", out var visa))
             emp.VisaNumber = visa;
+
+        if (rowData.TryGetValue("VisaSymbol", out var visaSym))
+            emp.VisaSymbol = visaSym;
 
         if (rowData.TryGetValue("TemporaryStay", out var ts) && !string.IsNullOrWhiteSpace(ts))
         {

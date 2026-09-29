@@ -182,6 +182,7 @@ public class ExportService
             ["Ngày sinh"] = e => e.Birthday?.ToString("dd/MM/yyyy") ?? "",
             ["Còn lại (ngày)"] = e => e.DaysUntilExpiry?.ToString() ?? "",
             ["Số Visa"] = e => e.VisaNumber ?? "",
+            ["Ký hiệu Visa"] = e => e.VisaSymbol ?? "",
             ["Địa chỉ"] = e => e.Address ?? "",
             ["Ghi chú"] = e => e.Note ?? "",
             // Cột thăm thân

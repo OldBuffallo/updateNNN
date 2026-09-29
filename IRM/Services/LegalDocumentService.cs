@@ -21,13 +21,15 @@ public sealed class LegalDocumentService : ILegalDocumentService
     private readonly string _storageRoot;
     private readonly IServiceAuthorizationGuard _guard;
     private readonly IMalwareScanner _malwareScanner;
+    private readonly IStorageCapacityGuard _storageCapacityGuard;
     public LegalDocumentService(IrmDbContext db, AuditService audit, IConfiguration configuration, IWebHostEnvironment environment,
-        IServiceAuthorizationGuard guard, IMalwareScanner malwareScanner)
+        IServiceAuthorizationGuard guard, IMalwareScanner malwareScanner, IStorageCapacityGuard? storageCapacityGuard = null)
     {
         _db = db;
         _audit = audit;
         _guard = guard;
         _malwareScanner = malwareScanner;
+        _storageCapacityGuard = storageCapacityGuard ?? AllowAllStorageCapacityGuard.Instance;
         _storageRoot = Path.GetFullPath(configuration["FileStorage:Root"]
             ?? Path.Combine(environment.ContentRootPath, "..", "irm-private-files"));
     }
@@ -49,6 +51,7 @@ public sealed class LegalDocumentService : ILegalDocumentService
         var extension = Path.GetExtension(Path.GetFileName(originalName));
         ValidateUploadMetadata(extension, contentType);
         Directory.CreateDirectory(_storageRoot);
+        _storageCapacityGuard.EnsureCanWrite(_storageRoot);
         var storageName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
         var target = Path.GetFullPath(Path.Combine(_storageRoot, storageName));
         if (!target.StartsWith(_storageRoot, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Đường dẫn tệp không hợp lệ.");
@@ -117,6 +120,12 @@ public sealed class LegalDocumentService : ILegalDocumentService
         return new FileStream(target, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, FileOptions.Asynchronous);
     }
 
+    private sealed class AllowAllStorageCapacityGuard : IStorageCapacityGuard
+    {
+        public static readonly AllowAllStorageCapacityGuard Instance = new();
+        public void EnsureCanWrite(string path) { }
+    }
+
 }
 
 public sealed class WindowsDefenderMalwareScanner : IMalwareScanner
@@ -135,5 +144,33 @@ public sealed class WindowsDefenderMalwareScanner : IMalwareScanner
             ?? throw new InvalidOperationException("Không khởi động được Windows Defender.");
         await process.WaitForExitAsync(cancellationToken);
         if (process.ExitCode != 0) throw new InvalidOperationException("Tệp không vượt qua kiểm tra mã độc.");
+    }
+}
+
+public sealed class ClamAvMalwareScanner : IMalwareScanner
+{
+    public async Task ScanAsync(string path, CancellationToken cancellationToken = default)
+    {
+        const string executable = "/usr/bin/clamscan";
+        if (!File.Exists(executable))
+            throw new InvalidOperationException("ClamAV không khả dụng; tệp không được lưu.");
+
+        var startInfo = new ProcessStartInfo(executable)
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        startInfo.ArgumentList.Add("--no-summary");
+        startInfo.ArgumentList.Add("--infected");
+        startInfo.ArgumentList.Add(path);
+        using var process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("Không khởi động được ClamAV.");
+        await process.WaitForExitAsync(cancellationToken);
+        if (process.ExitCode == 1)
+            throw new InvalidOperationException("Tệp không vượt qua kiểm tra mã độc.");
+        if (process.ExitCode != 0)
+            throw new InvalidOperationException("ClamAV không thể hoàn thành việc quét; tệp không được lưu.");
     }
 }

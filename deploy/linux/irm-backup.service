@@ -1,0 +1,11 @@
+[Unit]
+Description=IRM compressed SQL Server backup
+After=mssql-server.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/irm
+ExecStart=/opt/irm/IRM --backup
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_GCHeapHardLimit=0x20000000

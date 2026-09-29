@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.0.2] - 2026-09-27
+
+### Fixed
+
+- **[CRITICAL] SignalR MaximumReceiveMessageSize**: Mặc định 32 KB quá nhỏ — file Excel import và export qua WebSocket bị cắt giữa chừng. Tăng lên 10 MB, thêm timeout 2 phút cho VPS chậm.
+- **[HIGH] SourceType không nhất quán**: `DashboardService` dùng `"Employee"` nhưng `ImportService`/`LegacySyncService` dùng `"EMPLOYEE"` — Dashboard đếm sai số thăm thân.
+- **[HIGH] Import hardcode username `"admin"`**: Audit log ghi sai người thực hiện import. Thay bằng user thực tế từ `AuthenticationStateProvider`.
+- **[MEDIUM] AllowedHosts chỉ cho localhost**: Client LAN bị block khi truy cập qua hostname/IP. Đổi thành `"*"` (bảo mật vẫn bởi `RequireHttpsForRemoteClients` middleware).
+- **[MEDIUM] Import MemoryStream leak**: `_fileStream` không dispose khi navigate away. Thêm `IDisposable` cho Import.razor.
+
+### Added
+
+- **Trường "Ký hiệu Visa"** (`VisaSymbol`): Theo yêu cầu khách hàng — thêm cột mới vào Employee, ArchivedEmployee, Import/Export Excel, Reports, form nhập thủ công. Auto-detect keywords: `ký hiệu visa`, `ky hieu visa`, `visa symbol`.
+- EF Migration `AddVisaSymbol` cho SQL Server.
+
+### Changed
+
+- Bump phiên bản từ v1.0.1 → v1.0.2.
+- Test suite: 84/84 tests PASS.
+
+---
+
+## [1.0.1] - 2026-09-21
+
+### Changed
+
+- Chuẩn hóa runtime chỉ dùng SQL Server 2022 Express CU27 trên Windows và Ubuntu.
+- Tách SQLite sang project test; không còn trong artifact ứng dụng.
+- Thêm bootstrap quản trị không dùng mật khẩu mặc định, login `irm_app`/`irm_dba` và migration ban đầu.
+- Thêm Defender/ClamAV theo hệ điều hành, health check và bảo vệ dung lượng upload.
+- Thêm builder bộ cài Windows và ISO Ubuntu ngoại tuyến, backup 7 bản/2 GB, SBOM và checksum.
+- Đồng bộ phiên bản ứng dụng và tài liệu thành v1.0.1.
+
 Tất cả thay đổi đáng chú ý của dự án IRM được ghi lại tại đây.
 Format theo [Keep a Changelog](https://keepachangelog.com/).
 Versioning theo [Semantic Versioning](https://semver.org/).

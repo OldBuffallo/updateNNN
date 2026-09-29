@@ -8,7 +8,7 @@
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
 
-<PageTitle>Báo cáo - IRM v1.0.0</PageTitle>
+<PageTitle>Báo cáo - IRM v1.0.2</PageTitle>
 
 <div class="section-header" style="border-bottom:none; padding-bottom:0; margin-bottom:8px;">
     <h3>📝 Tạo báo cáo tùy chỉnh</h3>
@@ -268,6 +268,7 @@
         new() { Name = "Ngày sinh", Selected = false },
         new() { Name = "Còn lại (ngày)", Selected = true },
         new() { Name = "Số Visa", Selected = false },
+        new() { Name = "Ký hiệu Visa", Selected = false },
         new() { Name = "Địa chỉ", Selected = false },
         new() { Name = "Ghi chú", Selected = false },
         // Thăm thân
@@ -356,6 +357,7 @@
         "Ngày sinh" => emp.Birthday?.ToString("dd/MM/yyyy") ?? "",
         "Còn lại (ngày)" => emp.DaysUntilExpiry?.ToString() ?? "",
         "Số Visa" => emp.VisaNumber ?? "",
+        "Ký hiệu Visa" => emp.VisaSymbol ?? "",
         "Địa chỉ" => emp.Address ?? "",
         "Ghi chú" => emp.Note ?? "",
         "Thăm thân" => emp.FamilyVisitString,

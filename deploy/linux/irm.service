@@ -1,0 +1,22 @@
+[Unit]
+Description=IRM v1.0.1
+After=network.target mssql-server.service
+Requires=mssql-server.service
+
+[Service]
+Type=notify
+User=irm
+Group=irm
+WorkingDirectory=/opt/irm
+ExecStart=/opt/irm/IRM
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_GCHeapHardLimit=0x20000000
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/irm
+
+[Install]
+WantedBy=multi-user.target

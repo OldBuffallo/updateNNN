@@ -10,7 +10,7 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
-<PageTitle>Quản lý Nhân viên - IRM v1.0.0</PageTitle>
+<PageTitle>Quản lý Nhân viên - IRM v1.0.2</PageTitle>
 
 <div class="section-header">
     <h3>👥 Danh sách Nhân viên nước ngoài</h3>
@@ -290,6 +290,8 @@ else if (!_loading)
             <MudItem xs="6" md="4"><MudSelect T="int?" Label="Nghề nghiệp" @bind-Value="_f.IDCareer" Variant="Variant.Outlined" Clearable="true">@foreach(var c in _careers){<MudSelectItem T="int?" Value="@((int?)c.IDCareer)">@c.CareerName</MudSelectItem>}</MudSelect></MudItem>
             <MudItem xs="6" md="4"><MudSelect T="WorkPermitType" Label="GPLĐ" @bind-Value="_f.WorkPermit" Variant="Variant.Outlined"><MudSelectItem Value="WorkPermitType.WorkerExempt">Miễn GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.WorkerHasPermit">Đã có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.WorkerNoPermit">Chưa có GPLĐ</MudSelectItem></MudSelect></MudItem>
             <MudItem xs="6" md="4"><MudDatePicker Label="Hạn tạm trú" @bind-Date="_f.TemporaryStay" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Số Visa" @bind-Value="_f.VisaNumber" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Ký hiệu Visa" @bind-Value="_f.VisaSymbol" Variant="Variant.Outlined" /></MudItem>
             <MudItem xs="12"><MudTextField T="string" Label="Ghi chú" @bind-Value="_f.Note" Variant="Variant.Outlined" Lines="2" /></MudItem>
         </MudGrid>
     </DialogContent>
@@ -316,6 +318,11 @@ else if (!_loading)
                 <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">GPLĐ</MudText><span class="tag @(_detEmp.WorkPermit == WorkPermitType.WorkerHasPermit ? "tag-green" : _detEmp.WorkPermit == WorkPermitType.WorkerExempt ? "tag-blue" : "tag-orange")">@_detEmp.WorkPermitString</span></MudItem>
                 <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Hạn tạm trú</MudText><MudText Style="font-weight:600;">@(_detEmp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "—")</MudText></MudItem>
                 <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Còn lại</MudText><MudText Style="@GetExpiryStyle(_detEmp)">@(_detEmp.DaysUntilExpiry.HasValue ? $"{_detEmp.DaysUntilExpiry} ngày" : "—")</MudText></MudItem>
+                @if (!string.IsNullOrEmpty(_detEmp.VisaNumber) || !string.IsNullOrEmpty(_detEmp.VisaSymbol))
+                {
+                    <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Số Visa</MudText><MudText Style="font-weight:600;">@(_detEmp.VisaNumber ?? "—")</MudText></MudItem>
+                    <MudItem xs="4"><MudText Typo="Typo.caption" Color="Color.Secondary">Ký hiệu Visa</MudText><MudText Style="font-weight:600;">@(_detEmp.VisaSymbol ?? "—")</MudText></MudItem>
+                }
                 @if (_detEmp.HasFamilyVisit)
                 {
                     <MudItem xs="12"><MudDivider Class="my-1" /><MudText Typo="Typo.subtitle2" Style="font-weight:700;">👨‍👩‍👧 Thông tin thăm thân</MudText></MudItem>
@@ -561,6 +568,7 @@ else if (!_loading)
             StaffName = e.StaffName, Gender = e.Gender, Birthday = e.Birthday,
             Nationality = e.Nationality, Passport = e.Passport, IDCompany = e.IDCompany,
             IDCareer = e.IDCareer, WorkPermit = e.WorkPermit, TemporaryStay = e.TemporaryStay,
+            VisaNumber = e.VisaNumber, VisaSymbol = e.VisaSymbol,
             Note = e.Note, WorkPermitNumber = e.WorkPermitNumber, Address = e.Address,
             FamilyVisit = e.FamilyVisit, FamilyVisitRelativeName = e.FamilyVisitRelativeName,
             FamilyVisitRelationship = e.FamilyVisitRelationship, FamilyVisitEndDate = e.FamilyVisitEndDate

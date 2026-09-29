@@ -203,6 +203,11 @@ public interface IMalwareScanner
     Task ScanAsync(string path, CancellationToken cancellationToken = default);
 }
 
+public interface IStorageCapacityGuard
+{
+    void EnsureCanWrite(string path);
+}
+
 public interface ILegacySyncService
 {
     Task<int> ProcessPendingAsync(int batchSize, CancellationToken cancellationToken = default);

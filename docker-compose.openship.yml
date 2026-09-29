@@ -1,14 +1,39 @@
 services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-CU27-ubuntu-22.04
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${SQL_SA_PASSWORD:?SQL_SA_PASSWORD is required}"
+      MSSQL_PID: Express
+    volumes:
+      - sql-data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}" -Q "SELECT 1" -C -b
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   app:
-    image: irm:0.1.1
+    image: irm:1.0.2
     build:
       context: .
-      dockerfile: Dockerfile.openship-prebuilt
+      dockerfile: Dockerfile
     restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "127.0.0.1:5050:5050"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=IRM;User Id=irm_app;Password=${IRM_APP_PASSWORD:?IRM_APP_PASSWORD is required};Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - Backup__Directory=/app/data/backups
+      - DataProtection__KeysPath=/app/data/dataprotection-keys
+      - FileStorage__Root=/app/data/private-files
+      - Security__RequireHttpsForRemoteClients=false
     volumes:
-      - irm-v010-data:/app/data
+      - irm-data:/app/data
 
 volumes:
-  irm-v010-data:
+  sql-data:
+  irm-data:

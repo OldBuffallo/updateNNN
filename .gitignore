@@ -1,75 +1,52 @@
-# ============================================================
-#  IRM v2.0 — .gitignore
-# ============================================================
-
-# === Build outputs ===
-*.exe
+# Build outputs and package caches
+bin/
+obj/
+packages/
+node_modules/
 *.dll
+*.exe
 *.pdb
 *.user
 *.suo
 
-# === IDE ===
+# IDE and operating-system files
 .vs/
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# === OS ===
+.DS_Store
 Thumbs.db
 desktop.ini
-.DS_Store
 
-# === .NET packages & build ===
-packages/
-node_modules/
-bin/
-obj/
-
-# === AI / Gemini ===
-.gemini/
-
-# === Large binary files ===
-*.zip
-*.rar
-*.7z
-*.bak
-*.msi
-*.msp
-
-# === SQL Server installer (quá lớn cho git) ===
-deploy/SQLEXPRWT_x64_2014/
-
-# === Test project build ===
-TestExcelGen/bin/
-TestExcelGen/obj/
-
-# === Publish / Temp ===
-IRM/publish-temp/
-deploy-package/
-
-# === SQLite database (auto-generated) ===
+# Generated databases and runtime state
 *.db
 *.db-shm
 *.db-wal
+*.bak
+data-protection-keys/
 
-# === Build output packages (quá lớn) ===
-build-output/
-
-# === Log files ===
+# Logs and local tooling state
 *.log
-local-run.*.log
 .local-run/
-
-# === Runtime installers (quá lớn, ~106MB) ===
-deploy/SQLEXPRWT_x64_2014/
-
-# === Tách credentials scripts (chứa thông tin nhạy cảm) ===
-create-*.ps1
-
-# === AI memory bank (workspace artifact, not project code) ===
+.gemini/
 memory-bank/
 
-# === Debug/deployment logs ===
-paramiko_debug.log
+# Generated publish, installer, and handoff artifacts
+IRM/publish-temp/
+build-output/
+deploy-package/
+IRM-v*-offline-installer/
+IRM-v*-ubuntu-installer/
+*.zip
+*.rar
+*.7z
+*.iso
+*.msi
+*.msp
+
+# Licensed third-party installer media; keep deploy/vendor/**/README.md tracked
+deploy/SQLEXPRWT_x64_2014/
+
+# Local scripts may contain credentials
+create-*.ps1

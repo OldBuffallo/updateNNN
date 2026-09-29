@@ -35,7 +35,7 @@ public class DashboardService
 
         // Thăm thân — V0.1.0 nguồn chính + legacy fallback
         var syncedEmpIds = await _db.ForeignPersonSourceLinks.AsNoTracking()
-            .Where(x => x.SourceType == "Employee")
+            .Where(x => x.SourceType == "EMPLOYEE")
             .Select(x => x.SourceId)
             .ToListAsync();
         var syncedSet = new HashSet<int>(syncedEmpIds.Select(s => int.TryParse(s, out var id) ? id : -1));

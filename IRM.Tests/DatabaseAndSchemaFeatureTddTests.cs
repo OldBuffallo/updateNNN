@@ -8,7 +8,7 @@ namespace IRM.Tests;
 public sealed class DatabaseAndSchemaFeatureTddTests
 {
     [Fact]
-    public async Task SchemaVersionService_ValidatesVersion010_ThrowsWhenMissing()
+    public async Task SchemaVersionService_ValidatesVersion101_ThrowsWhenMissing()
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: false);
@@ -16,13 +16,35 @@ public sealed class DatabaseAndSchemaFeatureTddTests
 
         // Initially empty SchemaVersions table -> throws InvalidOperationException
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.ValidateAsync());
-        Assert.Contains("0.1.0", ex.Message);
+        Assert.Contains("1.0.1", ex.Message);
 
-        // Add 0.1.0 version -> ValidateAsync completes successfully
-        db.Context.SchemaVersions.Add(new SchemaVersion { Version = "0.1.0", AppliedAt = DateTime.UtcNow });
+        // Add the required release schema version -> ValidateAsync completes successfully
+        db.Context.SchemaVersions.Add(new SchemaVersion
+        {
+            Version = "1.0.1",
+            Checksum = SchemaVersionService.RequiredChecksum,
+            AppliedAt = DateTime.UtcNow
+        });
         await db.Context.SaveChangesAsync();
 
         await service.ValidateAsync(); // Should not throw
+    }
+
+    [Fact]
+    public async Task SchemaVersionService_RejectsWrongChecksum()
+    {
+        await using var db = new TestDatabase();
+        await db.InitializeAsync(seedBaseline: false);
+        db.Context.SchemaVersions.Add(new SchemaVersion
+        {
+            Version = SchemaVersionService.RequiredVersion,
+            Checksum = "WRONG",
+            AppliedAt = DateTime.UtcNow
+        });
+        await db.Context.SaveChangesAsync();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => new SchemaVersionService(db.Context).ValidateAsync());
     }
 
     [Fact]

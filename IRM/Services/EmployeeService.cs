@@ -188,6 +188,7 @@ public class EmployeeService
             WorkPermit = (int)emp.WorkPermit,
             WorkPermitNumber = emp.WorkPermitNumber,
             VisaNumber = emp.VisaNumber,
+            VisaSymbol = emp.VisaSymbol,
             TemporaryStay = emp.TemporaryStay,
             Note = emp.Note,
             SettlementResults = emp.SettlementResults,

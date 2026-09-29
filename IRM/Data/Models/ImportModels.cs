@@ -40,6 +40,7 @@ public class ImportPreviewRow
     public string? CareerDisplay { get; set; }
     public string? WorkPermitDisplay { get; set; }
     public string? VisaNumber { get; set; }
+    public string? VisaSymbol { get; set; }
     public string? TemporaryStayDisplay { get; set; }
 
     // Công ty (resolve từ Excel)
@@ -94,6 +95,7 @@ public static class SystemFields
         { "WorkPermit",    "GPLĐ" },
         { "WorkPermitNumber", "Số GPLĐ" },
         { "VisaNumber",    "Số Visa" },
+        { "VisaSymbol",    "Ký hiệu Visa" },
         { "TemporaryStay", "Hạn tạm trú" },
         { "Note",          "Ghi chú" },
         // Thăm thân
@@ -133,6 +135,7 @@ public static class SystemFields
         { "WorkPermit",    new[] { "gplđ", "gpld", "work permit", "giấy phép" } },
         { "WorkPermitNumber", new[] { "số gplđ", "so gpld", "wp number" } },
         { "VisaNumber",    new[] { "visa", "số visa", "so visa", "visa number" } },
+        { "VisaSymbol",    new[] { "ký hiệu visa", "ky hieu visa", "visa symbol", "visa code", "ký hiệu", "ky hieu" } },
         { "TemporaryStay", new[] { "tạm trú", "tam tru", "temporary stay", "hạn tạm trú", "han tam tru" } },
         { "Note",          new[] { "ghi chú", "ghi chu", "note", "chú thích" } },
         // Thăm thân

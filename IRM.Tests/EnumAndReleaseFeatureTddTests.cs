@@ -220,17 +220,25 @@ public sealed class EnumAndReleaseFeatureTddTests
         Assert.False(await db.Context.CareerGroups.AnyAsync());
         Assert.False(await db.Context.Careers.AnyAsync());
 
-        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context);
+        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context, "admin", "Test-Admin-Password-1!");
 
         // Verify lookups populated
         Assert.True(await db.Context.Accounts.AnyAsync(a => a.Username == "admin" && a.Permission == AccountPermission.Admin));
         Assert.Equal(8, await db.Context.Fields.CountAsync());
         Assert.Equal(4, await db.Context.CareerGroups.CountAsync());
         Assert.Equal(4, await db.Context.Careers.CountAsync());
-        Assert.True(await db.Context.SchemaVersions.AnyAsync(s => s.Version == "0.1.0"));
+        Assert.Equal(14, await db.Context.Nationality.CountAsync());
+        Assert.Equal(3, await db.Context.Districts.CountAsync());
+        Assert.Equal(3, await db.Context.Wards.CountAsync());
+        Assert.Equal(54, await db.Context.AdministrativeUnits.CountAsync());
+        Assert.True(await db.Context.SchemaVersions.AnyAsync(s =>
+            s.Version == "1.0.1" && s.Checksum == SchemaVersionService.RequiredChecksum));
+        Assert.Empty(await db.Context.Companies.ToListAsync());
+        Assert.Empty(await db.Context.Employees.ToListAsync());
+        Assert.Empty(await db.Context.Students.ToListAsync());
 
         // Verify idempotency
-        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context);
+        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context, "admin", "Test-Admin-Password-1!");
         Assert.Single(await db.Context.Accounts.Where(a => a.Username == "admin").ToListAsync());
         Assert.Equal(8, await db.Context.Fields.CountAsync());
     }

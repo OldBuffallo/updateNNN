@@ -2,13 +2,13 @@
 
 # 📋 HỆ THỐNG QUẢN LÝ NGƯỜI NƯỚC NGOÀI (IRM)
 
-**Immigration Report Manager — Phiên bản v1.0.0**
+**Immigration Report Manager — Phiên bản v1.0.1**
 
 ---
 
 | Thông tin | Chi tiết |
 |---|---|
-| **Phần mềm** | Immigration Report Manager (IRM) v1.0.0 |
+| **Phần mềm** | Immigration Report Manager (IRM) v1.0.1 |
 | **Đối tượng** | Cán bộ quản lý xuất nhập cảnh, cán bộ nghiệp vụ |
 | **Trình duyệt hỗ trợ** | Google Chrome 90+, Microsoft Edge 90+, Firefox 88+ |
 | **Ngày cập nhật** | Tháng 08/2026 |
@@ -766,14 +766,4 @@ Nút **"+ Thêm nhanh"** trên thanh công cụ (chỉ hiện với quyền Admi
 
 ---
 
-## Liên hệ Hỗ trợ
-
-Khi gặp sự cố kỹ thuật hoặc cần hỗ trợ sử dụng, vui lòng liên hệ:
-
-- **Email:** *(điền email hỗ trợ)*
-- **Điện thoại:** *(điền SĐT hỗ trợ)*
-- **Giờ hỗ trợ:** Thứ 2 – Thứ 6, 08:00 – 17:00
-
----
-
-> *Tài liệu này được tạo cho phiên bản IRM v0.1.1. Nội dung có thể thay đổi theo cập nhật phần mềm.*
+> *Tài liệu này áp dụng cho IRM v1.0.1.*

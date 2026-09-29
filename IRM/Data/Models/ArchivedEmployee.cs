@@ -19,6 +19,7 @@ public class ArchivedEmployee
     public int WorkPermit { get; set; }
     public string? WorkPermitNumber { get; set; }
     public string? VisaNumber { get; set; }
+    public string? VisaSymbol { get; set; }          // Ký hiệu Visa
     public DateTime? TemporaryStay { get; set; }
     public string? Note { get; set; }
     public int SettlementResults { get; set; }
