@@ -1,6 +1,6 @@
 # Thiết kế chuẩn hóa light/dark mode toàn IRM
 
-Ngày: 10/11/2026. Trạng thái: **Dự thảo, chờ người dùng duyệt thiết kế**. Phạm vi đã được người dùng chọn: toàn ứng dụng, giữ bố cục hiện tại. Chưa được phép coi việc chọn phạm vi là duyệt các chi tiết bên dưới.
+Ngày: 10/11/2026. Trạng thái: **Đã được người dùng phê duyệt thiết kế và yêu cầu triển khai**. Phạm vi: toàn ứng dụng, giữ bố cục hiện tại.
 
 ## Mục tiêu và lý do
 
@@ -15,7 +15,7 @@ Không thay database, schema, migration, mã danh mục cũ, entity, quyền, th
 1. Sửa riêng bảng và nút màn hình Import: thay đổi ít hơn nhưng theme vẫn có thể lệch ở nơi khác và sau tải lại.
 2. Chuẩn hóa cơ chế theme và các cặp màu toàn Web: phạm vi rộng hơn, giải quyết lỗi nguồn và rà soát những control cùng cơ chế.
 
-Người dùng đã chọn phương án 2. Chi tiết kiến trúc/theme dưới đây là đề xuất kỹ thuật của người thực hiện, cần được duyệt cùng tài liệu này.
+Người dùng đã chọn phương án 2 và phê duyệt thiết kế bên dưới bằng phản hồi “Duyệt thiết kế, triển khai theo tài liệu”.
 
 ## Nguồn theme duy nhất
 
@@ -86,4 +86,4 @@ Có thể thêm công cụ test browser vào môi trường kiểm thử nếu c
 
 Builder check độc lập đã đọc thiết kế và kết luận `nothing important left`: không còn câu hỏi quan trọng cản trở lập kế hoạch. Đây là rà soát tính đầy đủ của thiết kế, không phải nghiệm thu UI hoặc phê duyệt thay người dùng.
 
-Thiết kế đang chờ người dùng phê duyệt. Sau khi được duyệt sẽ lập kế hoạch triển khai theo skill writing-plans; chưa viết code sản phẩm trong bước phân tích này.
+Đã nhận phê duyệt ngày 10/11/2026. Kế hoạch triển khai: [2026-11-10-irm-theme-consistency.md](../plans/2026-11-10-irm-theme-consistency.md). Giữ yêu cầu kiểm chứng và commit cục bộ trước khi kết thúc.
