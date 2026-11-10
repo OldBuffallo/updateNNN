@@ -54,6 +54,21 @@ public sealed class IrmThemePaletteTests
         }
     }
 
+    [Theory]
+    [InlineData(false, "#f4f5fa", "#ffffff", "#6e39cb")]
+    [InlineData(true, "#28243d", "#312d4b", "#b794f4")]
+    public void MaterioPalette_UsesExpectedCanvasAndReadableDrawerTokens(
+        bool dark, string expectedBackground, string expectedSurface, string expectedPrimary)
+    {
+        var palette = Palette(dark);
+        Assert.Equal(new MudColor(expectedBackground), palette.Background);
+        Assert.Equal(new MudColor(expectedSurface), palette.Surface);
+        Assert.Equal(new MudColor(expectedPrimary), palette.Primary);
+        Assert.Equal(new MudColor(expectedBackground), palette.DrawerBackground);
+        Readable(palette.DrawerText, palette.DrawerBackground, 4.5);
+        Readable(palette.DrawerIcon, palette.DrawerBackground, 4.5);
+    }
+
     private static Palette Palette(bool dark)
     {
         var theme = IrmTheme.Create();
