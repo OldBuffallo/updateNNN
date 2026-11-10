@@ -50,6 +50,27 @@ public partial class SqlImportStore
                         .ToListAsync())
                         .ToHashSet();
 
+                    // A catalog entry may have changed since preview. Validate the
+                    // whole writable batch before tracking or saving any employee.
+                    var nationalities = await _db.Nationality.AsNoTracking()
+                        .Where(n => n.Delete_flag == 0).ToListAsync();
+                    foreach (var row in previewRows.Where(r => r.ParsedEmployee is not null &&
+                        (r.Status == "new" || (r.Status == "duplicate" && r.ExistingEmployeeId.HasValue &&
+                            duplicateDecisions.GetValueOrDefault(r.ExistingEmployeeId.Value, "skip") == "update"))))
+                    {
+                        try
+                        {
+                            row.ParsedEmployee!.Nationality = ResolveNationalityCode(row.ParsedEmployee.Nationality, nationalities);
+                        }
+                        catch (InvalidOperationException ex)
+                        {
+                            result.TotalRows = previewRows.Count;
+                            result.ErrorCount = 1;
+                            result.Errors.Add($"Dòng {row.RowNumber}: {ex.Message}");
+                            throw;
+                        }
+                    }
+
                     foreach (var row in previewRows)
 
                     {

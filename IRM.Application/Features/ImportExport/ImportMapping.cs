@@ -132,11 +132,7 @@ public static class ImportMapping
 
         if (rowData.TryGetValue("Nationality", out var nat) && !string.IsNullOrWhiteSpace(nat))
         {
-            // Try match by name first, then code
-            var match = nationalities.FirstOrDefault(n =>
-                n.NationalityName.Equals(nat, StringComparison.OrdinalIgnoreCase) ||
-                n.NationalityCode.Equals(nat, StringComparison.OrdinalIgnoreCase));
-            emp.Nationality = match?.NationalityCode ?? nat;
+            emp.Nationality = ResolveNationalityCode(nat, nationalities);
         }
 
         if (rowData.TryGetValue("Passport", out var passport))
@@ -210,6 +206,27 @@ public static class ImportMapping
 
         return emp;
     }
+
+    public static string? ResolveNationalityCode(string? value, IReadOnlyCollection<NationalityEntity> nationalities)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        var normalized = NormalizeNationality(value);
+        var active = nationalities.Where(n => n.Delete_flag == 0).ToList();
+        // Preserve the actual database key, including legacy/custom codes.
+        var byCode = active.FirstOrDefault(n =>
+            NormalizeNationality(n.NationalityCode).Equals(normalized, StringComparison.OrdinalIgnoreCase));
+        if (byCode is not null) return byCode.NationalityCode;
+
+        var byName = active.FirstOrDefault(n =>
+            NormalizeNationality(n.NationalityName).Equals(normalized, StringComparison.OrdinalIgnoreCase));
+        if (byName is not null) return byName.NationalityCode;
+
+        throw new InvalidOperationException($"Quốc tịch \"{value.Trim()}\" không có trong danh mục đang hoạt động. Hãy dùng đúng tên hoặc mã tại Quản trị → Quốc tịch.");
+    }
+
+    private static string NormalizeNationality(string value) =>
+        string.Join(" ", value.Normalize(System.Text.NormalizationForm.FormC)
+            .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
     /// <summary>Parse date dạng dd/MM/yyyy</summary>
     private static bool TryParseVietnameseDate(string input, out DateTime result)
