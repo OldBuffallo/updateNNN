@@ -14,7 +14,7 @@ public sealed class EmployeeFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
-        var service = new EmployeeService(db.Context, TestSecurityContext.CreateAllowAllGuard());
+        var service = new SqlEmployeeStore(db.Context, TestSecurityContext.CreateAllowAllGuard());
 
         var emp = new Employee
         {
@@ -42,7 +42,7 @@ public sealed class EmployeeFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
-        var service = new EmployeeService(db.Context, TestSecurityContext.CreateAllowAllGuard());
+        var service = new SqlEmployeeStore(db.Context, TestSecurityContext.CreateAllowAllGuard());
         var today = DateTime.Today;
 
         var e1 = new Employee { StaffName = "E1_ExpiredYesterday", IDCompany = 1, IDCareer = 1, Nationality = "USA", TemporaryStay = today.AddDays(-1), Hidden_flag = 0, WorkingStatus = 0 };
@@ -66,7 +66,7 @@ public sealed class EmployeeFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
-        var service = new EmployeeService(db.Context, TestSecurityContext.CreateAllowAllGuard());
+        var service = new SqlEmployeeStore(db.Context, TestSecurityContext.CreateAllowAllGuard());
 
         var field = new Field { FieldName = "Công nghệ" };
         var careerGroup = new CareerGroup { CareerGroupName = "CNTT Group" };
@@ -131,7 +131,7 @@ public sealed class EmployeeFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
-        var service = new EmployeeService(db.Context, TestSecurityContext.CreateAllowAllGuard());
+        var service = new SqlEmployeeStore(db.Context, TestSecurityContext.CreateAllowAllGuard());
 
         var famExpired = new Employee
         {
@@ -171,7 +171,7 @@ public sealed class EmployeeFeatureTddTests
         await db.InitializeAsync(seedBaseline: true);
 
         var viewerGuard = TestSecurityContext.CreateGuard(IrmRoles.Viewer);
-        var serviceViewer = new EmployeeService(db.Context, viewerGuard);
+        var serviceViewer = new SqlEmployeeStore(db.Context, viewerGuard);
 
         var emp = new Employee { StaffName = "Test Guard", IDCompany = 1, IDCareer = 1, Nationality = "USA", Hidden_flag = 0 };
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => serviceViewer.CreateAsync(emp));
@@ -180,7 +180,7 @@ public sealed class EmployeeFeatureTddTests
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => serviceViewer.ArchiveExpiredTemporaryStayAsync());
 
         var editorGuard = TestSecurityContext.CreateGuard(IrmRoles.DataEditor);
-        var serviceEditor = new EmployeeService(db.Context, editorGuard);
+        var serviceEditor = new SqlEmployeeStore(db.Context, editorGuard);
         await serviceEditor.CreateAsync(emp);
         Assert.True(emp.IDEmployee > 0);
     }

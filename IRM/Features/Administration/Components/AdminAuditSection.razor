@@ -1,0 +1,41 @@
+@namespace IRM.Components.Pages
+@inherits IRM.Components.Shared.FeatureSection<Admin>
+
+<MudPaper Class="pa-4 mb-4">
+                <MudGrid>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Username" @bind-Value="Page._auditFilterUsername" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Action" @bind-Value="Page._auditFilterAction" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudDatePicker Label="Tu ngay" @bind-Date="Page._auditFrom" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudDatePicker Label="Den ngay" @bind-Date="Page._auditTo" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="2" Class="d-flex align-center">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.LoadAuditAsync">Loc</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>Thời gian</th><th>User</th><th>Action</th><th>Loai</th><th>Mo ta</th></tr></thead>
+                <tbody>
+                    @foreach (var log in Page._auditLogs)
+                    {
+                        <tr>
+                            <td>@log.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@log.Username</td>
+                            <td><MudChip T="string" Size="Size.Small" Color="@Admin.GetActionColor(log.Action)">@log.Action</MudChip></td>
+                            <td>@log.EntityType</td>
+                            <td>@log.Description</td>
+                        </tr>
+                    }
+                    @if (!Page._auditLogs.Any())
+                    {
+                        <tr><td colspan="5" style="text-align:center;color:#94a3b8;">Khong co du lieu</td></tr>
+                    }
+                </tbody>
+            </MudSimpleTable>

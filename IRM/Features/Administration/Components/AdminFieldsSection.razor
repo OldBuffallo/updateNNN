@@ -1,0 +1,38 @@
+@namespace IRM.Components.Pages
+@inherits IRM.Components.Shared.FeatureSection<Admin>
+
+<MudPaper Class="pa-4 mb-4">
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudTextField T="string" Label="Ten linh vuc" @bind-Value="Page._fieldForm.FieldName" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField T="string" Label="Mo ta" @bind-Value="Page._fieldForm.Description" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="2" Class="d-flex align-center">
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.SaveFieldAsync">@(Page._editingField ? "Luu" : "Them")</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="Page.ResetFieldForm">Hủy</MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>ID</th><th>Ten linh vuc</th><th>Mo ta</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var f in Page._fields)
+                    {
+                        <tr>
+                            <td>@f.IDField</td>
+                            <td>@f.FieldName</td>
+                            <td>@f.Description</td>
+                            <td>
+                                <MudStack Row="true" Spacing="1">
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => Page.EditField(f))">Sửa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => Page.DeleteFieldAsync(f.IDField))">Xóa</MudButton>
+                                </MudStack>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>

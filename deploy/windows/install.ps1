@@ -9,7 +9,10 @@ param(
     [switch]$NonInteractive
 )
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot 'windows-environment.ps1')
 $ProgressPreference = "SilentlyContinue"
+[Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
+$OutputEncoding = [Console]::OutputEncoding
 $minimumAvailableBytes = 2GB
 $minimumDiskBytes = 10GB
 $minimumPostInstallBytes = 4GB
@@ -19,6 +22,48 @@ $dataRoot = Join-Path $installRoot "data"
 $backupRoot = Join-Path $installRoot "backups"
 $logRoot = Join-Path $installRoot "logs"
 $toolsRoot = Join-Path $installRoot "tools"
+$script:currentStep = 'Khởi động trình cài đặt'
+
+trap {
+    $failure = $_
+    [Console]::Error.WriteLine("IRM_ERROR_STEP=$script:currentStep")
+    [Console]::Error.WriteLine("IRM_ERROR_MESSAGE=$($failure.Exception.Message)")
+    if (-not [string]::IsNullOrWhiteSpace($failure.ScriptStackTrace)) {
+        [Console]::Error.WriteLine("IRM_ERROR_LOCATION=$($failure.ScriptStackTrace)")
+    }
+    exit 1
+}
+
+function Write-InstallStep([string]$Name) {
+    $script:currentStep = $Name
+    Write-Output ("[{0}] {1}" -f (Get-Date -Format 'HH:mm:ss'), $Name)
+}
+
+function Get-LatestSqlSetupLog {
+    $bootstrapRoot = Join-Path ${env:ProgramFiles} 'Microsoft SQL Server\160\Setup Bootstrap\Log'
+    if (-not (Test-Path -LiteralPath $bootstrapRoot -PathType Container)) { return $null }
+    return Get-ChildItem -LiteralPath $bootstrapRoot -Filter Summary.txt -File -Recurse -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
+}
+
+function Invoke-CheckedInstaller {
+    param([string]$FilePath, [string[]]$Arguments, [string]$DisplayName, [int[]]$AdditionalSuccessExitCodes = @())
+    $process = Start-Process -FilePath $FilePath -ArgumentList $Arguments -Wait -PassThru
+    $successExitCodes = @(0,3010) + $AdditionalSuccessExitCodes
+    if ($process.ExitCode -notin $successExitCodes) {
+        $sqlLog = Get-LatestSqlSetupLog
+        $logHint = if ($sqlLog) { " Nhật ký SQL: $sqlLog" } else { '' }
+        throw "$DisplayName thất bại (mã $($process.ExitCode)).$logHint"
+    }
+    if ($process.ExitCode -eq 3010) { Write-Output "$DisplayName yêu cầu khởi động lại; bộ cài sẽ hoàn tất cấu hình trước khi thông báo." }
+    if ($process.ExitCode -in $AdditionalSuccessExitCodes) { Write-Output "$DisplayName không cần thực hiện vì instance đã ở đúng hoặc cao hơn mức cập nhật yêu cầu." }
+}
+
+function Get-InstalledSqlVersion([string]$InstanceId) {
+    $setup = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\$InstanceId\Setup"
+    $versionText = if (-not [string]::IsNullOrWhiteSpace($setup.PatchLevel)) { $setup.PatchLevel } else { $setup.Version }
+    return [version]$versionText
+}
 
 function Read-RequiredSecret([string]$Prompt, [int]$MinimumLength) {
     $secure = Read-Host $Prompt -AsSecureString
@@ -48,11 +93,14 @@ function Assert-PayloadIntegrity {
     }
 }
 function Assert-Preflight {
-    if (-not [Environment]::Is64BitOperatingSystem) { throw "IRM chỉ hỗ trợ Windows 64-bit." }
     $os = Get-CimInstance Win32_OperatingSystem
-    $isServer = $os.ProductType -ne 1
-    if (-not $isServer -and [Environment]::OSVersion.Version.Build -lt 19044) { throw "Máy trạm phải dùng Windows 10 21H2 hoặc Windows 11 64-bit." }
-    if ($isServer -and [Environment]::OSVersion.Version.Build -lt 17763) { throw "Máy chủ phải dùng Windows Server 2019/2022/2025." }
+    $windows = Get-IrmWindowsCompatibility -OperatingSystem $os
+    if (-not $windows.ArchitecturePassed) { throw "IRM chỉ hỗ trợ Windows 64-bit. $($windows.ArchitectureDetail)" }
+    if (-not $windows.VersionPassed) { throw $windows.VersionDetail }
+    if (-not $windows.Is64BitProcess) { throw 'Windows là 64-bit nhưng tiến trình PowerShell đang là 32-bit. Hãy chạy bộ cài EXE hoặc Windows PowerShell 64-bit.' }
+    $framework = Get-IrmNetFrameworkCompatibility
+    if (-not $framework.Passed) { throw $framework.Detail }
+
     $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
     if ($cpu.NumberOfLogicalProcessors -lt 2 -or $cpu.MaxClockSpeed -lt 2000) { throw "Cần tối thiểu 2 CPU core, 2 GHz." }
     $available = [long]$os.FreePhysicalMemory * 1KB
@@ -71,13 +119,16 @@ function Assert-Preflight {
     }
 }
 
+Write-InstallStep 'Kiểm tra tính toàn vẹn của bộ cài'
 Assert-PayloadIntegrity
+Write-InstallStep 'Kiểm tra điều kiện máy tính'
 Assert-Preflight
 Write-Host "IRM sử dụng Microsoft SQL Server 2022 Express."
 if (-not $AcceptSqlLicense -and (Read-Host "Nhập YES để chấp nhận điều khoản Microsoft SQL Server") -ne "YES") {
     throw "Chưa chấp nhận điều khoản SQL Server."
 }
-if ([string]::IsNullOrWhiteSpace($AdminUser)) { $AdminUser = Read-Host "Tên tài khoản quản trị IRM [admin]" }
+if ([string]::IsNullOrWhiteSpace($AdminUser)) { $AdminUser = $env:IRM_INSTALL_ADMIN_USER }
+if ([string]::IsNullOrWhiteSpace($AdminUser) -and -not $NonInteractive) { $AdminUser = Read-Host "Tên tài khoản quản trị IRM [admin]" }
 if ([string]::IsNullOrWhiteSpace($AdminUser)) { $AdminUser = "admin" }
 if ([string]::IsNullOrWhiteSpace($AdminPassword)) { $AdminPassword = $env:IRM_INSTALL_ADMIN_PASSWORD }
 if ([string]::IsNullOrWhiteSpace($DbaPassword)) { $DbaPassword = $env:IRM_INSTALL_DBA_PASSWORD }
@@ -95,6 +146,7 @@ if (-not $NonInteractive -and -not $PSBoundParameters.ContainsKey('EnableLan')) 
 }
 $lanUrl = if ($enableLanValue) { 'https://0.0.0.0:5443' } else { 'https://127.0.0.1:5443' }
 
+Write-InstallStep 'Sao chép ứng dụng IRM'
 New-Item -ItemType Directory -Force -Path $appRoot,$dataRoot,$backupRoot,$logRoot,$toolsRoot | Out-Null
 $existingIrmService = Get-Service IRM -ErrorAction SilentlyContinue
 if ($existingIrmService -and $existingIrmService.Status -ne 'Stopped') {
@@ -106,37 +158,46 @@ Copy-Item -LiteralPath (Join-Path $PayloadRoot "uninstall.ps1") -Destination $to
 Copy-Item -LiteralPath (Join-Path $PayloadRoot "restore.ps1") -Destination $toolsRoot -Force
 Copy-Item -LiteralPath (Join-Path $PayloadRoot "repair.ps1") -Destination $toolsRoot -Force
 Copy-Item -LiteralPath (Join-Path $PayloadRoot "backup.ps1") -Destination $toolsRoot -Force
+Copy-Item -LiteralPath (Join-Path $PayloadRoot "windows-environment.ps1") -Destination $toolsRoot -Force
+Copy-Item -LiteralPath (Join-Path $PayloadRoot "diagnose-environment.ps1") -Destination $toolsRoot -Force
 Copy-Item -LiteralPath (Join-Path $PayloadRoot "release-manifest.json") -Destination $installRoot -Force
 Copy-Item -LiteralPath (Join-Path $PayloadRoot "SBOM-dotnet.json") -Destination $installRoot -Force
 Copy-Item -LiteralPath (Join-Path $PayloadRoot "IRM-v1.0.1-schema.sql") -Destination $installRoot -Force
 Copy-Item -LiteralPath (Join-Path $PayloadRoot "SHA256SUMS.txt") -Destination $installRoot -Force
 
+$installedSqlNow = $false
 $sqlService = Get-Service 'MSSQL$IRMEXPRESS' -ErrorAction SilentlyContinue
 if (-not $sqlService) {
+    Write-InstallStep 'Cài đặt SQL Server 2022 Express'
     $baseArgs = @(
         '/Q','/ACTION=Install','/FEATURES=SQLENGINE','/INSTANCENAME=IRMEXPRESS','/SECURITYMODE=SQL',
         "/SAPWD=$saPassword",'/TCPENABLED=1','/NPENABLED=0','/SQLSVCSTARTUPTYPE=Automatic',
         '/SQLSYSADMINACCOUNTS="BUILTIN\Administrators"','/IACCEPTSQLSERVERLICENSETERMS','/UPDATEENABLED=FALSE',
         '/USEMICROSOFTUPDATE=FALSE','/ERRORREPORTING=FALSE','/SUPPRESSPRIVACYSTATEMENTNOTICE=TRUE','/ENU'
     )
-    $process = Start-Process -FilePath (Join-Path $PayloadRoot "sql-base.exe") -ArgumentList $baseArgs -Wait -PassThru
-    if ($process.ExitCode -notin 0,3010) { throw "Cài SQL Server thất bại: $($process.ExitCode)" }
+    Invoke-CheckedInstaller -FilePath (Join-Path $PayloadRoot "sql-base.exe") -Arguments $baseArgs -DisplayName 'Cài SQL Server'
+    $installedSqlNow = $true
 }
 
+Write-InstallStep 'Kiểm tra phiên bản SQL Server'
 $instanceId = (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL').IRMEXPRESS
 if ([string]::IsNullOrWhiteSpace($instanceId)) { throw 'Không tìm thấy SQL Server instance IRMEXPRESS sau khi cài.' }
-$currentSqlVersion = [version](Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\$instanceId\Setup").Version
+$currentSqlVersion = Get-InstalledSqlVersion $instanceId
 $requiredSqlVersion = [version]'16.0.4295.3'
 if ($currentSqlVersion -lt $requiredSqlVersion) {
-    $process = Start-Process -FilePath (Join-Path $PayloadRoot "sql-cu.exe") -ArgumentList '/quiet','/action=patch','/instancename=IRMEXPRESS','/IAcceptSQLServerLicenseTerms' -Wait -PassThru
-    if ($process.ExitCode -notin 0,3010) { throw "Cài SQL Server CU27 thất bại: $($process.ExitCode)" }
+    Write-InstallStep 'Cập nhật SQL Server lên CU27'
+    Invoke-CheckedInstaller -FilePath (Join-Path $PayloadRoot "sql-cu.exe") -Arguments @('/quiet','/action=patch','/instancename=IRMEXPRESS','/IAcceptSQLServerLicenseTerms') -DisplayName 'Cài SQL Server CU27' -AdditionalSuccessExitCodes @(-2042429437)
+    $currentSqlVersion = Get-InstalledSqlVersion $instanceId
+    if ($currentSqlVersion -lt $requiredSqlVersion) { throw "SQL Server vẫn ở phiên bản $currentSqlVersion sau khi cập nhật; yêu cầu tối thiểu $requiredSqlVersion." }
 }
 
+Write-InstallStep 'Cấu hình cổng SQL Server'
 $tcpPath = "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\$instanceId\MSSQLServer\SuperSocketNetLib\Tcp\IPAll"
 Set-ItemProperty $tcpPath TcpDynamicPorts ''
 Set-ItemProperty $tcpPath TcpPort '14331'
 Restart-Service 'MSSQL$IRMEXPRESS'
 
+Write-InstallStep 'Tạo chứng thư HTTPS nội bộ'
 $cert = New-SelfSignedCertificate -DnsName @('localhost',$env:COMPUTERNAME) -CertStoreLocation 'Cert:\LocalMachine\My' -NotAfter (Get-Date).AddYears(3)
 $pfxPath = Join-Path $dataRoot 'irm-https.pfx'
 $secureCertPassword = ConvertTo-SecureString $certificatePassword -AsPlainText -Force
@@ -159,13 +220,19 @@ $settings = @{
 $settingsPath = Join-Path $appRoot 'appsettings.Production.json'
 [IO.File]::WriteAllText($settingsPath, $settings, (New-Object Text.UTF8Encoding($false)))
 
+Write-InstallStep 'Khởi tạo database và tài khoản quản trị'
 $bootstrap = New-Object Diagnostics.ProcessStartInfo
 $bootstrap.FileName = Join-Path $appRoot 'IRM.exe'
 $bootstrap.Arguments = '--bootstrap --provision-database'
 $bootstrap.UseShellExecute = $false
 $bootstrap.EnvironmentVariables['ASPNETCORE_ENVIRONMENT'] = 'Production'
 $bootstrap.EnvironmentVariables['ConnectionStrings__DefaultConnection'] = $connectionString
-$bootstrap.EnvironmentVariables['Provisioning__AdminConnectionString'] = "Server=127.0.0.1,14331;Database=master;Integrated Security=True;Encrypt=True;TrustServerCertificate=True"
+$provisioningAdminConnectionString = if ($installedSqlNow) {
+    "Server=127.0.0.1,14331;Database=master;User Id=sa;Password=$saPassword;Encrypt=True;TrustServerCertificate=True"
+} else {
+    "Server=.\IRMEXPRESS;Database=master;Integrated Security=True;Encrypt=True;TrustServerCertificate=True"
+}
+$bootstrap.EnvironmentVariables['Provisioning__AdminConnectionString'] = $provisioningAdminConnectionString
 $bootstrap.EnvironmentVariables['Provisioning__AppPassword'] = $appPassword
 $bootstrap.EnvironmentVariables['Provisioning__DbaPassword'] = $DbaPassword
 $bootstrap.EnvironmentVariables['Bootstrap__AdminUsername'] = $AdminUser
@@ -176,6 +243,7 @@ $bootstrapProcess = [Diagnostics.Process]::Start($bootstrap)
 $bootstrapProcess.WaitForExit()
 if ($bootstrapProcess.ExitCode -ne 0) { throw "Khởi tạo database thất bại." }
 
+Write-InstallStep 'Kiểm tra database, đăng nhập, upload và báo cáo'
 $selfTest = New-Object Diagnostics.ProcessStartInfo
 $selfTest.FileName = Join-Path $appRoot 'IRM.exe'
 $selfTest.Arguments = '--self-test'
@@ -190,6 +258,7 @@ $selfTestProcess = [Diagnostics.Process]::Start($selfTest)
 $selfTestProcess.WaitForExit()
 if ($selfTestProcess.ExitCode -ne 0) { throw "Kiểm tra đăng nhập/database/upload/quét file/xuất báo cáo thất bại." }
 
+Write-InstallStep 'Đăng ký dịch vụ Windows IRM'
 $existingIrmService = Get-Service IRM -ErrorAction SilentlyContinue
 if ($existingIrmService) {
     Stop-Service IRM -Force -ErrorAction SilentlyContinue
@@ -203,6 +272,7 @@ icacls $installRoot /inheritance:r /grant:r 'SYSTEM:(OI)(CI)F' 'Administrators:(
 icacls $dataRoot /grant:r 'LOCAL SERVICE:(OI)(CI)M' | Out-Null
 icacls $backupRoot /grant:r 'NT SERVICE\MSSQL$IRMEXPRESS:(OI)(CI)M' | Out-Null
 
+Write-InstallStep 'Cấu hình sao lưu và tường lửa'
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $toolsRoot 'backup.ps1')`"" -WorkingDirectory $appRoot
 $trigger = New-ScheduledTaskTrigger -Daily -At '02:00'
 Register-ScheduledTask -TaskName 'IRM-DailyBackup' -Action $action -Trigger $trigger -User 'SYSTEM' -RunLevel Highest -Force | Out-Null
@@ -213,6 +283,7 @@ $shell = New-Object -ComObject WScript.Shell
 foreach ($shortcutPath in @((Join-Path ([Environment]::GetFolderPath('CommonDesktopDirectory')) 'IRM.lnk'), (Join-Path ([Environment]::GetFolderPath('CommonPrograms')) 'IRM.lnk'))) {
     $shortcut = $shell.CreateShortcut($shortcutPath); $shortcut.TargetPath = 'http://localhost:5050'; $shortcut.Save()
 }
+Write-InstallStep 'Khởi động và kiểm tra IRM'
 Start-Service IRM
 Start-Sleep -Seconds 5
 $health = Invoke-RestMethod 'http://127.0.0.1:5050/health/ready' -TimeoutSec 15

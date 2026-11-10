@@ -31,8 +31,8 @@ public sealed class StatisticsFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var statsService = new StatisticsService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var statsService = new SqlStatisticsStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var unit = new AdministrativeUnit { Code = "ADM-HL", Name = "Hạ Long", TypeCode = "W", ValidFrom = new DateTime(2020, 1, 1) };
         var person = new ForeignPerson { FullName = "Distinct Tester", PassportSearchKey = "KEY1" };
@@ -73,8 +73,8 @@ public sealed class StatisticsFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var statsService = new StatisticsService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var statsService = new SqlStatisticsStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var zone = new EconomicZone { Code = "KCN-DM", Name = "KCN Đông Mai", TypeCode = "IZ", ValidFrom = new DateTime(2020, 1, 1) };
         var field = new Field { FieldName = "F1" };

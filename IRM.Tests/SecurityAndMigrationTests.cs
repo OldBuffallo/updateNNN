@@ -10,11 +10,21 @@ namespace IRM.Tests;
 public sealed class SecurityAndMigrationTests
 {
     [Theory]
+    [InlineData("16.0.4295.3", true)]
+    [InlineData("16.0.4300.1", true)]
+    [InlineData("16.0.4265.3", false)]
+    [InlineData("15.0.9999.9", false)]
+    [InlineData("17.0.100.1", false)]
+    [InlineData("not-a-version", false)]
+    public void DatabaseProvisioning_AcceptsCu27OrNewerSql2022Builds(string version, bool expected) =>
+        Assert.Equal(expected, DatabaseProvisioner.IsSupportedSqlServerVersion(version));
+
+    [Theory]
     [InlineData("=1+1", "'=1+1")]
     [InlineData("@cmd", "'@cmd")]
     [InlineData("normal", "normal")]
     public void ExcelExport_NeutralizesFormulaInjection(string value,string expected) =>
-        Assert.Equal(expected,StatisticsExportService.Safe(value));
+        Assert.Equal(expected,SqlStatisticsExportStore.Safe(value));
 
     [Fact]
     public void TemporalFilter_RejectsMixedModesAndReverseRange()
@@ -29,7 +39,7 @@ public sealed class SecurityAndMigrationTests
         await using var database = new TestDatabase(); await database.InitializeAsync(seedBaseline: false);
         var account=new Account{Username="admin",Name="Admin",Password="legacy",Permission=AccountPermission.Admin,Delete_flag=0};
         database.Context.Accounts.Add(account);await database.Context.SaveChangesAsync();
-        var service=new AuthService(database.Context,new AuditService(database.Context));
+        var service=new SqlAuthStore(database.Context,new SqlAuditStore(database.Context));
         var principal=await service.AuthenticateWebAsync("admin","legacy","127.0.0.1");
         Assert.NotNull(principal);Assert.True(principal!.IsInRole(IrmRoles.Admin));
         Assert.NotEqual("legacy",database.Context.WebCredentials.Single().PasswordHash);
@@ -45,7 +55,7 @@ public sealed class SecurityAndMigrationTests
         var account = new Account { Username = "admin", Name = "Admin", Password = "old-password", Permission = AccountPermission.Admin, Delete_flag = 0 };
         database.Context.Accounts.Add(account);
         await database.Context.SaveChangesAsync();
-        var service = new AuthService(database.Context, new AuditService(database.Context));
+        var service = new SqlAuthStore(database.Context, new SqlAuditStore(database.Context));
         Assert.NotNull(await service.AuthenticateWebAsync("admin", "old-password", "127.0.0.1"));
 
         account.Password = "new-password";
@@ -67,10 +77,10 @@ public sealed class SecurityAndMigrationTests
     [Fact]
     public void LegalFileValidation_RejectsMimeMismatchAndBadSignature()
     {
-        Assert.Throws<InvalidOperationException>(()=>LegalDocumentService.ValidateUploadMetadata(".exe","application/octet-stream"));
-        Assert.Throws<InvalidOperationException>(()=>LegalDocumentService.ValidateUploadMetadata(".pdf","image/png"));
-        Assert.False(LegalDocumentService.HasAllowedSignature(new byte[8],".pdf"));
-        Assert.True(LegalDocumentService.HasAllowedSignature(new byte[]{0x25,0x50,0x44,0x46,0x2D,0x31,0x2E,0x34},".pdf"));
+        Assert.Throws<InvalidOperationException>(()=>IRM.Application.Features.Documents.LegalFileRules.ValidateUploadMetadata(".exe","application/octet-stream"));
+        Assert.Throws<InvalidOperationException>(()=>IRM.Application.Features.Documents.LegalFileRules.ValidateUploadMetadata(".pdf","image/png"));
+        Assert.False(IRM.Application.Features.Documents.LegalFileRules.HasAllowedSignature(new byte[8],".pdf"));
+        Assert.True(IRM.Application.Features.Documents.LegalFileRules.HasAllowedSignature(new byte[]{0x25,0x50,0x44,0x46,0x2D,0x31,0x2E,0x34},".pdf"));
     }
 
     [Fact]
@@ -94,7 +104,7 @@ public sealed class SecurityAndMigrationTests
                 ["ResidenceAddress"]="Hạ Long", ["ResidenceValidFrom"]="2026-01-01"
             }
         };
-        var service = new ImportService(database.Context,new AuditService(database.Context),new AllowGuard());
+        var service = new SqlImportStore(database.Context,new SqlAuditStore(database.Context),new AllowGuard());
         var result = await service.ExecuteImportAsync([row],[],company.IDCompany,"extended.xlsx","editor");
         Assert.True(result.Success); Assert.Equal(1,result.AddedCount);
         Assert.Single(database.Context.ForeignPersons); Assert.Equal(2,database.Context.ImmigrationDocuments.Count());
@@ -114,8 +124,8 @@ public sealed class SecurityAndMigrationTests
         try
         {
             var configuration=new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string,string?>{{"FileStorage:Root",root}}).Build();
-            var service=new LegalDocumentService(database.Context,new AuditService(database.Context),configuration,
-                new TestEnvironment(root),new AllowGuard(),new RejectScanner());
+            var service=new SqlLegalDocumentStore(database.Context,new SqlAuditStore(database.Context),
+                new IRM.Infrastructure.Files.LocalPrivateFileStorage(new(root),new RejectScanner(),new UnlimitedTestStorage()),new AllowGuard());
             await Assert.ThrowsAsync<InvalidOperationException>(()=>service.StoreAsync(
                 new MemoryStream(new byte[]{0x25,0x50,0x44,0x46,0x2D,0x31,0x2E,0x34}),"scan.pdf","application/pdf"));
             Assert.Empty(Directory.GetFiles(root));
@@ -135,5 +145,9 @@ public sealed class SecurityAndMigrationTests
         public string ApplicationName{get;set;}="IRM.Tests"; public IFileProvider WebRootFileProvider{get;set;}=new NullFileProvider();
         public string WebRootPath{get;set;}=root; public string EnvironmentName{get;set;}="Test";
         public string ContentRootPath{get;set;}=root; public IFileProvider ContentRootFileProvider{get;set;}=new NullFileProvider();
+    }
+    private sealed class UnlimitedTestStorage : IStorageCapacityGuard
+    {
+        public void EnsureCanWrite(string path) { }
     }
 }

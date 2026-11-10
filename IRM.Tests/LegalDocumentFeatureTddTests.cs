@@ -11,19 +11,19 @@ public sealed class LegalDocumentFeatureTddTests
     public void ValidateUploadMetadata_ChecksExtensionsAndMime()
     {
         // Whitelisted extension and matching MIME
-        LegalDocumentService.ValidateUploadMetadata(".pdf", "application/pdf");
-        LegalDocumentService.ValidateUploadMetadata(".png", "image/png");
-        LegalDocumentService.ValidateUploadMetadata(".jpg", "image/jpeg");
-        LegalDocumentService.ValidateUploadMetadata(".jpeg", "image/jpeg");
+        IRM.Application.Features.Documents.LegalFileRules.ValidateUploadMetadata(".pdf", "application/pdf");
+        IRM.Application.Features.Documents.LegalFileRules.ValidateUploadMetadata(".png", "image/png");
+        IRM.Application.Features.Documents.LegalFileRules.ValidateUploadMetadata(".jpg", "image/jpeg");
+        IRM.Application.Features.Documents.LegalFileRules.ValidateUploadMetadata(".jpeg", "image/jpeg");
 
         // Disallowed extension
         var exExt = Assert.Throws<InvalidOperationException>(() =>
-            LegalDocumentService.ValidateUploadMetadata(".exe", "application/octet-stream"));
+            IRM.Application.Features.Documents.LegalFileRules.ValidateUploadMetadata(".exe", "application/octet-stream"));
         Assert.Contains("Định dạng", exExt.Message);
 
         // Mime mismatch
         var exMime = Assert.Throws<InvalidOperationException>(() =>
-            LegalDocumentService.ValidateUploadMetadata(".pdf", "image/png"));
+            IRM.Application.Features.Documents.LegalFileRules.ValidateUploadMetadata(".pdf", "image/png"));
         Assert.Contains("Định dạng", exMime.Message);
     }
 
@@ -32,20 +32,20 @@ public sealed class LegalDocumentFeatureTddTests
     {
         // PDF magic bytes: %PDF (0x25, 0x50, 0x44, 0x46)
         var validPdf = new byte[] { 0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x34 };
-        Assert.True(LegalDocumentService.HasAllowedSignature(validPdf, ".pdf"));
+        Assert.True(IRM.Application.Features.Documents.LegalFileRules.HasAllowedSignature(validPdf, ".pdf"));
 
         // Fake PDF with MZ executable bytes (0x4D, 0x5A)
         var fakePdf = new byte[] { 0x4D, 0x5A, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00 };
-        Assert.False(LegalDocumentService.HasAllowedSignature(fakePdf, ".pdf"));
+        Assert.False(IRM.Application.Features.Documents.LegalFileRules.HasAllowedSignature(fakePdf, ".pdf"));
 
         // PNG magic bytes: 89 50 4E 47 0D 0A 1A 0A
         var validPng = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
-        Assert.True(LegalDocumentService.HasAllowedSignature(validPng, ".png"));
+        Assert.True(IRM.Application.Features.Documents.LegalFileRules.HasAllowedSignature(validPng, ".png"));
 
         // JPEG magic bytes: FF D8 FF
         var validJpg = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46 };
-        Assert.True(LegalDocumentService.HasAllowedSignature(validJpg, ".jpg"));
-        Assert.True(LegalDocumentService.HasAllowedSignature(validJpg, ".jpeg"));
+        Assert.True(IRM.Application.Features.Documents.LegalFileRules.HasAllowedSignature(validJpg, ".jpg"));
+        Assert.True(IRM.Application.Features.Documents.LegalFileRules.HasAllowedSignature(validJpg, ".jpeg"));
     }
 
     [Fact]
@@ -65,13 +65,11 @@ public sealed class LegalDocumentFeatureTddTests
             }).Build();
 
             var env = new TestHostingEnvironment(root);
-            var service = new LegalDocumentService(
+            var service = new SqlLegalDocumentStore(
                 db.Context,
-                new AuditService(db.Context),
-                config,
-                env,
-                TestSecurityContext.CreateAllowAllGuard(),
-                new RejectingMalwareScanner()
+                new SqlAuditStore(db.Context),
+                new IRM.Infrastructure.Files.LocalPrivateFileStorage(new(root), new RejectingMalwareScanner(), new UnlimitedTestStorage()),
+                TestSecurityContext.CreateAllowAllGuard()
             );
 
             var validPdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x34 };
@@ -104,5 +102,9 @@ public sealed class LegalDocumentFeatureTddTests
         public string EnvironmentName { get; set; } = "Test";
         public string ContentRootPath { get; set; } = root;
         public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
+    }
+    private sealed class UnlimitedTestStorage : IStorageCapacityGuard
+    {
+        public void EnsureCanWrite(string path) { }
     }
 }

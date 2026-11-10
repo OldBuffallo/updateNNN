@@ -4,11 +4,23 @@ WORKDIR /src
 
 # Copy csproj and restore
 COPY IRM/IRM.csproj IRM/
+COPY IRM.Core/IRM.Core.csproj IRM.Core/
+COPY IRM.Application/IRM.Application.csproj IRM.Application/
+COPY IRM.Infrastructure/IRM.Infrastructure.csproj IRM.Infrastructure/
 RUN dotnet restore IRM/IRM.csproj
 
 # Copy all and build
 COPY IRM/ IRM/
+COPY IRM.Core/ IRM.Core/
+COPY IRM.Application/ IRM.Application/
+COPY IRM.Infrastructure/ IRM.Infrastructure/
 RUN dotnet publish IRM/IRM.csproj -c Release -o /app/publish
+
+# Optional portable test target: docker build --target test .
+FROM build AS test
+COPY IRM.sln ./
+COPY IRM.Tests/ IRM.Tests/
+RUN dotnet test IRM.Tests/IRM.Tests.csproj -c Release --nologo -- RunConfiguration.TreatNoTestsAsError=true
 
 # === Runtime stage ===
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime

@@ -21,4 +21,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup><ProjectReference Include="..\IRM\IRM.csproj" /></ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../IRM.Core/IRM.Core.csproj" />
+    <ProjectReference Include="../IRM.Application/IRM.Application.csproj" />
+    <ProjectReference Include="../IRM.Infrastructure/IRM.Infrastructure.csproj" />
+    <None Update="Baselines/**/*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

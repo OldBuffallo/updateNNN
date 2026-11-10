@@ -1,4 +1,13 @@
-# Immigration Report Manager v1.0.1
+# Immigration Report Manager v1.0.2
+
+## Mã nguồn hiện hành
+
+Mở **IRM.sln** để làm việc với bản web. Mã được tách thành **IRM (Web), IRM.Core, IRM.Application, IRM.Infrastructure**; test nằm trong IRM.Tests. Hướng dẫn ranh giới project, module, EF và kiểm thử database tại [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+Việc tách project giữ nguyên schema SQL Server hiện tại, dữ liệu và tương thích WPF chạy song song. Lệnh publish vẫn dùng `IRM/IRM.csproj`, executable vẫn là IRM.
+
+
+> Phần phát hành v1.0.1 bên dưới được giữ làm tài liệu lịch sử. Hướng dẫn Windows hiện hành ở [INSTALLATION-v1.0.2.md](docs/INSTALLATION-v1.0.2.md).
 
 IRM là ứng dụng nội bộ quản lý hồ sơ người nước ngoài, doanh nghiệp, lưu trú, kiểm tra, import và báo cáo. Bản v1.0.1 sử dụng một mã nguồn và một schema SQL Server trên cả Windows lẫn Ubuntu.
 
@@ -17,9 +26,10 @@ IRM là ứng dụng nội bộ quản lý hồ sơ người nước ngoài, doa
 | CPU | x64/amd64, 2 core, 2 GHz |
 | RAM | 2 GB khả dụng trước khi cài |
 | Ổ đĩa | 10 GB trống trước khi cài và tối thiểu 4 GB sau khi cài |
-| Windows | Windows 11 hoặc Windows Server 2019/2022/2025 64-bit còn hỗ trợ |
+| Windows tối thiểu kỹ thuật | Windows 10 1607 x64 hoặc Windows Server 2016 x64 trở lên, build 14393; giao diện cài đặt cần desktop |
+| .NET Framework cho SQL Server | Đã có 4.7.2 trở lên; tách biệt với .NET 8 self-contained của IRM |
 | Linux | Ubuntu 22.04 LTS amd64, ext4 hoặc XFS |
-| Internet | Không cần khi cài đặt hoặc vận hành |
+| Internet | Không cần khi cài/vận hành nếu đã có .NET Framework 4.7.2+; gói hiện chưa kèm bộ cài Framework |
 
 Mốc RAM và ổ đĩa là tài nguyên còn trống trên máy đã có hệ điều hành, không phải tổng cấu hình máy.
 

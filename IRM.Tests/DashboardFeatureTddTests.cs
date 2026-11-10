@@ -10,7 +10,7 @@ public sealed class DashboardFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: false);
-        var service = new DashboardService(db.Context);
+        var service = new SqlDashboardStore(db.Context);
 
         var data = await service.GetDashboardAsync();
         Assert.NotNull(data);
@@ -30,7 +30,7 @@ public sealed class DashboardFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var service = new DashboardService(db.Context);
+        var service = new SqlDashboardStore(db.Context);
         var today = DateTime.Today;
 
         var e1 = new Employee { StaffName = "E1_ExpiringIn10Days", IDCompany = 1, IDCareer = 1, Nationality = "USA", TemporaryStay = today.AddDays(10), Hidden_flag = 0, WorkingStatus = 0 };
@@ -58,7 +58,7 @@ public sealed class DashboardFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var service = new DashboardService(db.Context);
+        var service = new SqlDashboardStore(db.Context);
 
         db.Context.Employees.Add(new Employee { StaffName = "K1", IDCompany = 1, IDCareer = 1, Nationality = "KOR", WorkPermit = WorkPermitType.WorkerHasPermit, Hidden_flag = 0, WorkingStatus = 0 });
         db.Context.Employees.Add(new Employee { StaffName = "K2", IDCompany = 1, IDCareer = 1, Nationality = "KOR", WorkPermit = WorkPermitType.InvestorHasPermit, Hidden_flag = 0, WorkingStatus = 0 });

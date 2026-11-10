@@ -1,0 +1,52 @@
+@namespace IRM.Components.Pages
+@inherits IRM.Components.Shared.FeatureSection<Admin>
+
+<MudPaper Class="pa-4 mb-4">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@(Page._editingAccount ? "Cập nhật tài khoản" : "Thêm tài khoản")</MudText>
+                <MudGrid>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Username" @bind-Value="Page._accountForm.Username" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Họ tên" @bind-Value="Page._accountForm.Name" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="3">
+                        <MudTextField T="string" Label="Mật khẩu" InputType="InputType.Password" @bind-Value="Page._accountForm.Password" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="2">
+                        <MudSelect T="AccountPermission" Label="Quyền" @bind-Value="Page._accountForm.Permission" Variant="Variant.Outlined">
+                            <MudSelectItem Value="AccountPermission.Admin">Admin</MudSelectItem>
+                            <MudSelectItem Value="AccountPermission.User">User</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="1" Class="d-flex align-center">
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.SaveAccountAsync">
+                                @(Page._editingAccount ? "Luu" : "Them")
+                            </MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="Page.ResetAccountForm">Hủy</MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>Username</th><th>Họ tên</th><th>Quyền</th><th>Trạng thái</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var acc in Page._accounts)
+                    {
+                        <tr>
+                            <td>@acc.Username</td>
+                            <td>@acc.Name</td>
+                            <td><MudChip T="string" Size="Size.Small" Color="Color.Primary">@acc.PermissionString</MudChip></td>
+                            <td><MudChip T="string" Size="Size.Small" Color="Color.Success">Hoạt động</MudChip></td>
+                            <td>
+                                <MudStack Row="true" Spacing="1">
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => Page.EditAccount(acc))">Sửa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => Page.DeleteAccountAsync(acc.IDUser))">Xóa</MudButton>
+                                </MudStack>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>

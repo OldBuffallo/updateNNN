@@ -1,3 +1,5 @@
+> **Kiến trúc hiện hành:** đọc [ARCHITECTURE.md](ARCHITECTURE.md). Phần mô tả cấu trúc và SQLite development bên dưới là tài liệu lịch sử; ứng dụng hiện tại chỉ dùng SQL Server, SQLite chỉ phục vụ test.
+
 # IRM — Immigration Report Manager
 
 > Hệ thống quản lý người nước ngoài trên địa bàn tỉnh/thành phố. Blazor Server + EF Core 8 + SQL Server/SQLite.

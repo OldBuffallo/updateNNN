@@ -1,0 +1,75 @@
+@namespace IRM.Components.Pages
+@inherits IRM.Components.Shared.FeatureSection<Import>
+
+@* Step 1: Upload *@
+    @if (Page._currentStep == 1)
+    {
+        @if (!Page._hasCompanies)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-3">
+                <strong>Chưa có công ty trong hệ thống.</strong> Bạn phải tạo ít nhất một công ty trước khi nhập người lao động.
+                <MudButton Href="/companies" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Class="ml-3">
+                    Tạo công ty
+                </MudButton>
+            </MudAlert>
+        }
+
+        <MudPaper Elevation="0" Class="pa-8 rounded-xl border-dashed border-2 text-center"
+                  Style="border-color: var(--mud-palette-primary);">
+            <MudIcon Icon="@Icons.Material.Filled.CloudUpload" Size="Size.Large"
+                     Style="font-size: 3rem; opacity: 0.4;" Color="Color.Primary" />
+            <MudText Typo="Typo.h6" Class="mt-3" Style="font-weight: 700;">Kéo thả file Excel vào đây</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">
+                hoặc nhấn nút bên dưới để chọn file
+            </MudText>
+            <MudText Typo="Typo.caption" Color="Color.Tertiary" Class="mt-2">.xlsx hoặc .xls — Hệ thống hỗ trợ cả hai định dạng Excel</MudText>
+
+            <MudStack AlignItems="AlignItems.Center" Class="mt-4">
+                <InputFile OnChange="Page.HandleFileUpload" accept=".xlsx,.xls" id="fileInput" style="display:none" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" HtmlTag="label" for="fileInput"
+                           StartIcon="@Icons.Material.Filled.AttachFile">
+                    Chọn file Excel
+                </MudButton>
+            </MudStack>
+
+            @if (!string.IsNullOrEmpty(Page._uploadedFileName))
+            {
+                <MudAlert Severity="Severity.Success" Dense="true" Class="mt-3">
+                    📄 Đã chọn: <strong>@Page._uploadedFileName</strong> — @Page._sheetInfo
+                </MudAlert>
+            }
+        </MudPaper>
+
+        <MudGrid Spacing="3" Class="mt-3">
+            <MudItem xs="6">
+                <MudAutocomplete T="CompanyDto" @bind-Value="Page._selectedCompany" Label="Công ty mặc định (dùng khi file không có cột Công ty)"
+                                 SearchFunc="Page.SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")"
+                                 Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                                 ResetValueOnEmptyText="true" Immediate="true" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudSelect T="int?" Label="Template ghép cột" Variant="Variant.Outlined" @bind-Value="Page._selectedTemplateId"
+                           Margin="Margin.Dense" Dense="true">
+                    <MudSelectItem T="int?" Value="@((int?)null)">— Không dùng template —</MudSelectItem>
+                    @foreach (var t in Page._templates)
+                    {
+                        <MudSelectItem T="int?" Value="@((int?)t.Id)">@t.TemplateName</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+
+        <MudAlert Severity="Severity.Info" Dense="true" Class="mt-3">
+            💡 <strong>An toàn dữ liệu:</strong> Mỗi lần import tạo phiên riêng. Bạn có thể <strong>hoàn tác</strong> bất cứ lúc nào từ Lịch sử Import.
+        </MudAlert>
+        <MudAlert Severity="Severity.Success" Dense="true" Class="mt-2">
+            🏢 <strong>Tự động ghép công ty:</strong> Nếu file Excel có cột <strong>"Công ty"</strong> hoặc <strong>"CQ bảo lãnh"</strong>, hệ thống sẽ tự động ghép công ty theo từng dòng. Không cần chọn công ty ở trên.
+        </MudAlert>
+
+        <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+                       EndIcon="@Icons.Material.Filled.ArrowForward"
+                       Disabled="@(Page._fileStream == null || !Page._hasCompanies)"
+                       OnClick="Page.GoToStep2">Tiếp tục</MudButton>
+        </MudStack>
+    }

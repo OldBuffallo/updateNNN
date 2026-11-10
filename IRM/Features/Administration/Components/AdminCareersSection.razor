@@ -1,0 +1,43 @@
+@namespace IRM.Components.Pages
+@inherits IRM.Components.Shared.FeatureSection<Admin>
+
+<MudPaper Class="pa-4 mb-4">
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudTextField T="string" Label="Ten nganh nghe" @bind-Value="Page._careerForm.CareerName" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSelect T="int" Label="Nhom nganh" @bind-Value="Page._careerForm.IDCG" Variant="Variant.Outlined">
+                            @foreach (var group in Page._careerGroups)
+                            {
+                                <MudSelectItem Value="@group.IDCG">@group.CareerGroupName</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="4" Class="d-flex align-center">
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.SaveCareerAsync">@(Page._editingCareer ? "Luu" : "Them")</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="Page.ResetCareerForm">Hủy</MudButton>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+            <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>ID</th><th>Ten nganh nghe</th><th>Nhom</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var c in Page._careers)
+                    {
+                        <tr>
+                            <td>@c.IDCareer</td>
+                            <td>@c.CareerName</td>
+                            <td>@(c.CareerGroup?.CareerGroupName ?? "")</td>
+                            <td>
+                                <MudStack Row="true" Spacing="1">
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => Page.EditCareer(c))">Sửa</MudButton>
+                                    <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error" OnClick="@(() => Page.DeleteCareerAsync(c.IDCareer))">Xóa</MudButton>
+                                </MudStack>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>

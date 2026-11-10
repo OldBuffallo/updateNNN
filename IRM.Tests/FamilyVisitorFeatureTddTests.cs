@@ -11,8 +11,8 @@ public sealed class FamilyVisitorFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var service = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var service = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var unit = new AdministrativeUnit { Code = "ADM-01", Name = "Phường Bãi Cháy", TypeCode = AdministrativeUnitTypeCodes.Ward, ValidFrom = new DateTime(2020, 1, 1) };
         db.Context.AdministrativeUnits.Add(unit);
@@ -77,8 +77,8 @@ public sealed class FamilyVisitorFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var service = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var service = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         // First visit in 2025
         var input1 = new FamilyVisitInput
@@ -117,8 +117,8 @@ public sealed class FamilyVisitorFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var service = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var service = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var input1 = new FamilyVisitInput
         {
@@ -151,8 +151,8 @@ public sealed class FamilyVisitorFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var service = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var service = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var unitA = new AdministrativeUnit { Code = "A", Name = "Unit A", TypeCode = "W", ValidFrom = new DateTime(2020, 1, 1) };
         var unitB = new AdministrativeUnit { Code = "B", Name = "Unit B", TypeCode = "W", ValidFrom = new DateTime(2020, 1, 1) };
@@ -205,8 +205,8 @@ public sealed class FamilyVisitorFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var service = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var service = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var id = await service.SaveFamilyVisitAsync(new FamilyVisitInput
         {

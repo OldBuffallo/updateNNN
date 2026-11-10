@@ -10,7 +10,7 @@ public sealed class SearchFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var searchService = new SearchService(db.Context);
+        var searchService = new SqlSearchStore(db.Context);
 
         var company = new Company { CompanyName = "Foxconn Technology", IDField = 1, TrackerID = 1, Delete_flag = 0 };
         db.Context.Companies.Add(company);
@@ -62,7 +62,7 @@ public sealed class SearchFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var searchService = new SearchService(db.Context);
+        var searchService = new SqlSearchStore(db.Context);
 
         var keyword = "Alpha";
         db.Context.Companies.Add(new Company { CompanyName = "Alpha Corp", IDField = 1, TrackerID = 1, Delete_flag = 0 });
@@ -94,7 +94,7 @@ public sealed class SearchFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var searchService = new SearchService(db.Context);
+        var searchService = new SqlSearchStore(db.Context);
 
         db.Context.Companies.Add(new Company { CompanyName = "Deleted Company", IDField = 1, TrackerID = 1, Delete_flag = 1 });
         db.Context.Employees.Add(new Employee { StaffName = "Deleted Employee", IDCompany = 1, IDCareer = 1, Nationality = "USA", Hidden_flag = 1 });

@@ -11,8 +11,8 @@ public sealed class LegacySyncFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var registry = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var registry = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
         var syncService = new LegacySyncService(db.Context, registry);
 
         var xml = "<row><StaffName>Tanaka Taro</StaffName><Passport>JP-001</Passport><Nationality>JPN</Nationality></row>";
@@ -48,8 +48,8 @@ public sealed class LegacySyncFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var registry = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var registry = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
         var syncService = new LegacySyncService(db.Context, registry);
 
         var corruptXml = "<unclosed-tag><StaffName>";
@@ -77,8 +77,8 @@ public sealed class LegacySyncFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var registry = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var registry = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         // Employee 1: Valid
         var e1 = new Employee { StaffName = "Valid Person", Passport = "P-VALID", IDCompany = 1, IDCareer = 1, Nationality = "USA", Hidden_flag = 0 };

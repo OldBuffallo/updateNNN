@@ -11,17 +11,17 @@ public sealed class InspectionFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var foreignerService = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var foreignerService = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var viewerGuard = TestSecurityContext.CreateGuard(IrmRoles.Viewer);
-        var serviceViewer = new InspectionService(db.Context, foreignerService, audit, viewerGuard);
+        var serviceViewer = new SqlInspectionStore(db.Context, foreignerService, audit, viewerGuard);
 
         var insp = new Inspection { InspectedAt = DateTime.Today, LocationText = "Công ty A", InspectorNames = "Cán bộ 1" };
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => serviceViewer.SaveAsync(insp));
 
         var inspectorGuard = TestSecurityContext.CreateGuard(IrmRoles.Inspector);
-        var serviceInspector = new InspectionService(db.Context, foreignerService, audit, inspectorGuard);
+        var serviceInspector = new SqlInspectionStore(db.Context, foreignerService, audit, inspectorGuard);
 
         var emptyLocation = new Inspection { InspectedAt = DateTime.Today, LocationText = "" };
         await Assert.ThrowsAsync<ArgumentException>(() => serviceInspector.SaveAsync(emptyLocation));
@@ -35,9 +35,9 @@ public sealed class InspectionFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var foreignerService = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
-        var inspectionService = new InspectionService(db.Context, foreignerService, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var foreignerService = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var inspectionService = new SqlInspectionStore(db.Context, foreignerService, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var insp = new Inspection { InspectedAt = DateTime.Today, LocationText = "Khách sạn X", InspectorNames = "Đội 1" };
         var inspId = await inspectionService.SaveAsync(insp);
@@ -73,9 +73,9 @@ public sealed class InspectionFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var foreignerService = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
-        var inspectionService = new InspectionService(db.Context, foreignerService, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var foreignerService = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var inspectionService = new SqlInspectionStore(db.Context, foreignerService, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var p1 = new ForeignPerson { FullName = "P1" };
         var p2 = new ForeignPerson { FullName = "P2" };

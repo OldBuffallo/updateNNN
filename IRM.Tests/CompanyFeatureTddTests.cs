@@ -6,11 +6,31 @@ namespace IRM.Tests;
 public sealed class CompanyFeatureTddTests
 {
     [Fact]
+    public async Task CompanyService_CreateAsync_AssignsLoggedInUserAsTracker()
+    {
+        await using var db = new TestDatabase();
+        await db.InitializeAsync(seedBaseline: true);
+        var service = new SqlCompanyStore(db.Context, TestSecurityContext.CreateAllowAllGuard(accountId: 1));
+
+        var company = new Company
+        {
+            CompanyName = "Công ty kiểm thử",
+            IDField = 1,
+            TrackerID = 0
+        };
+
+        await service.CreateAsync(company);
+
+        Assert.True(company.IDCompany > 0);
+        Assert.Equal(1, company.TrackerID);
+    }
+
+    [Fact]
     public async Task CompanyService_GetByIdAsync_IncludesAllNavigations()
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
-        var service = new CompanyService(db.Context, TestSecurityContext.CreateAllowAllGuard());
+        var service = new SqlCompanyStore(db.Context, TestSecurityContext.CreateAllowAllGuard());
 
         var field = new Field { FieldName = "Công nghiệp chế tạo" };
         db.Context.Fields.Add(field);
@@ -50,9 +70,9 @@ public sealed class CompanyFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
-        var audit = new AuditService(db.Context);
-        var foreignerService = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
-        var profileService = new CompanyProfileService(db.Context, foreignerService, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var foreignerService = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var profileService = new SqlCompanyProfileStore(db.Context, foreignerService, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var company = new Company { CompanyName = "Foxconn Vietnam", IDField = 1, TrackerID = 1 };
         db.Context.Companies.Add(company);
@@ -105,9 +125,9 @@ public sealed class CompanyFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
-        var audit = new AuditService(db.Context);
-        var foreignerService = new FamilyVisitorService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
-        var profileService = new CompanyProfileService(db.Context, foreignerService, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var foreignerService = new SqlFamilyVisitorStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var profileService = new SqlCompanyProfileStore(db.Context, foreignerService, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var company = new Company { CompanyName = "LG Display", IDField = 1, TrackerID = 1 };
         var z1 = new EconomicZone { Code = "Z1", Name = "Zone 1", TypeCode = "IZ", ValidFrom = new DateTime(2020, 1, 1) };

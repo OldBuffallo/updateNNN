@@ -1,10 +1,21 @@
 ﻿[CmdletBinding()]
 param(
-    [string]$VendorDirectory = (Join-Path $PSScriptRoot "..\vendor\windows"),
-    [string]$OutputDirectory = (Join-Path $PSScriptRoot "..\..\build-output\v1.0.2"),
-    [string]$InnoCompiler = ""
+    [string]$VendorDirectory = "",
+    [string]$OutputDirectory = "",
+    [string]$InnoCompiler = "",
+    [string]$SignTool = "",
+    [string]$SigningCertificateThumbprint = $env:IRM_SIGNING_CERT_THUMBPRINT,
+    [ValidateSet('CurrentUser','LocalMachine')][string]$SigningCertificateStore = 'CurrentUser',
+    [string]$TimestampUrl = $env:IRM_SIGNING_TIMESTAMP_URL,
+    [switch]$AllowUnsigned
 )
 $ErrorActionPreference = "Stop"
+if ([string]::IsNullOrWhiteSpace($VendorDirectory)) {
+    $VendorDirectory = Join-Path $PSScriptRoot "..\vendor\windows"
+}
+if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
+    $OutputDirectory = Join-Path $PSScriptRoot "..\..\build-output\v1.0.2"
+}
 $repo = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
 $VendorDirectory = [IO.Path]::GetFullPath($VendorDirectory)
@@ -19,6 +30,31 @@ if ([string]::IsNullOrWhiteSpace($InnoCompiler)) {
         "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
         (Join-Path $env:LOCALAPPDATA 'Programs\Inno Setup 6\ISCC.exe')
     ) | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+}
+
+if ([string]::IsNullOrWhiteSpace($SigningCertificateThumbprint)) {
+    if (-not $AllowUnsigned) {
+        throw 'Bản phát hành Windows bắt buộc phải ký số. Cấu hình IRM_SIGNING_CERT_THUMBPRINT và IRM_SIGNING_TIMESTAMP_URL, hoặc chỉ dùng -AllowUnsigned cho build thử nội bộ.'
+    }
+} else {
+    if ([string]::IsNullOrWhiteSpace($TimestampUrl)) {
+        throw 'Thiếu URL máy chủ RFC 3161 timestamp trong IRM_SIGNING_TIMESTAMP_URL hoặc -TimestampUrl.'
+    }
+    if ([string]::IsNullOrWhiteSpace($SignTool)) {
+        $SignTool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" -File -ErrorAction SilentlyContinue |
+            Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName
+    }
+    if (-not (Test-Path -LiteralPath $SignTool -PathType Leaf)) { throw "Không tìm thấy signtool.exe: $SignTool" }
+
+    $certificatePath = "Cert:\$SigningCertificateStore\My\$($SigningCertificateThumbprint.Replace(' ',''))"
+    $certificate = Get-Item -LiteralPath $certificatePath -ErrorAction SilentlyContinue
+    if (-not $certificate -or -not $certificate.HasPrivateKey) {
+        throw "Không tìm thấy chứng thư ký mã có private key: $certificatePath"
+    }
+    $codeSigningOid = '1.3.6.1.5.5.7.3.3'
+    if (-not ($certificate.EnhancedKeyUsageList | Where-Object { $_.ObjectId.Value -eq $codeSigningOid })) {
+        throw "Chứng thư không có mục đích Code Signing: $certificatePath"
+    }
 }
 
 foreach ($file in @($sqlBase, $sqlCu)) {
@@ -53,7 +89,10 @@ if ($LASTEXITCODE -ne 0) { throw "dotnet publish thất bại" }
 Copy-Item -LiteralPath $sqlBase -Destination (Join-Path $stage "sql-base.exe") -Force
 Copy-Item -LiteralPath $sqlCu -Destination (Join-Path $stage "sql-cu.exe") -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "install.ps1") -Destination $stage -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot "windows-environment.ps1") -Destination $stage -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot "diagnose-environment.ps1") -Destination $stage -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "installer-ui.ps1") -Destination $stage -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot "installer-theme.ps1") -Destination $stage -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "uninstall.ps1") -Destination $stage -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "restore.ps1") -Destination $stage -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot "repair.ps1") -Destination $stage -Force
@@ -72,6 +111,21 @@ Get-ChildItem -LiteralPath $stage -Recurse -File | Get-FileHash -Algorithm SHA25
 if ($LASTEXITCODE -ne 0) { throw "Biên dịch Inno Setup thất bại" }
 
 $artifact = Join-Path $OutputDirectory $manifest.windows.artifact
+if ([string]::IsNullOrWhiteSpace($SigningCertificateThumbprint)) {
+    Write-Warning 'Artifact chưa ký số, chỉ dùng để kiểm thử nội bộ; Windows SmartScreen có thể chặn file này.'
+} else {
+    $signArguments = @('sign','/sha1',$SigningCertificateThumbprint.Replace(' ',''),'/s','My','/fd','SHA256','/tr',$TimestampUrl,'/td','SHA256','/v')
+    if ($SigningCertificateStore -eq 'LocalMachine') { $signArguments += '/sm' }
+    $signArguments += $artifact
+    $signProcess = Start-Process -FilePath $SignTool -ArgumentList $signArguments -Wait -PassThru -NoNewWindow
+    if ($signProcess.ExitCode -ne 0) { throw "Ký số bộ cài thất bại: $($signProcess.ExitCode)" }
+
+    $verifyProcess = Start-Process -FilePath $SignTool -ArgumentList @('verify','/pa','/all','/v',$artifact) -Wait -PassThru -NoNewWindow
+    if ($verifyProcess.ExitCode -ne 0) { throw "Xác minh chữ ký bộ cài thất bại: $($verifyProcess.ExitCode)" }
+    $artifactSignature = Get-AuthenticodeSignature -LiteralPath $artifact
+    if ($artifactSignature.Status -ne 'Valid') { throw "Chữ ký bộ cài không hợp lệ: $($artifactSignature.StatusMessage)" }
+    Write-Host "Đã ký bộ cài bởi $($artifactSignature.SignerCertificate.Subject)" -ForegroundColor Green
+}
 $artifactHash = (Get-FileHash -LiteralPath $artifact -Algorithm SHA256).Hash
 "$artifactHash  $($manifest.windows.artifact)" | Set-Content -LiteralPath "$artifact.sha256" -Encoding ASCII
 Get-FileHash -LiteralPath $artifact -Algorithm SHA256 | Format-List

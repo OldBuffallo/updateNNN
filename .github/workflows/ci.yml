@@ -26,17 +26,15 @@ jobs:
 
       - name: Restore Dependencies
         run: |
-          dotnet restore IRM/IRM.csproj
-          dotnet restore IRM.Tests/IRM.Tests.csproj
+          dotnet restore IRM.sln
 
       - name: Build Application & Tests
         run: |
-          dotnet build IRM/IRM.csproj -c Release --no-restore
-          dotnet build IRM.Tests/IRM.Tests.csproj -c Release --no-restore
+          dotnet build IRM.sln -c Release --no-restore
 
       - name: Run xUnit Tests & Collect Coverage
         run: |
-          dotnet test IRM.Tests/IRM.Tests.csproj -c Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
+          dotnet test IRM.Tests/IRM.Tests.csproj -c Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults -- RunConfiguration.TreatNoTestsAsError=true
 
       - name: Upload Test Results
         if: always()
@@ -60,3 +58,17 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t irm:ci .
+
+  windows-installer-preflight:
+    name: Windows installer environment checks (x64 and x86 PowerShell)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check native Windows PowerShell
+        shell: powershell
+        run: ./deploy/windows/tests/environment.Tests.ps1
+      - name: Check 32-bit PowerShell on 64-bit Windows
+        shell: powershell
+        run: |
+          & "$env:SystemRoot\SysWOW64\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -File deploy/windows/tests/environment.Tests.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

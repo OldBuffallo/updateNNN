@@ -10,7 +10,7 @@ public sealed class StudentFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var service = new StudentService(db.Context, TestSecurityContext.CreateAllowAllGuard());
+        var service = new SqlStudentStore(db.Context, TestSecurityContext.CreateAllowAllGuard());
 
         var s1 = new Student { FullName = "Student A", Nationality = "USA", SchoolName = "Đại học Hạ Long", Hidden_flag = 0, Status = 0 };
         var s2 = new Student { FullName = "Student B", Nationality = "USA", SchoolName = "Đại học Ngoại Thương", Hidden_flag = 0, Status = 0 };
@@ -29,7 +29,7 @@ public sealed class StudentFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var service = new StudentService(db.Context, TestSecurityContext.CreateAllowAllGuard());
+        var service = new SqlStudentStore(db.Context, TestSecurityContext.CreateAllowAllGuard());
         var today = DateTime.Today;
 
         var s1 = new Student { FullName = "S1_ActiveSoon", Nationality = "USA", VisaExpiry = today.AddDays(10), Status = StudentStatus.Studying, Hidden_flag = 0 };
@@ -49,7 +49,7 @@ public sealed class StudentFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var service = new StudentService(db.Context, TestSecurityContext.CreateAllowAllGuard());
+        var service = new SqlStudentStore(db.Context, TestSecurityContext.CreateAllowAllGuard());
 
         var student = new Student { FullName = "Student To Delete", Nationality = "USA", Hidden_flag = 0, Status = 0 };
         db.Context.Students.Add(student);
@@ -70,7 +70,7 @@ public sealed class StudentFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var service = new StudentService(db.Context, TestSecurityContext.CreateAllowAllGuard());
+        var service = new SqlStudentStore(db.Context, TestSecurityContext.CreateAllowAllGuard());
 
         var student = new Student { FullName = "Student Passport", Passport = "STU-001", Nationality = "USA", Hidden_flag = 0, Status = 0 };
         db.Context.Students.Add(student);
@@ -88,7 +88,7 @@ public sealed class StudentFeatureTddTests
         await db.InitializeAsync();
 
         var reporterGuard = TestSecurityContext.CreateGuard(IrmRoles.Reporter);
-        var serviceReporter = new StudentService(db.Context, reporterGuard);
+        var serviceReporter = new SqlStudentStore(db.Context, reporterGuard);
 
         var s = new Student { FullName = "Protected Student", Nationality = "USA" };
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => serviceReporter.CreateAsync(s));
@@ -96,7 +96,7 @@ public sealed class StudentFeatureTddTests
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => serviceReporter.DeleteAsync(1));
 
         var adminGuard = TestSecurityContext.CreateGuard(IrmRoles.Admin);
-        var serviceAdmin = new StudentService(db.Context, adminGuard);
+        var serviceAdmin = new SqlStudentStore(db.Context, adminGuard);
         await serviceAdmin.CreateAsync(s);
         Assert.True(s.IDStudent > 0);
     }

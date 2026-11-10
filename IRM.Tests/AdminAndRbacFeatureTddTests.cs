@@ -11,8 +11,8 @@ public sealed class AdminAndRbacFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var authService = new AuthService(db.Context, audit);
+        var audit = new SqlAuditStore(db.Context);
+        var authService = new SqlAuthStore(db.Context, audit);
 
         var legacyAccount = new Account
         {
@@ -44,8 +44,8 @@ public sealed class AdminAndRbacFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var authService = new AuthService(db.Context, audit);
+        var audit = new SqlAuditStore(db.Context);
+        var authService = new SqlAuthStore(db.Context, audit);
 
         var account = new Account
         {
@@ -86,7 +86,7 @@ public sealed class AdminAndRbacFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var service = new CatalogService(db.Context, TestSecurityContext.CreateAllowAllGuard());
+        var service = new SqlCatalogStore(db.Context, TestSecurityContext.CreateAllowAllGuard());
 
         // Create Field
         var field = new Field { FieldName = "Nông nghiệp công nghệ cao", Description = "Lĩnh vực mới" };

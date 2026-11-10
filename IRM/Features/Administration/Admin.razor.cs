@@ -1,0 +1,190 @@
+using IRM.Data.Models;
+using IRM.Services;
+using IRM.Application.Models;
+using IRM.Components.Shared;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
+using MudBlazor;
+
+namespace IRM.Components.Pages;
+
+public partial class Admin : ComponentBase, IFeaturePage
+{
+    [Inject] public ISnackbar Snackbar { get; set; } = default!;
+    [Inject] public NavigationManager Nav { get; set; } = default!;
+    [Inject] public IImportService ImportSvc { get; set; } = default!;
+    [Inject] public ICatalogService CatalogSvc { get; set; } = default!;
+    [Inject] public IAuditService AuditSvc { get; set; } = default!;
+    [Inject] public IAuthService AuthSvc { get; set; } = default!;
+
+    [Parameter]
+    public string? SectionKey { get; set; }
+
+    internal record AdminCardInfo(string Key, string Icon, string Title, string Description);
+
+    internal bool _loading;
+    internal string _activeSection = "";
+    internal string _activeSectionTitle = "";
+
+    internal readonly List<AdminCardInfo> _adminCards = new();
+
+    internal List<AccountDto> _accounts = new();
+    internal List<FieldDto> _fields = new();
+    internal List<CareerDto> _careers = new();
+    internal List<CareerGroupDto> _careerGroups = new();
+    internal List<NationalityEntityDto> _nationalities = new();
+    internal List<DistrictDto> _districts = new();
+    internal List<WardDto> _wards = new();
+    internal List<AuditLogDto> _auditLogs = new();
+    internal List<ImportSessionInfo> _importHistory = new();
+
+    internal AccountDto _accountForm = new();
+    internal bool _editingAccount;
+    internal FieldDto _fieldForm = new();
+    internal bool _editingField;
+    internal CareerDto _careerForm = new();
+    internal bool _editingCareer;
+    internal NationalityEntityDto _nationalityForm = new();
+    internal bool _editingNationality;
+    internal DistrictDto _districtForm = new();
+    internal bool _editingDistrict;
+    internal WardDto _wardForm = new();
+    internal bool _editingWard;
+
+    internal string? _auditFilterUsername;
+    internal string? _auditFilterAction;
+    internal DateTime? _auditFrom;
+    internal DateTime? _auditTo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCoreDataAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _activeSection = (SectionKey ?? string.Empty).Trim().ToLowerInvariant();
+        _activeSectionTitle = _adminCards.FirstOrDefault(c => c.Key == _activeSection)?.Title ?? _activeSection;
+        await LoadActiveSectionDataAsync();
+    }
+
+    internal async Task LoadCoreDataAsync()
+    {
+        _loading = true;
+        try
+        {
+            _accounts = await AuthSvc.GetAllAccountsAsync();
+            _fields = await CatalogSvc.GetFieldsAsync();
+            _careers = await CatalogSvc.GetCareersAsync();
+            _careerGroups = await CatalogSvc.GetCareerGroupsAsync();
+            _nationalities = await CatalogSvc.GetNationalitiesAsync();
+            _districts = await CatalogSvc.GetDistrictsAsync();
+            _wards = await CatalogSvc.GetWardsAsync();
+            BuildCards();
+            ResetFormsAfterDataLoaded();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Khong tai du lieu quan tri: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    internal async Task LoadActiveSectionDataAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_activeSection))
+        {
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            switch (_activeSection)
+            {
+                case "accounts":
+                    _accounts = await AuthSvc.GetAllAccountsAsync();
+                    break;
+                case "fields":
+                    _fields = await CatalogSvc.GetFieldsAsync();
+                    break;
+                case "careers":
+                    _careers = await CatalogSvc.GetCareersAsync();
+                    _careerGroups = await CatalogSvc.GetCareerGroupsAsync();
+                    if (_careerForm.IDCG == 0 && _careerGroups.Any())
+                    {
+                        _careerForm.IDCG = _careerGroups[0].IDCG;
+                    }
+                    break;
+                case "nationalities":
+                    _nationalities = await CatalogSvc.GetNationalitiesAsync();
+                    break;
+                case "districts":
+                    _districts = await CatalogSvc.GetDistrictsAsync();
+                    break;
+                case "wards":
+                    _wards = await CatalogSvc.GetWardsAsync();
+                    break;
+                case "audit":
+                    await LoadAuditAsync();
+                    break;
+                case "import-history":
+                    _importHistory = await ImportSvc.GetHistoryAsync();
+                    break;
+            }
+            BuildCards();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Khong tai du lieu module '{_activeSection}': {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    internal void BuildCards()
+    {
+        _adminCards.Clear();
+        _adminCards.Add(new("accounts", Icons.Material.Filled.ManageAccounts, "Tài khoản", $"{_accounts.Count} tai khoan"));
+        _adminCards.Add(new("fields", Icons.Material.Filled.Business, "Lĩnh vực", $"{_fields.Count} linh vuc"));
+        _adminCards.Add(new("careers", Icons.Material.Filled.Work, "Ngành nghề", $"{_careers.Count} nganh"));
+        _adminCards.Add(new("nationalities", Icons.Material.Filled.Public, "Quốc tịch", $"{_nationalities.Count} quoc tich"));
+        _adminCards.Add(new("districts", Icons.Material.Filled.Map, "Quận / Huyện", $"{_districts.Count} quan/huyen"));
+        _adminCards.Add(new("wards", Icons.Material.Filled.Place, "Phuong / Xa", $"{_wards.Count} phuong/xa"));
+        _adminCards.Add(new("audit", Icons.Material.Filled.ReceiptLong, "Nhật ký hệ thống", "Audit log"));
+        _adminCards.Add(new("import-history", Icons.Material.Filled.CloudUpload, "Lich su Import", "Lich su phien import"));
+    }
+
+    internal void ResetFormsAfterDataLoaded()
+    {
+        ResetAccountForm();
+        ResetFieldForm();
+        ResetCareerForm();
+        ResetNationalityForm();
+        ResetDistrictForm();
+        ResetWardForm();
+    }
+
+    internal void GoSection(string key)
+    {
+        Nav.NavigateTo($"/admin/{key}");
+    }
+
+    internal void OnCardKeyDown(KeyboardEventArgs e, string key)
+    {
+        if (e.Key is "Enter" or " ")
+        {
+            GoSection(key);
+        }
+    }
+
+    public Task RefreshAsync() => InvokeAsync(StateHasChanged);
+}

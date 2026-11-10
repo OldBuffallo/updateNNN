@@ -75,7 +75,7 @@ public sealed class DatabaseAndSchemaFeatureTddTests
         await db.Context.SaveChangesAsync();
 
         var factory = new TestDbContextFactory(db.Context);
-        var exportService = new ExportService(factory, new AuditService(db.Context), TestSecurityContext.CreateAllowAllGuard());
+        var exportService = new SqlExportStore(factory, new SqlAuditStore(db.Context), TestSecurityContext.CreateAllowAllGuard());
 
         var bytes = await exportService.ExportCompaniesAsync(null, null);
         Assert.NotNull(bytes);

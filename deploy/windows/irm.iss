@@ -1,4 +1,4 @@
-#ifndef StageDir
+﻿#ifndef StageDir
   #error StageDir is required
 #endif
 #ifndef OutputDir
@@ -10,6 +10,7 @@ AppId={{A7A7AA33-A680-4E29-93C4-9F4720376A6B}
 AppName=Immigration Report Manager
 AppVersion=1.0.2
 AppPublisher=IRM
+MinVersion=10.0.14393
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin
@@ -21,8 +22,12 @@ OutputDir={#OutputDir}
 OutputBaseFilename=IRM-v1.0.2-windows-x64-offline-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
-WizardStyle=modern
+WizardStyle=modern dark includetitlebar
 Uninstallable=no
+
+[Messages]
+WindowsVersionNotSupported=IRM requires Windows 10 version 1607 x64 (build 14393) or Windows Server 2016 x64 (build 14393), or newer.
+WinVersionTooLowError=IRM requires Windows 10 version 1607 x64 / Windows Server 2016 x64 (build 14393) or newer. Minimum platform: %1 %2.
 
 [Files]
 Source: "{#StageDir}\*"; DestDir: "{tmp}\irm-v1.0.2"; Flags: recursesubdirs createallsubdirs deleteafterinstall

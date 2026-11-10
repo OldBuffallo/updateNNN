@@ -11,8 +11,8 @@ public sealed class AccommodationFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var service = new AccommodationService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var service = new SqlAccommodationStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var emptyName = new Accommodation { Name = "", AddressLine = "123 Đường A" };
         var emptyAddress = new Accommodation { Name = "Nhà trọ A", AddressLine = "  " };
@@ -30,8 +30,8 @@ public sealed class AccommodationFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
-        var audit = new AuditService(db.Context);
-        var service = new AccommodationService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var service = new SqlAccommodationStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var acc = new Accommodation { Name = "CSLT Test", AddressLine = "Địa chỉ", TypeCode = "RENTED" };
         db.Context.Accommodations.Add(acc);
@@ -64,8 +64,8 @@ public sealed class AccommodationFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
-        var audit = new AuditService(db.Context);
-        var service = new AccommodationService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var service = new SqlAccommodationStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var compA = new Company { CompanyName = "Company A", IDField = 1, TrackerID = 1 };
         var compB = new Company { CompanyName = "Company B", IDField = 1, TrackerID = 1 };
@@ -110,8 +110,8 @@ public sealed class AccommodationFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
-        var service = new AccommodationService(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
+        var audit = new SqlAuditStore(db.Context);
+        var service = new SqlAccommodationStore(db.Context, audit, TestSecurityContext.CreateAllowAllGuard());
 
         var acc = new Accommodation { Name = "Nhà trọ Cẩm Phả", AddressLine = "Đường B", TypeCode = "RENTED", IsDeleted = false };
         var id = await service.SaveAsync(acc);
@@ -134,10 +134,10 @@ public sealed class AccommodationFeatureTddTests
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync();
-        var audit = new AuditService(db.Context);
+        var audit = new SqlAuditStore(db.Context);
 
         var reporterGuard = TestSecurityContext.CreateGuard(IrmRoles.Reporter);
-        var serviceReporter = new AccommodationService(db.Context, audit, reporterGuard);
+        var serviceReporter = new SqlAccommodationStore(db.Context, audit, reporterGuard);
 
         var acc = new Accommodation { Name = "CSLT Protected", AddressLine = "Địa chỉ", TypeCode = "HOTEL" };
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => serviceReporter.SaveAsync(acc));
@@ -145,7 +145,7 @@ public sealed class AccommodationFeatureTddTests
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => serviceReporter.SaveAgreementAsync(new CompanyAccommodationAgreement()));
 
         var editorGuard = TestSecurityContext.CreateGuard(IrmRoles.DataEditor);
-        var serviceEditor = new AccommodationService(db.Context, audit, editorGuard);
+        var serviceEditor = new SqlAccommodationStore(db.Context, audit, editorGuard);
         var id = await serviceEditor.SaveAsync(acc);
         Assert.True(id > 0);
     }

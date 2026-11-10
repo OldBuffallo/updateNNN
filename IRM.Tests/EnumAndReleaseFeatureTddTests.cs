@@ -156,7 +156,7 @@ public sealed class EnumAndReleaseFeatureTddTests
         wb.SaveAs(stream);
         stream.Position = 0;
 
-        var importService = new ImportService(db.Context, new AuditService(db.Context), TestSecurityContext.CreateAllowAllGuard());
+        var importService = new SqlImportStore(db.Context, new SqlAuditStore(db.Context), TestSecurityContext.CreateAllowAllGuard());
         var mappings = new List<ColumnMapping>
         {
             new() { ExcelColumnIndex = 0, ExcelColumnName = "Họ tên", SystemField = "StaffName", SystemFieldLabel = "Họ tên" },
@@ -193,7 +193,7 @@ public sealed class EnumAndReleaseFeatureTddTests
         await db.Context.SaveChangesAsync();
 
         var factory = new TestDbContextFactory(db.Context);
-        var exportService = new ExportService(factory, new AuditService(db.Context), TestSecurityContext.CreateAllowAllGuard());
+        var exportService = new SqlExportStore(factory, new SqlAuditStore(db.Context), TestSecurityContext.CreateAllowAllGuard());
 
         var bytes = await exportService.ExportEmployeesAsync(workPermit: WorkPermitType.WorkerHasPermit);
         Assert.NotNull(bytes);
@@ -233,14 +233,61 @@ public sealed class EnumAndReleaseFeatureTddTests
         Assert.Equal(54, await db.Context.AdministrativeUnits.CountAsync());
         Assert.True(await db.Context.SchemaVersions.AnyAsync(s =>
             s.Version == "1.0.1" && s.Checksum == SchemaVersionService.RequiredChecksum));
-        Assert.Empty(await db.Context.Companies.ToListAsync());
+        var initialCompany = Assert.Single(await db.Context.Companies.ToListAsync());
+        Assert.Equal(DatabaseSeeder.InitialCompanyName, initialCompany.CompanyName);
+        Assert.True(initialCompany.IDField > 0);
+        Assert.True(initialCompany.TrackerID > 0);
         Assert.Empty(await db.Context.Employees.ToListAsync());
         Assert.Empty(await db.Context.Students.ToListAsync());
 
         // Verify idempotency
         await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context, "admin", "Test-Admin-Password-1!");
         Assert.Single(await db.Context.Accounts.Where(a => a.Username == "admin").ToListAsync());
+        Assert.Single(await db.Context.Companies.ToListAsync());
         Assert.Equal(8, await db.Context.Fields.CountAsync());
+    }
+
+    [Fact]
+    public async Task DatabaseSeeder_SeedCatalogsIfEmpty_CreatesActiveCompanyWhenOnlyDeletedCompanyExists()
+    {
+        await using var db = new TestDatabase();
+        await db.InitializeAsync(seedBaseline: true);
+        var deletedCompany = Assert.Single(await db.Context.Companies.ToListAsync());
+        deletedCompany.Delete_flag = 1;
+        await db.Context.SaveChangesAsync();
+
+        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context, "admin", "Test-Admin-Password-1!");
+
+        var activeCompany = Assert.Single(await db.Context.Companies
+            .Where(company => company.Delete_flag == 0)
+            .ToListAsync());
+        Assert.Equal(DatabaseSeeder.InitialCompanyName, activeCompany.CompanyName);
+        Assert.Equal(2, await db.Context.Companies.CountAsync());
+    }
+
+    [Fact]
+    public async Task DatabaseSeeder_SeedCatalogsIfEmpty_RebootstrapUpdatesAdminCredentialAndKeepsSingleRole()
+    {
+        await using var db = new TestDatabase();
+        await db.InitializeAsync(seedBaseline: false);
+        const string oldPassword = "Old-Admin-Password-1!";
+        const string newPassword = "New-Admin-Password-2!";
+
+        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context, "admin", oldPassword);
+        var auth = new SqlAuthStore(db.Context, new SqlAuditStore(db.Context));
+        Assert.NotNull(await auth.AuthenticateWebAsync("admin", oldPassword, "127.0.0.1/test"));
+
+        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context, "admin", newPassword);
+
+        Assert.NotNull(await auth.AuthenticateWebAsync("admin", newPassword, "127.0.0.1/test"));
+        Assert.Null(await auth.AuthenticateWebAsync("admin", oldPassword, "127.0.0.1/test"));
+        var admin = Assert.Single(await db.Context.Accounts.Where(account => account.Username == "admin").ToListAsync());
+        Assert.Equal(AccountPermission.Admin, admin.Permission);
+        Assert.Equal(0, admin.Delete_flag);
+        Assert.Single(await db.Context.WebCredentials.Where(credential => credential.AccountId == admin.IDUser).ToListAsync());
+        Assert.Single(await db.Context.WebRoleAssignments
+            .Where(role => role.AccountId == admin.IDUser && role.RoleCode == IrmRoles.Admin)
+            .ToListAsync());
     }
 
     [Fact]
@@ -257,7 +304,7 @@ public sealed class EnumAndReleaseFeatureTddTests
         );
         await db.Context.SaveChangesAsync();
 
-        var dashboardService = new DashboardService(db.Context);
+        var dashboardService = new SqlDashboardStore(db.Context);
         var dashboard = await dashboardService.GetDashboardAsync();
 
         Assert.NotNull(dashboard.WorkPermitStats);

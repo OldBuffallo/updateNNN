@@ -1,0 +1,76 @@
+@namespace IRM.Components.Pages
+@inherits IRM.Components.Shared.FeatureSection<Import>
+
+@* Step 4: Result *@
+    @if (Page._currentStep == 4 && Page._importResult != null)
+    {
+        <MudPaper Elevation="0" Class="pa-8 rounded-xl border-solid border text-center" Style="border-width: 1px;">
+            <MudText Style="font-size: 3rem;">@(Page._importResult.Success ? "✅" : "❌")</MudText>
+            <MudText Typo="Typo.h5" Color="@(Page._importResult.Success ? Color.Success : Color.Error)" Style="font-weight: 800;" Class="mt-2">
+                @(Page._importResult.Success ? "Import hoàn tất!" : "Import thất bại!")
+            </MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">
+                Phiên <strong>@Page._importResult.SessionId</strong> · File <strong>@Page._uploadedFileName</strong>
+            </MudText>
+
+            <MudStack Row="true" Justify="Justify.Center" Spacing="8" Class="mt-6 mb-6">
+                <MudStack AlignItems="AlignItems.Center" Spacing="1">
+                    <MudText Typo="Typo.h3" Color="Color.Success" Style="font-weight: 800;">@Page._importResult.AddedCount</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Thêm mới</MudText>
+                </MudStack>
+                <MudStack AlignItems="AlignItems.Center" Spacing="1">
+                    <MudText Typo="Typo.h3" Color="Color.Warning" Style="font-weight: 800;">@Page._importResult.UpdatedCount</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Cập nhật</MudText>
+                </MudStack>
+                <MudStack AlignItems="AlignItems.Center" Spacing="1">
+                    <MudText Typo="Typo.h3" Color="Color.Error" Style="font-weight: 800;">@Page._importResult.ErrorCount</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Lỗi (bỏ qua)</MudText>
+                </MudStack>
+                @if (Page._importResult.SkippedCount > 0)
+                {
+                    <MudStack AlignItems="AlignItems.Center" Spacing="1">
+                        <MudText Typo="Typo.h3" Color="Color.Default" Style="font-weight: 800;">@Page._importResult.SkippedCount</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Bỏ qua</MudText>
+                    </MudStack>
+                }
+            </MudStack>
+
+            @if (Page._importResult.Errors.Any())
+            {
+                <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4 text-left">
+                    @foreach (var err in Page._importResult.Errors.Take(5))
+                    {
+                        <div>⚠️ @err</div>
+                    }
+                    @if (Page._importResult.Errors.Count > 5)
+                    {
+                        <div>... và @(Page._importResult.Errors.Count - 5) lỗi khác</div>
+                    }
+                </MudAlert>
+            }
+
+            @if (Page._importResult.Success)
+            {
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4 text-left">
+                    💾 <strong>Dữ liệu cũ đã được backup.</strong> Các bản ghi cập nhật có thể hoàn tác bất cứ lúc nào.
+                </MudAlert>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-4 text-left">
+                    Không có dữ liệu nào được ghi vì toàn bộ giao dịch đã được hoàn tác.
+                </MudAlert>
+            }
+
+            <MudStack Row="true" Justify="Justify.Center" Spacing="3">
+                @if (Page._importResult.Success)
+                {
+                    <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Undo"
+                               OnClick="@(() => Page.RollbackSession(Page._importResult.SessionId))">↩ Hoàn tác Import này</MudButton>
+                }
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/employees">👥 Xem danh sách NLĐ</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="Page.ResetWizard"
+                           StartIcon="@Icons.Material.Filled.Add">Import file khác</MudButton>
+            </MudStack>
+        </MudPaper>
+    }

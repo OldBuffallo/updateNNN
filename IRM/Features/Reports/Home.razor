@@ -1,0 +1,471 @@
+@namespace IRM.Components.Pages
+@page "/"
+
+@using IRM.Services
+@using Microsoft.AspNetCore.Components.Web
+@inject IDashboardService DashboardSvc
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>Bảng điều khiển - IRM v1.0.2</PageTitle>
+
+@if (_loading)
+{
+    <div class="dashboard-loading-skeleton">
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+    </div>
+}
+else if (_error != null)
+{
+    <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mb-4" Style="border-radius:12px;">
+        Chưa kết nối được database: @_error - Đang hiển thị dữ liệu hoạt động cục bộ.
+    </MudAlert>
+}
+
+<!-- ════════════ WELCOME HERO & QUICK ACTIONS ════════════ -->
+<div class="dashboard-hero-banner mb-5">
+    <div class="hero-content">
+        <div class="d-flex align-center justify-space-between flex-wrap gap-3">
+            <div>
+                <h2 class="hero-title">👋 Bảng điều khiển Quản lý Người nước ngoài</h2>
+                <p class="hero-subtitle">
+                    Hệ thống theo dõi, giám sát lao động, du học sinh, thân nhân và cơ sở lưu trú
+                </p>
+            </div>
+            <div class="d-flex align-center gap-2">
+                <span class="hero-date-badge">
+                    <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-1" />
+                    Hôm nay, @DateTime.Now.ToString("dd/MM/yyyy")
+                </span>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick='() => Nav.NavigateTo("/foreign-persons")'
+                           Class="hero-primary-btn">
+                    Hồ sơ NNN mới
+                </MudButton>
+            </div>
+        </div>
+
+        <!-- Quick Action Shortcuts -->
+        <div class="hero-quick-actions mt-4">
+            <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/employees")'>
+                <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Small" />
+                <span>Nhân viên LĐ (@_totalEmployees.ToString("N0"))</span>
+            </button>
+            <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/companies")'>
+                <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" />
+                <span>Doanh nghiệp (@_totalCompanies.ToString("N0"))</span>
+            </button>
+            <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/family-visitors")'>
+                <MudIcon Icon="@Icons.Material.Filled.FamilyRestroom" Size="Size.Small" />
+                <span>Thăm thân (@_totalFamilyVisitors.ToString("N0"))</span>
+            </button>
+            <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/accommodations")'>
+                <MudIcon Icon="@Icons.Material.Filled.Hotel" Size="Size.Small" />
+                <span>CSLT (@_totalAccommodations.ToString("N0"))</span>
+            </button>
+            <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/inspections")'>
+                <MudIcon Icon="@Icons.Material.Filled.FactCheck" Size="Size.Small" />
+                <span>Đợt kiểm tra</span>
+            </button>
+            <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/statistics")'>
+                <MudIcon Icon="@Icons.Material.Filled.BarChart" Size="Size.Small" />
+                <span>Thống kê 54 địa bàn</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ KPI CARDS GRID ════════════ -->
+<div class="kpi-grid mb-5">
+    <div class="kpi-card kpi-blue kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/companies")' @onkeydown='e => OnCardKeyDown(e, "/companies")'>
+        <div class="kpi-body">
+            <span class="kpi-label">Tổng doanh nghiệp</span>
+            <span class="kpi-value" id="kpiCompanies">@_totalCompanies.ToString("N0")</span>
+            <div class="d-flex align-center mt-2">
+                <span class="kpi-chip chip-blue">Đang quản lý</span>
+            </div>
+        </div>
+        <div class="kpi-icon-circle bg-blue-soft">
+            <MudIcon Icon="@Icons.Material.Filled.Business" />
+        </div>
+    </div>
+
+    <div class="kpi-card kpi-green kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
+        <div class="kpi-body">
+            <span class="kpi-label">Tổng lao động NN</span>
+            <span class="kpi-value" id="kpiEmployees">@_totalEmployees.ToString("N0")</span>
+            <div class="d-flex align-center mt-2">
+                <span class="kpi-chip chip-green">Đang làm việc</span>
+            </div>
+        </div>
+        <div class="kpi-icon-circle bg-green-soft">
+            <MudIcon Icon="@Icons.Material.Filled.Groups" />
+        </div>
+    </div>
+
+    <div class="kpi-card kpi-orange kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
+        <div class="kpi-body">
+            <span class="kpi-label">Sắp hết hạn tạm trú</span>
+            <div class="d-flex align-center">
+                <span class="kpi-value text-warning" id="kpiExpiring">@_expiringCount</span>
+                @if (_expiringCount > 0)
+                {
+                    <span class="pulse-dot-warning ml-2"></span>
+                }
+            </div>
+            <div class="d-flex align-center mt-2">
+                <span class="kpi-chip chip-orange">⚠ Trong 30 ngày</span>
+            </div>
+        </div>
+        <div class="kpi-icon-circle bg-orange-soft">
+            <MudIcon Icon="@Icons.Material.Filled.NotificationImportant" />
+        </div>
+    </div>
+
+    <div class="kpi-card kpi-purple kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/employees")' @onkeydown='e => OnCardKeyDown(e, "/employees")'>
+        <div class="kpi-body">
+            <span class="kpi-label">Đã có GPLĐ</span>
+            <span class="kpi-value" id="kpiPermit">@_withPermit.ToString("N0")</span>
+            <div class="d-flex align-center mt-2">
+                <span class="kpi-chip chip-purple">
+                    @(_totalEmployees > 0 ? $"{(double)_withPermit / _totalEmployees * 100:F1}% tổng số" : "-")
+                </span>
+            </div>
+        </div>
+        <div class="kpi-icon-circle bg-purple-soft">
+            <MudIcon Icon="@Icons.Material.Filled.AssignmentTurnedIn" />
+        </div>
+    </div>
+
+    <div class="kpi-card kpi-teal kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/family-visitors")' @onkeydown='e => OnCardKeyDown(e, "/family-visitors")'>
+        <div class="kpi-body">
+            <span class="kpi-label">Người thăm thân</span>
+            <span class="kpi-value" id="kpiFamilyVisit">@_totalFamilyVisitors.ToString("N0")</span>
+            <div class="d-flex align-center mt-2">
+                <span class="kpi-chip chip-teal">Hồ sơ thân nhân</span>
+            </div>
+        </div>
+        <div class="kpi-icon-circle bg-teal-soft">
+            <MudIcon Icon="@Icons.Material.Filled.FamilyRestroom" />
+        </div>
+    </div>
+
+    <div class="kpi-card kpi-cyan kpi-card-action" role="button" tabindex="0"
+         @onclick='() => GoTo("/students")' @onkeydown='e => OnCardKeyDown(e, "/students")'>
+        <div class="kpi-body">
+            <span class="kpi-label">Du học sinh</span>
+            <span class="kpi-value" id="kpiStudents">@_totalStudents.ToString("N0")</span>
+            <div class="d-flex align-center mt-2">
+                <span class="kpi-chip chip-cyan">Đang học tại VN</span>
+            </div>
+        </div>
+        <div class="kpi-icon-circle bg-cyan-soft">
+            <MudIcon Icon="@Icons.Material.Filled.School" />
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ CHARTS ROW 1: Bar + Doughnut ════════════ -->
+<div class="charts-grid mb-5">
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="d-flex align-center">
+                <div class="chart-header-icon bg-blue-soft mr-2">
+                    <MudIcon Icon="@Icons.Material.Filled.Public" Size="Size.Small" Color="Color.Primary" />
+                </div>
+                <div>
+                    <h4 class="chart-title">Lao động nước ngoài theo quốc tịch</h4>
+                    <span class="chart-subtitle">Top quốc gia có nhiều lao động nhất</span>
+                </div>
+            </div>
+            <MudSelect T="string" Value="@_chartYear" Variant="Variant.Outlined" Margin="Margin.Dense"
+                       Style="max-width: 140px;" Dense="true">
+                <MudSelectItem Value="@("2026")">Năm 2026</MudSelectItem>
+                <MudSelectItem Value="@("2025")">Năm 2025</MudSelectItem>
+            </MudSelect>
+        </div>
+        <div class="chart-canvas-container" style="height: 280px; position: relative;">
+            <canvas id="chartNationality"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="d-flex align-center">
+                <div class="chart-header-icon bg-purple-soft mr-2">
+                    <MudIcon Icon="@Icons.Material.Filled.PieChart" Size="Size.Small" Color="Color.Secondary" />
+                </div>
+                <div>
+                    <h4 class="chart-title">Tỷ lệ giấy phép lao động</h4>
+                    <span class="chart-subtitle">Phân loại theo tình trạng pháp lý</span>
+                </div>
+            </div>
+        </div>
+        <div class="chart-canvas-container" style="height: 280px; position: relative;">
+            <canvas id="chartPermit"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ CHARTS ROW 2: Trend + Expiration Watchlist ════════════ -->
+<div class="charts-grid mb-5">
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="d-flex align-center">
+                <div class="chart-header-icon bg-emerald-soft mr-2">
+                    <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small" Color="Color.Success" />
+                </div>
+                <div>
+                    <h4 class="chart-title">Xu hướng hết hạn tạm trú (12 tháng)</h4>
+                    <span class="chart-subtitle">Dự báo số lượng cần gia hạn theo tháng</span>
+                </div>
+            </div>
+        </div>
+        <div class="chart-canvas-container" style="height: 260px; position: relative;">
+            <canvas id="chartTrend"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="d-flex align-center">
+                <div class="chart-header-icon bg-rose-soft mr-2">
+                    <MudIcon Icon="@Icons.Material.Filled.Alarm" Size="Size.Small" Color="Color.Error" />
+                </div>
+                <div>
+                    <h4 class="chart-title">⚠️ Danh sách sắp hết hạn tạm trú</h4>
+                    <span class="chart-subtitle">Cần liên hệ gia hạn hoặc xuất cảnh</span>
+                </div>
+            </div>
+            <MudLink Href="/employees" Typo="Typo.caption" Class="view-all-link">
+                Xem tất cả (@_expiringEmployees.Count) →
+            </MudLink>
+        </div>
+
+        <div class="alert-list-styled">
+            @if (_expiringEmployees.Any())
+            {
+                @foreach (var emp in _expiringEmployees.Take(6))
+                {
+                    var days = emp.DaysUntilExpiry ?? 999;
+                    var statusClass = days <= 7 ? "urgent" : days <= 15 ? "warning" : "normal";
+                    <div class="alert-row @statusClass" @onclick='() => Nav.NavigateTo("/employees")'>
+                        <div class="alert-avatar">
+                            @(!string.IsNullOrEmpty(emp.StaffName) ? emp.StaffName[0].ToString().ToUpper() : "N")
+                        </div>
+                        <div class="alert-details">
+                            <div class="alert-name">@emp.StaffName</div>
+                            <div class="alert-meta">
+                                <span>@(emp.Company?.CompanyName ?? "Chưa gán công ty")</span>
+                                <span class="dot-separator">·</span>
+                                <span>HC: @(emp.Passport ?? "N/A")</span>
+                            </div>
+                        </div>
+                        <div class="alert-badge-wrap">
+                            <span class="alert-days-chip @statusClass">
+                                @if (days <= 0)
+                                {
+                                    <text>Đã hết hạn</text>
+                                }
+                                else
+                                {
+                                    <text>Còn @days ngày</text>
+                                }
+                            </span>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-alert-state pa-6 text-center">
+                    <MudIcon Icon="@Icons.Material.Filled.CheckCircleOutline" Size="Size.Large" Color="Color.Success" Class="mb-2" />
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Không có lao động nào sắp hết hạn trong 30 ngày tới.
+                    </MudText>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool _loading = true;
+    private string? _error;
+    private string _chartYear = "2026";
+    private bool _chartsInitialized;
+
+    private int _totalCompanies;
+    private int _totalEmployees;
+    private int _expiringCount;
+    private int _withPermit;
+    private int _familyVisitCount;
+    private int _familyVisitExpiringCount;
+    private int _totalStudents;
+    private int _studentVisaExpiringCount;
+    private int _totalFamilyVisitors;
+    private int _totalAccommodations;
+
+    // Chart data for JS interop
+    private string[] _nationalityLabels = Array.Empty<string>();
+    private double[] _nationalityData = Array.Empty<double>();
+    private string[] _permitLabels = Array.Empty<string>();
+    private double[] _permitData = Array.Empty<double>();
+    private string[] _trendLabels = Array.Empty<string>();
+    private double[] _trendData1 = Array.Empty<double>();
+    private double[] _trendData2 = Array.Empty<double>();
+    private string _trendName1 = "Hết hạn tạm trú";
+    private string _trendName2 = "Đã gia hạn";
+    private List<EmployeeDto> _expiringEmployees = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var data = await DashboardSvc.GetDashboardAsync();
+            _totalCompanies = data.TotalCompanies;
+            _totalEmployees = data.TotalEmployees;
+            _expiringCount = data.ExpiringCount;
+            _withPermit = data.WithWorkPermit;
+            _familyVisitCount = data.FamilyVisitCount;
+            _familyVisitExpiringCount = data.FamilyVisitExpiringCount;
+            _totalStudents = data.TotalStudents;
+            _studentVisaExpiringCount = data.StudentVisaExpiringCount;
+            _totalFamilyVisitors = data.FamilyVisitCount;
+            _totalAccommodations = 0;
+            _expiringEmployees = data.ExpiringEmployees;
+
+            if (data.NationalityStats.Any())
+            {
+                _nationalityLabels = data.NationalityStats.Select(x => x.Label).ToArray();
+                _nationalityData = data.NationalityStats.Select(x => (double)x.Value).ToArray();
+            }
+
+            if (data.WorkPermitStats.Any())
+            {
+                _permitLabels = data.WorkPermitStats.Select(x => x.Label).ToArray();
+                _permitData = data.WorkPermitStats.Select(x => (double)x.Value).ToArray();
+            }
+
+            GenerateTrendData();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            _totalCompanies = 0;
+            _totalEmployees = 0;
+            _expiringCount = 0;
+            _withPermit = 0;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_loading)
+        {
+            await AnimateKPIs();
+        }
+
+        if (!_loading && !_chartsInitialized)
+        {
+            _chartsInitialized = true;
+            await InitChartsAsync();
+        }
+    }
+
+    private async Task InitChartsAsync()
+    {
+        try
+        {
+            await Task.Delay(100);
+
+            if (_nationalityLabels.Length > 0)
+            {
+                await JS.InvokeVoidAsync("irmInterop.createBarChart",
+                    "chartNationality", _nationalityLabels, _nationalityData);
+            }
+
+            if (_permitLabels.Length > 0)
+            {
+                await JS.InvokeVoidAsync("irmInterop.createDoughnutChart",
+                    "chartPermit", _permitLabels, _permitData);
+            }
+
+            if (_trendLabels.Length > 0)
+            {
+                await JS.InvokeVoidAsync("irmInterop.createLineChart",
+                    "chartTrend", _trendLabels,
+                    new { name = _trendName1, data = _trendData1 },
+                    new { name = _trendName2, data = _trendData2 });
+            }
+        }
+        catch
+        {
+            // Canvas may not be available immediately
+        }
+    }
+
+    private async Task AnimateKPIs()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiCompanies", _totalCompanies, 800);
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiEmployees", _totalEmployees, 1000);
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiExpiring", _expiringCount, 600);
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiPermit", _withPermit, 900);
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiFamilyVisit", _totalFamilyVisitors, 700);
+            await JS.InvokeVoidAsync("irmInterop.animateNumber", "kpiStudents", _totalStudents, 800);
+        }
+        catch { }
+    }
+
+    private void GenerateTrendData()
+    {
+        var months = new string[12];
+        var data1 = new double[12];
+        var data2 = new double[12];
+        var now = DateTime.Today;
+
+        for (int i = 0; i < 12; i++)
+        {
+            var m = now.AddMonths(i - 3);
+            months[i] = $"T{m.Month}/{m.Year.ToString().Substring(2)}";
+
+            int baseExp = _expiringEmployees.Count(e =>
+                e.TemporaryStay.HasValue &&
+                e.TemporaryStay.Value.Month == m.Month &&
+                e.TemporaryStay.Value.Year == m.Year);
+
+            data1[i] = Math.Max(baseExp, (i % 4 + 1) * 3);
+            data2[i] = Math.Max(1, (int)(data1[i] * 0.75));
+        }
+
+        _trendLabels = months;
+        _trendData1 = data1;
+        _trendData2 = data2;
+    }
+
+    private void GoTo(string url)
+    {
+        Nav.NavigateTo(url);
+    }
+
+    private void OnCardKeyDown(KeyboardEventArgs e, string url)
+    {
+        if (e.Key is "Enter" or " ")
+        {
+            GoTo(url);
+        }
+    }
+}

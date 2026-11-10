@@ -1,0 +1,99 @@
+using IRM.Services;
+using IRM.Data;
+using IRM.Data.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace IRM.Infrastructure.Persistence.Stores.Students;
+
+/// <summary>
+/// Service Du học sinh — CRUD + thống kê
+/// </summary>
+public class SqlStudentStore : IStudentStore
+{
+    private readonly IrmDbContext _db;
+    private readonly IServiceAuthorizationGuard? _guard;
+    public SqlStudentStore(IrmDbContext db) => _db = db;
+    public SqlStudentStore(IrmDbContext db, IServiceAuthorizationGuard guard) : this(db) => _guard = guard;
+
+    public async Task<List<Student>> GetAllActiveAsync()
+    {
+        return await _db.Students
+            .Include(s => s.NationalityNav)
+            .Where(s => s.Hidden_flag == 0 && s.Status == StudentStatus.Studying)
+            .OrderBy(s => s.FullName)
+            .ToListAsync();
+    }
+
+    public async Task<List<Student>> GetAllVisibleAsync()
+    {
+        return await _db.Students
+            .Include(s => s.NationalityNav)
+            .Where(s => s.Hidden_flag == 0)
+            .OrderBy(s => s.FullName)
+            .ToListAsync();
+    }
+
+    public async Task<Student?> GetByIdAsync(int id)
+    {
+        return await _db.Students
+            .Include(s => s.NationalityNav)
+            .FirstOrDefaultAsync(s => s.IDStudent == id);
+    }
+
+    public async Task<List<Student>> GetBySchoolAsync(string schoolName)
+    {
+        var term = schoolName.ToLower();
+        return await _db.Students
+            .Include(s => s.NationalityNav)
+            .Where(s => s.Hidden_flag == 0 && s.SchoolName != null && s.SchoolName.ToLower().Contains(term))
+            .OrderBy(s => s.FullName)
+            .ToListAsync();
+    }
+
+    public async Task<List<Student>> GetExpiringVisaAsync(int days = 30)
+    {
+        var deadline = DateTime.Today.AddDays(days);
+        return await _db.Students
+            .Include(s => s.NationalityNav)
+            .Where(s => s.Hidden_flag == 0 && s.Status == StudentStatus.Studying
+                && s.VisaExpiry != null
+                && s.VisaExpiry >= DateTime.Today
+                && s.VisaExpiry <= deadline)
+            .OrderBy(s => s.VisaExpiry)
+            .ToListAsync();
+    }
+
+    public async Task CreateAsync(Student student)
+    {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
+        student.Hidden_flag = 0;
+        student.DateCreated = DateTime.Now;
+        _db.Students.Add(student);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Student student)
+    {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
+        _db.Students.UpdateValues(_db, student);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
+        var stu = await _db.Students.FindAsync(id);
+        if (stu != null)
+        {
+            stu.Hidden_flag = 1; // soft delete
+            await _db.SaveChangesAsync();
+        }
+    }
+
+    public async Task<bool> CheckDuplicatePassportAsync(string passport, int excludeId = 0)
+    {
+        if (string.IsNullOrWhiteSpace(passport)) return false;
+        return await _db.Students.AnyAsync(s =>
+            s.Passport == passport && s.Hidden_flag == 0 && s.IDStudent != excludeId);
+    }
+}
