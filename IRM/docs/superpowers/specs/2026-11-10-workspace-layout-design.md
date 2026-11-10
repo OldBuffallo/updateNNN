@@ -1,6 +1,6 @@
 # Thiết kế sắp xếp workspace IRM
 
-Ngày: 10/11/2026. Trạng thái: người dùng đã duyệt phương án một Git repo chung và yêu cầu thực hiện kế hoạch.
+Ngày: 10/11/2026. Trạng thái: đã được người dùng duyệt, đã triển khai theo kế hoạch và rà soát độc lập. Kết quả kiểm tra cùng ngoại lệ workbook đang mở được ghi tại `../../WORKSPACE-REORGANIZATION-2026-11-10.md`.
 
 ## Mục tiêu và phạm vi
 

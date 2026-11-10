@@ -39,7 +39,9 @@
 - [x] Set the appropriate IRM working directory in CI/release jobs; update artifact upload paths, Docker context and reference demo path.
 - [x] Preserve solution-relative project paths and packaging source revision checks; keep candidates under BAN-GIAO/04-CHO-NGHIEM-THU.
 - [x] Run structural/fingerprint/ignore checks; restore, build Release, test .NET, and verify PowerShell x64/x86. Check Docker if available; record unavailable tools or policy restrictions accurately.
-- [ ] Commit the complete move and integration changes; obtain one independent read-only review of the full change, fix material findings with focused verification, and leave a clean tree.
+- [x] Commit the complete move and integration changes; obtain one independent read-only review of the full change, fix material findings with focused verification, and leave a clean tree.
+
+Completed: relocation commit `2bdd748`; independent read-only review of `75403fe..2bdd748` found no Critical, Important or Minor issues. Windows policy restrictions and the actively locked original Excel workbook remain explicitly documented acceptance exceptions. Linux Docker tests passed 117 cases with one unconfigured SQL Server integration case skipped; runtime image build passed.
 
 ## Acceptance
 

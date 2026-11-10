@@ -38,3 +38,11 @@ Mốc trước di chuyển: commit `75403fe214da64f7626d5dfeeba4a2c500f51c5c`. �
 - PowerShell `Move-Item` gặp thuộc tính ẩn của thư mục `.git` và dừng giữa quá trình. Đã kiểm tra phần đã chuyển, tiếp tục bằng thao tác đổi tên thư mục cùng volume với đường dẫn được xác minh, rồi đối chiếu toàn bộ 702 fingerprint và Git config. Các thư mục rỗng còn lại được giữ trong cache cục bộ để không phải xóa dữ liệu.
 - File Excel cũ trong `outputs/irm-import-fixed-20261110/` vẫn bị Excel giữ mở theo kiểm tra chia sẻ file. Giữ nguyên bản đó và bản đã tập trung trong `BAN-GIAO`; `outputs/` được Git bỏ qua. Không đóng Excel hoặc xóa file đang mở. Đây là ngoại lệ tạm thời ngoài ba thư mục công việc chính, đã được kế hoạch cho phép báo riêng.
 - Không thay chính sách bảo mật Windows để chạy test/EF. Dùng quy trình Docker Linux đã có của dự án để kiểm chứng riêng tính tương thích build/test trên nền tảng Linux.
+
+## Commit và rà soát độc lập
+
+Commit `75403fe` ghi nhận thiết kế đã duyệt và kế hoạch trước khi chuyển; commit `2bdd748` chứa toàn bộ phần di chuyển/cập nhật tích hợp. Một lượt review độc lập, chỉ đọc, đối chiếu `75403fe..2bdd748` với thiết kế/kế hoạch và chạy lại audit fingerprint: không phát hiện lỗi Critical, Important hoặc Minor.
+
+Các mục reviewer không kiểm tra được xử lý theo đúng phạm vi đã duyệt: nghiệp vụ/tagging release/tài liệu lỗi thời có sẵn không liên quan đến di chuyển được giữ nguyên; không chạy dịch vụ hoặc database production; giữ nguyên runtime/cache và không đi theo junction hỗ trợ; ghi nhận giới hạn Application Control và test SQL Server chưa cấu hình. Không có mục nào cần thay đổi mã nghiệp vụ hoặc bổ sung triển khai trong đợt sắp xếp này.
+
+Kiểm tra cuối xác nhận hai thư mục source cùng trỏ về Git root `NNN/`, không có diff trong 146 file WPF kể từ mốc trước di chuyển, và cả 7 checksum gốc của gói R4 đều hợp lệ. Không push; tiếp tục giữ nhánh `develop`.
