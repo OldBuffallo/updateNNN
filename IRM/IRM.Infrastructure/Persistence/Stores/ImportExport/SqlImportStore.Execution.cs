@@ -44,11 +44,24 @@ public partial class SqlImportStore
                 {
                     int added = 0, updated = 0, errors = 0, skipped = 0;
                     var errorDetails = new List<string>();
-                    var activeCompanyIds = (await _db.Companies
+                    var activeCompanies = await _db.Companies
                         .Where(company => company.Delete_flag == 0)
+                        .ToListAsync();
+                    var activeCompanyIds = activeCompanies
                         .Select(company => company.IDCompany)
-                        .ToListAsync())
                         .ToHashSet();
+                    var defaultFieldId = await _db.Fields
+                        .Where(f => f.Delete_flag == 0)
+                        .OrderBy(f => f.IDField)
+                        .Select(f => f.IDField)
+                        .FirstOrDefaultAsync();
+                    if (defaultFieldId <= 0)
+                    {
+                        var defaultField = new Field { FieldName = "Sản xuất công nghiệp", Description = "Mặc định", Delete_flag = 0 };
+                        _db.Fields.Add(defaultField);
+                        await _db.SaveChangesAsync();
+                        defaultFieldId = defaultField.IDField;
+                    }
 
                     // A catalog entry may have changed since preview. Validate the
                     // whole writable batch before tracking or saving any employee.
@@ -91,7 +104,46 @@ public partial class SqlImportStore
                             continue;
                         }
 
-                        var resolvedCompanyId = row.ResolvedCompanyId ?? companyId;
+                        var resolvedCompanyId = row.ResolvedCompanyId.HasValue && row.ResolvedCompanyId.Value > 0
+                            ? row.ResolvedCompanyId.Value
+                            : companyId;
+
+                        if (!activeCompanyIds.Contains(resolvedCompanyId) &&
+                            row.ExtendedFields.TryGetValue("__AutoCreateCompanyName", out var autoCompName) &&
+                            !string.IsNullOrWhiteSpace(autoCompName))
+                        {
+                            var trimmedCompName = autoCompName.Trim();
+                            var matched = activeCompanies.FirstOrDefault(c =>
+                                c.CompanyName.Equals(trimmedCompName, StringComparison.OrdinalIgnoreCase));
+                            if (matched is null)
+                            {
+                                matched = new Company
+                                {
+                                    CompanyName = trimmedCompName,
+                                    TypeOfBusiniess = "Tự động tạo khi Import Excel",
+                                    IDField = defaultFieldId,
+                                    TrackerID = accountId > 0 ? accountId : 1,
+                                    UpdateDay = DateTime.Now,
+                                    Delete_flag = 0
+                                };
+                                _db.Companies.Add(matched);
+                                await _db.SaveChangesAsync();
+                                activeCompanies.Add(matched);
+                                activeCompanyIds.Add(matched.IDCompany);
+
+                                _db.ImportBackups.Add(new ImportBackup
+                                {
+                                    ImportSessionId = sessionId,
+                                    ActionType = "INSERT",
+                                    EntityType = "Company",
+                                    EntityId = matched.IDCompany,
+                                    CreatedAt = DateTime.Now
+                                });
+                            }
+                            resolvedCompanyId = matched.IDCompany;
+                            row.ResolvedCompanyId = resolvedCompanyId;
+                        }
+
                         if (!activeCompanyIds.Contains(resolvedCompanyId))
                         {
                             errors++;

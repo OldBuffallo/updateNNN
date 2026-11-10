@@ -173,10 +173,14 @@ public static class DatabaseSeeder
             db.Companies.Add(new Company
             {
                 CompanyName = InitialCompanyName,
-                TypeOfBusiniess = "Chưa cập nhật",
+                TypeOfBusiniess = "Doanh nghiệp FDI (Dữ liệu mẫu hướng dẫn)",
                 IDField = fieldId,
                 TrackerID = trackerId,
-                Note = "Dữ liệu khởi tạo của hệ thống. Hãy sửa tên và thông tin công ty trước khi sử dụng chính thức.",
+                LegalRepresentative = "Nguyễn Văn Mẫu (Hướng dẫn)",
+                Address = "KCN Cái Lân, Phường Bãi Cháy, TP. Hạ Long (Dữ liệu mẫu khi cài đặt lần đầu)",
+                TotalAmount = 1,
+                QuantityAvailable = 1,
+                Note = "🏢 Dữ liệu mẫu hướng dẫn khi cài đặt lần đầu. Bấm biểu tượng Xem (👁️) để xem mẫu Hồ sơ 6 Tab, dùng để thử nghiệm Import Excel, hoặc đổi tên / xóa khi sử dụng chính thức.",
                 UpdateDay = DateTime.Now,
                 Delete_flag = 0
             });
@@ -313,6 +317,208 @@ public static class DatabaseSeeder
                 Checksum = SchemaVersionService.RequiredChecksum,
                 AppliedBy = "DatabaseSeeder"
             });
+            await db.SaveChangesAsync();
+        }
+    }
+
+    /// <summary>
+    /// Tạo bộ dữ liệu mẫu hướng dẫn sử dụng khi cài đặt lần đầu (1 Doanh nghiệp mẫu đủ 6 Tab,
+    /// 1 Cơ sở lưu trú mẫu, và 1 Hồ sơ Người nước ngoài mẫu đủ 5 Tab).
+    /// Chỉ chạy khi trong hệ thống chưa từng có bất kỳ bản ghi Nhân viên, Du học sinh hay Hồ sơ NNN nào.
+    /// </summary>
+    public static async Task SeedOnboardingGuideIfEmptyAsync(IrmDbContext db)
+    {
+        if (await db.Employees.AnyAsync() || await db.Students.AnyAsync() || await db.ForeignPersons.AnyAsync())
+            return;
+
+        var company = await db.Companies
+            .Where(c => c.Delete_flag == 0)
+            .OrderBy(c => c.IDCompany)
+            .FirstOrDefaultAsync();
+        if (company is null)
+            return;
+
+        var adminUnit = await db.AdministrativeUnits
+            .Where(u => !u.ValidTo.HasValue)
+            .OrderBy(u => u.Id)
+            .FirstOrDefaultAsync();
+        var careerId = await db.Careers
+            .Where(c => c.Delete_flag == 0)
+            .OrderBy(c => c.IDCareer)
+            .Select(c => (int?)c.IDCareer)
+            .FirstOrDefaultAsync();
+        var trackerId = await db.Accounts
+            .Where(a => a.Delete_flag == 0)
+            .OrderBy(a => a.IDUser)
+            .Select(a => a.IDUser)
+            .FirstOrDefaultAsync();
+        var nationalityCode = await db.Nationality
+            .Where(n => n.Delete_flag == 0 && (n.NationalityCode == "KR" || n.NationalityCode == "US"))
+            .Select(n => n.NationalityCode)
+            .FirstOrDefaultAsync()
+            ?? await db.Nationality.Where(n => n.Delete_flag == 0).Select(n => n.NationalityCode).FirstOrDefaultAsync();
+
+        // 1. Hồ sơ mở rộng 6 Tab cho Công ty mẫu
+        if (!await db.CompanyProfiles.AnyAsync(p => p.CompanyId == company.IDCompany))
+        {
+            db.CompanyProfiles.Add(new CompanyProfile
+            {
+                CompanyId = company.IDCompany,
+                OwnershipTypeCode = "FDI",
+                TaxCode = "5700000001-MAU",
+                BusinessRegistrationNumber = "ĐKKD-MAU-001",
+                ValidFrom = DateTime.Today
+            });
+        }
+
+        if (adminUnit is not null && !await db.CompanySites.AnyAsync(s => s.CompanyId == company.IDCompany))
+        {
+            db.CompanySites.Add(new CompanySite
+            {
+                CompanyId = company.IDCompany,
+                Name = "Nhà máy mẫu - KCN Cái Lân (Dữ liệu hướng dẫn)",
+                SiteTypeCode = "FACTORY",
+                AddressLine = "Lô A1, KCN Cái Lân, Phường Bãi Cháy",
+                AdministrativeUnitId = adminUnit.Id,
+                ValidFrom = DateTime.Today
+            });
+        }
+
+        if (!await db.CompanyRepresentatives.AnyAsync(r => r.CompanyId == company.IDCompany))
+        {
+            db.CompanyRepresentatives.Add(new CompanyRepresentative
+            {
+                CompanyId = company.IDCompany,
+                FullName = "Nguyễn Văn Mẫu (Đại diện pháp luật mẫu)",
+                Title = "Tổng Giám đốc",
+                IdNumber = "022000000001",
+                Phone = "0900000001",
+                ValidFrom = DateTime.Today
+            });
+        }
+
+        // 2. Cơ sở lưu trú mẫu hướng dẫn
+        Accommodation? sampleAcc = await db.Accommodations.FirstOrDefaultAsync(a => !a.IsDeleted);
+        if (sampleAcc is null)
+        {
+            sampleAcc = new Accommodation
+            {
+                Name = "CƠ SỞ LƯU TRÚ MẪU - HƯỚNG DẪN SỬ DỤNG",
+                TypeCode = "RENTED",
+                AddressLine = "Số 01 Đường Hạ Long, Phường Bãi Cháy (Dữ liệu mẫu hướng dẫn)",
+                AdministrativeUnitId = adminUnit?.Id,
+                ContactName = "Trần Văn Mẫu (Quản lý CSLT)",
+                ContactPhone = "0900000002",
+                Capacity = 50,
+                Note = "🏠 Cơ sở lưu trú mẫu được tạo tự động khi cài đặt lần đầu để hướng dẫn sử dụng. Bạn có thể sửa hoặc xóa.",
+                IsDeleted = false
+            };
+            db.Accommodations.Add(sampleAcc);
+            await db.SaveChangesAsync();
+
+            db.CompanyAccommodationAgreements.Add(new CompanyAccommodationAgreement
+            {
+                CompanyId = company.IDCompany,
+                AccommodationId = sampleAcc.Id,
+                ScopeCode = "PARTIAL",
+                UnitLabel = "Tầng 2 - Khu chuyên gia mẫu",
+                ValidFrom = DateTime.Today,
+                ValidTo = DateTime.Today.AddYears(1)
+            });
+        }
+
+        // 3. Hồ sơ Người nước ngoài mẫu hướng dẫn (Đầy đủ thông tin 5 Tab)
+        if (!string.IsNullOrWhiteSpace(nationalityCode))
+        {
+            var sampleEmp = new Employee
+            {
+                StaffName = "KIM MIN-SU (HỒ SƠ MẪU HƯỚNG DẪN - HÃY SỬA HOẶC XÓA)",
+                Gender = Gender.Male,
+                Birthday = new DateTime(1988, 6, 15),
+                Nationality = nationalityCode,
+                Passport = "M00000001",
+                Address = "Số 01 Đường Hạ Long, Phường Bãi Cháy (Tạm trú mẫu)",
+                IDCompany = company.IDCompany,
+                IDCareer = careerId,
+                WorkPermit = WorkPermitType.WorkerHasPermit,
+                WorkPermitNumber = "GPLĐ-MAU-001",
+                VisaNumber = "VISA-MAU-001",
+                VisaSymbol = "LĐ2",
+                TemporaryStay = DateTime.Today.AddMonths(6),
+                IDUser = trackerId > 0 ? trackerId : 1,
+                DateCreated = DateTime.Now,
+                WorkingStatus = 0,
+                Hidden_flag = 0,
+                Note = "🪪 Hồ sơ mẫu hướng dẫn khi cài đặt lần đầu. Bấm nút Sửa (✏️) để xem mẫu nhập đầy đủ 5 Tab hoặc bấm Xóa (🗑️) khi bắt đầu sử dụng."
+            };
+            db.Employees.Add(sampleEmp);
+            await db.SaveChangesAsync();
+
+            var samplePerson = new ForeignPerson
+            {
+                FullName = sampleEmp.StaffName,
+                Gender = (int)sampleEmp.Gender,
+                Birthday = sampleEmp.Birthday,
+                PassportNumber = sampleEmp.Passport,
+                PassportSearchKey = "M00000001",
+                NationalityCode = nationalityCode,
+                IsDataIncomplete = false,
+                IsDeleted = false
+            };
+            db.ForeignPersons.Add(samplePerson);
+            await db.SaveChangesAsync();
+
+            db.ForeignPersonSourceLinks.Add(new ForeignPersonSourceLink
+            {
+                ForeignPersonId = samplePerson.Id,
+                SourceType = "EMPLOYEE",
+                SourceId = sampleEmp.IDEmployee.ToString()
+            });
+
+            var stayCase = new StayCase
+            {
+                ForeignPersonId = samplePerson.Id,
+                PurposeCode = StayPurposeCodes.Work,
+                SponsorCompanyId = company.IDCompany,
+                ValidFrom = DateTime.Today,
+                ValidTo = sampleEmp.TemporaryStay,
+                StatusCode = "ACTIVE",
+                Note = sampleEmp.Note
+            };
+            db.StayCases.Add(stayCase);
+
+            if (adminUnit is not null)
+            {
+                db.ResidencePeriods.Add(new ResidencePeriod
+                {
+                    ForeignPersonId = samplePerson.Id,
+                    AccommodationId = sampleAcc.Id,
+                    AdministrativeUnitId = adminUnit.Id,
+                    AddressLine = sampleEmp.Address ?? "",
+                    ValidFrom = DateTime.Today,
+                    ValidTo = sampleEmp.TemporaryStay
+                });
+            }
+
+            db.ImmigrationDocuments.Add(new ImmigrationDocument
+            {
+                ForeignPersonId = samplePerson.Id,
+                TypeCode = ImmigrationDocumentTypeCodes.Visa,
+                Number = "VISA-MAU-001",
+                ValidFrom = DateTime.Today,
+                ValidTo = sampleEmp.TemporaryStay,
+                StatusCode = "ACTIVE"
+            });
+
+            db.ElectronicIdentities.Add(new ElectronicIdentity
+            {
+                ForeignPersonId = samplePerson.Id,
+                IdentityNumber = "EID-MAU-0001",
+                IdentitySearchKey = "EID-MAU-0001",
+                ValidFrom = DateTime.Today,
+                ValidTo = DateTime.Today.AddYears(2)
+            });
+
             await db.SaveChangesAsync();
         }
     }

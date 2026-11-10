@@ -36,7 +36,7 @@
                 @if (_items.Any(x => x.IsLegacyUnlinked))
                 {
                     <MudButton Variant="Variant.Outlined"
-                               Color="Color.Info"
+                               Color="Color.Primary"
                                StartIcon="@Icons.Material.Filled.Sync"
                                OnClick="SyncLegacyRecordsAsync">
                         🔄 Đồng bộ hồ sơ cũ (@_items.Count(x => x.IsLegacyUnlinked))
@@ -112,34 +112,34 @@
 <!-- ════════════ QUICK CATEGORY FILTER TABS ════════════ -->
 <MudStack Row="true" Spacing="2" Class="mb-3" Style="flex-wrap:wrap;">
     <MudButton Variant="@(_categoryFilter == "ALL" ? Variant.Filled : Variant.Outlined)"
-               Color="Color.Primary"
+               Color="@(_categoryFilter == "ALL" ? Color.Primary : Color.Default)"
                Size="Size.Small"
                OnClick='() => SelectCategory("ALL")'>
         Tất cả (@_items.Count)
     </MudButton>
     <MudButton Variant="@(_categoryFilter == "WORK" ? Variant.Filled : Variant.Outlined)"
-               Color="Color.Info"
+               Color="@(_categoryFilter == "WORK" ? Color.Primary : Color.Default)"
                Size="Size.Small"
                StartIcon="@Icons.Material.Filled.Engineering"
                OnClick='() => SelectCategory("WORK")'>
         Nhân viên lao động (@_items.Count(x => x.HasWorkProfile))
     </MudButton>
     <MudButton Variant="@(_categoryFilter == "STUDY" ? Variant.Filled : Variant.Outlined)"
-               Color="Color.Secondary"
+               Color="@(_categoryFilter == "STUDY" ? Color.Primary : Color.Default)"
                Size="Size.Small"
                StartIcon="@Icons.Material.Filled.School"
                OnClick='() => SelectCategory("STUDY")'>
         Du học sinh (@_items.Count(x => x.HasStudyProfile))
     </MudButton>
     <MudButton Variant="@(_categoryFilter == "FAMILY_VISIT" ? Variant.Filled : Variant.Outlined)"
-               Color="Color.Tertiary"
+               Color="@(_categoryFilter == "FAMILY_VISIT" ? Color.Primary : Color.Default)"
                Size="Size.Small"
                StartIcon="@Icons.Material.Filled.FamilyRestroom"
                OnClick='() => SelectCategory("FAMILY_VISIT")'>
         Người thăm thân (@_items.Count(x => x.HasFamilyVisitProfile))
     </MudButton>
     <MudButton Variant="@(_categoryFilter == "EXPIRING" ? Variant.Filled : Variant.Outlined)"
-               Color="Color.Warning"
+               Color="@(_categoryFilter == "EXPIRING" ? Color.Primary : Color.Default)"
                Size="Size.Small"
                StartIcon="@Icons.Material.Filled.Warning"
                OnClick='() => SelectCategory("EXPIRING")'>

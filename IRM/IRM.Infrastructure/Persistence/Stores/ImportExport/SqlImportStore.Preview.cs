@@ -52,6 +52,7 @@ public partial class SqlImportStore
                 // Resolve công ty theo từng dòng
                 int resolvedCompanyId = effectiveCompanyId;
                 string? companyDisplay = null;
+                string? autoCreateCompanyName = null;
 
                 if (hasCompanyColumn && rowData.TryGetValue("CompanyName", out var companyName)
                     && !string.IsNullOrWhiteSpace(companyName))
@@ -69,11 +70,8 @@ public partial class SqlImportStore
                     }
                     else
                     {
-                        preview.Status = "error";
-                        preview.ErrorMessage = $"Công ty \"{companyNameTrimmed}\" không tồn tại trong hệ thống";
-                        preview.CompanyDisplay = $"❌ {companyNameTrimmed}";
-                        previewRows.Add(preview);
-                        continue;
+                        autoCreateCompanyName = companyNameTrimmed;
+                        companyDisplay = $"🆕 {companyNameTrimmed} (Tự động tạo mới)";
                     }
                 }
                 else if (hasCompanyColumn)
@@ -111,10 +109,14 @@ public partial class SqlImportStore
 
                 // Parse row data
                 var employee = ParseRowToEmployee(rowData, resolvedCompanyId, nationalities, careers);
+                if (!employee.IDCareer.HasValue && careers.Count > 0)
+                    employee.IDCareer = careers[0].IDCareer;
                 preview.ParsedEmployee = employee;
                 preview.ExtendedFields = rowData
                     .Where(item => V010ImportFields.Contains(item.Key) && !string.IsNullOrWhiteSpace(item.Value))
                     .ToDictionary(item => item.Key, item => item.Value.Trim(), StringComparer.OrdinalIgnoreCase);
+                if (!string.IsNullOrWhiteSpace(autoCreateCompanyName))
+                    preview.ExtendedFields["__AutoCreateCompanyName"] = autoCreateCompanyName;
 
                 // Set display values
                 preview.StaffName = employee.StaffName;

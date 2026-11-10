@@ -227,7 +227,7 @@ public sealed class EnumAndReleaseFeatureTddTests
         Assert.Equal(8, await db.Context.Fields.CountAsync());
         Assert.Equal(4, await db.Context.CareerGroups.CountAsync());
         Assert.Equal(4, await db.Context.Careers.CountAsync());
-        Assert.Equal(14, await db.Context.Nationality.CountAsync());
+        Assert.Equal(34, await db.Context.Nationality.CountAsync());
         Assert.Equal(3, await db.Context.Districts.CountAsync());
         Assert.Equal(3, await db.Context.Wards.CountAsync());
         Assert.Equal(54, await db.Context.AdministrativeUnits.CountAsync());

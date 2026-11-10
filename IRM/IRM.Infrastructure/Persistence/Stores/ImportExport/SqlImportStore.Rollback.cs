@@ -46,12 +46,24 @@ public partial class SqlImportStore
                         await RollbackV010ChangesAsync(backup.OldData);
                         if (backup.ActionType == "INSERT")
                         {
-                            // Xóa record đã insert (soft delete)
-                            var emp = await _db.Employees.FindAsync(backup.EntityId);
-                            if (emp != null)
+                            if (backup.EntityType == "Company")
                             {
-                                emp.Hidden_flag = 1;
-                                await _db.SaveChangesAsync();
+                                var comp = await _db.Companies.FindAsync(backup.EntityId);
+                                if (comp != null)
+                                {
+                                    comp.Delete_flag = 1;
+                                    await _db.SaveChangesAsync();
+                                }
+                            }
+                            else
+                            {
+                                // Xóa record đã insert (soft delete)
+                                var emp = await _db.Employees.FindAsync(backup.EntityId);
+                                if (emp != null)
+                                {
+                                    emp.Hidden_flag = 1;
+                                    await _db.SaveChangesAsync();
+                                }
                             }
                         }
                         else if (backup.ActionType == "UPDATE" && !string.IsNullOrEmpty(backup.OldData))

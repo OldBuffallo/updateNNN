@@ -70,7 +70,7 @@ public partial class Import : ComponentBase, IFeaturePage
         await LoadTemplatesAsync();
         var companies = await CompanySvc.GetAllAsync();
         _hasCompanies = companies.Any();
-        if (companies.Count == 1)
+        if (companies.Any())
             _selectedCompany = companies[0];
         _mfNationalities = await CatalogSvc.GetNationalitiesAsync();
         _mfCareers = await CatalogSvc.GetCareersAsync();

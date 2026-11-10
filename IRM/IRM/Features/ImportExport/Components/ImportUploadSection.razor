@@ -6,10 +6,10 @@
     {
         @if (!Page._hasCompanies)
         {
-            <MudAlert Severity="Severity.Error" Class="mb-3">
-                <strong>Chưa có công ty trong hệ thống.</strong> Bạn phải tạo ít nhất một công ty trước khi nhập người lao động.
-                <MudButton Href="/companies" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Class="ml-3">
-                    Tạo công ty
+            <MudAlert Severity="Severity.Info" Class="mb-3">
+                <strong>Chưa có công ty nào trong hệ thống.</strong> Nếu file Excel có cột <strong>"Công ty"</strong> hoặc <strong>"CQ bảo lãnh"</strong>, hệ thống sẽ tự động tạo mới các công ty tương ứng khi Import.
+                <MudButton Href="/companies" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" Class="ml-3">
+                    Quản lý công ty
                 </MudButton>
             </MudAlert>
         }
@@ -69,7 +69,7 @@
         <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
                        EndIcon="@Icons.Material.Filled.ArrowForward"
-                       Disabled="@(Page._fileStream == null || !Page._hasCompanies)"
+                       Disabled="@(Page._fileStream == null)"
                        OnClick="Page.GoToStep2">Tiếp tục</MudButton>
         </MudStack>
     }
