@@ -196,4 +196,33 @@ public sealed class CatalogApplicationService(ICatalogStore store, IServiceAutho
         var result = await _store.DeleteWardAsync(id);
         return result;
     }
+
+    // ── AdministrativeUnits (Địa bàn hành chính) ──
+
+    public async Task<List<AdministrativeUnitDto>> GetAllAdministrativeUnitsAsync()
+    {
+        var result = await _store.GetAllAdministrativeUnitsAsync();
+        return result.Select(item0 => ToDto(item0)).ToList();
+    }
+
+    public async Task<AdministrativeUnitDto> CreateAdministrativeUnitAsync(AdministrativeUnitDto unit)
+    {
+        await _guard.RequireAnyRoleAsync(IrmRoles.Admin);
+        var entity = ToEntity(unit);
+        var result = await _store.CreateAdministrativeUnitAsync(entity);
+        return ToDto(result);
+    }
+
+    public async Task<bool> UpdateAdministrativeUnitAsync(AdministrativeUnitDto unit)
+    {
+        await _guard.RequireAnyRoleAsync(IrmRoles.Admin);
+        var entity = ToEntity(unit);
+        return await _store.UpdateAdministrativeUnitAsync(entity);
+    }
+
+    public async Task<bool> DeactivateAdministrativeUnitAsync(int id, int? successorId)
+    {
+        await _guard.RequireAnyRoleAsync(IrmRoles.Admin);
+        return await _store.DeactivateAdministrativeUnitAsync(id, successorId);
+    }
 }

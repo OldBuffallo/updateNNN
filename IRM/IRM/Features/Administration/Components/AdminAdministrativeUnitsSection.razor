@@ -1,0 +1,107 @@
+@namespace IRM.Components.Pages
+@inherits IRM.Components.Shared.FeatureSection<Admin>
+@using IRM.Data.Models
+
+<MudPaper Class="pa-4 mb-4">
+    <MudText Typo="Typo.body2" Class="mb-3" Color="Color.Secondary">
+        Quản lý đơn vị hành chính (phường/xã/thị trấn). Khi sáp nhập đơn vị, hãy vô hiệu hóa đơn vị cũ và tạo đơn vị mới.
+    </MudText>
+    <MudGrid>
+        <MudItem xs="12" md="2">
+            <MudTextField T="string" Label="Mã" @bind-Value="Page._adminUnitForm.Code" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="3">
+            <MudTextField T="string" Label="Tên địa bàn" @bind-Value="Page._adminUnitForm.Name" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="2">
+            <MudSelect T="string" Label="Loại" @bind-Value="Page._adminUnitForm.TypeCode" Variant="Variant.Outlined">
+                <MudSelectItem Value="@AdministrativeUnitTypeCodes.Ward">Phường</MudSelectItem>
+                <MudSelectItem Value="@AdministrativeUnitTypeCodes.Commune">Xã</MudSelectItem>
+                <MudSelectItem Value="@AdministrativeUnitTypeCodes.Province">Tỉnh/TP</MudSelectItem>
+                <MudSelectItem Value="@AdministrativeUnitTypeCodes.SpecialZone">Đặc khu</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" md="2">
+            <MudDatePicker Label="Hiệu lực từ" @bind-Date="_validFromDate" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="3" Class="d-flex align-center">
+            <MudStack Row="true" Spacing="1">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">@(Page._editingAdminUnit ? "Lưu" : "Thêm")</MudButton>
+                <MudButton Variant="Variant.Text" OnClick="Page.ResetAdminUnitForm">Hủy</MudButton>
+            </MudStack>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<MudStack Row="true" Spacing="2" Class="mb-3">
+    <MudChip T="string" Color="@(string.IsNullOrEmpty(Page._adminUnitTypeFilter) ? Color.Primary : Color.Default)"
+             OnClick='() => Page._adminUnitTypeFilter = ""'>Tất cả (@Page._adminUnits.Count)</MudChip>
+    <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.Ward ? Color.Primary : Color.Default)"
+             OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.Ward'>Phường (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.Ward))</MudChip>
+    <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.Commune ? Color.Primary : Color.Default)"
+             OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.Commune'>Xã (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.Commune))</MudChip>
+    <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.SpecialZone ? Color.Primary : Color.Default)"
+             OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.SpecialZone'>Đặc khu (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.SpecialZone))</MudChip>
+    <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.Province ? Color.Primary : Color.Default)"
+             OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.Province'>Tỉnh/TP (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.Province))</MudChip>
+</MudStack>
+
+<MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+    <thead>
+        <tr>
+            <th>Mã</th>
+            <th>Tên địa bàn</th>
+            <th>Loại</th>
+            <th>Hiệu lực từ</th>
+            <th>Hiệu lực đến</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Page.FilteredAdminUnits)
+        {
+            <tr class="@(u.ValidTo.HasValue ? "mud-text-disabled" : "")">
+                <td>@u.Code</td>
+                <td>@u.Name</td>
+                <td>@FormatType(u.TypeCode)</td>
+                <td>@u.ValidFrom.ToString("dd/MM/yyyy")</td>
+                <td>@(u.ValidTo?.ToString("dd/MM/yyyy") ?? "—")</td>
+                <td>
+                    <MudStack Row="true" Spacing="1">
+                        <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => Page.EditAdminUnit(u))">Sửa</MudButton>
+                        @if (!u.ValidTo.HasValue)
+                        {
+                            <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Warning" OnClick="@(() => Page.DeactivateAdminUnitAsync(u.Id))">Vô hiệu hóa</MudButton>
+                        }
+                    </MudStack>
+                </td>
+            </tr>
+        }
+    </tbody>
+</MudSimpleTable>
+
+@code {
+    private DateTime? _validFromDate;
+
+    protected override void OnParametersSet()
+    {
+        _validFromDate = Page._adminUnitForm.ValidFrom;
+    }
+
+    private async Task SaveAsync()
+    {
+        Page._adminUnitForm.ValidFrom = _validFromDate ?? DateTime.Today;
+        await Page.SaveAdminUnitAsync();
+        _validFromDate = Page._adminUnitForm.ValidFrom;
+    }
+
+    private static string FormatType(string typeCode) => typeCode switch
+    {
+        AdministrativeUnitTypeCodes.Province => "Tỉnh/TP",
+        AdministrativeUnitTypeCodes.Ward => "Phường",
+        AdministrativeUnitTypeCodes.Commune => "Xã",
+        AdministrativeUnitTypeCodes.SpecialZone => "Đặc khu",
+        _ => typeCode
+    };
+}
+

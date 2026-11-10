@@ -54,6 +54,11 @@ public partial class Admin : ComponentBase, IFeaturePage
     internal WardDto _wardForm = new();
     internal bool _editingWard;
 
+    internal List<AdministrativeUnitDto> _adminUnits = new();
+    internal AdministrativeUnitDto _adminUnitForm = new() { ValidFrom = DateTime.Today };
+    internal bool _editingAdminUnit;
+    internal string _adminUnitTypeFilter = "";
+
     internal string? _auditFilterUsername;
     internal string? _auditFilterAction;
     internal DateTime? _auditFrom;
@@ -83,6 +88,7 @@ public partial class Admin : ComponentBase, IFeaturePage
             _nationalities = await CatalogSvc.GetNationalitiesAsync();
             _districts = await CatalogSvc.GetDistrictsAsync();
             _wards = await CatalogSvc.GetWardsAsync();
+            _adminUnits = await CatalogSvc.GetAllAdministrativeUnitsAsync();
             BuildCards();
             ResetFormsAfterDataLoaded();
         }
@@ -131,6 +137,9 @@ public partial class Admin : ComponentBase, IFeaturePage
                 case "wards":
                     _wards = await CatalogSvc.GetWardsAsync();
                     break;
+                case "admin-units":
+                    _adminUnits = await CatalogSvc.GetAllAdministrativeUnitsAsync();
+                    break;
                 case "audit":
                     await LoadAuditAsync();
                     break;
@@ -159,6 +168,7 @@ public partial class Admin : ComponentBase, IFeaturePage
         _adminCards.Add(new("nationalities", Icons.Material.Filled.Public, "Quốc tịch", $"{_nationalities.Count} quốc tịch"));
         _adminCards.Add(new("districts", Icons.Material.Filled.Map, "Quận / Huyện", $"{_districts.Count} quận/huyện"));
         _adminCards.Add(new("wards", Icons.Material.Filled.Place, "Phường / Xã", $"{_wards.Count} phường/xã"));
+        _adminCards.Add(new("admin-units", Icons.Material.Filled.LocationCity, "Địa bàn hành chính", $"{_adminUnits.Count} địa bàn"));
         _adminCards.Add(new("audit", Icons.Material.Filled.ReceiptLong, "Nhật ký hệ thống", "Audit log"));
         _adminCards.Add(new("import-history", Icons.Material.Filled.CloudUpload, "Lịch sử Import", "Lịch sử phiên import"));
     }
@@ -171,6 +181,7 @@ public partial class Admin : ComponentBase, IFeaturePage
         ResetNationalityForm();
         ResetDistrictForm();
         ResetWardForm();
+        ResetAdminUnitForm();
     }
 
     internal void GoSection(string key)

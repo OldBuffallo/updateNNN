@@ -233,4 +233,64 @@ public class SqlCatalogStore : ICatalogStore
     private Task RequireCatalogEditorAsync() => _guard is null
         ? Task.CompletedTask
         : _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
+
+    // ── AdministrativeUnits (Địa bàn hành chính) ──
+
+    public async Task<List<AdministrativeUnit>> GetAllAdministrativeUnitsAsync()
+    {
+        return await _db.AdministrativeUnits.AsNoTracking()
+            .Include(x => x.Parent)
+            .Include(x => x.Predecessor)
+            .Where(x => !x.IsDeleted)
+            .OrderBy(x => x.TypeCode).ThenBy(x => x.Name)
+            .ToListAsync();
+    }
+
+    public async Task<AdministrativeUnit> CreateAdministrativeUnitAsync(AdministrativeUnit unit)
+    {
+        await RequireCatalogEditorAsync();
+        _db.AdministrativeUnits.Add(unit);
+        await _db.SaveChangesAsync();
+        return unit;
+    }
+
+    public async Task<bool> UpdateAdministrativeUnitAsync(AdministrativeUnit unit)
+    {
+        await RequireCatalogEditorAsync();
+        var existing = await _db.AdministrativeUnits.FirstOrDefaultAsync(x => x.Id == unit.Id && !x.IsDeleted);
+        if (existing == null) return false;
+
+        existing.Code = unit.Code;
+        existing.Name = unit.Name;
+        existing.TypeCode = unit.TypeCode;
+        existing.ParentId = unit.ParentId;
+        existing.ValidFrom = unit.ValidFrom;
+        existing.ValidTo = unit.ValidTo;
+        existing.LegacyDistrictId = unit.LegacyDistrictId;
+        existing.LegacyWardId = unit.LegacyWardId;
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeactivateAdministrativeUnitAsync(int id, int? successorId)
+    {
+        await RequireCatalogEditorAsync();
+        var existing = await _db.AdministrativeUnits.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+        if (existing == null) return false;
+
+        existing.ValidTo = DateTime.Today;
+        existing.IsDeleted = true;
+
+        if (successorId.HasValue)
+        {
+            var successor = await _db.AdministrativeUnits.FirstOrDefaultAsync(x => x.Id == successorId.Value);
+            if (successor != null)
+            {
+                successor.PredecessorId = id;
+            }
+        }
+
+        await _db.SaveChangesAsync();
+        return true;
+    }
 }

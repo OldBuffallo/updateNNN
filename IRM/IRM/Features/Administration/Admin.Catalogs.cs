@@ -329,4 +329,79 @@ public partial class Admin
         _wardForm = new WardDto();
         _editingWard = false;
     }
+
+    // ── AdministrativeUnits (Địa bàn hành chính) ──
+
+    internal IEnumerable<AdministrativeUnitDto> FilteredAdminUnits =>
+        string.IsNullOrWhiteSpace(_adminUnitTypeFilter)
+            ? _adminUnits
+            : _adminUnits.Where(u => u.TypeCode == _adminUnitTypeFilter);
+
+    internal async Task SaveAdminUnitAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_adminUnitForm.Code) || string.IsNullOrWhiteSpace(_adminUnitForm.Name))
+        {
+            Snackbar.Add("Vui lòng nhập đầy đủ mã và tên địa bàn.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            if (_editingAdminUnit)
+            {
+                await CatalogSvc.UpdateAdministrativeUnitAsync(_adminUnitForm);
+            }
+            else
+            {
+                await CatalogSvc.CreateAdministrativeUnitAsync(_adminUnitForm);
+            }
+            _adminUnits = await CatalogSvc.GetAllAdministrativeUnitsAsync();
+            BuildCards();
+            ResetAdminUnitForm();
+            Snackbar.Add("Đã lưu địa bàn hành chính.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi lưu địa bàn: {ex.Message}", Severity.Error);
+        }
+    }
+
+    internal void EditAdminUnit(AdministrativeUnitDto unit)
+    {
+        _adminUnitForm = new AdministrativeUnitDto
+        {
+            Id = unit.Id,
+            Code = unit.Code,
+            Name = unit.Name,
+            TypeCode = unit.TypeCode,
+            ParentId = unit.ParentId,
+            PredecessorId = unit.PredecessorId,
+            ValidFrom = unit.ValidFrom,
+            ValidTo = unit.ValidTo,
+            LegacyDistrictId = unit.LegacyDistrictId,
+            LegacyWardId = unit.LegacyWardId
+        };
+        _editingAdminUnit = true;
+    }
+
+    internal async Task DeactivateAdminUnitAsync(int id)
+    {
+        try
+        {
+            await CatalogSvc.DeactivateAdministrativeUnitAsync(id, null);
+            _adminUnits = await CatalogSvc.GetAllAdministrativeUnitsAsync();
+            BuildCards();
+            Snackbar.Add("Đã vô hiệu hóa địa bàn.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi vô hiệu hóa: {ex.Message}", Severity.Error);
+        }
+    }
+
+    internal void ResetAdminUnitForm()
+    {
+        _adminUnitForm = new AdministrativeUnitDto { ValidFrom = DateTime.Today };
+        _editingAdminUnit = false;
+    }
 }

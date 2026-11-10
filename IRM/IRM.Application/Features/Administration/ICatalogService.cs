@@ -31,4 +31,9 @@ public interface ICatalogService
     Task<WardDto> CreateWardAsync(WardDto ward);
     Task<bool> UpdateWardAsync(WardDto ward);
     Task<bool> DeleteWardAsync(int id);
+    // ── AdministrativeUnits (Địa bàn hành chính) ──
+    Task<List<AdministrativeUnitDto>> GetAllAdministrativeUnitsAsync();
+    Task<AdministrativeUnitDto> CreateAdministrativeUnitAsync(AdministrativeUnitDto unit);
+    Task<bool> UpdateAdministrativeUnitAsync(AdministrativeUnitDto unit);
+    Task<bool> DeactivateAdministrativeUnitAsync(int id, int? successorId);
 }
