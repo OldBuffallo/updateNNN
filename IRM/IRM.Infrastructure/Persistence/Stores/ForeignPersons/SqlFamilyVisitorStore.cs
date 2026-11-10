@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IRM.Infrastructure.Persistence.Stores.ForeignPersons;
 
-public sealed class SqlFamilyVisitorStore : IForeignerRegistryStore
+public sealed partial class SqlFamilyVisitorStore : IForeignerRegistryStore
 {
     private readonly IrmDbContext _db;
     private readonly SqlAuditStore _audit;

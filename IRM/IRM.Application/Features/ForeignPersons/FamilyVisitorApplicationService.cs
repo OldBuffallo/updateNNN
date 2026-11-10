@@ -76,4 +76,30 @@ public sealed class FamilyVisitorApplicationService(IForeignerRegistryStore stor
         var result = await _store.BackfillLegacyAsync(cancellationToken);
         return result;
     }
+
+    public async Task<IReadOnlyList<UnifiedForeignPersonDto>> GetUnifiedProfilesAsync(string? search, DateTime asOfDate, CancellationToken cancellationToken = default)
+    {
+        await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor, IrmRoles.Inspector, IrmRoles.Reporter, IrmRoles.Viewer);
+        return await _store.GetUnifiedProfilesAsync(search, asOfDate, cancellationToken);
+    }
+
+    public async Task<int> SaveUnifiedProfileAsync(UnifiedForeignPersonInput input, CancellationToken cancellationToken = default)
+    {
+        await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
+        if (string.IsNullOrWhiteSpace(input.FullName))
+            throw new ArgumentException("Họ tên người nước ngoài là bắt buộc.");
+        return await _store.SaveUnifiedProfileAsync(input, cancellationToken);
+    }
+
+    public async Task DeleteUnifiedProfileAsync(int? foreignPersonId, int? employeeId, int? studentId, CancellationToken cancellationToken = default)
+    {
+        await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
+        await _store.DeleteUnifiedProfileAsync(foreignPersonId, employeeId, studentId, cancellationToken);
+    }
+
+    public async Task<LegacyDatabaseImportResult> ImportFromLegacyDatabaseAsync(string sourceConnectionStringOrDbName, CancellationToken cancellationToken = default)
+    {
+        await _guard.RequireAnyRoleAsync(IrmRoles.Admin);
+        return await _store.ImportFromLegacyDatabaseAsync(sourceConnectionStringOrDbName, cancellationToken);
+    }
 }
