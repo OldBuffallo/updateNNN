@@ -97,15 +97,17 @@
                              TransformOrigin="Origin.TopRight"
                              Class="user-profile-menu"
                              Dense="true">
-                        <ActivatorContent>
-                            <div class="user-pill d-flex align-center cursor-pointer">
+                        <ActivatorContent Context="userMenu">
+                            <MudButton Class="user-pill d-flex align-center cursor-pointer"
+                                       Variant="Variant.Text" OnClick="userMenu.ToggleAsync"
+                                       aria-label="Tài khoản người dùng">
                                 <div class="user-avatar">@initial</div>
                                 <div class="user-info d-none d-lg-flex flex-column text-left ml-2">
                                     <span class="user-name">@displayName</span>
                                     <span class="user-role">@roleLabel</span>
                                 </div>
                                 <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Small" Class="ml-1 text-muted" />
-                            </div>
+                            </MudButton>
                         </ActivatorContent>
                         <ChildContent>
                             <div class="pa-3 user-menu-header">

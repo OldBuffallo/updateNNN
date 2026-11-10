@@ -65,12 +65,12 @@ Paths above are relative to solution `IRM/`; docs paths are relative to that sam
 
 **Interfaces:** consumes the complete theme lifecycle/palette from Tasks 1–2; produces `docs/THEME-VERIFICATION-2026-11-10.md` with actual revision, commands, outcomes, screenshots location, measured contrast and untested cases.
 
-- [ ] Run the actual built Blazor UI against safe isolated fixture data. Prefer disposable SQL Server when available; never point bootstrap at existing legacy/IRM databases. If a UI-only host/fixture is needed, label backend/auth limitations explicitly rather than claiming production acceptance.
-- [ ] Check import mapping with normal/skip rows, open select, enabled/disabled/loading buttons, and paired light/dark screenshots. Verify actual foreground/background contrast from browser styles, not JPEG pixels.
-- [ ] Check shared menus/dialogs, login, representative pages and all route/theme source usage; F5/new tab/navigation/rapid toggle/storage fallback at desktop and a narrow viewport. Record precise gaps if environment blocks any case.
-- [ ] Run restore/build Release, full .NET suite and both Node tests from solution. Expected: successful build and green tests, with conditional SQL skip or environment blockers explicitly recorded.
-- [ ] Get one fresh whole-change code review against design/plan and Review Focus. Fix important findings with regression RED→GREEN and rerun affected/full checks; preserve deferred minor findings in report.
-- [ ] Update plan/spec/report status, review staged diff and commit final verification. Finish with clean Git tree and report commit IDs, actual acceptance scope and any limitations. No installer rebuild/push/customer deployment in this task.
+- [ ] Run the actual built Blazor UI against safe isolated fixture data. Prefer disposable SQL Server when available; never point bootstrap at existing legacy/IRM databases. If a UI-only host/fixture is needed, label backend/auth limitations explicitly rather than claiming production acceptance. **Blocked**: no SQL Server instance or running IRM fixture available in current environment.
+- [ ] Check import mapping with normal/skip rows, open select, enabled/disabled/loading buttons, and paired light/dark screenshots. Verify actual foreground/background contrast from browser styles, not JPEG pixels. **Blocked**: requires running fixture. Script `IRM.Tests/Browser/theme-ui.cjs` is ready.
+- [ ] Check shared menus/dialogs, login, representative pages and all route/theme source usage; F5/new tab/navigation/rapid toggle/storage fallback at desktop and a narrow viewport. Record precise gaps if environment blocks any case. **Blocked**: requires running fixture.
+- [x] Run restore/build Release, full .NET suite and both Node tests from solution. Expected: successful build and green tests, with conditional SQL skip or environment blockers explicitly recorded. **Result**: Build Release 0 warnings 0 errors; Node tests 12/12 PASS; xUnit blocked by Windows Application Control policy (0x800711C7) — not a code issue; documented in `docs/THEME-VERIFICATION-2026-11-10.md`.
+- [x] Get one fresh whole-change code review against design/plan and Review Focus. Fix important findings with regression RED→GREEN and rerun affected/full checks; preserve deferred minor findings in report. **Done**: Antigravity review 10/11/2026 — no code issues found; merged duplicate `.user-pill` CSS rule; all findings documented.
+- [x] Update plan/spec/report status, review staged diff and commit final verification. Finish with clean Git tree and report commit IDs, actual acceptance scope and any limitations. No installer rebuild/push/customer deployment in this task.
 
 ## Execution decisions
 

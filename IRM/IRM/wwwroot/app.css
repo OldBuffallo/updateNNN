@@ -1612,6 +1612,7 @@ body {
     background: var(--bg-surface-variant);
     border: 1px solid var(--border);
     transition: all 0.2s var(--ease);
+    text-transform: none;
 }
 
 .user-pill:hover {
