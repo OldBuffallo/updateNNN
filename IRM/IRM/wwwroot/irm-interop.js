@@ -69,12 +69,18 @@ window.irmInterop = {
     _charts: {},
 
     _getChartColors: function () {
-        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var style = getComputedStyle(document.documentElement);
+        var read = function (name) { return style.getPropertyValue(name).trim(); };
+        var series = [1, 2, 3, 4, 5].map(function (index) { return read('--chart-' + index); });
         return {
-            textColor: isDark ? '#9aa0a6' : '#64748b',
-            gridColor: isDark ? '#2d3139' : '#f1f5f9',
-            borderColor: isDark ? '#2d3139' : '#e2e8f0',
-            surfaceColor: isDark ? '#1c1f26' : '#ffffff'
+            textColor: read('--text-secondary'),
+            gridColor: read('--border'),
+            borderColor: read('--border'),
+            surfaceColor: read('--bg-surface'),
+            series: series,
+            permits: [series[3], series[0], series[4], read('--text-muted') || read('--text-secondary')],
+            warningFill: read('--chart-warning-fill') || 'transparent',
+            successFill: read('--chart-success-fill') || 'transparent'
         };
     },
 
@@ -109,10 +115,7 @@ window.irmInterop = {
                 datasets: [{
                     label: 'Số lao động',
                     data: data,
-                    backgroundColor: [
-                        '#2563eb', '#7c3aed', '#ec4899', '#059669', '#d97706',
-                        '#8b5cf6', '#14b8a6', '#f97316', '#6366f1', '#94a3b8'
-                    ],
+                    backgroundColor: colors.series,
                     borderRadius: 6,
                     borderSkipped: false
                 }]
@@ -149,7 +152,7 @@ window.irmInterop = {
                 labels: labels,
                 datasets: [{
                     data: data,
-                    backgroundColor: ['#059669', '#2563eb', '#d97706', '#94a3b8'],
+                    backgroundColor: colors.permits,
                     borderWidth: 2,
                     borderColor: colors.surfaceColor,
                     spacing: 3
@@ -197,25 +200,25 @@ window.irmInterop = {
                     {
                         label: dataset1.name,
                         data: dataset1.data,
-                        borderColor: '#d97706',
-                        backgroundColor: 'rgba(217,119,6,0.08)',
+                        borderColor: colors.series[4],
+                        backgroundColor: colors.warningFill,
                         fill: true,
                         tension: 0.4,
                         pointRadius: 4,
                         pointHoverRadius: 7,
-                        pointBackgroundColor: '#d97706',
+                        pointBackgroundColor: colors.series[4],
                         borderWidth: 2.5
                     },
                     {
                         label: dataset2.name,
                         data: dataset2.data,
-                        borderColor: '#059669',
-                        backgroundColor: 'rgba(5,150,105,0.08)',
+                        borderColor: colors.series[3],
+                        backgroundColor: colors.successFill,
                         fill: true,
                         tension: 0.4,
                         pointRadius: 4,
                         pointHoverRadius: 7,
-                        pointBackgroundColor: '#059669',
+                        pointBackgroundColor: colors.series[3],
                         borderWidth: 2.5
                     }
                 ]
@@ -255,19 +258,27 @@ window.irmInterop = {
                 Chart.defaults.color = colors.textColor;
                 Chart.defaults.borderColor = colors.borderColor;
 
-                // Update grid and border colors
-                if (chart.options.scales) {
-                    if (chart.options.scales.y) {
-                        chart.options.scales.y.grid.color = colors.gridColor;
-                    }
-                }
+                chart.options.color = colors.textColor;
+                Object.values(chart.options.scales || {}).forEach(function (scale) {
+                    scale.ticks = scale.ticks || {};
+                    scale.ticks.color = colors.textColor;
+                    if (scale.grid) scale.grid.color = colors.gridColor;
+                });
+                var legend = chart.options.plugins && chart.options.plugins.legend;
+                if (legend && legend.labels) legend.labels.color = colors.textColor;
 
-                // Update doughnut border color
-                if (chart.config.type === 'doughnut') {
-                    chart.data.datasets.forEach(function (ds) {
+                chart.data.datasets.forEach(function (ds, index) {
+                    if (chart.config.type === 'doughnut') {
                         ds.borderColor = colors.surfaceColor;
-                    });
-                }
+                        ds.backgroundColor = colors.permits;
+                    } else if (chart.config.type === 'bar') {
+                        ds.backgroundColor = colors.series;
+                    } else if (chart.config.type === 'line') {
+                        ds.borderColor = colors.series[index === 0 ? 4 : 3];
+                        ds.pointBackgroundColor = ds.borderColor;
+                        ds.backgroundColor = index === 0 ? colors.warningFill : colors.successFill;
+                    }
+                });
 
                 chart.update();
             }

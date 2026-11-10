@@ -54,12 +54,12 @@ Paths above are relative to solution `IRM/`; docs paths are relative to that sam
 
 **Interfaces:** `IrmTheme.Create()` produces the shared MudTheme consumed by Task 1 provider. JS `getTheme()/initTheme()/setTheme(mode)` retain existing entry points; async `applyTheme(mode)` applies normalized mode, waits a rendering frame and refreshes chart colors. Chart helpers read computed CSS properties; CSS aliases Mud variables for primary/on-primary/background/surface/text and semantic paired status colors.
 
-- [ ] Write failing palette tests calculating contrast independently from actual light/dark palette values: all normal text foreground/background, Filled button colors and representative muted/surface pairs meet 4.5; meaningful action/icon pairs meet 3. Include real existing failing combinations.
-- [ ] Write Node chart test: computed palette values feed axes/legend/grid/doughnut borders after apply frame, storage failure does not suppress refresh and the final toggle wins. Expected: existing fixed chart colors fail.
-- [ ] Implement shared palette contrast pairs, CSS aliases and paired status/soft backgrounds. Keep the CSS entry point; repair custom HTML buttons, text-muted, focus, mapping table/select and any inline color conflicts, without changing feature behavior.
-- [ ] Implement chart computed colors and post-render refresh, retaining data/series order. Version CSS/interop asset URLs in App to prevent old cached scripts/styles.
-- [ ] Run both Node files, palette/controller tests and whole .NET suite. Expected: green except explicitly conditional SQL integration skip; report any loader/environment failure separately.
-- [ ] Review staged feature diffs for handlers/conditions/data changes and commit `fix: unify readable light-dark colors and chart styling`.
+- [x] Write failing palette tests calculating contrast independently from actual light/dark palette values: all normal text foreground/background, Filled button colors and representative muted/surface pairs meet 4.5; meaningful action/icon pairs meet 3. Include real existing failing combinations.
+- [x] Write Node chart test: computed palette values feed axes/legend/grid/doughnut borders after apply frame, storage failure does not suppress refresh and the final toggle wins. Expected: existing fixed chart colors fail.
+- [x] Implement shared palette contrast pairs, CSS aliases and paired status/soft backgrounds. Keep the CSS entry point; repair custom HTML buttons, text-muted, focus, mapping table/select and any inline color conflicts, without changing feature behavior.
+- [x] Implement chart computed colors and post-render refresh, retaining data/series order. Version CSS/interop asset URLs in App to prevent old cached scripts/styles.
+- [x] Run both Node files, palette/controller tests and whole .NET suite. Expected: green except explicitly conditional SQL integration skip; report any loader/environment failure separately.
+- [x] Review staged feature diffs for handlers/conditions/data changes and commit `fix: unify readable light-dark colors and chart styling`.
 
 ### Task 3: Browser acceptance and final review
 
