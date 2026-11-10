@@ -156,12 +156,59 @@
 
     <!-- ════════════ HỆ THỐNG ════════════ -->
     <AuthorizeView Roles="ADMIN" Context="adminCtx">
+        <!-- ──── DANH MỤC (collapsible) ──── -->
+        <div class="nav-group-header">
+            <span class="nav-section-label">DANH MỤC</span>
+        </div>
+
+        <MudNavGroup Title="Danh mục hệ thống"
+                     Icon="@Icons.Material.Filled.ListAlt"
+                     Class="irm-nav-link"
+                     Expanded="false">
+            <MudNavLink Href="/admin/nationalities"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Public"
+                        Class="irm-nav-link"
+                        OnClick='@(() => NotifyPageChanged("Quốc tịch"))'>
+                <span>Quốc tịch</span>
+            </MudNavLink>
+            <MudNavLink Href="/admin/districts"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Map"
+                        Class="irm-nav-link"
+                        OnClick='@(() => NotifyPageChanged("Quận / Huyện"))'>
+                <span>Quận / Huyện</span>
+            </MudNavLink>
+            <MudNavLink Href="/admin/wards"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Place"
+                        Class="irm-nav-link"
+                        OnClick='@(() => NotifyPageChanged("Phường / Xã"))'>
+                <span>Phường / Xã</span>
+            </MudNavLink>
+            <MudNavLink Href="/admin/fields"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Business"
+                        Class="irm-nav-link"
+                        OnClick='@(() => NotifyPageChanged("Lĩnh vực"))'>
+                <span>Lĩnh vực</span>
+            </MudNavLink>
+            <MudNavLink Href="/admin/careers"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Work"
+                        Class="irm-nav-link"
+                        OnClick='@(() => NotifyPageChanged("Ngành nghề"))'>
+                <span>Ngành nghề</span>
+            </MudNavLink>
+        </MudNavGroup>
+
+        <!-- ──── QUẢN TRỊ ──── -->
         <div class="nav-group-header">
             <span class="nav-section-label">HỆ THỐNG</span>
         </div>
 
         <MudNavLink Href="/admin"
-                    Match="NavLinkMatch.Prefix"
+                    Match="NavLinkMatch.All"
                     Icon="@Icons.Material.Filled.AdminPanelSettings"
                     Class="irm-nav-link"
                     ActiveClass="active"

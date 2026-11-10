@@ -210,6 +210,7 @@ public static class DatabaseSeeder
         if (!await db.Nationality.AnyAsync())
         {
             db.Nationality.AddRange(
+                // Đông Á & Đông Nam Á (phổ biến nhất với lao động nước ngoài tại VN)
                 new NationalityEntity { NationalityCode = "CN", NationalityName = "Trung Quốc" },
                 new NationalityEntity { NationalityCode = "KR", NationalityName = "Hàn Quốc" },
                 new NationalityEntity { NationalityCode = "JP", NationalityName = "Nhật Bản" },
@@ -219,11 +220,35 @@ public static class DatabaseSeeder
                 new NationalityEntity { NationalityCode = "PH", NationalityName = "Philippines" },
                 new NationalityEntity { NationalityCode = "TH", NationalityName = "Thái Lan" },
                 new NationalityEntity { NationalityCode = "ID", NationalityName = "Indonesia" },
+                new NationalityEntity { NationalityCode = "SG", NationalityName = "Singapore" },
+                new NationalityEntity { NationalityCode = "MM", NationalityName = "Myanmar" },
+                new NationalityEntity { NationalityCode = "LA", NationalityName = "Lào" },
+                new NationalityEntity { NationalityCode = "KH", NationalityName = "Campuchia" },
+                new NationalityEntity { NationalityCode = "BN", NationalityName = "Brunei" },
+                // Châu Âu & Bắc Mỹ
                 new NationalityEntity { NationalityCode = "US", NationalityName = "Hoa Kỳ" },
                 new NationalityEntity { NationalityCode = "GB", NationalityName = "Anh Quốc" },
+                new NationalityEntity { NationalityCode = "FR", NationalityName = "Pháp" },
+                new NationalityEntity { NationalityCode = "DE", NationalityName = "Đức" },
+                new NationalityEntity { NationalityCode = "RU", NationalityName = "Nga" },
+                new NationalityEntity { NationalityCode = "IT", NationalityName = "Ý" },
+                new NationalityEntity { NationalityCode = "ES", NationalityName = "Tây Ban Nha" },
+                new NationalityEntity { NationalityCode = "CA", NationalityName = "Canada" },
+                new NationalityEntity { NationalityCode = "NL", NationalityName = "Hà Lan" },
+                new NationalityEntity { NationalityCode = "SE", NationalityName = "Thụy Điển" },
+                new NationalityEntity { NationalityCode = "DK", NationalityName = "Đan Mạch" },
                 new NationalityEntity { NationalityCode = "AU", NationalityName = "Úc" },
-                new NationalityEntity { NationalityCode = "LA", NationalityName = "Lào" },
-                new NationalityEntity { NationalityCode = "KH", NationalityName = "Campuchia" });
+                new NationalityEntity { NationalityCode = "NZ", NationalityName = "New Zealand" },
+                // Nam Á & Trung Đông
+                new NationalityEntity { NationalityCode = "BD", NationalityName = "Bangladesh" },
+                new NationalityEntity { NationalityCode = "PK", NationalityName = "Pakistan" },
+                new NationalityEntity { NationalityCode = "LK", NationalityName = "Sri Lanka" },
+                new NationalityEntity { NationalityCode = "NP", NationalityName = "Nepal" },
+                // Châu Phi
+                new NationalityEntity { NationalityCode = "NG", NationalityName = "Nigeria" },
+                new NationalityEntity { NationalityCode = "ZA", NationalityName = "Nam Phi" },
+                // Châu Mỹ Latinh
+                new NationalityEntity { NationalityCode = "BR", NationalityName = "Brazil" });
             await db.SaveChangesAsync();
         }
 
