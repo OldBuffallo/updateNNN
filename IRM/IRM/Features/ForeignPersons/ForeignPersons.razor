@@ -1,28 +1,68 @@
 @namespace IRM.Components.Pages
 @page "/foreign-persons"
+@page "/employees"
+@page "/students"
+@page "/family-visitors"
 @using IRM.Data.Models
+@using IRM.Services
 @inject IForeignerRegistryService Registry
+@inject IEmployeeService EmployeeSvc
+@inject IStudentService StudentSvc
+@inject ICompanyService CompanySvc
 @inject ICatalogService Catalog
+@inject IExportService ExportSvc
+@inject IJSRuntime JS
 @inject ISnackbar Snackbar
 @inject NavigationManager Nav
 
-<PageTitle>Hồ sơ NNN hợp nhất - IRM v1.0.2</PageTitle>
+<PageTitle>Hồ sơ Người nước ngoài - IRM v1.0.2</PageTitle>
 
 <div class="section-header">
     <div class="d-flex align-center justify-space-between flex-wrap gap-2">
         <div>
-            <h3>🪪 Hồ sơ Người nước ngoài Hợp nhất</h3>
+            <h3>🪪 Hồ sơ Người nước ngoài</h3>
             <span class="section-meta">
-                Quản lý định danh duy nhất theo mã ForeignPersonId · Lao động, thăm thân, du học, du lịch
+                Quản lý tập trung mỗi người 1 hồ sơ đa diện · Lao động, Du học sinh, Thăm thân, Giấy tờ XNC & Định danh điện tử
             </span>
         </div>
-        <div class="d-flex align-center gap-2">
+        <div class="d-flex align-center flex-wrap gap-2">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Default"
+                       StartIcon="@Icons.Material.Filled.Download"
+                       OnClick="ExportExcelAsync">
+                📥 Xuất Excel
+            </MudButton>
+            <AuthorizeView Roles="ADMIN,DATA_EDITOR">
+                @if (_items.Any(x => x.IsLegacyUnlinked))
+                {
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Info"
+                               StartIcon="@Icons.Material.Filled.Sync"
+                               OnClick="SyncLegacyRecordsAsync">
+                        🔄 Đồng bộ hồ sơ cũ (@_items.Count(x => x.IsLegacyUnlinked))
+                    </MudButton>
+                }
+            </AuthorizeView>
+            <AuthorizeView Roles="ADMIN">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.DeleteSweep"
+                           OnClick="OpenArchiveTemporaryStayDialog">
+                    🗑️ Xóa hết hạn tạm trú
+                </MudButton>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.FamilyRestroom"
+                           OnClick="OpenArchiveFamilyVisitDialog">
+                    🗑️ Xóa hết hạn thăm thân
+                </MudButton>
+            </AuthorizeView>
             <AuthorizeView Roles="ADMIN,DATA_EDITOR">
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
                            StartIcon="@Icons.Material.Filled.PersonAdd"
                            OnClick="OpenAddPerson">
-                    Thêm hồ sơ NNN
+                    + Thêm hồ sơ NNN
                 </MudButton>
             </AuthorizeView>
         </div>
@@ -32,11 +72,29 @@
 <!-- ════════════ STATS SUMMARY CARDS ════════════ -->
 <MudGrid Class="mb-4">
     <MudItem xs="6" sm="3">
-        <div class="stat-mini-card stat-blue">
+        <div class="stat-mini-card stat-blue" style="cursor:pointer;" @onclick='() => SelectCategory("ALL")'>
             <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count</span>
-                <span class="stat-mini-label">Tổng hồ sơ</span>
+                <span class="stat-mini-label">Tổng hồ sơ NNN</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-purple" style="cursor:pointer;" @onclick='() => SelectCategory("WORK")'>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count(x => x.HasWorkProfile)</span>
+                <span class="stat-mini-label">Lao động nước ngoài</span>
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6" sm="3">
+        <div class="stat-mini-card stat-amber" style="cursor:pointer;" @onclick='() => SelectCategory("STUDY_FAMILY")'>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.School" Size="Size.Small" /></div>
+            <div class="stat-mini-data">
+                <span class="stat-mini-value">@_items.Count(x => x.HasStudyProfile) / @_items.Count(x => x.HasFamilyVisitProfile)</span>
+                <span class="stat-mini-label">Du học / Thăm thân</span>
             </div>
         </div>
     </MudItem>
@@ -44,37 +102,57 @@
         <div class="stat-mini-card stat-green">
             <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Size="Size.Small" /></div>
             <div class="stat-mini-data">
-                <span class="stat-mini-value">@_items.Count(x => x.ElectronicIdentities.Any(e => e.ValidFrom <= At && (!e.ValidTo.HasValue || e.ValidTo >= At) && e.StatusCode == "ACTIVE"))</span>
-                <span class="stat-mini-label">Đã cấp định danh</span>
-            </div>
-        </div>
-    </MudItem>
-    <MudItem xs="6" sm="3">
-        <div class="stat-mini-card stat-amber">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.HourglassEmpty" Size="Size.Small" /></div>
-            <div class="stat-mini-data">
-                <span class="stat-mini-value">@_items.Count(x => !x.ElectronicIdentities.Any(e => e.ValidFrom <= At && (!e.ValidTo.HasValue || e.ValidTo >= At) && e.StatusCode == "ACTIVE"))</span>
-                <span class="stat-mini-label">Chưa có định danh</span>
-            </div>
-        </div>
-    </MudItem>
-    <MudItem xs="6" sm="3">
-        <div class="stat-mini-card stat-purple">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Small" /></div>
-            <div class="stat-mini-data">
-                <span class="stat-mini-value">@_items.Count(x => x.ImmigrationDocuments.Any(d => d.ValidFrom <= At && (!d.ValidTo.HasValue || d.ValidTo >= At) && d.StatusCode == "VALID"))</span>
-                <span class="stat-mini-label">Có giấy tờ hiệu lực</span>
+                <span class="stat-mini-value">@_items.Count(x => !string.IsNullOrEmpty(x.ElectronicIdNumber))</span>
+                <span class="stat-mini-label">Đã cấp định danh ĐT</span>
             </div>
         </div>
     </MudItem>
 </MudGrid>
 
+<!-- ════════════ QUICK CATEGORY FILTER TABS ════════════ -->
+<MudStack Row="true" Spacing="2" Class="mb-3" Style="flex-wrap:wrap;">
+    <MudButton Variant="@(_categoryFilter == "ALL" ? Variant.Filled : Variant.Outlined)"
+               Color="Color.Primary"
+               Size="Size.Small"
+               OnClick='() => SelectCategory("ALL")'>
+        Tất cả (@_items.Count)
+    </MudButton>
+    <MudButton Variant="@(_categoryFilter == "WORK" ? Variant.Filled : Variant.Outlined)"
+               Color="Color.Info"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Filled.Engineering"
+               OnClick='() => SelectCategory("WORK")'>
+        Nhân viên lao động (@_items.Count(x => x.HasWorkProfile))
+    </MudButton>
+    <MudButton Variant="@(_categoryFilter == "STUDY" ? Variant.Filled : Variant.Outlined)"
+               Color="Color.Secondary"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Filled.School"
+               OnClick='() => SelectCategory("STUDY")'>
+        Du học sinh (@_items.Count(x => x.HasStudyProfile))
+    </MudButton>
+    <MudButton Variant="@(_categoryFilter == "FAMILY_VISIT" ? Variant.Filled : Variant.Outlined)"
+               Color="Color.Tertiary"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Filled.FamilyRestroom"
+               OnClick='() => SelectCategory("FAMILY_VISIT")'>
+        Người thăm thân (@_items.Count(x => x.HasFamilyVisitProfile))
+    </MudButton>
+    <MudButton Variant="@(_categoryFilter == "EXPIRING" ? Variant.Filled : Variant.Outlined)"
+               Color="Color.Warning"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Filled.Warning"
+               OnClick='() => SelectCategory("EXPIRING")'>
+        Sắp hết hạn ≤30 ngày (@_items.Count(x => x.DaysUntilExpiry.HasValue && x.DaysUntilExpiry.Value >= 0 && x.DaysUntilExpiry.Value <= 30))
+    </MudButton>
+</MudStack>
+
 <!-- ════════════ FILTER TOOLBAR ════════════ -->
 <MudPaper Class="pa-4 mb-4 page-filter-card" Elevation="0">
     <MudGrid Spacing="2">
-        <MudItem xs="12" sm="5">
+        <MudItem xs="12" sm="4">
             <MudTextField @bind-Value="_search"
-                          Placeholder="Tìm kiếm theo tên, số hộ chiếu, quốc tịch..."
+                          Placeholder="Tìm theo họ tên, hộ chiếu, công ty, trường, thân nhân..."
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           Adornment="Adornment.Start"
@@ -84,19 +162,38 @@
                           OnKeyUp="HandleSearchKeyUp" />
         </MudItem>
         <MudItem xs="12" sm="3">
-            <MudDatePicker @bind-Date="_asOf"
-                           Label="Trạng thái tại ngày (AsOf)"
-                           Variant="Variant.Outlined"
-                           Margin="Margin.Dense"
-                           DateFormat="dd/MM/yyyy" />
+            <MudAutocomplete T="CompanyDto"
+                             Value="_selectedCompany"
+                             ValueChanged="OnCompanyFilterChanged"
+                             Label="Công ty / Đơn vị"
+                             Placeholder="Tất cả công ty"
+                             SearchFunc="SearchCompanyAsync"
+                             ToStringFunc="@(c => c?.CompanyName ?? "")"
+                             Variant="Variant.Outlined"
+                             Margin="Margin.Dense"
+                             Clearable="true"
+                             ResetValueOnEmptyText="true" />
         </MudItem>
-        <MudItem xs="12" sm="4" Class="d-flex align-center gap-2">
+        <MudItem xs="6" sm="2">
+            <MudSelect T="string"
+                       @bind-Value="_selectedNationality"
+                       Label="Quốc tịch"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Clearable="true">
+                @foreach (var n in _nationalities)
+                {
+                    <MudSelectItem T="string" Value="@n.NationalityCode">@n.NationalityName (@n.NationalityCode)</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="6" sm="3" Class="d-flex align-center gap-2">
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.FilterAlt"
                        OnClick="Load"
                        Class="flex-grow-1">
-                Lọc dữ liệu
+                Lọc
             </MudButton>
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Default"
@@ -114,12 +211,13 @@
 }
 else
 {
-    <MudDataGrid T="ForeignPersonDto"
-                 Items="_items"
+    <MudDataGrid T="UnifiedForeignPersonDto"
+                 Items="FilteredItems"
                  Dense="true"
                  Hover="true"
                  Striped="true"
                  Class="irm-data-table"
+                 RowsPerPage="15"
                  Elevation="0">
         <Columns>
             <TemplateColumn Title="Họ và tên" SortBy="x => x.FullName">
@@ -130,84 +228,140 @@ else
                         </div>
                         <div>
                             <div class="font-weight-bold">@context.Item.FullName</div>
-                            <div class="text-caption text-muted">ID: #@context.Item.Id</div>
+                            <div class="text-caption text-muted">
+                                @context.Item.GenderString
+                                @if (context.Item.Birthday.HasValue)
+                                {
+                                    <text> · @context.Item.Birthday.Value.ToString("dd/MM/yyyy")</text>
+                                }
+                            </div>
                         </div>
                     </div>
                 </CellTemplate>
             </TemplateColumn>
 
-            <PropertyColumn Property="x => x.PassportNumber" Title="Số hộ chiếu" />
+            <TemplateColumn Title="Số hộ chiếu" SortBy="x => x.PassportNumber">
+                <CellTemplate>
+                    @if (!string.IsNullOrEmpty(context.Item.PassportNumber))
+                    {
+                        <MudText Typo="Typo.body2" Style="font-family: monospace; font-size: 12px; padding: 2px 6px; border-radius: 4px;">
+                            @context.Item.PassportNumber
+                        </MudText>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa cập nhật</span>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
 
             <TemplateColumn Title="Quốc tịch" SortBy="x => x.NationalityCode">
                 <CellTemplate>
                     <span class="country-chip">
                         <MudIcon Icon="@Icons.Material.Filled.Flag" Size="Size.Small" Class="mr-1" />
-                        @(context.Item.NationalityCode ?? "N/A")
+                        @(context.Item.NationalityName ?? context.Item.NationalityCode ?? "N/A")
                     </span>
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Diện cư trú hiện tại">
+            <TemplateColumn Title="Diện hồ sơ">
                 <CellTemplate>
-                    @{
-                        var activeCases = context.Item.StayCases
-                            .Where(x => x.ValidFrom <= At && (!x.ValidTo.HasValue || x.ValidTo >= At) && x.StatusCode == "ACTIVE")
-                            .ToList();
-                    }
-                    @if (activeCases.Any())
-                    {
-                        <div class="d-flex flex-wrap gap-1">
-                            @foreach (var c in activeCases)
+                    <div class="d-flex flex-wrap gap-1">
+                        @if (context.Item.HasWorkProfile)
+                        {
+                            <span class="purpose-chip purpose-blue">Lao động</span>
+                        }
+                        @if (context.Item.HasStudyProfile)
+                        {
+                            <span class="purpose-chip purpose-cyan">Du học</span>
+                        }
+                        @if (context.Item.HasFamilyVisitProfile)
+                        {
+                            <span class="purpose-chip purpose-purple">Thăm thân</span>
+                        }
+                        @if (!context.Item.HasWorkProfile && !context.Item.HasStudyProfile && !context.Item.HasFamilyVisitProfile)
+                        {
+                            @foreach (var code in context.Item.PurposeCodes)
                             {
-                                var (label, colorClass) = GetPurposeMeta(c.PurposeCode);
+                                var (label, colorClass) = GetPurposeMeta(code);
                                 <span class="purpose-chip @colorClass">@label</span>
                             }
+                            @if (!context.Item.PurposeCodes.Any())
+                            {
+                                <span class="text-muted">Chưa phân diện</span>
+                            }
+                        }
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Đơn vị / Chi tiết lưu trú">
+                <CellTemplate>
+                    @if (context.Item.HasWorkProfile)
+                    {
+                        <div class="font-weight-bold">@(context.Item.CompanyName ?? "Chưa gắn công ty")</div>
+                        <div class="text-caption text-muted">
+                            @(context.Item.CareerName ?? "Chưa rõ nghề") · @context.Item.WorkPermitString
+                        </div>
+                    }
+                    @if (context.Item.HasStudyProfile)
+                    {
+                        <div class="font-weight-bold">@(context.Item.SchoolName ?? "Du học sinh")</div>
+                        <div class="text-caption text-muted">
+                            @(context.Item.Major ?? "—") · @context.Item.EducationLevelString · @context.Item.StudentStatusString
+                        </div>
+                    }
+                    @if (context.Item.HasFamilyVisitProfile)
+                    {
+                        <div class="font-weight-bold">TN: @(context.Item.RelativeName ?? "—")</div>
+                        <div class="text-caption text-muted">
+                            @(context.Item.Relationship ?? "Thân nhân") · @context.Item.RelativeTypeString
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(context.Item.ResidenceAddress))
+                    {
+                        <div class="text-caption text-muted">📍 @context.Item.ResidenceAddress</div>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Giấy tờ & Thời hạn" SortBy="x => x.EffectiveExpiryDate">
+                <CellTemplate>
+                    @if (!string.IsNullOrEmpty(context.Item.PrimaryDocumentNumber))
+                    {
+                        <div class="font-weight-bold">
+                            @context.Item.PrimaryDocumentNumber
+                            @if (!string.IsNullOrEmpty(context.Item.VisaSymbol))
+                            {
+                                <span class="text-caption text-muted">(@context.Item.VisaSymbol)</span>
+                            }
+                        </div>
+                    }
+                    @if (context.Item.EffectiveExpiryDate.HasValue)
+                    {
+                        var days = context.Item.DaysUntilExpiry ?? 999;
+                        var style = days <= 7 ? "color: var(--red); font-weight: 700;" :
+                                    days <= 30 ? "color: var(--orange); font-weight: 700;" : "";
+                        <div class="text-caption" style="@style">
+                            Hạn: @context.Item.EffectiveExpiryDate.Value.ToString("dd/MM/yyyy")
+                            (@(days >= 0 ? $"còn {days} ngày" : $"quá hạn {-days} ngày"))
                         </div>
                     }
                     else
                     {
-                        <span class="text-muted">Chưa đăng ký</span>
+                        <span class="text-muted">Chưa có hạn</span>
                     }
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Giấy tờ thị thực / thẻ">
+            <TemplateColumn Title="Định danh ĐT">
                 <CellTemplate>
-                    @{
-                        var validDocs = context.Item.ImmigrationDocuments
-                            .Where(x => x.ValidFrom <= At && (!x.ValidTo.HasValue || x.ValidTo >= At) && x.StatusCode == "VALID")
-                            .ToList();
-                    }
-                    @if (validDocs.Any())
+                    @if (!string.IsNullOrEmpty(context.Item.ElectronicIdNumber))
                     {
-                        <MudTooltip Text="@string.Join(", ", validDocs.Select(d => $"{d.TypeCode}: {d.Number}"))">
-                            <span class="doc-badge doc-valid">
-                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Class="mr-1" />
-                                @validDocs.Count giấy tờ
-                            </span>
-                        </MudTooltip>
-                    }
-                    else
-                    {
-                        <span class="doc-badge doc-none">Chưa có</span>
-                    }
-                </CellTemplate>
-            </TemplateColumn>
-
-            <TemplateColumn Title="Định danh điện tử">
-                <CellTemplate>
-                    @{
-                        var activeId = context.Item.ElectronicIdentities
-                            .FirstOrDefault(x => x.ValidFrom <= At && (!x.ValidTo.HasValue || x.ValidTo >= At) && x.StatusCode == "ACTIVE");
-                    }
-                    @if (activeId != null)
-                    {
-                        <MudTooltip Text="@($"Số định danh: {activeId.IdentityNumber}")">
-                            <span class="eid-chip eid-active">
-                                <span class="eid-dot"></span>
-                                @activeId.IdentityNumber
-                            </span>
-                        </MudTooltip>
+                        <span class="eid-chip eid-active">
+                            <span class="eid-dot"></span>
+                            @context.Item.ElectronicIdNumber
+                        </span>
                     }
                     else
                     {
@@ -219,73 +373,300 @@ else
             <TemplateColumn Title="Thao tác" CellStyle="text-align: right;">
                 <CellTemplate>
                     <div class="d-flex align-center justify-end gap-1">
+                        <MudTooltip Text="Xem / Sửa hồ sơ đầy đủ (5 Tab)">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Size="Size.Small"
+                                           Color="Color.Warning"
+                                           OnClick="@(() => OpenEditPerson(context.Item))" />
+                        </MudTooltip>
                         <AuthorizeView Roles="ADMIN,DATA_EDITOR" Context="permissionContext">
-                            <MudTooltip Text="Thêm giấy tờ xuất nhập cảnh">
-                                <MudIconButton Icon="@Icons.Material.Filled.NoteAdd"
+                            @if (context.Item.ForeignPersonId.HasValue)
+                            {
+                                <MudTooltip Text="Thêm nhanh giấy tờ XNC">
+                                    <MudIconButton Icon="@Icons.Material.Filled.NoteAdd"
+                                                   Size="Size.Small"
+                                                   Color="Color.Primary"
+                                                   OnClick="@(() => OpenDocument(context.Item))" />
+                                </MudTooltip>
+                                <MudTooltip Text="Cấp nhanh số định danh điện tử">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Fingerprint"
+                                                   Size="Size.Small"
+                                                   Color="Color.Secondary"
+                                                   OnClick="@(() => OpenIdentity(context.Item))" />
+                                </MudTooltip>
+                            }
+                            <MudTooltip Text="Xóa hồ sơ">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                                Size="Size.Small"
-                                               Color="Color.Primary"
-                                               OnClick="@(() => OpenDocument(context.Item))" />
-                            </MudTooltip>
-                            <MudTooltip Text="Cấp số định danh điện tử">
-                                <MudIconButton Icon="@Icons.Material.Filled.Fingerprint"
-                                               Size="Size.Small"
-                                               Color="Color.Secondary"
-                                               OnClick="@(() => OpenIdentity(context.Item))" />
+                                               Color="Color.Error"
+                                               OnClick="@(() => DeletePersonAsync(context.Item))" />
                             </MudTooltip>
                         </AuthorizeView>
                     </div>
                 </CellTemplate>
             </TemplateColumn>
         </Columns>
+        <PagerContent>
+            <MudDataGridPager T="UnifiedForeignPersonDto" />
+        </PagerContent>
     </MudDataGrid>
 }
 
-<!-- ════════════ DIALOG: THÊM HỒ SƠ NNN MỚI ════════════ -->
-<MudDialog @bind-Visible="_addPersonDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+<!-- ════════════ DIALOG: HỒ SƠ NNN ĐA NĂNG (5 TAB) ════════════ -->
+<MudDialog @bind-Visible="_profileDialogVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true })">
     <TitleContent>
         <div class="d-flex align-center">
-            <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Color="Color.Primary" Class="mr-2" />
-            <span>Thêm hồ sơ người nước ngoài mới</span>
+            <MudIcon Icon="@(_isEditingProfile ? Icons.Material.Filled.EditNote : Icons.Material.Filled.PersonAdd)" Color="Color.Primary" Class="mr-2" />
+            <span>@(_isEditingProfile ? $"Cập nhật hồ sơ NNN: {_form.FullName}" : "Thêm mới hồ sơ Người nước ngoài hợp nhất")</span>
         </div>
     </TitleContent>
     <DialogContent>
-        <MudGrid>
-            <MudItem xs="12" sm="8">
-                <MudTextField @bind-Value="_newPerson.FullName" Label="Họ và tên đầy đủ *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
-            </MudItem>
-            <MudItem xs="12" sm="4">
-                <MudSelect T="int" @bind-Value="_newPerson.Gender" Label="Giới tính" Variant="Variant.Outlined" Margin="Margin.Dense">
-                    <MudSelectItem Value="1">Nam</MudSelectItem>
-                    <MudSelectItem Value="0">Nữ</MudSelectItem>
-                </MudSelect>
-            </MudItem>
-            <MudItem xs="12" sm="6">
-                <MudTextField @bind-Value="_newPerson.PassportNumber" Label="Số hộ chiếu" Variant="Variant.Outlined" Margin="Margin.Dense" />
-            </MudItem>
-            <MudItem xs="12" sm="6">
-                <MudTextField @bind-Value="_newPerson.NationalityCode" Label="Mã quốc tịch (VD: US, JP, KR, CN...)" Variant="Variant.Outlined" Margin="Margin.Dense" />
-            </MudItem>
-            <MudItem xs="12" sm="6">
-                <MudDatePicker @bind-Date="_newPersonBirthday" Label="Ngày sinh" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
-            </MudItem>
-            <MudItem xs="12" sm="6">
-                <MudSelect T="string" @bind-Value="_newPersonPurpose" Label="Diện đăng ký ban đầu" Variant="Variant.Outlined" Margin="Margin.Dense">
-                    <MudSelectItem Value="@StayPurposeCodes.Work">Lao động</MudSelectItem>
-                    <MudSelectItem Value="@StayPurposeCodes.FamilyVisit">Thăm thân</MudSelectItem>
-                    <MudSelectItem Value="@StayPurposeCodes.Study">Du học</MudSelectItem>
-                    <MudSelectItem Value="@StayPurposeCodes.Tourism">Du lịch</MudSelectItem>
-                    <MudSelectItem Value="@StayPurposeCodes.Other">Khác</MudSelectItem>
-                </MudSelect>
-            </MudItem>
-        </MudGrid>
+        <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" Class="irm-tabs">
+            <!-- TAB 1: THÔNG TIN CHUNG & CƯ TRÚ -->
+            <MudTabPanel Text="1. Thông tin chung & Cư trú" Icon="@Icons.Material.Filled.Person">
+                <MudGrid Spacing="2" Class="pt-4">
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_form.FullName" Label="Họ và tên đầy đủ *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="6" sm="3">
+                        <MudSelect T="int" @bind-Value="_form.Gender" Label="Giới tính" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="1">Nam</MudSelectItem>
+                            <MudSelectItem Value="0">Nữ</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="6" sm="3">
+                        <MudDatePicker @bind-Date="_form.Birthday" Label="Ngày sinh" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="4">
+                        <MudSelect T="string" @bind-Value="_form.NationalityCode" Label="Quốc tịch *" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true">
+                            @if (!string.IsNullOrWhiteSpace(_form.NationalityCode) && !_nationalities.Any(n => string.Equals(n.NationalityCode, _form.NationalityCode, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                <MudSelectItem T="string" Value="@_form.NationalityCode">@_form.NationalityCode (Dữ liệu cũ)</MudSelectItem>
+                            }
+                            @foreach (var n in _nationalities)
+                            {
+                                <MudSelectItem T="string" Value="@n.NationalityCode">@n.NationalityName (@n.NationalityCode)</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_form.PassportNumber" Label="Số hộ chiếu" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudSelect T="int?" @bind-Value="_form.AdministrativeUnitId" Label="Địa bàn xã/phường tạm trú" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            @foreach (var u in _units)
+                            {
+                                <MudSelectItem T="int?" Value="u.Id">@u.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="8">
+                        <MudTextField @bind-Value="_form.ResidenceAddress" Label="Địa chỉ tạm trú tại Việt Nam" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_form.Note" Label="Ghi chú hồ sơ" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudDivider Class="my-2" />
+                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">
+                            Chọn các diện thông tin áp dụng cho người này (có thể chọn nhiều diện cùng lúc):
+                        </MudText>
+                        <MudStack Row="true" Spacing="4" Style="flex-wrap:wrap;">
+                            <MudCheckBox T="bool" @bind-Value="_form.HasWorkProfile" Color="Color.Primary" Label="👷 Có thông tin Lao động / Làm việc tại Doanh nghiệp" />
+                            <MudCheckBox T="bool" @bind-Value="_form.HasStudyProfile" Color="Color.Secondary" Label="🎓 Có thông tin Du học sinh" />
+                            <MudCheckBox T="bool" @bind-Value="_form.HasFamilyVisitProfile" Color="Color.Tertiary" Label="👨‍👩‍👧 Có thông tin Thăm thân tại Việt Nam" />
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <!-- TAB 2: LAO ĐỘNG & VIỆC LÀM -->
+            <MudTabPanel Text="2. Lao động & Việc làm" Icon="@Icons.Material.Filled.Engineering">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12">
+                        <MudCheckBox T="bool" @bind-Value="_form.HasWorkProfile" Color="Color.Primary" Label="Kích hoạt thông tin Lao động cho hồ sơ này" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudAutocomplete T="CompanyDto"
+                                         Label="Công ty làm việc *"
+                                         Value="_dialogCompany"
+                                         ValueChanged="OnDialogCompanyChanged"
+                                         SearchFunc="SearchCompanyAsync"
+                                         ToStringFunc="@(c => c?.CompanyName ?? "")"
+                                         Variant="Variant.Outlined"
+                                         Margin="Margin.Dense"
+                                         ResetValueOnEmptyText="true" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="int?" @bind-Value="_form.CareerId" Label="Nghề nghiệp / Vị trí" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true">
+                            @foreach (var c in _careers)
+                            {
+                                <MudSelectItem T="int?" Value="@((int?)c.IDCareer)">@c.CareerName</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudSelect T="WorkPermitType" @bind-Value="_form.WorkPermit" Label="Trạng thái Giấy phép lao động" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="WorkPermitType.WorkerHasPermit">Đã có GPLĐ</MudSelectItem>
+                            <MudSelectItem Value="WorkPermitType.WorkerExempt">Miễn GPLĐ</MudSelectItem>
+                            <MudSelectItem Value="WorkPermitType.WorkerNoPermit">Chưa có GPLĐ</MudSelectItem>
+                            <MudSelectItem Value="WorkPermitType.InvestorHasPermit">Nhà đầu tư - Có GPLĐ</MudSelectItem>
+                            <MudSelectItem Value="WorkPermitType.InvestorExempt">Nhà đầu tư - Miễn GPLĐ</MudSelectItem>
+                            <MudSelectItem Value="WorkPermitType.InvestorNoPermit">Nhà đầu tư - Chưa có</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_form.WorkPermitNumber" Label="Số Giấy phép lao động" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudDatePicker @bind-Date="_form.TemporaryStay" Label="Hạn tạm trú lao động" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" Clearable="true" />
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <!-- TAB 3: DU HỌC SINH -->
+            <MudTabPanel Text="3. Du học sinh" Icon="@Icons.Material.Filled.School">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12">
+                        <MudCheckBox T="bool" @bind-Value="_form.HasStudyProfile" Color="Color.Secondary" Label="Kích hoạt thông tin Du học sinh cho hồ sơ này" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_form.SchoolName" Label="Trường đào tạo" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_form.Major" Label="Ngành học / Chuyên ngành" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudSelect T="EducationLevel" @bind-Value="_form.EducationLevel" Label="Trình độ đào tạo" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="EducationLevel.University">Đại học</MudSelectItem>
+                            <MudSelectItem Value="EducationLevel.Master">Thạc sĩ</MudSelectItem>
+                            <MudSelectItem Value="EducationLevel.Doctorate">Tiến sĩ</MudSelectItem>
+                            <MudSelectItem Value="EducationLevel.ShortTerm">Ngắn hạn</MudSelectItem>
+                            <MudSelectItem Value="EducationLevel.Other">Khác</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudSelect T="ScholarshipType" @bind-Value="_form.ScholarshipType" Label="Loại học bổng" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="ScholarshipType.SelfFunded">Tự túc</MudSelectItem>
+                            <MudSelectItem Value="ScholarshipType.VietnamGovernment">HB Chính phủ VN</MudSelectItem>
+                            <MudSelectItem Value="ScholarshipType.ForeignScholarship">HB nước ngoài</MudSelectItem>
+                            <MudSelectItem Value="ScholarshipType.Other">Khác</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudSelect T="StudentStatus" @bind-Value="_form.StudentStatus" Label="Trạng thái học tập" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="StudentStatus.Studying">Đang học</MudSelectItem>
+                            <MudSelectItem Value="StudentStatus.Graduated">Đã tốt nghiệp</MudSelectItem>
+                            <MudSelectItem Value="StudentStatus.OnLeave">Tạm nghỉ</MudSelectItem>
+                            <MudSelectItem Value="StudentStatus.Returned">Đã về nước</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudDatePicker @bind-Date="_form.EnrollmentDate" Label="Ngày nhập học" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" Clearable="true" />
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudDatePicker @bind-Date="_form.GraduationDate" Label="Dự kiến tốt nghiệp" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" Clearable="true" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_form.PhoneNumber" Label="Mã sinh viên / Liên hệ" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <!-- TAB 4: THĂM THÂN -->
+            <MudTabPanel Text="4. Thăm thân" Icon="@Icons.Material.Filled.FamilyRestroom">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12">
+                        <MudCheckBox T="bool" @bind-Value="_form.HasFamilyVisitProfile" Color="Color.Tertiary" Label="Kích hoạt thông tin Thăm thân tại Việt Nam cho hồ sơ này" />
+                    </MudItem>
+                    <MudItem xs="12" sm="5">
+                        <MudTextField @bind-Value="_form.RelativeName" Label="Họ và tên thân nhân bảo lãnh *" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="6" sm="3">
+                        <MudTextField @bind-Value="_form.Relationship" Label="Mối quan hệ (Vợ/chồng, con, cha mẹ...) *" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudSelect T="string" @bind-Value="_form.RelativeTypeCode" Label="Phân loại thân nhân" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="@("VIETNAMESE_CITIZEN")">Công dân Việt Nam</MudSelectItem>
+                            <MudSelectItem Value="@("VIETNAMESE_ORIGIN")">Người gốc Việt Nam</MudSelectItem>
+                            <MudSelectItem Value="@("OVERSEAS_VIETNAMESE_DUAL")">Người VN định cư ở nước ngoài</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_form.RelativeIdNumber" Label="Số CCCD / CMND / Hộ chiếu thân nhân" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_form.RelativePhone" Label="Số điện thoại thân nhân" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_form.RelativeAddress" Label="Địa chỉ thường trú thân nhân" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudDatePicker @bind-Date="_form.VisitStartDate" Label="Thăm thân từ ngày" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudDatePicker @bind-Date="_form.VisitEndDate" Label="Thăm thân đến ngày" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <!-- TAB 5: GIẤY TỜ XNC & ĐỊNH DANH ĐT -->
+            <MudTabPanel Text="5. Giấy tờ XNC & Định danh ĐT" Icon="@Icons.Material.Filled.Fingerprint">
+                <MudGrid Spacing="2">
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Thị thực (Visa) / Thẻ tạm trú</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudSelect T="string" @bind-Value="_form.DocumentTypeCode" Label="Loại giấy tờ" Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="@ImmigrationDocumentTypeCodes.Visa">Thị thực (Visa)</MudSelectItem>
+                            <MudSelectItem Value="@ImmigrationDocumentTypeCodes.VisaExtension">Gia hạn tạm trú</MudSelectItem>
+                            <MudSelectItem Value="@ImmigrationDocumentTypeCodes.TemporaryResidenceCard">Thẻ tạm trú (TRC)</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_form.DocumentNumber" Label="Số Visa / Số thẻ tạm trú" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_form.VisaSymbol" Label="Ký hiệu Visa (VD: LĐ1, LĐ2, ĐT, TT, DH...)" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudDatePicker @bind-Date="_form.DocumentValidFrom" Label="Giấy tờ có hiệu lực từ ngày" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" Clearable="true" />
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudDatePicker @bind-Date="_form.DocumentValidTo" Label="Hạn giấy tờ đến ngày" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" Clearable="true" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudDivider Class="my-2" />
+                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Định danh điện tử (VNeID / EID)</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudTextField @bind-Value="_form.ElectronicIdentityNumber" Label="Mã số định danh điện tử" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="VD: EID-2026-0001" />
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudDatePicker @bind-Date="_form.ElectronicIdentityValidFrom" Label="Ngày kích hoạt định danh" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" Clearable="true" />
+                    </MudItem>
+                    <MudItem xs="6" sm="4">
+                        <MudDatePicker @bind-Date="_form.ElectronicIdentityValidTo" Label="Hạn định danh đến ngày" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" Clearable="true" />
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+        </MudTabs>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="@(() => _addPersonDialog = false)">Hủy</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveNewPerson">Tạo hồ sơ</MudButton>
+        <MudButton OnClick="@(() => _profileDialogVisible = false)">Hủy</MudButton>
+        <AuthorizeView Roles="ADMIN,DATA_EDITOR">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" OnClick="SaveUnifiedProfileAsync">
+                Lưu hồ sơ hợp nhất
+            </MudButton>
+        </AuthorizeView>
     </DialogActions>
 </MudDialog>
 
-<!-- ════════════ DIALOG: THÊM GIẤY TỜ XNK ════════════ -->
+<!-- ════════════ DIALOG: THÊM NHANH GIẤY TỜ XNK ════════════ -->
 <MudDialog @bind-Visible="_documentDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
     <TitleContent>
         <div class="d-flex align-center">
@@ -319,7 +700,7 @@ else
     </DialogActions>
 </MudDialog>
 
-<!-- ════════════ DIALOG: CẤP ĐỊNH DANH ĐIỆN TỬ ════════════ -->
+<!-- ════════════ DIALOG: CẤP NHANH ĐỊNH DANH ĐIỆN TỬ ════════════ -->
 <MudDialog @bind-Visible="_identityDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
     <TitleContent>
         <div class="d-flex align-center">
@@ -343,33 +724,126 @@ else
     </DialogActions>
 </MudDialog>
 
+<!-- ════════════ DIALOG: XÁC NHẬN XÓA LƯU TRỮ HẾT HẠN ════════════ -->
+<MudDialog @bind-Visible="_archiveDialogVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
+    <TitleContent>
+        <MudText Typo="Typo.h6" Style="font-weight: 700; color: var(--red);">
+            ⚠️ Xác nhận xóa @_archiveDialogTitle
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
+            <strong>@_archiveCount</strong> hồ sơ @_archiveDialogTitle sẽ được di chuyển sang bảng lưu trữ.
+        </MudAlert>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">
+            Dữ liệu sẽ được lưu vào bảng <strong>Lưu trữ</strong> và ẩn khỏi danh sách chính.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="@(() => _archiveDialogVisible = false)">Hủy</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error"
+                   StartIcon="@Icons.Material.Filled.DeleteForever"
+                   OnClick="ExecuteArchiveAsync"
+                   Disabled="@(_archiveProcessing || _archiveCount == 0)">
+            Xóa @_archiveCount hồ sơ
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
-    private List<ForeignPersonDto> _items = new();
+    private List<UnifiedForeignPersonDto> _items = new();
+    private List<NationalityEntityDto> _nationalities = new();
+    private List<CareerDto> _careers = new();
+    private List<AdministrativeUnitDto> _units = new();
+    private List<CompanyDto> _companies = new();
+
     private string? _search;
+    private string _categoryFilter = "ALL";
+    private CompanyDto? _selectedCompany;
+    private string? _selectedNationality;
     private DateTime? _asOf = DateTime.Today;
     private DateTime At = DateTime.Today;
     private bool _loading;
 
-    // Document dialog
+    // 5-Tab Unified Dialog
+    private bool _profileDialogVisible;
+    private bool _isEditingProfile;
+    private UnifiedForeignPersonInput _form = new();
+    private CompanyDto? _dialogCompany;
+
+    // Quick Document dialog
     private bool _documentDialog;
     private ImmigrationDocumentDto _document = new();
     private DateTime? _documentFrom = DateTime.Today;
     private DateTime? _documentTo;
 
-    // Identity dialog
+    // Quick Identity dialog
     private bool _identityDialog;
     private ElectronicIdentityDto _identity = new();
     private DateTime? _identityFrom = DateTime.Today;
 
-    // Add Person dialog
-    private bool _addPersonDialog;
-    private FamilyVisitInput _newPerson = new();
-    private DateTime? _newPersonBirthday;
-    private string _newPersonPurpose = StayPurposeCodes.Work;
+    // Archive dialog
+    private bool _archiveDialogVisible;
+    private string _archiveDialogTitle = "";
+    private string _archiveType = "";
+    private int _archiveCount;
+    private bool _archiveProcessing;
+
+    private IEnumerable<UnifiedForeignPersonDto> FilteredItems
+    {
+        get
+        {
+            IEnumerable<UnifiedForeignPersonDto> query = _items;
+
+            query = _categoryFilter switch
+            {
+                "WORK" => query.Where(x => x.HasWorkProfile),
+                "STUDY" => query.Where(x => x.HasStudyProfile),
+                "FAMILY_VISIT" => query.Where(x => x.HasFamilyVisitProfile),
+                "STUDY_FAMILY" => query.Where(x => x.HasStudyProfile || x.HasFamilyVisitProfile),
+                "EXPIRING" => query.Where(x => x.DaysUntilExpiry.HasValue && x.DaysUntilExpiry.Value >= 0 && x.DaysUntilExpiry.Value <= 30),
+                _ => query
+            };
+
+            if (_selectedCompany is not null)
+                query = query.Where(x => x.CompanyId == _selectedCompany.IDCompany);
+
+            if (!string.IsNullOrWhiteSpace(_selectedNationality))
+                query = query.Where(x => string.Equals(x.NationalityCode, _selectedNationality, StringComparison.OrdinalIgnoreCase));
+
+            return query;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
+        ApplyRouteCategoryDefault();
+        _nationalities = await Catalog.GetNationalitiesAsync();
+        _careers = await Catalog.GetCareersAsync();
+        _units = (await Catalog.GetAdministrativeUnitsAsync()).ToList();
+        _companies = await CompanySvc.GetAllAsync();
         await Load();
+    }
+
+    protected override void OnParametersSet()
+    {
+        ApplyRouteCategoryDefault();
+    }
+
+    private void ApplyRouteCategoryDefault()
+    {
+        var path = new Uri(Nav.Uri).AbsolutePath.TrimEnd('/').ToLowerInvariant();
+        if (path.EndsWith("/employees"))
+            _categoryFilter = "WORK";
+        else if (path.EndsWith("/students"))
+            _categoryFilter = "STUDY";
+        else if (path.EndsWith("/family-visitors"))
+            _categoryFilter = "FAMILY_VISIT";
+    }
+
+    private void SelectCategory(string category)
+    {
+        _categoryFilter = category;
     }
 
     private async Task Load()
@@ -378,7 +852,7 @@ else
         try
         {
             At = (_asOf ?? DateTime.Today).Date;
-            _items = (await Registry.SearchAsync(_search, At)).ToList();
+            _items = (await Registry.GetUnifiedProfilesAsync(_search, At)).ToList();
         }
         catch (Exception ex)
         {
@@ -390,17 +864,38 @@ else
         }
     }
 
+    private Task<IEnumerable<CompanyDto>> SearchCompanyAsync(string? value, CancellationToken cancel)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Task.FromResult<IEnumerable<CompanyDto>>(_companies);
+        return Task.FromResult(_companies.Where(c => c.CompanyName.Contains(value, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private void OnCompanyFilterChanged(CompanyDto? company)
+    {
+        _selectedCompany = company;
+    }
+
+    private void OnDialogCompanyChanged(CompanyDto? company)
+    {
+        _dialogCompany = company;
+        _form.CompanyId = company?.IDCompany;
+        if (company is not null)
+            _form.HasWorkProfile = true;
+    }
+
     private async Task HandleSearchKeyUp(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
-        {
             await Load();
-        }
     }
 
     private async Task ResetFilters()
     {
         _search = null;
+        _selectedCompany = null;
+        _selectedNationality = null;
+        _categoryFilter = "ALL";
         _asOf = DateTime.Today;
         await Load();
     }
@@ -416,30 +911,93 @@ else
 
     private void OpenAddPerson()
     {
-        _newPerson = new FamilyVisitInput
+        _isEditingProfile = false;
+        _form = new UnifiedForeignPersonInput
         {
-            ValidFrom = DateTime.Today
+            Gender = 1,
+            HasWorkProfile = _categoryFilter is "ALL" or "WORK",
+            HasStudyProfile = _categoryFilter == "STUDY",
+            HasFamilyVisitProfile = _categoryFilter == "FAMILY_VISIT",
+            CareerId = _careers.FirstOrDefault()?.IDCareer,
+            VisitStartDate = DateTime.Today,
+            DocumentValidFrom = DateTime.Today,
+            ElectronicIdentityValidFrom = DateTime.Today
         };
-        _newPersonBirthday = null;
-        _newPersonPurpose = StayPurposeCodes.Work;
-        _addPersonDialog = true;
+        _dialogCompany = _selectedCompany;
+        if (_dialogCompany is not null)
+            _form.CompanyId = _dialogCompany.IDCompany;
+        _profileDialogVisible = true;
     }
 
-    private async Task SaveNewPerson()
+    private void OpenEditPerson(UnifiedForeignPersonDto item)
     {
-        if (string.IsNullOrWhiteSpace(_newPerson.FullName))
+        _isEditingProfile = true;
+        _form = new UnifiedForeignPersonInput
         {
-            Snackbar.Add("Vui lòng nhập họ và tên.", Severity.Warning);
-            return;
-        }
+            ForeignPersonId = item.ForeignPersonId,
+            EmployeeId = item.EmployeeId,
+            StudentId = item.StudentId,
+            FamilyVisitStayCaseId = item.FamilyVisitStayCaseId,
+            FullName = item.FullName,
+            Gender = item.Gender,
+            Birthday = item.Birthday,
+            NationalityCode = item.NationalityCode,
+            PassportNumber = item.PassportNumber,
+            AdministrativeUnitId = item.AdministrativeUnitId,
+            ResidenceAddress = item.ResidenceAddress,
+            Note = item.Note,
 
+            HasWorkProfile = item.HasWorkProfile,
+            HasStudyProfile = item.HasStudyProfile,
+            HasFamilyVisitProfile = item.HasFamilyVisitProfile,
+
+            CompanyId = item.CompanyId,
+            CareerId = item.CareerId ?? _careers.FirstOrDefault()?.IDCareer,
+            WorkPermit = item.WorkPermit,
+            WorkPermitNumber = item.WorkPermitNumber,
+            TemporaryStay = item.TemporaryStay,
+
+            SchoolName = item.SchoolName,
+            Major = item.Major,
+            EducationLevel = item.EducationLevel,
+            ScholarshipType = item.ScholarshipType,
+            EnrollmentDate = item.EnrollmentDate,
+            GraduationDate = item.GraduationDate,
+            StudentStatus = item.StudentStatus,
+            VisaExpiry = item.VisaExpiry,
+            PhoneNumber = item.PhoneNumber,
+
+            RelativeName = item.RelativeName,
+            Relationship = item.Relationship,
+            RelativeTypeCode = item.RelativeTypeCode,
+            RelativeNationalityCode = item.RelativeNationalityCode,
+            RelativeIdNumber = item.RelativeIdNumber,
+            RelativePhone = item.RelativePhone,
+            RelativeAddress = item.RelativeAddress,
+            VisitStartDate = item.VisitStartDate ?? DateTime.Today,
+            VisitEndDate = item.VisitEndDate,
+
+            DocumentTypeCode = item.PrimaryDocumentType ?? ImmigrationDocumentTypeCodes.Visa,
+            DocumentNumber = item.PrimaryDocumentNumber ?? item.VisaNumber,
+            VisaSymbol = item.VisaSymbol,
+            DocumentValidFrom = item.PrimaryDocumentValidFrom ?? DateTime.Today,
+            DocumentValidTo = item.PrimaryDocumentValidTo ?? item.TemporaryStay ?? item.VisaExpiry,
+            ElectronicIdentityNumber = item.ElectronicIdNumber,
+            ElectronicIdentityValidFrom = item.ElectronicIdValidFrom ?? DateTime.Today,
+            ElectronicIdentityValidTo = item.ElectronicIdValidTo
+        };
+        _dialogCompany = _companies.FirstOrDefault(c => c.IDCompany == item.CompanyId);
+        _profileDialogVisible = true;
+    }
+
+    private async Task SaveUnifiedProfileAsync()
+    {
         try
         {
-            _newPerson.Birthday = _newPersonBirthday;
-            await Registry.SaveFamilyVisitAsync(_newPerson);
-            _addPersonDialog = false;
+            await Registry.SaveUnifiedProfileAsync(_form);
+            _profileDialogVisible = false;
             await Load();
-            Snackbar.Add("Đã tạo hồ sơ người nước ngoài.", Severity.Success);
+            Snackbar.Add(_isEditingProfile ? "Đã cập nhật hồ sơ người nước ngoài." : "Đã tạo mới hồ sơ người nước ngoài.", Severity.Success);
         }
         catch (Exception ex)
         {
@@ -447,11 +1005,106 @@ else
         }
     }
 
-    private void OpenDocument(ForeignPersonDto person)
+    private async Task DeletePersonAsync(UnifiedForeignPersonDto item)
     {
+        try
+        {
+            await Registry.DeleteUnifiedProfileAsync(item.ForeignPersonId, item.EmployeeId, item.StudentId);
+            await Load();
+            Snackbar.Add($"Đã xóa hồ sơ {item.FullName}.", Severity.Info);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task SyncLegacyRecordsAsync()
+    {
+        try
+        {
+            var res = await Registry.BackfillLegacyAsync();
+            await Load();
+            Snackbar.Add($"Đã đồng bộ {res.Linked} hồ sơ (tạo mới {res.Created}, cần rà soát hộ chiếu {res.Issues}).", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task ExportExcelAsync()
+    {
+        try
+        {
+            if (_categoryFilter == "STUDY")
+            {
+                var bytes = await ExportSvc.ExportStudentsAsync(_selectedNationality, null, null, null, null, _categoryFilter == "EXPIRING");
+                await JS.InvokeVoidAsync("irmInterop.downloadFile",
+                    $"DuHocSinh_{DateTime.Now:yyyyMMdd}.xlsx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    Convert.ToBase64String(bytes));
+            }
+            else
+            {
+                var bytes = await ExportSvc.ExportEmployeesAsync(_selectedCompany?.IDCompany, _selectedNationality, null, _categoryFilter == "EXPIRING");
+                await JS.InvokeVoidAsync("irmInterop.downloadFile",
+                    $"HoSoNNN_{DateTime.Now:yyyyMMdd}.xlsx",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    Convert.ToBase64String(bytes));
+            }
+            Snackbar.Add("Đã xuất file Excel thành công.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi xuất Excel: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenArchiveTemporaryStayDialog()
+    {
+        _archiveType = "TAM_TRU";
+        _archiveDialogTitle = "hết hạn tạm trú";
+        _archiveCount = await EmployeeSvc.CountExpiredTemporaryStayAsync();
+        _archiveDialogVisible = true;
+    }
+
+    private async Task OpenArchiveFamilyVisitDialog()
+    {
+        _archiveType = "THAM_THAN";
+        _archiveDialogTitle = "hết hạn thăm thân";
+        _archiveCount = await EmployeeSvc.CountExpiredFamilyVisitAsync();
+        _archiveDialogVisible = true;
+    }
+
+    private async Task ExecuteArchiveAsync()
+    {
+        _archiveProcessing = true;
+        try
+        {
+            var count = _archiveType == "TAM_TRU"
+                ? await EmployeeSvc.ArchiveExpiredTemporaryStayAsync()
+                : await EmployeeSvc.ArchiveExpiredFamilyVisitAsync();
+            _archiveDialogVisible = false;
+            await Load();
+            Snackbar.Add($"Đã chuyển {count} hồ sơ sang lưu trữ.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _archiveProcessing = false;
+        }
+    }
+
+    private void OpenDocument(UnifiedForeignPersonDto person)
+    {
+        if (!person.ForeignPersonId.HasValue) return;
         _document = new ImmigrationDocumentDto
         {
-            ForeignPersonId = person.Id,
+            ForeignPersonId = person.ForeignPersonId.Value,
             TypeCode = ImmigrationDocumentTypeCodes.Visa
         };
         _documentFrom = DateTime.Today;
@@ -482,12 +1135,13 @@ else
         }
     }
 
-    private void OpenIdentity(ForeignPersonDto person)
+    private void OpenIdentity(UnifiedForeignPersonDto person)
     {
+        if (!person.ForeignPersonId.HasValue) return;
         _identity = new ElectronicIdentityDto
         {
-            ForeignPersonId = person.Id,
-            IdentityNumber = $"EID-{DateTime.Today.Year}-{person.Id:D4}"
+            ForeignPersonId = person.ForeignPersonId.Value,
+            IdentityNumber = $"EID-{DateTime.Today.Year}-{person.ForeignPersonId.Value:D4}"
         };
         _identityFrom = DateTime.Today;
         _identityDialog = true;
