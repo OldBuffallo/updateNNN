@@ -37,3 +37,11 @@ dotnet ef migrations list --project IRM.Infrastructure --startup-project IRM --n
 ```
 
 Production uses SQL Server. SQLite is test-only. SQL integration tests use `IRM_TEST_SQLSERVER` and create/drop only generated `IRM_RefactorTest_*` databases; never point tests or maintenance at production. Never commit credentials or generated installer media. Keep dependency versions and database schema unchanged during architectural refactoring.
+
+## Commits and delivery packages
+
+- The user requires every completed source change to be committed locally. Run the appropriate checks, review the staged diff, and commit all related source, tests, configuration, and documentation before ending the task. Report commit IDs and any skipped checks. Do not push unless explicitly asked.
+- Do not mix generated packages, runtime data, credentials, or local diagnostic output into source commits. Preserve unrelated work and split substantial independent changes into coherent commits.
+- The single delivery root is `../BAN-GIAO/`, outside this repository. Read `docs/DELIVERY-LAYOUT.md` and its README before creating, moving, or handing over artifacts.
+- Keep existing package directories and checksums intact. Store new candidates in `../BAN-GIAO/04-CHO-NGHIEM-THU/<timestamp>-<version>/`; promote them only after the requested acceptance checks. Keep corrected Excel fixtures in `03-DU-LIEU-TEST/` and old installers in `02-LUU-TRU/`.
+- The Windows packaging script requires a clean Git tree and records `SOURCE-REVISION.json` in its payload. Never claim an older installer contains current commits just because the version label is unchanged.

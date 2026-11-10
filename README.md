@@ -2,6 +2,8 @@
 
 ## Mã nguồn hiện hành
 
+Các gói bàn giao được tập trung ở **[../BAN-GIAO/](../BAN-GIAO/README.md)**. Xem [quy ước lưu trữ và commit](docs/DELIVERY-LAYOUT.md) để phân biệt bộ cài đã giao, source hiện tại, bản thử mới và dữ liệu test.
+
 Mở **IRM.sln** để làm việc với bản web. Mã được tách thành **IRM (Web), IRM.Core, IRM.Application, IRM.Infrastructure**; test nằm trong IRM.Tests. Hướng dẫn ranh giới project, module, EF và kiểm thử database tại [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 Việc tách project giữ nguyên schema SQL Server hiện tại, dữ liệu và tương thích WPF chạy song song. Lệnh publish vẫn dùng `IRM/IRM.csproj`, executable vẫn là IRM.

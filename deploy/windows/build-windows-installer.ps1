@@ -14,9 +14,16 @@ if ([string]::IsNullOrWhiteSpace($VendorDirectory)) {
     $VendorDirectory = Join-Path $PSScriptRoot "..\vendor\windows"
 }
 if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
-    $OutputDirectory = Join-Path $PSScriptRoot "..\..\build-output\v1.0.2"
+    $buildStamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
+    $OutputDirectory = Join-Path $PSScriptRoot "..\..\..\BAN-GIAO\04-CHO-NGHIEM-THU\$buildStamp-v1.0.2"
 }
 $repo = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+$sourceCommit = & git -C $repo rev-parse --verify HEAD
+if ($LASTEXITCODE -ne 0) { throw 'Khong xac dinh duoc Git commit cua ma nguon.' }
+$sourceChanges = & git -C $repo status --porcelain --untracked-files=normal
+if ($LASTEXITCODE -ne 0) { throw 'Khong kiem tra duoc trang thai Git.' }
+if ($sourceChanges) { throw 'Hay commit day du cac thay doi ma nguon truoc khi dong goi ban giao.' }
+$sourceCommit = $sourceCommit.Trim()
 $OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
 $VendorDirectory = [IO.Path]::GetFullPath($VendorDirectory)
 $manifest = Get-Content (Join-Path $repo "deploy\release-manifest.json") -Raw | ConvertFrom-Json
@@ -100,6 +107,12 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot "backup.ps1") -Destination $stag
 Copy-Item -LiteralPath (Join-Path $repo "deploy\release-manifest.json") -Destination $stage -Force
 Copy-Item -LiteralPath (Join-Path $repo "deploy\database\IRM-v1.0.1-schema.sql") -Destination $stage -Force
 Copy-Item -LiteralPath (Join-Path $repo "docs\INSTALLATION-v1.0.2.md") -Destination (Join-Path $stage "HUONG-DAN-CAI-DAT.md") -Force
+
+[ordered]@{
+    commit = $sourceCommit
+    dirty = $false
+    builtAtUtc = [DateTime]::UtcNow.ToString('o')
+} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stage 'SOURCE-REVISION.json') -Encoding UTF8
 
 dotnet list (Join-Path $repo "IRM\IRM.csproj") package --include-transitive --format json | `
     Set-Content -LiteralPath (Join-Path $stage "SBOM-dotnet.json") -Encoding UTF8
