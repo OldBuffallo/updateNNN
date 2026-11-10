@@ -4,7 +4,7 @@
 <MudPaper Class="pa-4 mb-4">
                 <MudGrid>
                     <MudItem xs="12" md="8">
-                        <MudTextField T="string" Label="Ten quan/huyen" @bind-Value="Page._districtForm.DisTrictName" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Tên quận/huyện" @bind-Value="Page._districtForm.DisTrictName" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="4" Class="d-flex align-center">
                         <MudStack Row="true" Spacing="1">
@@ -15,7 +15,7 @@
                 </MudGrid>
             </MudPaper>
             <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
-                <thead><tr><th>ID</th><th>Ten quan/huyen</th><th></th></tr></thead>
+                <thead><tr><th>ID</th><th>Tên quận/huyện</th><th></th></tr></thead>
                 <tbody>
                     @foreach (var d in Page._districts)
                     {
