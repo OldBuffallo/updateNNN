@@ -34,3 +34,11 @@ test('setting an invalid theme normalizes both the current page and stored prefe
     assert.equal(b.attributes.get('data-theme'), 'light');
     assert.equal(b.storage.get('irm-theme'), 'light');
 });
+
+test('app.css uses government navy tokens without legacy purple radial gradients or transparent gradient titles', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const css = fs.readFileSync(path.join(__dirname, '..', '..', 'IRM', 'wwwroot', 'app.css'), 'utf8');
+    assert.equal(/140,\s*87,\s*255|110,\s*57,\s*203/.test(css), false, 'app.css should not contain hardcoded Materio purple RGB');
+    assert.equal(css.includes('-webkit-text-fill-color: transparent'), false, 'search hero title should use solid readable text');
+});

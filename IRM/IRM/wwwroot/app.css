@@ -897,13 +897,10 @@ body {
 }
 
 .search-hero-title {
-    margin-bottom: 8px;
-    font-size: 28px !important;
-    font-weight: 800 !important;
-    background: linear-gradient(135deg, var(--primary), var(--purple));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    margin-bottom: 6px;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: var(--text-primary);
 }
 
 .search-hero-subtitle {
@@ -1378,12 +1375,12 @@ body {
 }
 .login-bg::before {
     content: ''; position: absolute; inset: 0;
-    background: radial-gradient(circle at 18% 82%, rgba(140, 87, 255, 0.12) 0%, transparent 45%),
-                radial-gradient(circle at 84% 18%, rgba(110, 57, 203, 0.10) 0%, transparent 45%);
+    background: radial-gradient(circle at 18% 82%, rgba(var(--mud-palette-primary-rgb), 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 84% 18%, rgba(var(--mud-palette-secondary-rgb), 0.06) 0%, transparent 45%);
 }
 .login-bg::after {
     content: ''; position: absolute; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='60' cy='60' r='44' fill='none' stroke='rgba(140,87,255,0.06)' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-image: none;
 }
 
 [data-theme="dark"] .login-bg {
@@ -1394,11 +1391,10 @@ body {
     background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 42px 38px;
-    width: 450px; max-width: 92vw;
+    padding: 36px 32px;
+    width: 440px; max-width: 92vw;
     box-shadow: var(--shadow-md);
     z-index: 1;
-    animation: fadeUp 0.5s var(--ease);
 }
 [data-theme="dark"] .login-card {
     background: var(--bg-surface);
@@ -1406,19 +1402,17 @@ body {
     box-shadow: var(--shadow-lg);
 }
 
-.login-logo { text-align: center; margin-bottom: 28px; }
+.login-logo { text-align: center; margin-bottom: 24px; }
 .logo-icon {
     display: inline-flex; align-items: center; justify-content: center;
-    margin-bottom: 14px;
-    width: 52px; height: 52px;
-    background: var(--materio-gradient);
+    margin-bottom: 12px;
+    width: 48px; height: 48px;
+    background: var(--primary);
     color: #ffffff;
-    border-radius: 12px;
-    box-shadow: var(--materio-shadow-active);
-    transition: transform 0.3s var(--ease-bounce);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
 }
-.logo-icon:hover { transform: scale(1.05) rotate(-2deg); }
-.login-logo h1 { font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; }
+.login-logo h1 { font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.2px; }
 .login-subtitle { color: var(--text-secondary); font-size: 13.5px; margin-top: 6px; font-weight: 400; }
 
 .login-card .input-group { margin-bottom: 18px; }
@@ -1484,8 +1478,7 @@ body {
 
 /* ============ DARK MODE SEARCH HERO ============ */
 [data-theme="dark"] .search-hero-title {
-    background: linear-gradient(135deg, var(--primary), #c4b5fd);
-    -webkit-background-clip: text; background-clip: text;
+    color: var(--text-primary);
 }
 
 /* ============ DARK MODE MARK ============ */
@@ -2014,17 +2007,19 @@ body {
 
 /* ── Dashboard Hero Banner ── */
 .dashboard-hero-banner {
-    background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.08) 0%, rgba(var(--mud-palette-secondary-rgb), 0.08) 100%);
-    border: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15);
-    border-radius: 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius);
     padding: 14px 18px;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-xs);
 }
 
 .hero-title {
-    font-size: 18px;
-    font-weight: 800;
+    font-size: 17px;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 4px 0;
 }
@@ -2038,20 +2033,20 @@ body {
 .hero-date-badge {
     display: inline-flex;
     align-items: center;
-    padding: 5px 10px;
-    border-radius: 8px;
-    background: var(--bg-surface);
+    padding: 6px 10px;
+    border-radius: var(--radius);
+    background: var(--bg-surface-variant);
     border: 1px solid var(--border);
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 600;
     color: var(--text-secondary);
 }
 
 .hero-primary-btn {
-    border-radius: 8px;
+    border-radius: var(--radius);
     font-weight: 600;
     text-transform: none;
-    box-shadow: 0 4px 12px rgba(var(--mud-palette-primary-rgb), 0.3) !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12) !important;
 }
 
 .hero-quick-actions {
@@ -2064,23 +2059,22 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 5px 12px;
-    border-radius: 999px;
-    background: var(--bg-surface);
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    background: var(--bg-surface-variant);
     border: 1px solid var(--border);
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 600;
     color: var(--text-primary);
     font-family: inherit;
     cursor: pointer;
-    transition: all 0.2s var(--ease);
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .hero-action-pill:hover {
     border-color: var(--primary);
+    background: rgba(var(--mud-palette-primary-rgb), 0.06);
     color: var(--primary);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(var(--mud-palette-primary-rgb), 0.12);
 }
 
 /* ── KPI Icon Circles & Chips ── */
