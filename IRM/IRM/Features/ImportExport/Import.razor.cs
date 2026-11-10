@@ -88,7 +88,7 @@ public partial class Import : ComponentBase, IFeaturePage
         if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) &&
             !file.Name.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
         {
-            Snackbar.Add("❌ Chỉ hỗ trợ file Excel (.xlsx hoặc .xls)", Severity.Error);
+            Snackbar.Add("Chỉ hỗ trợ file Excel (.xlsx hoặc .xls)", Severity.Error);
             return;
         }
 
@@ -104,7 +104,7 @@ public partial class Import : ComponentBase, IFeaturePage
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"❌ Không thể đọc file: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Không thể đọc file: {ex.Message}", Severity.Error);
             _fileStream = null;
             _uploadedFileName = null;
         }
@@ -154,7 +154,7 @@ public partial class Import : ComponentBase, IFeaturePage
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"❌ Lỗi đọc file: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi đọc file: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -190,7 +190,7 @@ public partial class Import : ComponentBase, IFeaturePage
                 var templateUser = (await AuthState.GetAuthenticationStateAsync()).User.Identity?.Name ?? "unknown";
                 await ImportSvc.SaveTemplateAsync(_templateName, _selectedCompany?.IDCompany, _columnMappings, templateUser);
                 await LoadTemplatesAsync();
-                Snackbar.Add($"✅ Đã lưu template '{_templateName}'", Severity.Success);
+                Snackbar.Add($"Đã lưu template '{_templateName}'", Severity.Success);
             }
 
             _previewRows = await ImportSvc.GeneratePreviewAsync(_fileStream, _columnMappings, _selectedCompany?.IDCompany ?? 0);
@@ -206,7 +206,7 @@ public partial class Import : ComponentBase, IFeaturePage
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"❌ Lỗi phân tích: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi phân tích: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -251,13 +251,13 @@ public partial class Import : ComponentBase, IFeaturePage
             _currentStep = 4;
 
             if (_importResult.Success)
-                Snackbar.Add($"✅ Import hoàn tất: +{_importResult.AddedCount} mới, ~{_importResult.UpdatedCount} cập nhật", Severity.Success);
+                Snackbar.Add($"Import hoàn tất: +{_importResult.AddedCount} mới, ~{_importResult.UpdatedCount} cập nhật", Severity.Success);
             else
-                Snackbar.Add("❌ Import thất bại!", Severity.Error);
+                Snackbar.Add("Import thất bại!", Severity.Error);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"❌ Import lỗi: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Import lỗi: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -280,17 +280,17 @@ public partial class Import : ComponentBase, IFeaturePage
             var success = await ImportSvc.RollbackImportAsync(sessionId);
             if (success)
             {
-                Snackbar.Add($"✅ Đã hoàn tác phiên {sessionId} — Dữ liệu đã khôi phục.", Severity.Success);
+                Snackbar.Add($"Đã hoàn tác phiên {sessionId} — Dữ liệu đã khôi phục.", Severity.Success);
                 await LoadHistoryAsync();
             }
             else
             {
-                Snackbar.Add("❌ Không thể hoàn tác phiên này.", Severity.Error);
+                Snackbar.Add("Không thể hoàn tác phiên này.", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"❌ Lỗi hoàn tác: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi hoàn tác: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -333,12 +333,12 @@ public partial class Import : ComponentBase, IFeaturePage
     {
         if (string.IsNullOrWhiteSpace(_mf.StaffName))
         {
-            Snackbar.Add("❌ Họ tên không được trống", Severity.Error);
+            Snackbar.Add("Họ tên không được trống", Severity.Error);
             return;
         }
         if (_mf.IDCompany == 0)
         {
-            Snackbar.Add("❌ Chưa chọn công ty", Severity.Error);
+            Snackbar.Add("Chưa chọn công ty", Severity.Error);
             return;
         }
 
@@ -348,7 +348,7 @@ public partial class Import : ComponentBase, IFeaturePage
             var isDup = await EmployeeSvc.CheckDuplicatePassportAsync(_mf.Passport);
             if (isDup)
             {
-                Snackbar.Add($"⚠️ Hộ chiếu {_mf.Passport} đã tồn tại trong hệ thống!", Severity.Warning);
+                Snackbar.Add($"Hộ chiếu {_mf.Passport} đã tồn tại trong hệ thống!", Severity.Warning);
                 return;
             }
         }
@@ -356,12 +356,12 @@ public partial class Import : ComponentBase, IFeaturePage
         try
         {
             await EmployeeSvc.CreateAsync(_mf);
-            Snackbar.Add($"✅ Đã thêm nhân viên \"{_mf.StaffName}\" thành công!", Severity.Success);
+            Snackbar.Add($"Đã thêm nhân viên \"{_mf.StaffName}\" thành công!", Severity.Success);
             ResetManualForm();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"❌ Lỗi: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi: {ex.Message}", Severity.Error);
         }
     }
 
@@ -381,11 +381,11 @@ public partial class Import : ComponentBase, IFeaturePage
                 "Mau_Import_NLD.xlsx",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 base64);
-            Snackbar.Add("📥 Đã tải file mẫu — Xem sheet 'Hướng dẫn' trong file", Severity.Success);
+            Snackbar.Add("Đã tải file mẫu — Xem sheet 'Hướng dẫn' trong file", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"❌ Lỗi tải file mẫu: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi tải file mẫu: {ex.Message}", Severity.Error);
         }
     }
 

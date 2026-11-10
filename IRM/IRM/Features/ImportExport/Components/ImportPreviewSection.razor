@@ -5,7 +5,7 @@
     @if (Page._currentStep == 3)
     {
         <MudAlert Severity="Severity.Info" Class="mb-3">
-            👁️ Tổng: @Page._previewRows.Count dòng · 🟢 @(Page._previewRows.Count(r => r.Status == "new")) mới · 🟡 @(Page._previewRows.Count(r => r.Status == "duplicate")) trùng · 🔴 @(Page._previewRows.Count(r => r.Status == "error")) lỗi
+            Tổng: @Page._previewRows.Count dòng · @(Page._previewRows.Count(r => r.Status == "new")) mới · @(Page._previewRows.Count(r => r.Status == "duplicate")) trùng · @(Page._previewRows.Count(r => r.Status == "error")) lỗi
         </MudAlert>
 
         <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px; max-height: 400px; overflow-y: auto;">
@@ -40,7 +40,7 @@
                         <td>
                             @if (row.CompanyDisplay != null)
                             {
-                                @if (row.CompanyDisplay.StartsWith("❌"))
+                                @if (row.CompanyDisplay.StartsWith(""))
                                 {
                                     <MudText Typo="Typo.caption" Color="Color.Error">@row.CompanyDisplay</MudText>
                                 }
@@ -59,7 +59,7 @@
                                            Value="@Page.GetDuplicateDecision(row.ExistingEmployeeId.Value)"
                                            ValueChanged="@(val => Page.SetDuplicateDecision(row.ExistingEmployeeId.Value, val))"
                                            Style="min-width: 120px;">
-                                    <MudSelectItem Value="@("update")">🔄 Cập nhật</MudSelectItem>
+                                    <MudSelectItem Value="@("update")">Cập nhật</MudSelectItem>
                                     <MudSelectItem Value="@("skip")">⏭️ Bỏ qua</MudSelectItem>
                                 </MudSelect>
                             }
@@ -80,7 +80,7 @@
         @if (Page._previewRows.Any(row => row.Status != "error"))
         {
             <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
-                🔒 <strong>Dữ liệu cũ sẽ được backup.</strong> Bạn có thể hoàn tác import bất cứ lúc nào từ lịch sử.
+                <strong>Dữ liệu cũ sẽ được backup.</strong> Bạn có thể hoàn tác import bất cứ lúc nào từ lịch sử.
             </MudAlert>
         }
         else
@@ -91,9 +91,9 @@
         }
 
         <MudStack Row="true" Justify="Justify.Center" Spacing="3">
-            <MudButton Variant="Variant.Outlined" OnClick="@(() => Page._currentStep = 2)" StartIcon="@Icons.Material.Filled.ArrowBack">Quay lại</MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Page._currentStep = 2)" StartIcon="@Icons.Material.Outlined.ArrowBack">Quay lại</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
-                       OnClick="Page.ExecuteImport" StartIcon="@Icons.Material.Filled.FlashOn"
+                       OnClick="Page.ExecuteImport" StartIcon="@Icons.Material.Outlined.FlashOn"
                        Disabled="@(Page._isProcessing || !Page._previewRows.Any(row => row.Status != "error"))">
                 @if (Page._isProcessing) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
                 Bắt đầu Import

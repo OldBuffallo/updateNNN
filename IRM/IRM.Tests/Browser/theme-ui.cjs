@@ -75,7 +75,7 @@ async function main() {
         await page.getByRole('button', { name: 'Tiếp tục', exact: true }).click();
         await page.getByText('Cột Excel', { exact: true }).waitFor();
         assert.equal(await page.locator('.mud-simple-table tbody tr').count(), 19);
-        assert.ok(await page.getByText('⚠️ Bỏ qua', { exact: true }).count());
+        assert.ok(await page.getByText('Bỏ qua', { exact: false }).count());
 
         for (const value of ['light', 'dark']) {
             await mode(value);
@@ -133,8 +133,8 @@ async function main() {
             await page.locator('.mud-popover-open .logout-menu-item').waitFor();
             await page.keyboard.press('Escape');
             await page.goto(new URL('/companies', base).href);
-            await page.getByRole('button', { name: '+ Thêm công ty', exact: true }).click();
-            await page.getByText('➕ Thêm công ty mới', { exact: true }).waitFor();
+            await page.getByRole('button', { name: 'Thêm công ty', exact: true }).click();
+            await page.getByText('Thêm công ty mới', { exact: true }).waitFor();
             await contrast('.mud-dialog .mud-button-label, .mud-dialog .mud-input-label', `dialog ${value}`);
             await capture('company-dialog-' + value);
             await page.getByRole('button', { name: 'Hủy', exact: true }).click();

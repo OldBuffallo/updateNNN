@@ -10,7 +10,7 @@
     <DialogContent>
         <div class="spotlight-container">
             <div class="spotlight-input-wrapper">
-                <MudIcon Icon="@Icons.Material.Filled.Search" Class="spotlight-search-icon" />
+                <MudIcon Icon="@Icons.Material.Outlined.Search" Class="spotlight-search-icon" />
                 <input type="text"
                        @ref="_inputRef"
                        @bind="_query"
@@ -21,7 +21,7 @@
                 @if (!string.IsNullOrEmpty(_query))
                 {
                     <button class="spotlight-clear-btn" @onclick="ClearQuery">
-                        <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
+                        <MudIcon Icon="@Icons.Material.Outlined.Close" Size="Size.Small" />
                     </button>
                 }
                 <span class="spotlight-badge">ESC để đóng</span>
@@ -51,7 +51,7 @@
                                     <span class="spotlight-item-title">@item.Title</span>
                                     <span class="spotlight-item-desc">@item.Description</span>
                                 </div>
-                                <MudIcon Icon="@Icons.Material.Filled.ChevronRight" Size="Size.Small" Class="spotlight-item-arrow" />
+                                <MudIcon Icon="@Icons.Material.Outlined.ChevronRight" Size="Size.Small" Class="spotlight-item-arrow" />
                             </div>
                         }
                     </div>
@@ -59,19 +59,19 @@
                     <div class="spotlight-section-title mt-3">HÀNH ĐỘNG NHANH</div>
                     <div class="spotlight-quick-actions">
                         <button class="spotlight-action-pill" @onclick='() => NavigateTo("/foreign-persons")'>
-                            <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Small" />
+                            <MudIcon Icon="@Icons.Material.Outlined.PersonAdd" Size="Size.Small" />
                             <span>Hồ sơ NNN</span>
                         </button>
                         <button class="spotlight-action-pill" @onclick='() => NavigateTo("/inspections")'>
-                            <MudIcon Icon="@Icons.Material.Filled.FactCheck" Size="Size.Small" />
+                            <MudIcon Icon="@Icons.Material.Outlined.FactCheck" Size="Size.Small" />
                             <span>Đợt kiểm tra</span>
                         </button>
                         <button class="spotlight-action-pill" @onclick='() => NavigateTo("/statistics")'>
-                            <MudIcon Icon="@Icons.Material.Filled.BarChart" Size="Size.Small" />
+                            <MudIcon Icon="@Icons.Material.Outlined.BarChart" Size="Size.Small" />
                             <span>Thống kê địa bàn</span>
                         </button>
                         <button class="spotlight-action-pill" @onclick='() => NavigateTo("/reports")'>
-                            <MudIcon Icon="@Icons.Material.Filled.Assessment" Size="Size.Small" />
+                            <MudIcon Icon="@Icons.Material.Outlined.Assessment" Size="Size.Small" />
                             <span>Báo cáo định kỳ</span>
                         </button>
                     </div>
@@ -82,7 +82,7 @@
                     @if (_searchResults.Count == 0)
                     {
                         <div class="spotlight-empty">
-                            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Class="mb-2" Style="opacity: 0.4;" />
+                            <MudIcon Icon="@Icons.Material.Outlined.SearchOff" Size="Size.Large" Class="mb-2" Style="opacity: 0.4;" />
                             <div>Không tìm thấy kết quả nào cho "<strong>@_query</strong>"</div>
                             <div class="spotlight-empty-hint">Thử tìm theo tên, số hộ chiếu, công ty, hoặc mã định danh.</div>
                         </div>
@@ -150,16 +150,16 @@
 
     private readonly List<QuickNav> _quickNavs = new()
     {
-        new("Tổng quan (Dashboard)", "Xem các chỉ số KPI, biểu đồ và cảnh báo hạn visa", "/", Icons.Material.Filled.Dashboard, "bg-blue"),
-        new("Hồ sơ NNN hợp nhất", "Quản lý toàn diện người nước ngoài tại địa phương", "/foreign-persons", Icons.Material.Filled.Badge, "bg-indigo"),
-        new("Danh sách Nhân viên", "Quản lý lao động nước ngoài tại các doanh nghiệp", "/employees", Icons.Material.Filled.Groups, "bg-emerald"),
-        new("Hồ sơ Doanh nghiệp", "Quản lý công ty, địa bàn, FDI và tài liệu pháp nhân", "/company-profiles", Icons.Material.Filled.DomainVerification, "bg-amber"),
-        new("Người thăm thân", "Quản lý thân nhân của công dân VN và người gốc VN", "/family-visitors", Icons.Material.Filled.FamilyRestroom, "bg-purple"),
-        new("Cơ sở lưu trú", "Quản lý khách sạn, nhà trọ, KTX doanh nghiệp thuê", "/accommodations", Icons.Material.Filled.Hotel, "bg-teal"),
-        new("Kiểm tra NNN", "Quản lý đợt kiểm tra hiện trường và vi phạm", "/inspections", Icons.Material.Filled.FactCheck, "bg-rose"),
-        new("Thống kê lịch sử & địa bàn", "Tra cứu theo 54 xã/phường, khu kinh tế, định danh", "/statistics", Icons.Material.Filled.BarChart, "bg-cyan"),
-        new("Báo cáo định kỳ", "Xuất các biểu mẫu báo cáo cơ quan xuất nhập cảnh", "/reports", Icons.Material.Filled.Assessment, "bg-blue"),
-        new("Tìm kiếm toàn cục", "Tra cứu chi tiết trên toàn bộ cơ sở dữ liệu", "/search", Icons.Material.Filled.Search, "bg-slate")
+        new("Tổng quan (Dashboard)", "Xem các chỉ số KPI, biểu đồ và cảnh báo hạn visa", "/", Icons.Material.Outlined.Dashboard, "bg-blue"),
+        new("Hồ sơ NNN hợp nhất", "Quản lý toàn diện người nước ngoài tại địa phương", "/foreign-persons", Icons.Material.Outlined.Badge, "bg-indigo"),
+        new("Danh sách Nhân viên", "Quản lý lao động nước ngoài tại các doanh nghiệp", "/employees", Icons.Material.Outlined.Groups, "bg-emerald"),
+        new("Hồ sơ Doanh nghiệp", "Quản lý công ty, địa bàn, FDI và tài liệu pháp nhân", "/company-profiles", Icons.Material.Outlined.DomainVerification, "bg-amber"),
+        new("Người thăm thân", "Quản lý thân nhân của công dân VN và người gốc VN", "/family-visitors", Icons.Material.Outlined.FamilyRestroom, "bg-purple"),
+        new("Cơ sở lưu trú", "Quản lý khách sạn, nhà trọ, KTX doanh nghiệp thuê", "/accommodations", Icons.Material.Outlined.Hotel, "bg-teal"),
+        new("Kiểm tra NNN", "Quản lý đợt kiểm tra hiện trường và vi phạm", "/inspections", Icons.Material.Outlined.FactCheck, "bg-rose"),
+        new("Thống kê lịch sử & địa bàn", "Tra cứu theo 54 xã/phường, khu kinh tế, định danh", "/statistics", Icons.Material.Outlined.BarChart, "bg-cyan"),
+        new("Báo cáo định kỳ", "Xuất các biểu mẫu báo cáo cơ quan xuất nhập cảnh", "/reports", Icons.Material.Outlined.Assessment, "bg-blue"),
+        new("Tìm kiếm toàn cục", "Tra cứu chi tiết trên toàn bộ cơ sở dữ liệu", "/search", Icons.Material.Outlined.Search, "bg-slate")
     };
 
     public class SpotlightResultItem
@@ -168,7 +168,7 @@
         public string Subtitle { get; set; } = "";
         public string Category { get; set; } = "";
         public string Url { get; set; } = "";
-        public string Icon { get; set; } = Icons.Material.Filled.Search;
+        public string Icon { get; set; } = Icons.Material.Outlined.Search;
         public string ColorClass { get; set; } = "bg-blue";
         public string? Badge { get; set; }
         public string? BadgeColorClass { get; set; }
@@ -282,7 +282,7 @@
                         Subtitle = $"Hộ chiếu: {emp.Passport ?? "N/A"} · Công ty: {emp.Company?.CompanyName ?? "N/A"} · {emp.GenderString}",
                         Category = "Lao động",
                         Url = $"/employees",
-                        Icon = Icons.Material.Filled.Person,
+                        Icon = Icons.Material.Outlined.Person,
                         ColorClass = "bg-emerald",
                         Badge = emp.WorkPermitString,
                         BadgeColorClass = "tag-success"
@@ -302,7 +302,7 @@
                         Subtitle = $"HC: {fp.PassportNumber ?? "N/A"} · QT: {fp.NationalityCode ?? "N/A"}",
                         Category = "Hồ sơ NNN",
                         Url = "/foreign-persons",
-                        Icon = Icons.Material.Filled.Badge,
+                        Icon = Icons.Material.Outlined.Badge,
                         ColorClass = "bg-indigo"
                     });
                 }
@@ -318,7 +318,7 @@
                         Subtitle = $"Địa chỉ: {comp.Address ?? "N/A"} · Loại hình: {comp.TypeOfBusiniess ?? "Doanh nghiệp"}",
                         Category = "Doanh nghiệp",
                         Url = $"/company-profiles",
-                        Icon = Icons.Material.Filled.Business,
+                        Icon = Icons.Material.Outlined.Business,
                         ColorClass = "bg-amber",
                         Badge = comp.Field?.FieldName,
                         BadgeColorClass = "tag-info"
@@ -336,7 +336,7 @@
                         Subtitle = $"Trường: {stu.SchoolName ?? "N/A"} · Ngành: {stu.Major ?? "N/A"}",
                         Category = "Du học sinh",
                         Url = $"/students",
-                        Icon = Icons.Material.Filled.School,
+                        Icon = Icons.Material.Outlined.School,
                         ColorClass = "bg-cyan"
                     });
                 }

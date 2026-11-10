@@ -5,7 +5,7 @@
     @if (Page._currentStep == 4 && Page._importResult != null)
     {
         <MudPaper Elevation="0" Class="pa-8 rounded-xl border-solid border text-center" Style="border-width: 1px;">
-            <MudText Style="font-size: 3rem;">@(Page._importResult.Success ? "✅" : "❌")</MudText>
+            <MudText Style="font-size: 3rem;">@(Page._importResult.Success ? "" : "")</MudText>
             <MudText Typo="Typo.h5" Color="@(Page._importResult.Success ? Color.Success : Color.Error)" Style="font-weight: 800;" Class="mt-2">
                 @(Page._importResult.Success ? "Import hoàn tất!" : "Import thất bại!")
             </MudText>
@@ -40,7 +40,7 @@
                 <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4 text-left">
                     @foreach (var err in Page._importResult.Errors.Take(5))
                     {
-                        <div>⚠️ @err</div>
+                        <div>@err</div>
                     }
                     @if (Page._importResult.Errors.Count > 5)
                     {
@@ -52,7 +52,7 @@
             @if (Page._importResult.Success)
             {
                 <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4 text-left">
-                    💾 <strong>Dữ liệu cũ đã được backup.</strong> Các bản ghi cập nhật có thể hoàn tác bất cứ lúc nào.
+                    <strong>Dữ liệu cũ đã được backup.</strong> Các bản ghi cập nhật có thể hoàn tác bất cứ lúc nào.
                 </MudAlert>
             }
             else
@@ -65,12 +65,12 @@
             <MudStack Row="true" Justify="Justify.Center" Spacing="3">
                 @if (Page._importResult.Success)
                 {
-                    <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Undo"
+                    <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Outlined.Undo"
                                OnClick="@(() => Page.RollbackSession(Page._importResult.SessionId))">↩ Hoàn tác Import này</MudButton>
                 }
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/employees">👥 Xem danh sách NLĐ</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/employees">Xem danh sách NLĐ</MudButton>
                 <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="Page.ResetWizard"
-                           StartIcon="@Icons.Material.Filled.Add">Import file khác</MudButton>
+                           StartIcon="@Icons.Material.Outlined.Add">Import file khác</MudButton>
             </MudStack>
         </MudPaper>
     }

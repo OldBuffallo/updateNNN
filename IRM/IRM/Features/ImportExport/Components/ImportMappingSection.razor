@@ -5,7 +5,7 @@
     @if (Page._currentStep == 2)
     {
         <MudAlert Severity="Severity.Info" Class="mb-3">
-            📄 <strong>@Page._uploadedFileName</strong> — @Page._sheetInfo
+            <strong>@Page._uploadedFileName</strong> — @Page._sheetInfo
         </MudAlert>
 
         <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px;">
@@ -29,15 +29,15 @@
                         <td>
                             @if (m.SystemField == "skip")
                             {
-                                <MudChip T="string" Size="Size.Small" Color="Color.Warning">⚠️ Bỏ qua</MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Warning">Bỏ qua</MudChip>
                             }
                             else if (m.IsAutoMapped)
                             {
-                                <MudChip T="string" Size="Size.Small" Color="Color.Success">✅ Tự động</MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Success">Tự động</MudChip>
                             }
                             else
                             {
-                                <MudChip T="string" Size="Size.Small" Color="Color.Info">✏️ Thủ công</MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="Color.Info">Thủ công</MudChip>
                             }
                         </td>
                     </tr>
@@ -48,7 +48,7 @@
 
 
         <MudAlert Severity="Severity.Success" Dense="true" Class="mb-3">
-            ✅ @(Page._columnMappings.Count(m => m.SystemField != "skip"))/@Page._columnMappings.Count cột đã ghép ·
+            @(Page._columnMappings.Count(m => m.SystemField != "skip"))/@Page._columnMappings.Count cột đã ghép ·
             <MudCheckBox T="bool" @bind-Value="Page._saveTemplate" Dense="true" Label="Lưu template" Class="d-inline" />
         </MudAlert>
 
@@ -60,9 +60,9 @@
         }
 
         <MudStack Row="true" Justify="Justify.Center" Spacing="3">
-            <MudButton Variant="Variant.Outlined" OnClick="@(() => Page._currentStep = 1)" StartIcon="@Icons.Material.Filled.ArrowBack">Quay lại</MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Page._currentStep = 1)" StartIcon="@Icons.Material.Outlined.ArrowBack">Quay lại</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
-                       OnClick="Page.GoToStep3" EndIcon="@Icons.Material.Filled.ArrowForward"
+                       OnClick="Page.GoToStep3" EndIcon="@Icons.Material.Outlined.ArrowForward"
                        Disabled="@Page._isProcessing">
                 @if (Page._isProcessing) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
                 Tiếp tục

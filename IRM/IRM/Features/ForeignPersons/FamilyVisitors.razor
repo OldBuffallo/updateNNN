@@ -9,7 +9,7 @@
 <div class="section-header">
     <div class="d-flex align-center justify-space-between flex-wrap gap-2">
         <div>
-            <h3>👨‍👩‍👧‍👦 Quản lý Người nước ngoài Thăm thân</h3>
+            <h3>Quản lý Người nước ngoài Thăm thân</h3>
             <span class="section-meta">
                 Hồ sơ NNN có thân nhân là công dân VN, người gốc VN hoặc người VN định cư ở nước ngoài
             </span>
@@ -18,7 +18,7 @@
             <AuthorizeView Roles="ADMIN,DATA_EDITOR">
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                           StartIcon="@Icons.Material.Outlined.PersonAdd"
                            OnClick="OpenAdd">
                     Thêm hồ sơ thăm thân
                 </MudButton>
@@ -31,7 +31,7 @@
 <MudGrid Class="mb-4">
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-purple">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.FamilyRestroom" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.FamilyRestroom" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count</span>
                 <span class="stat-mini-label">Tổng người thăm thân</span>
@@ -40,7 +40,7 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-blue">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.PersonPin" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.PersonPin" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count(x => x.RelativeTypeCode == "VIETNAMESE_CITIZEN")</span>
                 <span class="stat-mini-label">Thân nhân công dân VN</span>
@@ -49,7 +49,7 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-teal">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Public" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.Public" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count(x => x.RelativeTypeCode == "VIETNAMESE_ORIGIN" || x.RelativeTypeCode == "OVERSEAS_VIETNAMESE_DUAL")</span>
                 <span class="stat-mini-label">Gốc VN / 2 quốc tịch</span>
@@ -58,7 +58,7 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-green">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Fingerprint" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.Fingerprint" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count(x => x.HasElectronicId)</span>
                 <span class="stat-mini-label">Đã cấp định danh ĐT</span>
@@ -76,7 +76,7 @@
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          AdornmentIcon="@Icons.Material.Outlined.Search"
                           Immediate="true"
                           Clearable="true"
                           OnKeyUp="HandleSearchKeyUp" />
@@ -93,7 +93,7 @@
             <MudDatePicker @bind-Date="_asOfNullable" Label="Tại ngày (AsOf)" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
         </MudItem>
         <MudItem xs="12" sm="2" Class="d-flex align-center">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FilterAlt" OnClick="Load" FullWidth="true">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.FilterAlt" OnClick="Load" FullWidth="true">
                 Tra cứu
             </MudButton>
         </MudItem>
@@ -132,7 +132,7 @@ else
             <TemplateColumn Title="Quốc tịch" SortBy="x => x.Nationality">
                 <CellTemplate>
                     <span class="country-chip">
-                        <MudIcon Icon="@Icons.Material.Filled.Flag" Size="Size.Small" Class="mr-1" />
+                        <MudIcon Icon="@Icons.Material.Outlined.Flag" Size="Size.Small" Class="mr-1" />
                         @(context.Item.Nationality ?? "N/A")
                     </span>
                 </CellTemplate>
@@ -179,12 +179,12 @@ else
                     <div class="d-flex align-center justify-end gap-1">
                         <AuthorizeView Roles="ADMIN,DATA_EDITOR" Context="permissionContext">
                             <MudTooltip Text="Sửa hồ sơ">
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                                Size="Size.Small"
                                                OnClick="@(() => OpenEdit(context.Item))" />
                             </MudTooltip>
                             <MudTooltip Text="Xóa hồ sơ">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                <MudIconButton Icon="@Icons.Material.Outlined.Delete"
                                                Size="Size.Small"
                                                Color="Color.Error"
                                                OnClick="@(() => Delete(context.Item.ForeignPersonId))" />
@@ -201,13 +201,13 @@ else
 <MudDialog @bind-Visible="_dialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true })">
     <TitleContent>
         <div class="d-flex align-center">
-            <MudIcon Icon="@(_input.StayCaseId.HasValue ? Icons.Material.Filled.Edit : Icons.Material.Filled.PersonAdd)" Color="Color.Primary" Class="mr-2" />
+            <MudIcon Icon="@(_input.StayCaseId.HasValue ? Icons.Material.Outlined.Edit : Icons.Material.Outlined.PersonAdd)" Color="Color.Primary" Class="mr-2" />
             <span>@(_input.StayCaseId.HasValue ? "Cập nhật hồ sơ thăm thân" : "Thêm mới hồ sơ người nước ngoài thăm thân")</span>
         </div>
     </TitleContent>
     <DialogContent>
         <MudTabs Elevation="0" Rounded="true">
-            <MudTabPanel Text="1. Thông tin người nước ngoài" Icon="@Icons.Material.Filled.Person">
+            <MudTabPanel Text="1. Thông tin người nước ngoài" Icon="@Icons.Material.Outlined.Person">
                 <MudGrid>
                     <MudItem xs="12" sm="6"><MudTextField @bind-Value="_input.FullName" Label="Họ và tên đầy đủ *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                     <MudItem xs="12" sm="3"><MudTextField @bind-Value="_input.PassportNumber" Label="Số hộ chiếu" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
@@ -226,7 +226,7 @@ else
                 </MudGrid>
             </MudTabPanel>
 
-            <MudTabPanel Text="2. Thân nhân bảo lãnh tại VN" Icon="@Icons.Material.Filled.FamilyRestroom">
+            <MudTabPanel Text="2. Thân nhân bảo lãnh tại VN" Icon="@Icons.Material.Outlined.FamilyRestroom">
                 <MudGrid>
                     <MudItem xs="12" sm="6"><MudTextField @bind-Value="_input.RelativeName" Label="Họ và tên thân nhân bảo lãnh *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                     <MudItem xs="12" sm="3"><MudTextField @bind-Value="_input.Relationship" Label="Mối quan hệ (Vợ/chồng, con, cha mẹ...)" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
@@ -243,7 +243,7 @@ else
                 </MudGrid>
             </MudTabPanel>
 
-            <MudTabPanel Text="3. Giấy tờ & Định danh điện tử" Icon="@Icons.Material.Filled.Badge">
+            <MudTabPanel Text="3. Giấy tờ & Định danh điện tử" Icon="@Icons.Material.Outlined.Badge">
                 <MudGrid>
                     <MudItem xs="12" sm="4">
                         <MudSelect T="string" @bind-Value="_input.DocumentTypeCode" Label="Loại giấy tờ XNK" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">

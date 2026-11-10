@@ -12,12 +12,12 @@
 <PageTitle>Báo cáo - IRM v1.0.2</PageTitle>
 
 <div class="section-header" style="border-bottom:none; padding-bottom:0; margin-bottom:8px;">
-    <h3>📝 Tạo báo cáo tùy chỉnh</h3>
+    <h3>Tạo báo cáo tùy chỉnh</h3>
 </div>
 
 <div class="report-builder-grid">
     <div class="report-builder-sidebar">
-        <MudText Typo="Typo.subtitle1" Class="mb-4" Style="font-weight: 700;">⚙️ Cấu hình báo cáo</MudText>
+        <MudText Typo="Typo.subtitle1" Class="mb-4" Style="font-weight: 700;">Cấu hình báo cáo</MudText>
 
         <div class="mb-4">
             <span class="builder-section-title">Nguồn dữ liệu</span>
@@ -55,7 +55,7 @@
 
         @* ── Bộ lọc mới ── *@
         <div class="mb-4">
-            <span class="builder-section-title">🔍 Bộ lọc</span>
+            <span class="builder-section-title">Bộ lọc</span>
 
             <MudSelect T="string" Label="Trạng thái GPLĐ" Variant="Variant.Outlined" @bind-Value="_filterPermit"
                        Margin="Margin.Dense" Dense="true" Clearable="true" Class="mb-2">
@@ -87,13 +87,13 @@
 
         <MudStack Spacing="1">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
-                       StartIcon="@Icons.Material.Filled.Visibility" OnClick="LoadPreviewAsync">
+                       StartIcon="@Icons.Material.Outlined.Visibility" OnClick="LoadPreviewAsync">
                 Xem trước
             </MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
-                       StartIcon="@Icons.Material.Filled.Download" OnClick="ExportExcelAsync"
+                       StartIcon="@Icons.Material.Outlined.Download" OnClick="ExportExcelAsync"
                        Disabled="@_isExporting">
-                @(_isExporting ? "Đang xuất..." : "📥 Xuất Excel (.xlsx)")
+                @(_isExporting ? "Đang xuất..." : "Xuất Excel (.xlsx)")
             </MudButton>
         </MudStack>
     </div>
@@ -162,7 +162,7 @@
                         {
                             currentGroup = groupVal;
                             <tr class="group-header">
-                                <td colspan="@(_columns.Count(c => c.Selected) + 1)"><strong>🏢 @currentGroup</strong></td>
+                                <td colspan="@(_columns.Count(c => c.Selected) + 1)"><strong>@currentGroup</strong></td>
                             </tr>
                         }
                         stt++;
@@ -182,7 +182,7 @@
 
             @* ── Thống kê tóm tắt ── *@
             <MudPaper Elevation="0" Class="pa-4 mt-4 rounded-lg border-solid border" Style="border-width: 1px;">
-                <MudText Typo="Typo.subtitle2" Style="font-weight: 700;" Class="mb-2">📊 Thống kê tóm tắt</MudText>
+                <MudText Typo="Typo.subtitle2" Style="font-weight: 700;" Class="mb-2">Thống kê tóm tắt</MudText>
                 <MudGrid Spacing="2">
                     <MudItem xs="3">
                         <div class="stat-mini-card">
@@ -218,12 +218,12 @@
             </MudAlert>
         }
 
-        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mt-8 mb-3">📋 Template đã lưu</MudText>
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mt-8 mb-3">Template đã lưu</MudText>
         <MudStack Spacing="2">
             @foreach (var tpl in _templates)
             {
                 <div class="template-item">
-                    <MudIcon Icon="@Icons.Material.Filled.Description" Color="Color.Primary" />
+                    <MudIcon Icon="@Icons.Material.Outlined.Description" Color="Color.Primary" />
                     <div class="template-item-body">
                         <MudText Typo="Typo.body2" Class="template-item-title">@tpl.Name</MudText>
                         <MudText Typo="Typo.caption" Color="Color.Secondary">@tpl.Meta</MudText>

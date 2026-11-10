@@ -12,7 +12,7 @@
 <div class="section-header">
     <div class="d-flex align-center justify-space-between flex-wrap gap-2">
         <div>
-            <h3>📊 Thống kê Lịch sử & 54 Địa bàn</h3>
+            <h3>Thống kê Lịch sử & 54 Địa bàn</h3>
             <span class="section-meta">
                 Hệ thống truy vấn theo mốc thời gian (As-Of) · Tổng người tính duy nhất theo ForeignPersonId
             </span>
@@ -21,7 +21,7 @@
             <AuthorizeView Roles="ADMIN,REPORTER">
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.FileDownload"
+                           StartIcon="@Icons.Material.Outlined.FileDownload"
                            OnClick="Export"
                            Disabled="_exporting">
                     @if (_exporting)
@@ -39,12 +39,12 @@
     </div>
 </div>
 
-<MudAlert Severity="Severity.Info" Variant="Variant.Text" Class="mb-4" Style="background: rgba(37, 99, 235, 0.06); border-radius: 10px;">
-    <strong>ℹ️ Ghi chú:</strong> Dữ liệu từ thời điểm baseline v0.1.0 được cam kết độ chính xác theo dòng thời gian (Effective Dating).
+<MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense="true" Class="mb-3" Style="background: var(--primary-lighter); border-radius: 10px;">
+    <strong>Ghi chú:</strong> Dữ liệu từ thời điểm baseline v0.1.0 được cam kết độ chính xác theo dòng thời gian (Effective Dating).
 </MudAlert>
 
 <!-- ════════════ FILTER TOOLBAR ════════════ -->
-<MudPaper Class="pa-4 mb-4 page-filter-card" Elevation="0">
+<MudPaper Class="pa-3 mb-3 page-filter-card" Elevation="0">
     <MudGrid Spacing="2">
         <MudItem xs="12" sm="4">
             <MudSelect T="int?" @bind-Value="_filter.AdministrativeUnitId" Label="Chọn Xã/phường/đặc khu" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
@@ -67,7 +67,7 @@
             </MudSelect>
         </MudItem>
         <MudItem xs="12" sm="2" Class="d-flex align-center">
-            <MudButton FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Search" OnClick="LoadTerritory">
+            <MudButton FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.Search" OnClick="LoadTerritory">
                 Thống kê
             </MudButton>
         </MudItem>
@@ -78,15 +78,15 @@
 @if (_territory is not null)
 {
     <div class="territory-header-badge mb-3">
-        <MudIcon Icon="@Icons.Material.Filled.LocationOn" Color="Color.Primary" Class="mr-2" />
+        <MudIcon Icon="@Icons.Material.Outlined.LocationOn" Color="Color.Primary" Class="mr-2" />
         <span class="font-weight-bold">@_territory.AdministrativeUnitName</span>
         <span class="text-muted ml-2">· Trạng thái tại ngày @_filter.AsOfDate?.ToString("dd/MM/yyyy")</span>
     </div>
 
-    <MudGrid Class="mb-4">
+    <MudGrid Spacing="2" Class="mb-3">
         <MudItem xs="6" sm="4" md="2">
             <div class="stat-mini-card stat-blue">
-                <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Small" /></div>
+                <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.People" Size="Size.Small" /></div>
                 <div class="stat-mini-data">
                     <span class="stat-mini-value">@_territory.TotalForeigners</span>
                     <span class="stat-mini-label">Tổng NNN</span>
@@ -110,7 +110,7 @@
 
         <MudItem xs="6" sm="4" md="2">
             <div class="stat-mini-card stat-amber">
-                <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" /></div>
+                <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.Business" Size="Size.Small" /></div>
                 <div class="stat-mini-data">
                     <span class="stat-mini-value">@_territory.CompanyCount</span>
                     <span class="stat-mini-label">Doanh nghiệp</span>
@@ -120,7 +120,7 @@
 
         <MudItem xs="6" sm="4" md="2">
             <div class="stat-mini-card stat-teal">
-                <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Hotel" Size="Size.Small" /></div>
+                <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.Hotel" Size="Size.Small" /></div>
                 <div class="stat-mini-data">
                     <span class="stat-mini-value">@_territory.AccommodationCount</span>
                     <span class="stat-mini-label">CSLT</span>
@@ -130,7 +130,7 @@
     </MudGrid>
 
     <MudTabs Elevation="0" Rounded="true" Class="irm-tabs mb-5">
-        <MudTabPanel Text="Doanh nghiệp tại địa bàn" Icon="@Icons.Material.Filled.Business">
+        <MudTabPanel Text="Doanh nghiệp tại địa bàn" Icon="@Icons.Material.Outlined.Business">
             <MudDataGrid T="CompanySummary" Items="_territory.Companies" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
                 <Columns>
                     <PropertyColumn Property="x => x.CompanyName" Title="Tên doanh nghiệp" />
@@ -144,7 +144,7 @@
             </MudDataGrid>
         </MudTabPanel>
 
-        <MudTabPanel Text="Cơ sở lưu trú tại địa bàn" Icon="@Icons.Material.Filled.Hotel">
+        <MudTabPanel Text="Cơ sở lưu trú tại địa bàn" Icon="@Icons.Material.Outlined.Hotel">
             <MudDataGrid T="AccommodationSummary" Items="_territory.Accommodations" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
                 <Columns>
                     <PropertyColumn Property="x => x.Name" Title="Tên cơ sở lưu trú" />
@@ -164,16 +164,16 @@
 <!-- ════════════ MULTI-VIEW SECTION: TỔNG QUAN, ĐỊNH DANH, KHU KINH TẾ ════════════ -->
 <div class="d-flex align-center justify-space-between flex-wrap gap-2 mb-3 mt-6">
     <MudText Typo="Typo.subtitle1" Class="font-weight-bold">
-        📊 Chuyên đề phân tích mở rộng
+        Chuyên đề phân tích mở rộng
     </MudText>
     <div class="d-flex align-center gap-2">
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Map" OnClick="LoadOverview">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Map" OnClick="LoadOverview">
             Tổng quan 54 địa bàn
         </MudButton>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Fingerprint" OnClick="LoadDocuments">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Fingerprint" OnClick="LoadDocuments">
             Định danh & Giấy tờ
         </MudButton>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Factory" OnClick="LoadZones">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Factory" OnClick="LoadZones">
             Khu & Cụm kinh tế
         </MudButton>
     </div>
@@ -183,7 +183,7 @@
 {
     <MudPaper Class="pa-4 mb-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
         <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
-            🪪 Báo cáo Tỷ lệ Cấp số định danh điện tử & Giấy tờ
+            Báo cáo Tỷ lệ Cấp số định danh điện tử & Giấy tờ
         </MudText>
         <MudGrid Class="mb-3">
             <MudItem xs="12" sm="6">
@@ -224,7 +224,7 @@
     <MudPaper Class="pa-4 mb-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
         <div class="d-flex align-center justify-space-between mb-3">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold">
-                🗺️ Tổng quan thống kê 54 xã / phường / đặc khu (@_overview.Count đơn vị)
+                Tổng quan thống kê 54 xã / phường / đặc khu (@_overview.Count đơn vị)
             </MudText>
         </div>
         <MudDataGrid T="TerritoryOverview" Items="_overview" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
@@ -249,7 +249,7 @@
     <MudPaper Class="pa-4 mb-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
         <div class="d-flex align-center justify-space-between mb-3">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold">
-                🏭 Thống kê theo Khu công nghiệp & Khu kinh tế (@_zones.Count khu)
+                Thống kê theo Khu công nghiệp & Khu kinh tế (@_zones.Count khu)
             </MudText>
         </div>
         <MudDataGrid T="ZoneStatistics" Items="_zones" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
@@ -355,10 +355,10 @@
 
     private static string GetPurposeIcon(string code) => code switch
     {
-        StayPurposeCodes.Work => Icons.Material.Filled.Engineering,
-        StayPurposeCodes.FamilyVisit => Icons.Material.Filled.FamilyRestroom,
-        StayPurposeCodes.Study => Icons.Material.Filled.School,
-        StayPurposeCodes.Tourism => Icons.Material.Filled.FlightTakeoff,
-        _ => Icons.Material.Filled.Category
+        StayPurposeCodes.Work => Icons.Material.Outlined.Engineering,
+        StayPurposeCodes.FamilyVisit => Icons.Material.Outlined.FamilyRestroom,
+        StayPurposeCodes.Study => Icons.Material.Outlined.School,
+        StayPurposeCodes.Tourism => Icons.Material.Outlined.FlightTakeoff,
+        _ => Icons.Material.Outlined.Category
     };
 }

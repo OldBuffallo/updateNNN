@@ -15,7 +15,7 @@
         <MudLayout Class="irm-shell">
             <!-- ════════════ TOPBAR ════════════ -->
             <MudAppBar Elevation="0" Dense="true" Class="irm-topbar">
-                <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                <MudIconButton Icon="@Icons.Material.Outlined.Menu"
                                Color="Color.Inherit"
                                Edge="Edge.Start"
                                Class="mr-2 topbar-menu-btn"
@@ -23,7 +23,7 @@
 
                 <div class="topbar-brand d-none d-sm-flex align-center">
                     <div class="topbar-logo-icon">
-                        <MudIcon Icon="@Icons.Material.Filled.FactCheck" Size="Size.Small" Color="Color.Inherit" />
+                        <MudIcon Icon="@Icons.Material.Outlined.FactCheck" Size="Size.Small" Color="Color.Inherit" />
                     </div>
                     <MudText Typo="Typo.subtitle1" Class="topbar-title ml-2 font-weight-bold">IRM</MudText>
                     <span class="topbar-version-badge ml-2">v1.0.2</span>
@@ -31,7 +31,7 @@
 
                 <!-- Global Spotlight Search Trigger -->
                 <div class="topbar-search-wrapper mx-4 d-none d-md-flex" @onclick="OpenSpotlight">
-                    <MudIcon Icon="@Icons.Material.Filled.Search" Size="Size.Small" Class="search-icon" />
+                    <MudIcon Icon="@Icons.Material.Outlined.Search" Size="Size.Small" Class="search-icon" />
                     <span class="search-placeholder">Tìm kiếm nhanh người nước ngoài, công ty, địa bàn...</span>
                     <span class="search-shortcut">Ctrl + K</span>
                 </div>
@@ -40,7 +40,7 @@
 
                 <div class="topbar-actions d-flex align-center gap-2">
                     <!-- Mobile Search Button -->
-                    <MudIconButton Icon="@Icons.Material.Filled.Search"
+                    <MudIconButton Icon="@Icons.Material.Outlined.Search"
                                    Color="Color.Inherit"
                                    Class="d-flex d-md-none"
                                    OnClick="OpenSpotlight"
@@ -48,30 +48,30 @@
 
                     <!-- Quick Add Action Menu -->
                     <AuthorizeView Roles="ADMIN,DATA_EDITOR" Context="permCtx">
-                        <MudMenu Icon="@Icons.Material.Filled.AddCircle"
+                        <MudMenu Icon="@Icons.Material.Outlined.AddCircle"
                                  Color="Color.Primary"
                                  Variant="Variant.Filled"
                                  Size="Size.Small"
                                  Label="Thêm nhanh"
-                                 EndIcon="@Icons.Material.Filled.KeyboardArrowDown"
+                                 EndIcon="@Icons.Material.Outlined.KeyboardArrowDown"
                                  Class="topbar-quick-add d-none d-sm-inline-flex"
                                  Dense="true"
                                  AnchorOrigin="Origin.BottomRight"
                                  TransformOrigin="Origin.TopRight">
-                            <MudMenuItem Icon="@Icons.Material.Filled.PersonAdd" OnClick='() => Navigation.NavigateTo("/employees")'>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.PersonAdd" OnClick='() => Navigation.NavigateTo("/employees")'>
                                 Thêm nhân viên NNN
                             </MudMenuItem>
-                            <MudMenuItem Icon="@Icons.Material.Filled.FamilyRestroom" OnClick='() => Navigation.NavigateTo("/family-visitors")'>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.FamilyRestroom" OnClick='() => Navigation.NavigateTo("/family-visitors")'>
                                 Thêm người thăm thân
                             </MudMenuItem>
-                            <MudMenuItem Icon="@Icons.Material.Filled.Hotel" OnClick='() => Navigation.NavigateTo("/accommodations")'>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.Hotel" OnClick='() => Navigation.NavigateTo("/accommodations")'>
                                 Thêm cơ sở lưu trú
                             </MudMenuItem>
-                            <MudMenuItem Icon="@Icons.Material.Filled.FactCheck" OnClick='() => Navigation.NavigateTo("/inspections")'>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.FactCheck" OnClick='() => Navigation.NavigateTo("/inspections")'>
                                 Tạo đợt kiểm tra
                             </MudMenuItem>
                             <MudDivider />
-                            <MudMenuItem Icon="@Icons.Material.Filled.UploadFile" OnClick='() => Navigation.NavigateTo("/import")'>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.UploadFile" OnClick='() => Navigation.NavigateTo("/import")'>
                                 Import Excel
                             </MudMenuItem>
                         </MudMenu>
@@ -79,7 +79,7 @@
 
                     <!-- Theme Toggle Button -->
                     <MudTooltip Text="@(_darkMode ? "Chuyển chế độ sáng" : "Chuyển chế độ tối")">
-                        <MudIconButton Icon="@(_darkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                        <MudIconButton Icon="@(_darkMode ? Icons.Material.Outlined.LightMode : Icons.Material.Outlined.DarkMode)"
                                        Color="Color.Inherit"
                                        Class="theme-toggle-btn"
                                        OnClick="ToggleTheme" />
@@ -106,7 +106,7 @@
                                     <span class="user-name">@displayName</span>
                                     <span class="user-role">@roleLabel</span>
                                 </div>
-                                <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Small" Class="ml-1 text-muted" />
+                                <MudIcon Icon="@Icons.Material.Outlined.KeyboardArrowDown" Size="Size.Small" Class="ml-1 text-muted" />
                             </MudButton>
                         </ActivatorContent>
                         <ChildContent>
@@ -115,21 +115,21 @@
                                 <MudText Typo="Typo.caption" Color="Color.Secondary">Quyền: @roleLabel</MudText>
                             </div>
                             <MudDivider />
-                            <MudMenuItem Icon="@Icons.Material.Filled.Dashboard" OnClick='() => Navigation.NavigateTo("/")'>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.Dashboard" OnClick='() => Navigation.NavigateTo("/")'>
                                 Bảng điều khiển
                             </MudMenuItem>
-                            <MudMenuItem Icon="@Icons.Material.Filled.Search" OnClick='() => Navigation.NavigateTo("/search")'>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.Search" OnClick='() => Navigation.NavigateTo("/search")'>
                                 Tìm kiếm dữ liệu
                             </MudMenuItem>
                             <AuthorizeView Roles="ADMIN" Context="adminCtx">
-                                <MudMenuItem Icon="@Icons.Material.Filled.AdminPanelSettings" OnClick='() => Navigation.NavigateTo("/admin")'>
+                                <MudMenuItem Icon="@Icons.Material.Outlined.AdminPanelSettings" OnClick='() => Navigation.NavigateTo("/admin")'>
                                     Quản trị hệ thống
                                 </MudMenuItem>
                             </AuthorizeView>
                             <MudDivider />
                             <form method="post" action="/auth/logout" class="logout-form">
                                 <button type="submit" class="logout-menu-item">
-                                    <MudIcon Icon="@Icons.Material.Filled.Logout" Size="Size.Small" Color="Color.Error" Class="mr-2" />
+                                    <MudIcon Icon="@Icons.Material.Outlined.Logout" Size="Size.Small" Color="Color.Error" Class="mr-2" />
                                     <span class="text-danger">Đăng xuất</span>
                                 </button>
                             </form>
@@ -147,7 +147,7 @@
                        Class="irm-drawer">
                 <div class="irm-drawer-header d-flex align-center px-4 py-3">
                     <div class="drawer-logo-icon">
-                        <MudIcon Icon="@Icons.Material.Filled.Security" Color="Color.Inherit" />
+                        <MudIcon Icon="@Icons.Material.Outlined.Security" Color="Color.Inherit" />
                     </div>
                     <div class="ml-3 flex-grow-1">
                         <div class="drawer-title">QUẢN LÝ NNN</div>
@@ -188,7 +188,7 @@
             <div class="login-bg">
                 <div class="login-card">
                     <div class="login-logo">
-                        <div class="logo-icon"><MudIcon Icon="@Icons.Material.Filled.FactCheck" Color="Color.Inherit" /></div>
+                        <div class="logo-icon"><MudIcon Icon="@Icons.Material.Outlined.FactCheck" Color="Color.Inherit" /></div>
                         <h1>Immigration Report Manager</h1>
                         <p class="login-subtitle">Quản lý người nước ngoài · Phiên bản v1.0.2</p>
                     </div>
@@ -204,18 +204,18 @@
                         @if (Navigation.Uri.Contains("loginError=1", StringComparison.Ordinal))
                         {
                             <div class="login-error-alert">
-                                <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Size="Size.Small" Class="mr-1" />
+                                <MudIcon Icon="@Icons.Material.Outlined.ErrorOutline" Size="Size.Small" Class="mr-1" />
                                 <span>Sai thông tin đăng nhập hoặc tài khoản tạm khóa.</span>
                             </div>
                         }
                         <button type="submit" class="btn-login">
                             <span>Đăng nhập hệ thống</span>
-                            <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Size="Size.Small" Class="ml-2" />
+                            <MudIcon Icon="@Icons.Material.Outlined.ArrowForward" Size="Size.Small" Class="ml-2" />
                         </button>
                     </form>
                     <div class="login-footer">
                         <span class="secure-badge">
-                            <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Small" Class="mr-1" />
+                            <MudIcon Icon="@Icons.Material.Outlined.Lock" Size="Size.Small" Class="mr-1" />
                             Cookie bảo mật · RBAC phía máy chủ
                         </span>
                     </div>

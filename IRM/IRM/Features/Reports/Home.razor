@@ -27,19 +27,19 @@ else if (_error != null)
     <div class="hero-content">
         <div class="d-flex align-center justify-space-between flex-wrap gap-3">
             <div>
-                <h2 class="hero-title">👋 Bảng điều khiển Quản lý Người nước ngoài</h2>
+                <h2 class="hero-title">Bảng điều khiển Quản lý Người nước ngoài</h2>
                 <p class="hero-subtitle">
                     Hệ thống theo dõi, giám sát lao động, du học sinh, thân nhân và cơ sở lưu trú
                 </p>
             </div>
             <div class="d-flex align-center gap-2">
                 <span class="hero-date-badge">
-                    <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-1" />
+                    <MudIcon Icon="@Icons.Material.Outlined.CalendarToday" Size="Size.Small" Class="mr-1" />
                     Hôm nay, @DateTime.Now.ToString("dd/MM/yyyy")
                 </span>
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.Add"
+                           StartIcon="@Icons.Material.Outlined.Add"
                            OnClick='() => Nav.NavigateTo("/foreign-persons")'
                            Class="hero-primary-btn">
                     Hồ sơ NNN mới
@@ -50,27 +50,27 @@ else if (_error != null)
         <!-- Quick Action Shortcuts -->
         <div class="hero-quick-actions mt-2">
             <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/employees")'>
-                <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Small" />
+                <MudIcon Icon="@Icons.Material.Outlined.Groups" Size="Size.Small" />
                 <span>Nhân viên LĐ (@_totalEmployees.ToString("N0"))</span>
             </button>
             <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/companies")'>
-                <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" />
+                <MudIcon Icon="@Icons.Material.Outlined.Business" Size="Size.Small" />
                 <span>Doanh nghiệp (@_totalCompanies.ToString("N0"))</span>
             </button>
             <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/family-visitors")'>
-                <MudIcon Icon="@Icons.Material.Filled.FamilyRestroom" Size="Size.Small" />
+                <MudIcon Icon="@Icons.Material.Outlined.FamilyRestroom" Size="Size.Small" />
                 <span>Thăm thân (@_totalFamilyVisitors.ToString("N0"))</span>
             </button>
             <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/accommodations")'>
-                <MudIcon Icon="@Icons.Material.Filled.Hotel" Size="Size.Small" />
+                <MudIcon Icon="@Icons.Material.Outlined.Hotel" Size="Size.Small" />
                 <span>CSLT (@_totalAccommodations.ToString("N0"))</span>
             </button>
             <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/inspections")'>
-                <MudIcon Icon="@Icons.Material.Filled.FactCheck" Size="Size.Small" />
+                <MudIcon Icon="@Icons.Material.Outlined.FactCheck" Size="Size.Small" />
                 <span>Đợt kiểm tra</span>
             </button>
             <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/statistics")'>
-                <MudIcon Icon="@Icons.Material.Filled.BarChart" Size="Size.Small" />
+                <MudIcon Icon="@Icons.Material.Outlined.BarChart" Size="Size.Small" />
                 <span>Thống kê 54 địa bàn</span>
             </button>
         </div>
@@ -89,7 +89,7 @@ else if (_error != null)
             </div>
         </div>
         <div class="kpi-icon-circle bg-blue-soft">
-            <MudIcon Icon="@Icons.Material.Filled.Business" />
+            <MudIcon Icon="@Icons.Material.Outlined.Business" />
         </div>
     </div>
 
@@ -103,7 +103,7 @@ else if (_error != null)
             </div>
         </div>
         <div class="kpi-icon-circle bg-green-soft">
-            <MudIcon Icon="@Icons.Material.Filled.Groups" />
+            <MudIcon Icon="@Icons.Material.Outlined.Groups" />
         </div>
     </div>
 
@@ -119,11 +119,11 @@ else if (_error != null)
                 }
             </div>
             <div class="d-flex align-center mt-2">
-                <span class="kpi-chip chip-orange">⚠ Trong 30 ngày</span>
+                <span class="kpi-chip chip-orange">Trong 30 ngày</span>
             </div>
         </div>
         <div class="kpi-icon-circle bg-orange-soft">
-            <MudIcon Icon="@Icons.Material.Filled.NotificationImportant" />
+            <MudIcon Icon="@Icons.Material.Outlined.NotificationImportant" />
         </div>
     </div>
 
@@ -139,7 +139,7 @@ else if (_error != null)
             </div>
         </div>
         <div class="kpi-icon-circle bg-purple-soft">
-            <MudIcon Icon="@Icons.Material.Filled.AssignmentTurnedIn" />
+            <MudIcon Icon="@Icons.Material.Outlined.AssignmentTurnedIn" />
         </div>
     </div>
 
@@ -153,7 +153,7 @@ else if (_error != null)
             </div>
         </div>
         <div class="kpi-icon-circle bg-teal-soft">
-            <MudIcon Icon="@Icons.Material.Filled.FamilyRestroom" />
+            <MudIcon Icon="@Icons.Material.Outlined.FamilyRestroom" />
         </div>
     </div>
 
@@ -167,7 +167,7 @@ else if (_error != null)
             </div>
         </div>
         <div class="kpi-icon-circle bg-cyan-soft">
-            <MudIcon Icon="@Icons.Material.Filled.School" />
+            <MudIcon Icon="@Icons.Material.Outlined.School" />
         </div>
     </div>
 </div>
@@ -178,7 +178,7 @@ else if (_error != null)
         <div class="chart-header">
             <div class="d-flex align-center">
                 <div class="chart-header-icon bg-blue-soft mr-2">
-                    <MudIcon Icon="@Icons.Material.Filled.Public" Size="Size.Small" Color="Color.Primary" />
+                    <MudIcon Icon="@Icons.Material.Outlined.Public" Size="Size.Small" Color="Color.Primary" />
                 </div>
                 <div>
                     <h4 class="chart-title">Lao động nước ngoài theo quốc tịch</h4>
@@ -200,7 +200,7 @@ else if (_error != null)
         <div class="chart-header">
             <div class="d-flex align-center">
                 <div class="chart-header-icon bg-purple-soft mr-2">
-                    <MudIcon Icon="@Icons.Material.Filled.PieChart" Size="Size.Small" Color="Color.Secondary" />
+                    <MudIcon Icon="@Icons.Material.Outlined.PieChart" Size="Size.Small" Color="Color.Secondary" />
                 </div>
                 <div>
                     <h4 class="chart-title">Tỷ lệ giấy phép lao động</h4>
@@ -220,7 +220,7 @@ else if (_error != null)
         <div class="chart-header">
             <div class="d-flex align-center">
                 <div class="chart-header-icon bg-emerald-soft mr-2">
-                    <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small" Color="Color.Success" />
+                    <MudIcon Icon="@Icons.Material.Outlined.TrendingUp" Size="Size.Small" Color="Color.Success" />
                 </div>
                 <div>
                     <h4 class="chart-title">Xu hướng hết hạn tạm trú (12 tháng)</h4>
@@ -237,10 +237,10 @@ else if (_error != null)
         <div class="chart-header">
             <div class="d-flex align-center">
                 <div class="chart-header-icon bg-rose-soft mr-2">
-                    <MudIcon Icon="@Icons.Material.Filled.Alarm" Size="Size.Small" Color="Color.Error" />
+                    <MudIcon Icon="@Icons.Material.Outlined.Alarm" Size="Size.Small" Color="Color.Error" />
                 </div>
                 <div>
-                    <h4 class="chart-title">⚠️ Danh sách sắp hết hạn tạm trú</h4>
+                    <h4 class="chart-title">Danh sách sắp hết hạn tạm trú</h4>
                     <span class="chart-subtitle">Cần liên hệ gia hạn hoặc xuất cảnh</span>
                 </div>
             </div>
@@ -286,7 +286,7 @@ else if (_error != null)
             else
             {
                 <div class="empty-alert-state pa-6 text-center">
-                    <MudIcon Icon="@Icons.Material.Filled.CheckCircleOutline" Size="Size.Large" Color="Color.Success" Class="mb-2" />
+                    <MudIcon Icon="@Icons.Material.Outlined.CheckCircleOutline" Size="Size.Large" Color="Color.Success" Class="mb-2" />
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
                         Không có lao động nào sắp hết hạn trong 30 ngày tới.
                     </MudText>

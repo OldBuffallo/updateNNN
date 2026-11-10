@@ -20,7 +20,7 @@
 <div class="section-header">
     <div class="d-flex align-center justify-space-between flex-wrap gap-2">
         <div>
-            <h3>🪪 Hồ sơ Người nước ngoài</h3>
+            <h3>Hồ sơ Người nước ngoài</h3>
             <span class="section-meta">
                 Quản lý tập trung mỗi người 1 hồ sơ đa diện · Lao động, Du học sinh, Thăm thân, Giấy tờ XNC & Định danh điện tử
             </span>
@@ -28,41 +28,41 @@
         <div class="d-flex align-center flex-wrap gap-2">
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Default"
-                       StartIcon="@Icons.Material.Filled.Download"
+                       StartIcon="@Icons.Material.Outlined.Download"
                        OnClick="ExportExcelAsync">
-                📥 Xuất Excel
+                Xuất Excel
             </MudButton>
             <AuthorizeView Roles="ADMIN,DATA_EDITOR">
                 @if (_items.Any(x => x.IsLegacyUnlinked))
                 {
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.Sync"
+                               StartIcon="@Icons.Material.Outlined.Sync"
                                OnClick="SyncLegacyRecordsAsync">
-                        🔄 Đồng bộ hồ sơ cũ (@_items.Count(x => x.IsLegacyUnlinked))
+                        Đồng bộ hồ sơ cũ (@_items.Count(x => x.IsLegacyUnlinked))
                     </MudButton>
                 }
             </AuthorizeView>
             <AuthorizeView Roles="ADMIN">
                 <MudButton Variant="Variant.Outlined"
                            Color="Color.Error"
-                           StartIcon="@Icons.Material.Filled.DeleteSweep"
+                           StartIcon="@Icons.Material.Outlined.DeleteSweep"
                            OnClick="OpenArchiveTemporaryStayDialog">
-                    🗑️ Xóa hết hạn tạm trú
+                    Xóa hết hạn tạm trú
                 </MudButton>
                 <MudButton Variant="Variant.Outlined"
                            Color="Color.Error"
-                           StartIcon="@Icons.Material.Filled.FamilyRestroom"
+                           StartIcon="@Icons.Material.Outlined.FamilyRestroom"
                            OnClick="OpenArchiveFamilyVisitDialog">
-                    🗑️ Xóa hết hạn thăm thân
+                    Xóa hết hạn thăm thân
                 </MudButton>
             </AuthorizeView>
             <AuthorizeView Roles="ADMIN,DATA_EDITOR">
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                           StartIcon="@Icons.Material.Outlined.PersonAdd"
                            OnClick="OpenAddPerson">
-                    + Thêm hồ sơ NNN
+                    Thêm hồ sơ NNN
                 </MudButton>
             </AuthorizeView>
         </div>
@@ -70,10 +70,10 @@
 </div>
 
 <!-- ════════════ STATS SUMMARY CARDS ════════════ -->
-<MudGrid Class="mb-4">
+<MudGrid Spacing="2" Class="mb-3">
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-blue" style="cursor:pointer;" @onclick='() => SelectCategory("ALL")'>
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.Badge" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count</span>
                 <span class="stat-mini-label">Tổng hồ sơ NNN</span>
@@ -82,7 +82,7 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-purple" style="cursor:pointer;" @onclick='() => SelectCategory("WORK")'>
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.Groups" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count(x => x.HasWorkProfile)</span>
                 <span class="stat-mini-label">Lao động nước ngoài</span>
@@ -91,7 +91,7 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-amber" style="cursor:pointer;" @onclick='() => SelectCategory("STUDY_FAMILY")'>
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.School" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.School" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count(x => x.HasStudyProfile) / @_items.Count(x => x.HasFamilyVisitProfile)</span>
                 <span class="stat-mini-label">Du học / Thăm thân</span>
@@ -100,7 +100,7 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-green">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.VerifiedUser" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count(x => !string.IsNullOrEmpty(x.ElectronicIdNumber))</span>
                 <span class="stat-mini-label">Đã cấp định danh ĐT</span>
@@ -120,35 +120,35 @@
     <MudButton Variant="@(_categoryFilter == "WORK" ? Variant.Filled : Variant.Outlined)"
                Color="@(_categoryFilter == "WORK" ? Color.Primary : Color.Default)"
                Size="Size.Small"
-               StartIcon="@Icons.Material.Filled.Engineering"
+               StartIcon="@Icons.Material.Outlined.Engineering"
                OnClick='() => SelectCategory("WORK")'>
         Nhân viên lao động (@_items.Count(x => x.HasWorkProfile))
     </MudButton>
     <MudButton Variant="@(_categoryFilter == "STUDY" ? Variant.Filled : Variant.Outlined)"
                Color="@(_categoryFilter == "STUDY" ? Color.Primary : Color.Default)"
                Size="Size.Small"
-               StartIcon="@Icons.Material.Filled.School"
+               StartIcon="@Icons.Material.Outlined.School"
                OnClick='() => SelectCategory("STUDY")'>
         Du học sinh (@_items.Count(x => x.HasStudyProfile))
     </MudButton>
     <MudButton Variant="@(_categoryFilter == "FAMILY_VISIT" ? Variant.Filled : Variant.Outlined)"
                Color="@(_categoryFilter == "FAMILY_VISIT" ? Color.Primary : Color.Default)"
                Size="Size.Small"
-               StartIcon="@Icons.Material.Filled.FamilyRestroom"
+               StartIcon="@Icons.Material.Outlined.FamilyRestroom"
                OnClick='() => SelectCategory("FAMILY_VISIT")'>
         Người thăm thân (@_items.Count(x => x.HasFamilyVisitProfile))
     </MudButton>
     <MudButton Variant="@(_categoryFilter == "EXPIRING" ? Variant.Filled : Variant.Outlined)"
                Color="@(_categoryFilter == "EXPIRING" ? Color.Primary : Color.Default)"
                Size="Size.Small"
-               StartIcon="@Icons.Material.Filled.Warning"
+               StartIcon="@Icons.Material.Outlined.Warning"
                OnClick='() => SelectCategory("EXPIRING")'>
         Sắp hết hạn ≤30 ngày (@_items.Count(x => x.DaysUntilExpiry.HasValue && x.DaysUntilExpiry.Value >= 0 && x.DaysUntilExpiry.Value <= 30))
     </MudButton>
 </MudStack>
 
 <!-- ════════════ FILTER TOOLBAR ════════════ -->
-<MudPaper Class="pa-4 mb-4 page-filter-card" Elevation="0">
+<MudPaper Class="pa-3 mb-3 page-filter-card" Elevation="0">
     <MudGrid Spacing="2">
         <MudItem xs="12" sm="4">
             <MudTextField @bind-Value="_search"
@@ -156,7 +156,7 @@
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          AdornmentIcon="@Icons.Material.Outlined.Search"
                           Immediate="true"
                           Clearable="true"
                           OnKeyUp="HandleSearchKeyUp" />
@@ -190,7 +190,7 @@
         <MudItem xs="6" sm="3" Class="d-flex align-center gap-2">
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
-                       StartIcon="@Icons.Material.Filled.FilterAlt"
+                       StartIcon="@Icons.Material.Outlined.FilterAlt"
                        OnClick="Load"
                        Class="flex-grow-1">
                 Lọc
@@ -258,7 +258,7 @@ else
             <TemplateColumn Title="Quốc tịch" SortBy="x => x.NationalityCode">
                 <CellTemplate>
                     <span class="country-chip">
-                        <MudIcon Icon="@Icons.Material.Filled.Flag" Size="Size.Small" Class="mr-1" />
+                        <MudIcon Icon="@Icons.Material.Outlined.Flag" Size="Size.Small" Class="mr-1" />
                         @(context.Item.NationalityName ?? context.Item.NationalityCode ?? "N/A")
                     </span>
                 </CellTemplate>
@@ -320,7 +320,7 @@ else
                     }
                     @if (!string.IsNullOrEmpty(context.Item.ResidenceAddress))
                     {
-                        <div class="text-caption text-muted">📍 @context.Item.ResidenceAddress</div>
+                        <div class="text-caption text-muted">@context.Item.ResidenceAddress</div>
                     }
                 </CellTemplate>
             </TemplateColumn>
@@ -374,7 +374,7 @@ else
                 <CellTemplate>
                     <div class="d-flex align-center justify-end gap-1">
                         <MudTooltip Text="Xem / Sửa hồ sơ đầy đủ (5 Tab)">
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                            <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                            Size="Size.Small"
                                            Color="Color.Warning"
                                            OnClick="@(() => OpenEditPerson(context.Item))" />
@@ -383,20 +383,20 @@ else
                             @if (context.Item.ForeignPersonId.HasValue)
                             {
                                 <MudTooltip Text="Thêm nhanh giấy tờ XNC">
-                                    <MudIconButton Icon="@Icons.Material.Filled.NoteAdd"
+                                    <MudIconButton Icon="@Icons.Material.Outlined.NoteAdd"
                                                    Size="Size.Small"
                                                    Color="Color.Primary"
                                                    OnClick="@(() => OpenDocument(context.Item))" />
                                 </MudTooltip>
                                 <MudTooltip Text="Cấp nhanh số định danh điện tử">
-                                    <MudIconButton Icon="@Icons.Material.Filled.Fingerprint"
+                                    <MudIconButton Icon="@Icons.Material.Outlined.Fingerprint"
                                                    Size="Size.Small"
                                                    Color="Color.Secondary"
                                                    OnClick="@(() => OpenIdentity(context.Item))" />
                                 </MudTooltip>
                             }
                             <MudTooltip Text="Xóa hồ sơ">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                <MudIconButton Icon="@Icons.Material.Outlined.Delete"
                                                Size="Size.Small"
                                                Color="Color.Error"
                                                OnClick="@(() => DeletePersonAsync(context.Item))" />
@@ -416,14 +416,14 @@ else
 <MudDialog @bind-Visible="_profileDialogVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true })">
     <TitleContent>
         <div class="d-flex align-center">
-            <MudIcon Icon="@(_isEditingProfile ? Icons.Material.Filled.EditNote : Icons.Material.Filled.PersonAdd)" Color="Color.Primary" Class="mr-2" />
+            <MudIcon Icon="@(_isEditingProfile ? Icons.Material.Outlined.EditNote : Icons.Material.Outlined.PersonAdd)" Color="Color.Primary" Class="mr-2" />
             <span>@(_isEditingProfile ? $"Cập nhật hồ sơ NNN: {_form.FullName}" : "Thêm mới hồ sơ Người nước ngoài hợp nhất")</span>
         </div>
     </TitleContent>
     <DialogContent>
         <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" Class="irm-tabs">
             <!-- TAB 1: THÔNG TIN CHUNG & CƯ TRÚ -->
-            <MudTabPanel Text="1. Thông tin chung & Cư trú" Icon="@Icons.Material.Filled.Person">
+            <MudTabPanel Text="1. Thông tin chung & Cư trú" Icon="@Icons.Material.Outlined.Person">
                 <MudGrid Spacing="2" Class="pt-4">
                     <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="_form.FullName" Label="Họ và tên đầy đủ *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
@@ -475,16 +475,16 @@ else
                             Chọn các diện thông tin áp dụng cho người này (có thể chọn nhiều diện cùng lúc):
                         </MudText>
                         <MudStack Row="true" Spacing="4" Style="flex-wrap:wrap;">
-                            <MudCheckBox T="bool" @bind-Value="_form.HasWorkProfile" Color="Color.Primary" Label="👷 Có thông tin Lao động / Làm việc tại Doanh nghiệp" />
-                            <MudCheckBox T="bool" @bind-Value="_form.HasStudyProfile" Color="Color.Secondary" Label="🎓 Có thông tin Du học sinh" />
-                            <MudCheckBox T="bool" @bind-Value="_form.HasFamilyVisitProfile" Color="Color.Tertiary" Label="👨‍👩‍👧 Có thông tin Thăm thân tại Việt Nam" />
+                            <MudCheckBox T="bool" @bind-Value="_form.HasWorkProfile" Color="Color.Primary" Label="Có thông tin Lao động / Làm việc tại Doanh nghiệp" />
+                            <MudCheckBox T="bool" @bind-Value="_form.HasStudyProfile" Color="Color.Secondary" Label="Có thông tin Du học sinh" />
+                            <MudCheckBox T="bool" @bind-Value="_form.HasFamilyVisitProfile" Color="Color.Tertiary" Label="Có thông tin Thăm thân tại Việt Nam" />
                         </MudStack>
                     </MudItem>
                 </MudGrid>
             </MudTabPanel>
 
             <!-- TAB 2: LAO ĐỘNG & VIỆC LÀM -->
-            <MudTabPanel Text="2. Lao động & Việc làm" Icon="@Icons.Material.Filled.Engineering">
+            <MudTabPanel Text="2. Lao động & Việc làm" Icon="@Icons.Material.Outlined.Engineering">
                 <MudGrid Spacing="2">
                     <MudItem xs="12">
                         <MudCheckBox T="bool" @bind-Value="_form.HasWorkProfile" Color="Color.Primary" Label="Kích hoạt thông tin Lao động cho hồ sơ này" />
@@ -528,7 +528,7 @@ else
             </MudTabPanel>
 
             <!-- TAB 3: DU HỌC SINH -->
-            <MudTabPanel Text="3. Du học sinh" Icon="@Icons.Material.Filled.School">
+            <MudTabPanel Text="3. Du học sinh" Icon="@Icons.Material.Outlined.School">
                 <MudGrid Spacing="2">
                     <MudItem xs="12">
                         <MudCheckBox T="bool" @bind-Value="_form.HasStudyProfile" Color="Color.Secondary" Label="Kích hoạt thông tin Du học sinh cho hồ sơ này" />
@@ -577,7 +577,7 @@ else
             </MudTabPanel>
 
             <!-- TAB 4: THĂM THÂN -->
-            <MudTabPanel Text="4. Thăm thân" Icon="@Icons.Material.Filled.FamilyRestroom">
+            <MudTabPanel Text="4. Thăm thân" Icon="@Icons.Material.Outlined.FamilyRestroom">
                 <MudGrid Spacing="2">
                     <MudItem xs="12">
                         <MudCheckBox T="bool" @bind-Value="_form.HasFamilyVisitProfile" Color="Color.Tertiary" Label="Kích hoạt thông tin Thăm thân tại Việt Nam cho hồ sơ này" />
@@ -614,7 +614,7 @@ else
             </MudTabPanel>
 
             <!-- TAB 5: GIẤY TỜ XNC & ĐỊNH DANH ĐT -->
-            <MudTabPanel Text="5. Giấy tờ XNC & Định danh ĐT" Icon="@Icons.Material.Filled.Fingerprint">
+            <MudTabPanel Text="5. Giấy tờ XNC & Định danh ĐT" Icon="@Icons.Material.Outlined.Fingerprint">
                 <MudGrid Spacing="2">
                     <MudItem xs="12">
                         <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Thị thực (Visa) / Thẻ tạm trú</MudText>
@@ -659,7 +659,7 @@ else
     <DialogActions>
         <MudButton OnClick="@(() => _profileDialogVisible = false)">Hủy</MudButton>
         <AuthorizeView Roles="ADMIN,DATA_EDITOR">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" OnClick="SaveUnifiedProfileAsync">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.Save" OnClick="SaveUnifiedProfileAsync">
                 Lưu hồ sơ hợp nhất
             </MudButton>
         </AuthorizeView>
@@ -670,7 +670,7 @@ else
 <MudDialog @bind-Visible="_documentDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
     <TitleContent>
         <div class="d-flex align-center">
-            <MudIcon Icon="@Icons.Material.Filled.Article" Color="Color.Primary" Class="mr-2" />
+            <MudIcon Icon="@Icons.Material.Outlined.Article" Color="Color.Primary" Class="mr-2" />
             <span>Thêm giấy tờ xuất nhập cảnh</span>
         </div>
     </TitleContent>
@@ -704,7 +704,7 @@ else
 <MudDialog @bind-Visible="_identityDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
     <TitleContent>
         <div class="d-flex align-center">
-            <MudIcon Icon="@Icons.Material.Filled.Fingerprint" Color="Color.Secondary" Class="mr-2" />
+            <MudIcon Icon="@Icons.Material.Outlined.Fingerprint" Color="Color.Secondary" Class="mr-2" />
             <span>Cấp số định danh điện tử</span>
         </div>
     </TitleContent>
@@ -728,7 +728,7 @@ else
 <MudDialog @bind-Visible="_archiveDialogVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
     <TitleContent>
         <MudText Typo="Typo.h6" Style="font-weight: 700; color: var(--red);">
-            ⚠️ Xác nhận xóa @_archiveDialogTitle
+            Xác nhận xóa @_archiveDialogTitle
         </MudText>
     </TitleContent>
     <DialogContent>
@@ -742,7 +742,7 @@ else
     <DialogActions>
         <MudButton Variant="Variant.Text" OnClick="@(() => _archiveDialogVisible = false)">Hủy</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Error"
-                   StartIcon="@Icons.Material.Filled.DeleteForever"
+                   StartIcon="@Icons.Material.Outlined.DeleteForever"
                    OnClick="ExecuteArchiveAsync"
                    Disabled="@(_archiveProcessing || _archiveCount == 0)">
             Xóa @_archiveCount hồ sơ

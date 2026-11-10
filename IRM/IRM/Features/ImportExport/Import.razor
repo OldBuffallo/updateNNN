@@ -9,22 +9,22 @@
 
 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
     <MudStack Spacing="0">
-        <MudText Typo="Typo.h5" Style="font-weight: 800;">📤 Import dữ liệu từ Excel</MudText>
+        <MudText Typo="Typo.h5" Style="font-weight: 800;">Import dữ liệu từ Excel</MudText>
         <MudText Typo="Typo.body2" Color="Color.Secondary">Cập nhật danh sách lao động — Mỗi phiên import đều có lịch sử để hoàn tác</MudText>
     </MudStack>
     <MudStack Row="true" Spacing="2">
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.History"
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.History"
                    Color="Color.Default" OnClick="@(() => _showHistory = !_showHistory)">
             @(_showHistory ? "Ẩn lịch sử" : "Lịch sử Import")
         </MudButton>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Download"
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Download"
                    Color="Color.Primary" OnClick="DownloadSampleFile">
-            📥 Tải file mẫu
+            Tải file mẫu
         </MudButton>
         <MudButton Variant="@(_manualMode ? Variant.Filled : Variant.Outlined)"
-                   StartIcon="@Icons.Material.Filled.Edit"
+                   StartIcon="@Icons.Material.Outlined.Edit"
                    Color="Color.Success" OnClick="@(() => _manualMode = !_manualMode)">
-            @(_manualMode ? "📤 Chuyển Import Excel" : "✏️ Nhập thủ công")
+            @(_manualMode ? "Chuyển Import Excel" : "Nhập thủ công")
         </MudButton>
     </MudStack>
 </MudStack>
@@ -33,7 +33,7 @@
 @if (_showHistory)
 {
     <MudPaper Elevation="0" Class="pa-4 mb-4 rounded-lg border-solid border" Style="border-width: 1px;">
-        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-3">📋 Lịch sử phiên Import</MudText>
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-3">Lịch sử phiên Import</MudText>
         @if (_importHistory.Any())
         {
             <MudSimpleTable Dense="true" Hover="true">
@@ -58,9 +58,9 @@
                                 @{
                                     var (statusLabel, statusColor) = s.Status switch
                                     {
-                                        "committed" => ("✅ Đã lưu", Color.Success),
+                                        "committed" => ("Đã lưu", Color.Success),
                                         "rolledback" => ("↩ Đã hoàn tác", Color.Secondary),
-                                        _ => ("📝 Nháp", Color.Info)
+                                        _ => ("Nháp", Color.Info)
                                     };
                                 }
                                 <MudChip T="string" Size="Size.Small" Color="@statusColor" Variant="Variant.Filled">@statusLabel</MudChip>
@@ -70,7 +70,7 @@
                                     @if (s.Status == "committed")
                                     {
                                         <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error"
-                                                   StartIcon="@Icons.Material.Filled.Undo"
+                                                   StartIcon="@Icons.Material.Outlined.Undo"
                                                    OnClick="@(() => RollbackSession(s.SessionId))">Hoàn tác</MudButton>
                                     }
                                 </MudStack>
@@ -91,7 +91,7 @@
 @if (_manualMode)
 {
     <MudPaper Elevation="0" Class="pa-6 mb-4 rounded-xl border-solid border" Style="border-width: 1px;">
-        <MudText Typo="Typo.h6" Style="font-weight: 800;" Class="mb-1">✏️ Nhập thủ công — Thêm nhân viên trực tiếp</MudText>
+        <MudText Typo="Typo.h6" Style="font-weight: 800;" Class="mb-1">Nhập thủ công — Thêm nhân viên trực tiếp</MudText>
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">Điền thông tin bên dưới để thêm nhân viên mà không cần file Excel</MudText>
 
         <MudGrid Spacing="3">
@@ -115,7 +115,7 @@
             <MudItem xs="12"><MudTextField T="string" Label="Ghi chú" @bind-Value="_mf.Note" Variant="Variant.Outlined" Lines="2" /></MudItem>
 
             @* Thăm thân *@
-            <MudItem xs="12"><MudDivider Class="my-1" /><MudText Typo="Typo.subtitle2" Style="font-weight:700;">👨‍👩‍👧 Thông tin thăm thân (tùy chọn)</MudText></MudItem>
+            <MudItem xs="12"><MudDivider Class="my-1" /><MudText Typo="Typo.subtitle2" Style="font-weight:700;">Thông tin thăm thân (tùy chọn)</MudText></MudItem>
             <MudItem xs="6" md="3"><MudSelect T="int" Label="Thăm thân" @bind-Value="_mf.FamilyVisit" Variant="Variant.Outlined"><MudSelectItem Value="0">Không</MudSelectItem><MudSelectItem Value="1">Có</MudSelectItem></MudSelect></MudItem>
             @if (_mf.FamilyVisit == 1)
             {
@@ -128,22 +128,22 @@
         </MudGrid>
 
         <MudStack Row="true" Justify="Justify.Center" Spacing="3" Class="mt-4">
-            <MudButton Variant="Variant.Outlined" OnClick="ResetManualForm" StartIcon="@Icons.Material.Filled.Clear">Xóa form</MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="ResetManualForm" StartIcon="@Icons.Material.Outlined.Clear">Xóa form</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large"
-                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                       StartIcon="@Icons.Material.Outlined.PersonAdd"
                        OnClick="SaveManualEntryAsync"
                        Disabled="@(string.IsNullOrWhiteSpace(_mf.StaffName) || _mf.IDCompany == 0)">
-                ➕ Thêm nhân viên
+                Thêm nhân viên
             </MudButton>
         </MudStack>
 
         @if (!string.IsNullOrWhiteSpace(_mf.StaffName) && _mf.IDCompany == 0)
         {
-            <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-3">⚠️ Vui lòng chọn <strong>Công ty</strong> trước khi thêm nhân viên.</MudAlert>
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-3">Vui lòng chọn <strong>Công ty</strong> trước khi thêm nhân viên.</MudAlert>
         }
         @if (!string.IsNullOrWhiteSpace(_mf.StaffName) && string.IsNullOrWhiteSpace(_mf.Passport))
         {
-            <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">💡 Nên điền <strong>Số hộ chiếu</strong> để hệ thống kiểm tra trùng lặp.</MudAlert>
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">Nên điền <strong>Số hộ chiếu</strong> để hệ thống kiểm tra trùng lặp.</MudAlert>
         }
     </MudPaper>
 }

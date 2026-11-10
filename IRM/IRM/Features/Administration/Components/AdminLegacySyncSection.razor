@@ -8,7 +8,7 @@
     <MudItem xs="12" md="7">
         <MudPaper Class="pa-4">
             <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-1">
-                🗄️ Nhập trực tiếp từ SQL Server cũ (ReportManagerDB)
+                Nhập trực tiếp từ SQL Server cũ (ReportManagerDB)
             </MudText>
             <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
                 Tự động đọc dữ liệu từ cơ sở dữ liệu của phần mềm cũ (chế độ chỉ đọc — an toàn tuyệt đối cho DB gốc), tự động bổ sung danh mục Quốc tịch / Lĩnh vực / Ngành nghề / Quận-Huyện / Phường-Xã / Địa bàn hành chính, nhập Doanh nghiệp, Nhân viên lao động và đồng bộ sang Hồ sơ Người nước ngoài hợp nhất.
@@ -27,7 +27,7 @@
                 <MudItem xs="12" sm="4" Class="d-flex align-start pt-2">
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.CloudDownload"
+                               StartIcon="@Icons.Material.Outlined.CloudDownload"
                                Disabled="_importingDb"
                                OnClick="ImportFromLegacyDbAsync"
                                FullWidth="true">
@@ -88,7 +88,7 @@
     <MudItem xs="12" md="5">
         <MudPaper Class="pa-4 mb-4">
             <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-1">
-                🔄 Đồng bộ bảng Nhân viên / DHS nội bộ
+                Đồng bộ bảng Nhân viên / DHS nội bộ
             </MudText>
             <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
                 Rà soát toàn bộ dữ liệu trong bảng Nhân viên lao động và Du học sinh hiện có (bao gồm dữ liệu vừa Import từ Excel mẫu cũ) để tạo liên kết định danh sang Hồ sơ Người nước ngoài hợp nhất.
@@ -96,7 +96,7 @@
 
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Primary"
-                       StartIcon="@Icons.Material.Filled.Sync"
+                       StartIcon="@Icons.Material.Outlined.Sync"
                        Disabled="_runningBackfill"
                        OnClick="RunInternalBackfillAsync">
                 @(_runningBackfill ? "Đang xử lý..." : "Chạy đồng bộ Hồ sơ hợp nhất ngay")
@@ -112,14 +112,14 @@
 
         <MudPaper Class="pa-4">
             <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-1">
-                📥 Nhập từ file Excel mẫu cũ hoặc mới
+                Nhập từ file Excel mẫu cũ hoặc mới
             </MudText>
             <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
                 Hệ thống hỗ trợ đầy đủ cả mẫu Excel của phần mềm cũ (Công ty, Nhân viên, Du học sinh) và tự động thêm mã quốc tịch nếu chưa có trong danh mục để không bao giờ lỗi khóa ngoại.
             </MudText>
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
-                       StartIcon="@Icons.Material.Filled.UploadFile"
+                       StartIcon="@Icons.Material.Outlined.UploadFile"
                        Href="/import">
                 Mở trang Nhập dữ liệu Excel
             </MudButton>

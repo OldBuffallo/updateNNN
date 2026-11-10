@@ -11,7 +11,7 @@
 <div class="section-header">
     <div class="d-flex align-center justify-space-between flex-wrap gap-2">
         <div>
-            <h3>🏠 Quản lý Cơ sở lưu trú</h3>
+            <h3>Quản lý Cơ sở lưu trú</h3>
             <span class="section-meta">
                 Quản lý các điểm lưu trú, nhà khách, KTX doanh nghiệp thuê cho người nước ngoài tạm trú
             </span>
@@ -20,7 +20,7 @@
             <AuthorizeView Roles="ADMIN,DATA_EDITOR">
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.AddBusiness"
+                           StartIcon="@Icons.Material.Outlined.AddBusiness"
                            OnClick="OpenAdd">
                     Thêm cơ sở lưu trú
                 </MudButton>
@@ -30,10 +30,10 @@
 </div>
 
 <!-- ════════════ STATS SUMMARY CARDS ════════════ -->
-<MudGrid Class="mb-4">
+<MudGrid Spacing="2" Class="mb-3">
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-blue">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Hotel" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.Hotel" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count</span>
                 <span class="stat-mini-label">Tổng cơ sở lưu trú</span>
@@ -42,7 +42,7 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-purple">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.Business" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count(x => x.CompanyAgreements.Any(a => a.ValidFrom <= DateTime.Today && (!a.ValidTo.HasValue || a.ValidTo >= DateTime.Today)))</span>
                 <span class="stat-mini-label">Có DN đứng ra thuê</span>
@@ -51,7 +51,7 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-green">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.MeetingRoom" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.MeetingRoom" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Sum(x => x.Capacity ?? 0)</span>
                 <span class="stat-mini-label">Tổng sức chứa (người)</span>
@@ -60,7 +60,7 @@
     </MudItem>
     <MudItem xs="6" sm="3">
         <div class="stat-mini-card stat-teal">
-            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Small" /></div>
+            <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.People" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Sum(x => x.ResidencePeriods.Where(r => r.ValidFrom <= DateTime.Today && (!r.ValidTo.HasValue || r.ValidTo >= DateTime.Today)).Select(r => r.ForeignPersonId).Distinct().Count())</span>
                 <span class="stat-mini-label">Đang lưu trú thực tế</span>
@@ -70,7 +70,7 @@
 </MudGrid>
 
 <!-- ════════════ FILTER TOOLBAR ════════════ -->
-<MudPaper Class="pa-4 mb-4 page-filter-card" Elevation="0">
+<MudPaper Class="pa-3 mb-3 page-filter-card" Elevation="0">
     <MudGrid Spacing="2">
         <MudItem xs="12" sm="4">
             <MudTextField @bind-Value="_search"
@@ -78,7 +78,7 @@
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          AdornmentIcon="@Icons.Material.Outlined.Search"
                           Immediate="true"
                           Clearable="true"
                           OnKeyUp="HandleSearchKeyUp" />
@@ -100,7 +100,7 @@
             </MudSelect>
         </MudItem>
         <MudItem xs="12" sm="2" Class="d-flex align-center gap-1">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FilterAlt" OnClick="Load" FullWidth="true">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.FilterAlt" OnClick="Load" FullWidth="true">
                 Lọc
             </MudButton>
         </MudItem>
@@ -126,7 +126,7 @@ else
                 <CellTemplate>
                     <div class="d-flex align-center">
                         <div class="table-avatar mr-2 bg-teal-soft">
-                            <MudIcon Icon="@Icons.Material.Filled.Hotel" Size="Size.Small" Color="Color.Info" />
+                            <MudIcon Icon="@Icons.Material.Outlined.Hotel" Size="Size.Small" Color="Color.Info" />
                         </div>
                         <div>
                             <div class="font-weight-bold">@context.Item.Name</div>
@@ -160,7 +160,7 @@ else
                             @foreach (var a in activeAgreements)
                             {
                                 <span class="company-badge">
-                                    <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Class="mr-1" />
+                                    <MudIcon Icon="@Icons.Material.Outlined.Business" Size="Size.Small" Class="mr-1" />
                                     @(a.Company?.CompanyName ?? $"ID: {a.CompanyId}")
                                 </span>
                             }
@@ -195,18 +195,18 @@ else
                     <div class="d-flex align-center justify-end gap-1">
                         <AuthorizeView Roles="ADMIN,DATA_EDITOR" Context="permissionContext">
                             <MudTooltip Text="Sửa thông tin cơ sở">
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                <MudIconButton Icon="@Icons.Material.Outlined.Edit"
                                                Size="Size.Small"
                                                OnClick="@(() => OpenEdit(context.Item))" />
                             </MudTooltip>
                             <MudTooltip Text="Hợp đồng doanh nghiệp thuê">
-                                <MudIconButton Icon="@Icons.Material.Filled.Handshake"
+                                <MudIconButton Icon="@Icons.Material.Outlined.Handshake"
                                                Size="Size.Small"
                                                Color="Color.Primary"
                                                OnClick="@(() => OpenAgreement(context.Item))" />
                             </MudTooltip>
                             <MudTooltip Text="Xóa cơ sở">
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                <MudIconButton Icon="@Icons.Material.Outlined.Delete"
                                                Size="Size.Small"
                                                Color="Color.Error"
                                                OnClick="@(() => Delete(context.Item.Id))" />
@@ -223,7 +223,7 @@ else
 <MudDialog @bind-Visible="_dialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
     <TitleContent>
         <div class="d-flex align-center">
-            <MudIcon Icon="@(_edit.Id > 0 ? Icons.Material.Filled.Edit : Icons.Material.Filled.AddBusiness)" Color="Color.Primary" Class="mr-2" />
+            <MudIcon Icon="@(_edit.Id > 0 ? Icons.Material.Outlined.Edit : Icons.Material.Outlined.AddBusiness)" Color="Color.Primary" Class="mr-2" />
             <span>@(_edit.Id > 0 ? "Cập nhật cơ sở lưu trú" : "Thêm mới cơ sở lưu trú")</span>
         </div>
     </TitleContent>
@@ -272,7 +272,7 @@ else
 <MudDialog @bind-Visible="_agreementDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
     <TitleContent>
         <div class="d-flex align-center">
-            <MudIcon Icon="@Icons.Material.Filled.Handshake" Color="Color.Primary" Class="mr-2" />
+            <MudIcon Icon="@Icons.Material.Outlined.Handshake" Color="Color.Primary" Class="mr-2" />
             <span>Gán doanh nghiệp thuê cơ sở: @_selectedAccommodation?.Name</span>
         </div>
     </TitleContent>

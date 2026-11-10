@@ -163,16 +163,16 @@ public partial class Admin : ComponentBase, IFeaturePage
     internal void BuildCards()
     {
         _adminCards.Clear();
-        _adminCards.Add(new("accounts", Icons.Material.Filled.ManageAccounts, "Tài khoản", $"{_accounts.Count} tài khoản"));
-        _adminCards.Add(new("fields", Icons.Material.Filled.Business, "Lĩnh vực", $"{_fields.Count} lĩnh vực"));
-        _adminCards.Add(new("careers", Icons.Material.Filled.Work, "Ngành nghề", $"{_careers.Count} ngành"));
-        _adminCards.Add(new("nationalities", Icons.Material.Filled.Public, "Quốc tịch", $"{_nationalities.Count} quốc tịch"));
-        _adminCards.Add(new("districts", Icons.Material.Filled.Map, "Quận / Huyện", $"{_districts.Count} quận/huyện"));
-        _adminCards.Add(new("wards", Icons.Material.Filled.Place, "Phường / Xã", $"{_wards.Count} phường/xã"));
-        _adminCards.Add(new("admin-units", Icons.Material.Filled.LocationCity, "Địa bàn hành chính", $"{_adminUnits.Count} địa bàn"));
-        _adminCards.Add(new("legacy-sync", Icons.Material.Filled.Storage, "Đồng bộ DB cũ", "Nhập từ ReportManagerDB"));
-        _adminCards.Add(new("audit", Icons.Material.Filled.ReceiptLong, "Nhật ký hệ thống", "Audit log"));
-        _adminCards.Add(new("import-history", Icons.Material.Filled.CloudUpload, "Lịch sử Import", "Lịch sử phiên import"));
+        _adminCards.Add(new("accounts", Icons.Material.Outlined.ManageAccounts, "Tài khoản", $"{_accounts.Count} tài khoản"));
+        _adminCards.Add(new("fields", Icons.Material.Outlined.Business, "Lĩnh vực", $"{_fields.Count} lĩnh vực"));
+        _adminCards.Add(new("careers", Icons.Material.Outlined.Work, "Ngành nghề", $"{_careers.Count} ngành"));
+        _adminCards.Add(new("nationalities", Icons.Material.Outlined.Public, "Quốc tịch", $"{_nationalities.Count} quốc tịch"));
+        _adminCards.Add(new("districts", Icons.Material.Outlined.Map, "Quận / Huyện", $"{_districts.Count} quận/huyện"));
+        _adminCards.Add(new("wards", Icons.Material.Outlined.Place, "Phường / Xã", $"{_wards.Count} phường/xã"));
+        _adminCards.Add(new("admin-units", Icons.Material.Outlined.LocationCity, "Địa bàn hành chính", $"{_adminUnits.Count} địa bàn"));
+        _adminCards.Add(new("legacy-sync", Icons.Material.Outlined.Storage, "Đồng bộ DB cũ", "Nhập từ ReportManagerDB"));
+        _adminCards.Add(new("audit", Icons.Material.Outlined.ReceiptLong, "Nhật ký hệ thống", "Audit log"));
+        _adminCards.Add(new("import-history", Icons.Material.Outlined.CloudUpload, "Lịch sử Import", "Lịch sử phiên import"));
     }
 
     internal void ResetFormsAfterDataLoaded()

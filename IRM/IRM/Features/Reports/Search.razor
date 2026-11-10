@@ -22,7 +22,7 @@
                   Placeholder="Nhập từ khóa tìm kiếm..."
                   Variant="Variant.Outlined"
                   Adornment="Adornment.Start"
-                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  AdornmentIcon="@Icons.Material.Outlined.Search"
                   Immediate="true"
                   OnKeyUp="OnSearchKeyUp" />
     <MudButton Variant="Variant.Filled"
@@ -44,10 +44,10 @@
 @* Bộ lọc nhanh *@
 <div class="search-filter-bar">
     <MudChipSet T="string" @bind-SelectedValue="_filterType" SelectionMode="SelectionMode.SingleSelection" CheckMark="true">
-        <MudChip Value="@("all")" Default="true" Variant="Variant.Outlined" Color="Color.Primary">📋 Tất cả</MudChip>
-        <MudChip Value="@("employee")" Variant="Variant.Outlined" Color="Color.Success">👥 Nhân viên</MudChip>
-        <MudChip Value="@("company")" Variant="Variant.Outlined" Color="Color.Info">🏢 Công ty</MudChip>
-        <MudChip Value="@("student")" Variant="Variant.Outlined" Color="Color.Warning">🎓 Du học sinh</MudChip>
+        <MudChip Value="@("all")" Default="true" Variant="Variant.Outlined" Color="Color.Primary">Tất cả</MudChip>
+        <MudChip Value="@("employee")" Variant="Variant.Outlined" Color="Color.Success">Nhân viên</MudChip>
+        <MudChip Value="@("company")" Variant="Variant.Outlined" Color="Color.Info">Công ty</MudChip>
+        <MudChip Value="@("student")" Variant="Variant.Outlined" Color="Color.Warning">Du học sinh</MudChip>
     </MudChipSet>
 </div>
 
@@ -79,11 +79,11 @@
 
     @if (_result.Employees.Any())
     {
-        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-2">👥 Nhân viên (@_result.Employees.Count)</MudText>
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-2">Nhân viên (@_result.Employees.Count)</MudText>
         @foreach (var emp in _result.Employees)
         {
             <div class="search-result-item">
-                <div class="result-type">👥</div>
+                <div class="result-type"><MudIcon Icon="@Icons.Material.Outlined.Person" Color="Color.Primary" /></div>
                 <div class="result-body">
                     <h4>@((MarkupString)HighlightKeyword(emp.StaffName ?? "")) — @((MarkupString)HighlightKeyword(emp.NationalityNav?.NationalityName ?? emp.Nationality ?? ""))</h4>
                     <p>
@@ -108,11 +108,11 @@
 
     @if (_result.Companies.Any())
     {
-        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-2 mt-4">🏢 Công ty (@_result.Companies.Count)</MudText>
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-2 mt-4">Công ty (@_result.Companies.Count)</MudText>
         @foreach (var company in _result.Companies)
         {
             <div class="search-result-item">
-                <div class="result-type">🏢</div>
+                <div class="result-type"><MudIcon Icon="@Icons.Material.Outlined.Business" Color="Color.Primary" /></div>
                 <div class="result-body">
                     <h4>@((MarkupString)HighlightKeyword(company.CompanyName ?? ""))</h4>
                     <p>
@@ -129,11 +129,11 @@
 
     @if (_result.Students.Any())
     {
-        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-2 mt-4">🎓 Du học sinh (@_result.Students.Count)</MudText>
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-2 mt-4">Du học sinh (@_result.Students.Count)</MudText>
         @foreach (var stu in _result.Students)
         {
             <div class="search-result-item">
-                <div class="result-type">🎓</div>
+                <div class="result-type"><MudIcon Icon="@Icons.Material.Outlined.School" Color="Color.Primary" /></div>
                 <div class="result-body">
                     <h4>@((MarkupString)HighlightKeyword(stu.FullName ?? "")) — @((MarkupString)HighlightKeyword(stu.NationalityNav?.NationalityName ?? stu.Nationality ?? ""))</h4>
                     <p>
@@ -171,26 +171,26 @@
 else if (!_hasSearched)
 {
     <MudPaper Elevation="0" Class="pa-6 rounded-lg empty-state-card">
-        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-3">💡 Gợi ý tìm kiếm</MudText>
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-3">Gợi ý tìm kiếm</MudText>
         <MudGrid Spacing="2">
             <MudItem xs="12" md="6">
                 <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">
-                    <strong>🔍 Tìm nhân viên</strong> — Nhập tên, số hộ chiếu, quốc tịch, hoặc nghề nghiệp
+                    <strong>Tìm nhân viên</strong> — Nhập tên, số hộ chiếu, quốc tịch, hoặc nghề nghiệp
                 </MudAlert>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">
-                    <strong>🏢 Tìm công ty</strong> — Nhập tên công ty, địa chỉ, lĩnh vực hoạt động
+                    <strong>Tìm công ty</strong> — Nhập tên công ty, địa chỉ, lĩnh vực hoạt động
                 </MudAlert>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">
-                    <strong>📋 Tìm hộ chiếu</strong> — Nhập số hộ chiếu để tra cứu nhanh
+                    <strong>Tìm hộ chiếu</strong> — Nhập số hộ chiếu để tra cứu nhanh
                 </MudAlert>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2">
-                    <strong>👨‍👩‍👧 Tìm thăm thân</strong> — Nhập tên người thân hoặc số CMND/CCCD
+                    <strong>Tìm thăm thân</strong> — Nhập tên người thân hoặc số CMND/CCCD
                 </MudAlert>
             </MudItem>
         </MudGrid>

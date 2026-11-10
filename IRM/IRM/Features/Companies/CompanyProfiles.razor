@@ -12,7 +12,7 @@
 <div class="section-header">
     <div class="d-flex align-center justify-space-between flex-wrap gap-2">
         <div>
-            <h3>🏢 Hồ sơ Mở rộng Doanh nghiệp</h3>
+            <h3>Hồ sơ Mở rộng Doanh nghiệp</h3>
             <span class="section-meta">
                 Quản lý phân loại FDI, địa bàn, cụm KCN, CSLT thuê, thân nhân NLĐ và hồ sơ pháp nhân scan
             </span>
@@ -44,7 +44,7 @@
             {
                 var isFdi = _profile.OwnershipTypeCode == "FDI";
                 <span class="company-status-badge @(isFdi ? "badge-fdi" : "badge-domestic")">
-                    <MudIcon Icon="@(isFdi ? Icons.Material.Filled.Language : Icons.Material.Filled.HomeWork)" Size="Size.Small" Class="mr-1" />
+                    <MudIcon Icon="@(isFdi ? Icons.Material.Outlined.Language : Icons.Material.Outlined.HomeWork)" Size="Size.Small" Class="mr-1" />
                     @(isFdi ? "Doanh nghiệp FDI" : "Doanh nghiệp trong nước")
                 </span>
             }
@@ -63,7 +63,7 @@
         <div class="d-flex align-center justify-space-between flex-wrap gap-2">
             <div class="d-flex align-center">
                 <div class="company-avatar-large mr-3">
-                    <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Medium" />
+                    <MudIcon Icon="@Icons.Material.Outlined.Business" Size="Size.Medium" />
                 </div>
                 <div>
                     <h3 class="company-name-heading">@(_companies.FirstOrDefault(c => c.IDCompany == _companyId)?.CompanyName)</h3>
@@ -81,7 +81,7 @@
     <!-- ════════════ TABS FOR EXTENDED PROFILES ════════════ -->
     <MudTabs Elevation="0" Rounded="true" Class="irm-tabs">
         <!-- ── TAB 1: PHÂN LOẠI DOANH NGHIỆP ── -->
-        <MudTabPanel Text="Phân loại & Pháp lý" Icon="@Icons.Material.Filled.Category">
+        <MudTabPanel Text="Phân loại & Pháp lý" Icon="@Icons.Material.Outlined.Category">
             <MudPaper Class="pa-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
                 <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">Thông tin đăng ký & Phân loại vốn</MudText>
                 <MudGrid>
@@ -98,7 +98,7 @@
                         <MudTextField @bind-Value="_profile.BusinessRegistrationNumber" Label="Số giấy chứng nhận ĐKKD" Variant="Variant.Outlined" Margin="Margin.Dense" />
                     </MudItem>
                     <MudItem xs="12">
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" OnClick="SaveProfile">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.Save" OnClick="SaveProfile">
                             Lưu thông tin phân loại
                         </MudButton>
                     </MudItem>
@@ -107,7 +107,7 @@
         </MudTabPanel>
 
         <!-- ── TAB 2: ĐỊA ĐIỂM & KHU KINH TẾ ── -->
-        <MudTabPanel Text="Địa điểm & Khu kinh tế" Icon="@Icons.Material.Filled.Place">
+        <MudTabPanel Text="Địa điểm & Khu kinh tế" Icon="@Icons.Material.Outlined.Place">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Danh sách Địa điểm hoạt động & Phân bổ KCN/KKT</MudText>
             <MudDataGrid T="CompanySiteDto" Items="_aggregate.Sites" Dense="true" Hover="true" Striped="true" Class="irm-data-table mb-4">
                 <Columns>
@@ -124,7 +124,7 @@
             </MudDataGrid>
 
             <MudPaper Class="pa-4 mb-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
-                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">➕ Thêm địa điểm mới cho doanh nghiệp</MudText>
+                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">Thêm địa điểm mới cho doanh nghiệp</MudText>
                 <MudGrid>
                     <MudItem xs="12" sm="4"><MudTextField @bind-Value="_site.Name" Label="Tên địa điểm / Nhà xưởng" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                     <MudItem xs="12" sm="4"><MudTextField @bind-Value="_site.AddressLine" Label="Địa chỉ cụ thể" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
@@ -145,7 +145,7 @@
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" sm="6" Class="d-flex align-center">
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddLocation" OnClick="SaveSite">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.AddLocation" OnClick="SaveSite">
                             Thêm địa điểm
                         </MudButton>
                     </MudItem>
@@ -167,14 +167,14 @@
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" sm="2" Class="d-flex align-center">
-                        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Add" OnClick="SaveZone">Tạo khu mới</MudButton>
+                        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Add" OnClick="SaveZone">Tạo khu mới</MudButton>
                     </MudItem>
                 </MudGrid>
             </MudPaper>
         </MudTabPanel>
 
         <!-- ── TAB 3: CƠ SỞ LƯU TRÚ ── -->
-        <MudTabPanel Text="Cơ sở lưu trú đã thuê" Icon="@Icons.Material.Filled.Hotel">
+        <MudTabPanel Text="Cơ sở lưu trú đã thuê" Icon="@Icons.Material.Outlined.Hotel">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Hợp đồng thuê Cơ sở lưu trú của Doanh nghiệp</MudText>
             <MudDataGrid T="CompanyAccommodationAgreementDto" Items="_aggregate.AccommodationAgreements" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
                 <Columns>
@@ -191,12 +191,12 @@
                 </Columns>
             </MudDataGrid>
             <MudAlert Severity="Severity.Info" Variant="Variant.Text" Class="mt-3" Style="border-radius: 8px;">
-                💡 <em>Để thêm hoặc điều chỉnh hợp đồng thuê, vui lòng vào màn hình <strong>Cơ sở lưu trú</strong>.</em>
+                <em>Để thêm hoặc điều chỉnh hợp đồng thuê, vui lòng vào màn hình <strong>Cơ sở lưu trú</strong>.</em>
             </MudAlert>
         </MudTabPanel>
 
         <!-- ── TAB 4: THÂN NHÂN NLĐ ── -->
-        <MudTabPanel Text="Thân nhân NLĐ" Icon="@Icons.Material.Filled.FamilyRestroom">
+        <MudTabPanel Text="Thân nhân NLĐ" Icon="@Icons.Material.Outlined.FamilyRestroom">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Người nước ngoài thuộc diện Thân nhân của NLĐ tại Doanh nghiệp</MudText>
             <MudDataGrid T="FamilyVisitorDto" Items="_aggregate.SponsoredFamilyVisitors" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
                 <Columns>
@@ -214,7 +214,7 @@
         </MudTabPanel>
 
         <!-- ── TAB 5: NGƯỜI ĐẠI DIỆN ── -->
-        <MudTabPanel Text="Người đại diện pháp luật" Icon="@Icons.Material.Filled.AccountBox">
+        <MudTabPanel Text="Người đại diện pháp luật" Icon="@Icons.Material.Outlined.AccountBox">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Danh sách Người đại diện pháp luật của Doanh nghiệp</MudText>
             <MudDataGrid T="CompanyRepresentativeDto" Items="_aggregate.Representatives" Dense="true" Hover="true" Striped="true" Class="irm-data-table mb-4">
                 <Columns>
@@ -226,13 +226,13 @@
             </MudDataGrid>
 
             <MudPaper Class="pa-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
-                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">➕ Thêm người đại diện pháp luật</MudText>
+                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">Thêm người đại diện pháp luật</MudText>
                 <MudGrid>
                     <MudItem xs="12" sm="4"><MudTextField @bind-Value="_representative.FullName" Label="Họ và tên *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                     <MudItem xs="12" sm="3"><MudTextField @bind-Value="_representative.Title" Label="Chức vụ (Tổng giám đốc, Đại diện...)" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                     <MudItem xs="12" sm="3"><MudTextField @bind-Value="_representative.IdNumber" Label="Số CCCD / Hộ chiếu" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                     <MudItem xs="12" sm="2" Class="d-flex align-center">
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonAdd" OnClick="SaveRepresentative">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.PersonAdd" OnClick="SaveRepresentative">
                             Thêm
                         </MudButton>
                     </MudItem>
@@ -241,7 +241,7 @@
         </MudTabPanel>
 
         <!-- ── TAB 6: HỒ SƠ PHÁP NHÂN SCAN ── -->
-        <MudTabPanel Text="Hồ sơ pháp nhân Scan" Icon="@Icons.Material.Filled.AttachFile">
+        <MudTabPanel Text="Hồ sơ pháp nhân Scan" Icon="@Icons.Material.Outlined.AttachFile">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Tài liệu pháp nhân & Tệp đính kèm Scan</MudText>
             <MudDataGrid T="CompanyLegalDocumentDto" Items="_aggregate.LegalDocuments" Dense="true" Hover="true" Striped="true" Class="irm-data-table mb-4">
                 <Columns>
@@ -256,7 +256,7 @@
                                 <MudButton Variant="Variant.Outlined"
                                            Color="Color.Primary"
                                            Size="Size.Small"
-                                           StartIcon="@Icons.Material.Filled.Download"
+                                           StartIcon="@Icons.Material.Outlined.Download"
                                            OnClick="() => Download(context.Item.StoredFile)">
                                     Tải về
                                 </MudButton>
@@ -267,7 +267,7 @@
             </MudDataGrid>
 
             <MudPaper Class="pa-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
-                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">➕ Tải lên tài liệu pháp nhân mới</MudText>
+                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">Tải lên tài liệu pháp nhân mới</MudText>
                 <MudGrid>
                     <MudItem xs="12" sm="3"><MudTextField @bind-Value="_legal.TypeCode" Label="Loại tài liệu (ĐKKD, Giấy phép...)" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                     <MudItem xs="12" sm="3"><MudTextField @bind-Value="_legal.DocumentNumber" Label="Số hiệu văn bản" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
@@ -276,7 +276,7 @@
                         <InputFile OnChange="SelectFile" accept=".pdf,.png,.jpg,.jpeg" class="mud-input-control-input" />
                     </MudItem>
                     <MudItem xs="12">
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" OnClick="SaveLegal">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.CloudUpload" OnClick="SaveLegal">
                             Lưu hồ sơ pháp nhân
                         </MudButton>
                     </MudItem>
