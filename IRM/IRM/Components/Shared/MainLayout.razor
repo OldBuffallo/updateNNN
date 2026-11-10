@@ -2,16 +2,13 @@
 @inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @using IRM.Services
+@using IRM.Components.Theming
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 @inject ILogger<MainLayout> Logger
 @implements IDisposable
 
-<MudThemeProvider Theme="_theme" IsDarkMode="_darkMode" />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
 
 <AuthorizeView>
     <Authorized Context="auth">
@@ -228,53 +225,10 @@
 
 @code {
     private bool _drawerOpen = true;
-    private bool _darkMode;
+    [CascadingParameter] private IrmThemeContext Theme { get; set; } = null!;
+    private bool _darkMode => Theme.IsDarkMode;
     private bool _spotlightOpen;
     private DotNetObjectReference<MainLayout>? _dotNetRef;
-
-    private readonly MudTheme _theme = new()
-    {
-        PaletteLight = new PaletteLight
-        {
-            Primary = "#2563eb",
-            PrimaryDarken = "#1d4ed8",
-            PrimaryLighten = "#3b82f6",
-            Secondary = "#6366f1",
-            Background = "#f8fafc",
-            Surface = "#ffffff",
-            AppbarBackground = "rgba(255, 255, 255, 0.85)",
-            AppbarText = "#0f172a",
-            DrawerBackground = "#0f172a",
-            DrawerText = "#94a3b8",
-            DrawerIcon = "#cbd5e1",
-            TextPrimary = "#0f172a",
-            TextSecondary = "#475569",
-            Divider = "#e2e8f0",
-            ActionDefault = "#64748b"
-        },
-        PaletteDark = new PaletteDark
-        {
-            Primary = "#3b82f6",
-            PrimaryDarken = "#2563eb",
-            PrimaryLighten = "#60a5fa",
-            Secondary = "#818cf8",
-            Background = "#090d16",
-            Surface = "#0f172a",
-            AppbarBackground = "rgba(15, 23, 42, 0.85)",
-            AppbarText = "#f8fafc",
-            DrawerBackground = "#090d16",
-            DrawerText = "#94a3b8",
-            DrawerIcon = "#94a3b8",
-            TextPrimary = "#f8fafc",
-            TextSecondary = "#94a3b8",
-            Divider = "#1e293b",
-            ActionDefault = "#94a3b8"
-        },
-        LayoutProperties = new LayoutProperties
-        {
-            DrawerWidthLeft = "260px"
-        }
-    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -293,16 +247,6 @@
                 Logger.LogWarning(ex, "Unable to register the global shortcut handler");
             }
 
-            try
-            {
-                var saved = await JS.InvokeAsync<string>("irmInterop.getTheme");
-                _darkMode = saved == "dark";
-            }
-            catch (JSException ex)
-            {
-                Logger.LogWarning(ex, "Unable to restore the saved theme");
-            }
-
             StateHasChanged();
         }
     }
@@ -314,12 +258,7 @@
         StateHasChanged();
     }
 
-    private async Task ToggleTheme()
-    {
-        _darkMode = !_darkMode;
-        await JS.InvokeVoidAsync("irmInterop.setTheme", _darkMode ? "dark" : "light");
-        await JS.InvokeVoidAsync("irmInterop.refreshCharts");
-    }
+    private Task ToggleTheme() => Theme.ToggleAsync();
 
     public void Dispose()
     {

@@ -1,0 +1,46 @@
+@namespace IRM.Components.Theming
+@inject IJSRuntime JS
+
+<MudThemeProvider Theme="_theme" IsDarkMode="_controller.IsDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@if (_controller.IsReady)
+{
+    <CascadingValue Value="Context">
+        @ChildContent
+    </CascadingValue>
+}
+else
+{
+    <div class="irm-theme-loading" role="status" aria-busy="true">Đang tải giao diện…</div>
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private readonly MudTheme _theme = IrmTheme.Create();
+    private IrmThemeController _controller = null!;
+    private IrmThemeContext Context => new(_controller.IsDarkMode, ToggleThemeAsync);
+
+    protected override void OnInitialized() => _controller = new IrmThemeController(JS);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _controller.InitializeAsync();
+            StateHasChanged();
+            return;
+        }
+        await _controller.ApplyRenderedAsync();
+        if (_controller.NeedsApply) StateHasChanged();
+    }
+
+    private Task ToggleThemeAsync()
+    {
+        _controller.Toggle();
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+}

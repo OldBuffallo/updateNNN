@@ -43,12 +43,12 @@ Paths above are relative to solution `IRM/`; docs paths are relative to that sam
 
 **Interfaces:** `IrmThemeController(IJSRuntime js)` exposes `bool IsReady`, `bool IsDarkMode`, `bool NeedsApply`, `Task InitializeAsync()`, `void Toggle()`, `Task ApplyRenderedAsync()`. It reads preferences once, normalizes to Light/Dark, bounds JS calls at 3 seconds and never lets storage/interop failure terminate normal UI. `ApplyRenderedAsync` invokes `irmInterop.applyTheme(mode)` after component rendering; applied version tracking preserves later toggles. `IrmThemeContext(bool IsDarkMode, Func<Task> ToggleAsync)` is a new snapshot each provider render.
 
-- [ ] Write Node regression tests against real `irm-interop.js`: get/init restores saved dark into data-theme; invalid value becomes light; read/write storage failure still applies a usable theme. Use controlled DOM/storage boundaries, not a second implementation.
-- [ ] Run `node --test IRM.Tests/Browser/theme-preference.test.cjs` from solution. Expected: current source fails saved-dark sync/error cases.
-- [ ] Add xUnit tests for valid/invalid/failed restore, initialized fallback, pre-ready toggle, rapid toggles and apply ordering/latest mode. Use IJSRuntime boundary fake, literal expected modes and effective controller state.
-- [ ] Implement controller/context/provider and safe JS preference functions. Wrap Router in provider; MainLayout consumes context; remove layout-local palette/state/providers and LoginLayout default providers. Preserve non-theme initialization and shortcuts.
-- [ ] Run Node regression and `dotnet test IRM.Tests/IRM.Tests.csproj -c Release --filter FullyQualifiedName~IrmThemeControllerTests` plus build. Expected: green; if native Windows loader is blocked use Linux Docker with the same source/tests, documenting the failure.
-- [ ] Review diff and commit `fix: synchronize shared theme lifecycle across IRM layouts`.
+- [x] Write Node regression tests against real `irm-interop.js`: get/init restores saved dark into data-theme; invalid value becomes light; read/write storage failure still applies a usable theme. Use controlled DOM/storage boundaries, not a second implementation.
+- [x] Run `node --test IRM.Tests/Browser/theme-preference.test.cjs` from solution. Expected: current source fails saved-dark sync/error cases.
+- [x] Add xUnit tests for valid/invalid/failed restore, initialized fallback, pre-ready toggle, rapid toggles and apply ordering/latest mode. Use IJSRuntime boundary fake, literal expected modes and effective controller state.
+- [x] Implement controller/context/provider and safe JS preference functions. Wrap Router in provider; MainLayout consumes context; remove layout-local palette/state/providers and LoginLayout default providers. Preserve non-theme initialization and shortcuts.
+- [x] Run Node regression and `dotnet test IRM.Tests/IRM.Tests.csproj -c Release --filter FullyQualifiedName~IrmThemeControllerTests` plus build. Expected: green; if native Windows loader is blocked use Linux Docker with the same source/tests, documenting the failure.
+- [x] Review diff and commit `fix: synchronize shared theme lifecycle across IRM layouts`.
 
 ### Task 2: Palette, CSS and chart consistency
 

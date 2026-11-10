@@ -5,16 +5,23 @@
 window.irmInterop = {
     // ── Dark Mode ──
     setTheme: function (theme) {
+        theme = theme === 'dark' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('irm-theme', theme);
+        try { localStorage.setItem('irm-theme', theme); } catch (_) { /* Session preference still applies. */ }
     },
     getTheme: function () {
-        return localStorage.getItem('irm-theme') || 'light';
+        return window.irmInterop.initTheme();
     },
     initTheme: function () {
-        var saved = localStorage.getItem('irm-theme') || 'light';
+        var saved = 'light';
+        try { saved = localStorage.getItem('irm-theme') === 'dark' ? 'dark' : 'light'; } catch (_) { /* Use light fallback. */ }
         document.documentElement.setAttribute('data-theme', saved);
         return saved;
+    },
+    applyTheme: async function (theme) {
+        window.irmInterop.setTheme(theme);
+        await new Promise(function (resolve) { requestAnimationFrame(resolve); });
+        window.irmInterop.refreshCharts();
     },
 
     // ── Loading Screen ──

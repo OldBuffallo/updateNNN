@@ -97,6 +97,14 @@ body {
     overflow-y: auto;
 }
 
+.irm-theme-loading {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: var(--mud-palette-background, #f8fafc);
+    color: var(--mud-palette-text-primary, #0f172a);
+}
+
 *,
 *::before,
 *::after {
