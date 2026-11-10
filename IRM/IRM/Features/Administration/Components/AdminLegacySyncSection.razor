@@ -1,0 +1,179 @@
+@namespace IRM.Components.Pages
+@inherits IRM.Components.Shared.FeatureSection<Admin>
+@using IRM.Services
+@using IRM.Data.Models
+
+<MudGrid Spacing="3">
+    <!-- 1. NHẬP TRỰC TIẾP TỪ DATABASE CŨ (ReportManagerDB) -->
+    <MudItem xs="12" md="7">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-1">
+                🗄️ Nhập trực tiếp từ SQL Server cũ (ReportManagerDB)
+            </MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                Tự động đọc dữ liệu từ cơ sở dữ liệu của phần mềm cũ (chế độ chỉ đọc — an toàn tuyệt đối cho DB gốc), tự động bổ sung danh mục Quốc tịch / Lĩnh vực / Ngành nghề / Quận-Huyện / Phường-Xã / Địa bàn hành chính, nhập Doanh nghiệp, Nhân viên lao động và đồng bộ sang Hồ sơ Người nước ngoài hợp nhất.
+            </MudText>
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="8">
+                    <MudTextField T="string"
+                                  @bind-Value="_sourceDatabaseOrConnection"
+                                  Label="Tên Database cũ hoặc Connection String SQL Server"
+                                  Placeholder="ReportManagerDB"
+                                  HelperText="Mặc định kết nối tới 'ReportManagerDB' trên cùng SQL Server instance hiện tại, hoặc nhập đầy đủ chuỗi kết nối Server=...;Database=...;"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" sm="4" Class="d-flex align-start pt-2">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.CloudDownload"
+                               Disabled="_importingDb"
+                               OnClick="ImportFromLegacyDbAsync"
+                               FullWidth="true">
+                        @(_importingDb ? "Đang đồng bộ..." : "Nhập từ Database cũ")
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+
+            @if (_importingDb)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-3" />
+            }
+
+            @if (_dbResult is not null)
+            {
+                <MudAlert Severity="Severity.Success" Class="mt-4" Dense="true">
+                    Đã hoàn tất đồng bộ từ <strong>@_sourceDatabaseOrConnection</strong>!
+                </MudAlert>
+                <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="mt-2">
+                    <thead>
+                        <tr>
+                            <th>Hạng mục</th>
+                            <th>Kết quả</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Quốc tịch bổ sung mới</td>
+                            <td><strong>@_dbResult.NationalitiesAdded</strong> mã quốc tịch</td>
+                        </tr>
+                        <tr>
+                            <td>Lĩnh vực & Ngành nghề bổ sung</td>
+                            <td><strong>@_dbResult.FieldsAdded</strong> lĩnh vực, <strong>@_dbResult.CareersAdded</strong> ngành nghề</td>
+                        </tr>
+                        <tr>
+                            <td>Quận/Huyện & Phường/Xã ánh xạ sang Địa bàn</td>
+                            <td><strong>@_dbResult.DistrictsAdded</strong> quận/huyện, <strong>@_dbResult.WardsAdded</strong> phường/xã</td>
+                        </tr>
+                        <tr>
+                            <td>Doanh nghiệp được nhập</td>
+                            <td><strong>@_dbResult.CompaniesAdded</strong> doanh nghiệp</td>
+                        </tr>
+                        <tr>
+                            <td>Nhân viên lao động được nhập</td>
+                            <td><strong>@_dbResult.EmployeesAdded</strong> nhân viên</td>
+                        </tr>
+                        <tr>
+                            <td>Hồ sơ Người nước ngoài hợp nhất được liên kết</td>
+                            <td><strong>@_dbResult.ProfilesLinked</strong> hồ sơ hợp nhất</td>
+                        </tr>
+                    </tbody>
+                </MudSimpleTable>
+            }
+        </MudPaper>
+    </MudItem>
+
+    <!-- 2. ĐỒNG BỘ NỘI BỘ BẢNG CŨ SANG HỒ SƠ HỢP NHẤT & EXCEL -->
+    <MudItem xs="12" md="5">
+        <MudPaper Class="pa-4 mb-4">
+            <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-1">
+                🔄 Đồng bộ bảng Nhân viên / DHS nội bộ
+            </MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                Rà soát toàn bộ dữ liệu trong bảng Nhân viên lao động và Du học sinh hiện có (bao gồm dữ liệu vừa Import từ Excel mẫu cũ) để tạo liên kết định danh sang Hồ sơ Người nước ngoài hợp nhất.
+            </MudText>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Sync"
+                       Disabled="_runningBackfill"
+                       OnClick="RunInternalBackfillAsync">
+                @(_runningBackfill ? "Đang xử lý..." : "Chạy đồng bộ Hồ sơ hợp nhất ngay")
+            </MudButton>
+
+            @if (_backfillResult is not null)
+            {
+                <MudAlert Severity="Severity.Info" Class="mt-3" Dense="true">
+                    Đã liên kết <strong>@_backfillResult.Linked</strong> bản ghi (tạo mới <strong>@_backfillResult.Created</strong> hồ sơ gốc, <strong>@_backfillResult.Issues</strong> bản ghi thiếu/trùng hộ chiếu được giữ nguyên và hiển thị trực tiếp).
+                </MudAlert>
+            }
+        </MudPaper>
+
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-1">
+                📥 Nhập từ file Excel mẫu cũ hoặc mới
+            </MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                Hệ thống hỗ trợ đầy đủ cả mẫu Excel của phần mềm cũ (Công ty, Nhân viên, Du học sinh) và tự động thêm mã quốc tịch nếu chưa có trong danh mục để không bao giờ lỗi khóa ngoại.
+            </MudText>
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       StartIcon="@Icons.Material.Filled.UploadFile"
+                       Href="/import">
+                Mở trang Nhập dữ liệu Excel
+            </MudButton>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private string _sourceDatabaseOrConnection = "ReportManagerDB";
+    private bool _importingDb;
+    private LegacyDatabaseImportResult? _dbResult;
+
+    private bool _runningBackfill;
+    private BackfillResult? _backfillResult;
+
+    private async Task ImportFromLegacyDbAsync()
+    {
+        _importingDb = true;
+        _dbResult = null;
+        try
+        {
+            _dbResult = await Page.RegistrySvc.ImportFromLegacyDatabaseAsync(_sourceDatabaseOrConnection);
+            await Page.LoadCoreDataAsync();
+            Page.Snackbar.Add(
+                $"Đã đồng bộ từ {_sourceDatabaseOrConnection}: {_dbResult.CompaniesAdded} công ty, {_dbResult.EmployeesAdded} nhân viên.",
+                Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Page.Snackbar.Add($"Lỗi nhập từ Database cũ: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _importingDb = false;
+        }
+    }
+
+    private async Task RunInternalBackfillAsync()
+    {
+        _runningBackfill = true;
+        try
+        {
+            _backfillResult = await Page.RegistrySvc.BackfillLegacyAsync();
+            Page.Snackbar.Add(
+                $"Đã đồng bộ {_backfillResult.Linked} bản ghi (tạo mới {_backfillResult.Created}).",
+                Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Page.Snackbar.Add($"Lỗi đồng bộ: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _runningBackfill = false;
+        }
+    }
+}

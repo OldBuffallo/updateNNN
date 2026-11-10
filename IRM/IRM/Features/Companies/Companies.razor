@@ -1,21 +1,27 @@
 @namespace IRM.Components.Pages
 @page "/companies"
+@page "/company-profiles"
 
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Forms
 @using IRM.Services
 @using IRM.Data.Models
 @inject ICompanyService CompanySvc
+@inject ICompanyProfileService Profiles
+@inject ILegalDocumentService LegalDocuments
 @inject ICatalogService CatalogSvc
 @inject IExportService ExportSvc
 @inject IJSRuntime JS
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
-<PageTitle>Quản lý Công ty - IRM v1.0.2</PageTitle>
+<PageTitle>Quản lý Doanh nghiệp & Hồ sơ FDI/KKT - IRM v1.0.2</PageTitle>
 
 <div class="section-header">
-    <h3>🏢 Danh sách Công ty</h3>
-    <span class="section-meta">Tổng: @_companies.Count công ty đang hoạt động</span>
+    <div>
+        <h3>🏢 Quản lý Doanh nghiệp (Tích hợp Hồ sơ FDI / Khu kinh tế)</h3>
+        <span class="section-meta">Tổng: @_companies.Count doanh nghiệp đang hoạt động — Quản lý tập trung lao động, phân loại FDI, địa điểm KCN/KKT, CSLT thuê và hồ sơ pháp nhân</span>
+    </div>
 </div>
 
 <div class="page-actions-bar">
@@ -126,10 +132,14 @@
         </TemplateColumn>
         <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
             <CellTemplate>
-                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary"
-                               OnClick="@(() => OpenDetailDialog(context.Item))" />
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning"
-                               OnClick="@(() => OpenEditDialog(context.Item))" />
+                <MudTooltip Text="Hồ sơ đầy đủ 6 Tab (FDI, KCN/KKT, CSLT thuê, Đại diện, Pháp nhân Scan)">
+                    <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Primary"
+                                   OnClick="@(() => OpenDetailDialog(context.Item))" />
+                </MudTooltip>
+                <MudTooltip Text="Sửa nhanh thông tin cơ bản">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning"
+                                   OnClick="@(() => OpenEditDialog(context.Item))" />
+                </MudTooltip>
                 @if (_isAdmin)
                 {
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
@@ -205,75 +215,284 @@
     </DialogActions>
 </MudDialog>
 
-@* ══════ DIALOG CHI TIẾT CÔNG TY ══════ *@
-<MudDialog @bind-Visible="_detailVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+@* ══════ DIALOG HỒ SƠ DOANH NGHIỆP TOÀN DIỆN (6 TAB) ══════ *@
+<MudDialog @bind-Visible="_detailVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true })">
     <TitleContent>
-        <MudText Typo="Typo.h6" Style="font-weight: 700;">🏢 Chi tiết công ty</MudText>
+        <div class="d-flex align-center justify-space-between w-100">
+            <MudText Typo="Typo.h6" Style="font-weight: 700;">
+                🏢 Hồ sơ Doanh nghiệp: @(_detailCompany?.CompanyName)
+            </MudText>
+            @if (_aggregate is not null)
+            {
+                var isFdi = _profile.OwnershipTypeCode == "FDI";
+                <span class="company-status-badge @(isFdi ? "badge-fdi" : "badge-domestic")">
+                    @(isFdi ? "Doanh nghiệp FDI" : "Doanh nghiệp trong nước")
+                </span>
+            }
+        </div>
     </TitleContent>
     <DialogContent>
         @if (_detailCompany != null)
         {
-            <MudGrid Spacing="2">
-                <MudItem xs="12">
-                    <MudText Typo="Typo.h5" Style="font-weight: 800;">@_detailCompany.CompanyName</MudText>
-                </MudItem>
-                <MudItem xs="6" md="4">
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Loại hình</MudText>
-                    <MudText Typo="Typo.body1" Style="font-weight: 600;">@(_detailCompany.TypeOfBusiniess ?? "—")</MudText>
-                </MudItem>
-                <MudItem xs="6" md="4">
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Lĩnh vực</MudText>
-                    <MudText Typo="Typo.body1" Style="font-weight: 600;">@(_detailCompany.Field?.FieldName ?? "—")</MudText>
-                </MudItem>
-                <MudItem xs="6" md="4">
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Người đại diện</MudText>
-                    <MudText Typo="Typo.body1" Style="font-weight: 600;">@(_detailCompany.LegalRepresentative ?? "—")</MudText>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Địa chỉ</MudText>
-                    <MudText Typo="Typo.body1">@(_detailCompany.Address ?? "—")</MudText>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudDivider Class="my-2" />
-                </MudItem>
-                <MudItem xs="3">
-                    <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
-                        <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight: 800;">@_detailCompany.TotalAmount</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Tổng LĐ</MudText>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="3">
-                    <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
-                        <MudText Typo="Typo.h4" Color="Color.Success" Style="font-weight: 800;">@_detailCompany.QuantityAvailable</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Có GPLĐ</MudText>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="3">
-                    <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
-                        <MudText Typo="Typo.h4" Color="Color.Warning" Style="font-weight: 800;">@_detailCompany.QuantityNotYet</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Chưa có</MudText>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="3">
-                    <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
-                        <MudText Typo="Typo.h4" Color="Color.Info" Style="font-weight: 800;">@_detailCompany.AmountOfExemption</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Miễn GPLĐ</MudText>
-                    </MudPaper>
-                </MudItem>
-                @if (!string.IsNullOrWhiteSpace(_detailCompany.Note))
-                {
-                    <MudItem xs="12">
-                        <MudAlert Severity="Severity.Info" Dense="true">📝 @_detailCompany.Note</MudAlert>
-                    </MudItem>
-                }
-            </MudGrid>
+            <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" Class="irm-tabs">
+                <!-- TAB 1: THÔNG TIN CHUNG & LAO ĐỘNG -->
+                <MudTabPanel Text="1. Thông tin chung & Lao động" Icon="@Icons.Material.Filled.Business">
+                    <MudGrid Spacing="2" Class="pt-4">
+                        <MudItem xs="12">
+                            <MudText Typo="Typo.h5" Style="font-weight: 800;">@_detailCompany.CompanyName</MudText>
+                        </MudItem>
+                        <MudItem xs="6" md="4">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Loại hình</MudText>
+                            <MudText Typo="Typo.body1" Style="font-weight: 600;">@(_detailCompany.TypeOfBusiniess ?? "—")</MudText>
+                        </MudItem>
+                        <MudItem xs="6" md="4">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Lĩnh vực</MudText>
+                            <MudText Typo="Typo.body1" Style="font-weight: 600;">@(_detailCompany.Field?.FieldName ?? "—")</MudText>
+                        </MudItem>
+                        <MudItem xs="6" md="4">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Người đại diện</MudText>
+                            <MudText Typo="Typo.body1" Style="font-weight: 600;">@(_detailCompany.LegalRepresentative ?? "—")</MudText>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Địa chỉ</MudText>
+                            <MudText Typo="Typo.body1">@(_detailCompany.Address ?? "—")</MudText>
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudDivider Class="my-2" />
+                        </MudItem>
+                        <MudItem xs="3">
+                            <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
+                                <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight: 800;">@_detailCompany.TotalAmount</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Tổng LĐ</MudText>
+                            </MudPaper>
+                        </MudItem>
+                        <MudItem xs="3">
+                            <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
+                                <MudText Typo="Typo.h4" Color="Color.Success" Style="font-weight: 800;">@_detailCompany.QuantityAvailable</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Có GPLĐ</MudText>
+                            </MudPaper>
+                        </MudItem>
+                        <MudItem xs="3">
+                            <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
+                                <MudText Typo="Typo.h4" Color="Color.Warning" Style="font-weight: 800;">@_detailCompany.QuantityNotYet</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Chưa có</MudText>
+                            </MudPaper>
+                        </MudItem>
+                        <MudItem xs="3">
+                            <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
+                                <MudText Typo="Typo.h4" Color="Color.Info" Style="font-weight: 800;">@_detailCompany.AmountOfExemption</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Miễn GPLĐ</MudText>
+                            </MudPaper>
+                        </MudItem>
+                        @if (!string.IsNullOrWhiteSpace(_detailCompany.Note))
+                        {
+                            <MudItem xs="12">
+                                <MudAlert Severity="Severity.Info" Dense="true">📝 @_detailCompany.Note</MudAlert>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </MudTabPanel>
+
+                <!-- TAB 2: PHÂN LOẠI & PHÁP LÝ (FDI / MST) -->
+                <MudTabPanel Text="2. Phân loại & Pháp lý (FDI/MST)" Icon="@Icons.Material.Filled.Category">
+                    <MudGrid Spacing="2" Class="pt-4">
+                        <MudItem xs="12" sm="4">
+                            <MudSelect T="string" @bind-Value="_profile.OwnershipTypeCode" Label="Phân loại nguồn vốn" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                <MudSelectItem Value="@("DOMESTIC")">Doanh nghiệp trong nước</MudSelectItem>
+                                <MudSelectItem Value="@("FDI")">Doanh nghiệp có vốn đầu tư nước ngoài (FDI)</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudTextField @bind-Value="_profile.TaxCode" Label="Mã số thuế doanh nghiệp" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudTextField @bind-Value="_profile.BusinessRegistrationNumber" Label="Số giấy chứng nhận ĐKKD" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" OnClick="SaveProfileAsync">
+                                Lưu thông tin phân loại & pháp lý
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
+
+                <!-- TAB 3: ĐỊA ĐIỂM & KHU KINH TẾ -->
+                <MudTabPanel Text="3. Địa điểm & Khu kinh tế" Icon="@Icons.Material.Filled.Place">
+                    <div class="pt-4">
+                        <MudDataGrid T="CompanySiteDto" Items="@(_aggregate?.Sites ?? Array.Empty<CompanySiteDto>())" Dense="true" Hover="true" Striped="true" Class="irm-data-table mb-4">
+                            <Columns>
+                                <PropertyColumn Property="x => x.Name" Title="Tên địa điểm / Chi nhánh" />
+                                <PropertyColumn Property="x => x.SiteTypeCode" Title="Loại địa điểm" />
+                                <PropertyColumn Property="x => x.AddressLine" Title="Địa chỉ cụ thể" />
+                                <PropertyColumn Property="x => x.AdministrativeUnit!.Name" Title="Địa bàn xã/phường" />
+                                <TemplateColumn Title="Khu công nghiệp / KKT">
+                                    <CellTemplate>
+                                        @string.Join(", ", context.Item.ZoneMemberships.Select(x => x.EconomicZone?.Name))
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+
+                        <MudPaper Class="pa-4 mb-3" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
+                            <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">➕ Thêm địa điểm hoạt động cho doanh nghiệp</MudText>
+                            <MudGrid>
+                                <MudItem xs="12" sm="4"><MudTextField @bind-Value="_site.Name" Label="Tên địa điểm / Nhà xưởng" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="4"><MudTextField @bind-Value="_site.AddressLine" Label="Địa chỉ cụ thể" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="4">
+                                    <MudSelect T="int" @bind-Value="_site.AdministrativeUnitId" Label="Địa bàn xã/phường" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                        @foreach (var unit in _units)
+                                        {
+                                            <MudSelectItem Value="unit.Id">@unit.Name</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudSelect T="int?" @bind-Value="_zoneId" Label="Thuộc Khu công nghiệp / KKT (nếu có)" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                        @foreach (var zone in _zones)
+                                        {
+                                            <MudSelectItem T="int?" Value="zone.Id">@zone.Name (@zone.TypeCode)</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12" sm="6" Class="d-flex align-center">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddLocation" OnClick="SaveSiteAsync">
+                                        Thêm địa điểm
+                                    </MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+
+                        <MudPaper Class="pa-3" Elevation="0" Style="border: 1px dashed var(--border); border-radius: 12px;">
+                            <MudText Typo="Typo.caption" Class="font-weight-bold text-muted mb-2">THÊM NHANH DANH MỤC KHU / CỤM KINH TẾ</MudText>
+                            <MudGrid>
+                                <MudItem xs="12" sm="3"><MudTextField @bind-Value="_newZone.Code" Label="Mã khu" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="4"><MudTextField @bind-Value="_newZone.Name" Label="Tên khu / cụm kinh tế" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="3">
+                                    <MudSelect T="string" @bind-Value="_newZone.TypeCode" Label="Loại hình" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                        <MudSelectItem Value="@("INDUSTRIAL_PARK")">Khu công nghiệp (KCN)</MudSelectItem>
+                                        <MudSelectItem Value="@("INDUSTRIAL_CLUSTER")">Cụm công nghiệp (CCN)</MudSelectItem>
+                                        <MudSelectItem Value="@("BORDER_GATE_ECONOMIC_ZONE")">KKT cửa khẩu</MudSelectItem>
+                                        <MudSelectItem Value="@("COASTAL_ECONOMIC_ZONE")">KKT ven biển</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12" sm="2" Class="d-flex align-center">
+                                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Add" OnClick="SaveZoneAsync">Tạo khu mới</MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    </div>
+                </MudTabPanel>
+
+                <!-- TAB 4: CƠ SỞ LƯU TRÚ ĐÃ THUÊ -->
+                <MudTabPanel Text="4. Cơ sở lưu trú đã thuê" Icon="@Icons.Material.Filled.Hotel">
+                    <div class="pt-4">
+                        <MudDataGrid T="CompanyAccommodationAgreementDto" Items="@(_aggregate?.AccommodationAgreements ?? Array.Empty<CompanyAccommodationAgreementDto>())" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+                            <Columns>
+                                <PropertyColumn Property="x => x.Accommodation!.Name" Title="Tên cơ sở lưu trú" />
+                                <PropertyColumn Property="x => x.ScopeCode" Title="Phạm vi thuê" />
+                                <PropertyColumn Property="x => x.UnitLabel" Title="Căn / Phòng cụ thể" />
+                                <TemplateColumn Title="Thời hạn thuê">
+                                    <CellTemplate>
+                                        <span class="font-weight-bold">
+                                            @context.Item.ValidFrom.ToString("dd/MM/yyyy") – @(context.Item.ValidTo?.ToString("dd/MM/yyyy") ?? "Không thời hạn")
+                                        </span>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+                    </div>
+                </MudTabPanel>
+
+                <!-- TAB 5: NGƯỜI ĐẠI DIỆN & THÂN NHÂN NLĐ -->
+                <MudTabPanel Text="5. Đại diện & Thân nhân NLĐ" Icon="@Icons.Material.Filled.AccountBox">
+                    <div class="pt-4">
+                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Người đại diện pháp luật của Doanh nghiệp</MudText>
+                        <MudDataGrid T="CompanyRepresentativeDto" Items="@(_aggregate?.Representatives ?? Array.Empty<CompanyRepresentativeDto>())" Dense="true" Hover="true" Striped="true" Class="irm-data-table mb-3">
+                            <Columns>
+                                <PropertyColumn Property="x => x.FullName" Title="Họ và tên" />
+                                <PropertyColumn Property="x => x.Title" Title="Chức danh / Chức vụ" />
+                                <PropertyColumn Property="x => x.IdNumber" Title="Số CCCD / Hộ chiếu" />
+                                <PropertyColumn Property="x => x.Phone" Title="Điện thoại liên hệ" />
+                            </Columns>
+                        </MudDataGrid>
+
+                        <MudPaper Class="pa-3 mb-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
+                            <MudGrid>
+                                <MudItem xs="12" sm="4"><MudTextField @bind-Value="_representative.FullName" Label="Họ và tên người đại diện *" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="3"><MudTextField @bind-Value="_representative.Title" Label="Chức vụ" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="3"><MudTextField @bind-Value="_representative.IdNumber" Label="Số CCCD / Hộ chiếu" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="2" Class="d-flex align-center">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PersonAdd" OnClick="SaveRepresentativeAsync">
+                                        Thêm
+                                    </MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+
+                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Thân nhân NLĐ được Doanh nghiệp bảo lãnh</MudText>
+                        <MudDataGrid T="FamilyVisitorDto" Items="@(_aggregate?.SponsoredFamilyVisitors ?? Array.Empty<FamilyVisitorDto>())" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+                            <Columns>
+                                <PropertyColumn Property="x => x.FullName" Title="Họ tên người thăm thân" />
+                                <PropertyColumn Property="x => x.Passport" Title="Số hộ chiếu" />
+                                <PropertyColumn Property="x => x.RelativeName" Title="Thân nhân bảo lãnh" />
+                                <PropertyColumn Property="x => x.Relationship" Title="Mối quan hệ" />
+                            </Columns>
+                        </MudDataGrid>
+                    </div>
+                </MudTabPanel>
+
+                <!-- TAB 6: HỒ SƠ PHÁP NHÂN SCAN -->
+                <MudTabPanel Text="6. Hồ sơ pháp nhân Scan" Icon="@Icons.Material.Filled.AttachFile">
+                    <div class="pt-4">
+                        <MudDataGrid T="CompanyLegalDocumentDto" Items="@(_aggregate?.LegalDocuments ?? Array.Empty<CompanyLegalDocumentDto>())" Dense="true" Hover="true" Striped="true" Class="irm-data-table mb-4">
+                            <Columns>
+                                <PropertyColumn Property="x => x.TypeCode" Title="Loại tài liệu" />
+                                <PropertyColumn Property="x => x.DocumentNumber" Title="Số văn bản" />
+                                <PropertyColumn Property="x => x.IssuedBy" Title="Cơ quan cấp" />
+                                <PropertyColumn Property="x => x.StoredFile!.OriginalName" Title="Tên tệp đính kèm" />
+                                <TemplateColumn Title="Tải tệp" CellStyle="text-align: right;">
+                                    <CellTemplate>
+                                        @if (context.Item.StoredFile is not null)
+                                        {
+                                            <MudButton Variant="Variant.Outlined"
+                                                       Color="Color.Primary"
+                                                       Size="Size.Small"
+                                                       StartIcon="@Icons.Material.Filled.Download"
+                                                       OnClick="() => DownloadLegalFileAsync(context.Item.StoredFile)">
+                                                Tải về
+                                            </MudButton>
+                                        }
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+
+                        <MudPaper Class="pa-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
+                            <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">➕ Tải lên tài liệu pháp nhân mới</MudText>
+                            <MudGrid>
+                                <MudItem xs="12" sm="3"><MudTextField @bind-Value="_legal.TypeCode" Label="Loại tài liệu (ĐKKD, Giấy phép...)" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="3"><MudTextField @bind-Value="_legal.DocumentNumber" Label="Số hiệu văn bản" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="3"><MudTextField @bind-Value="_legal.IssuedBy" Label="Cơ quan cấp" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="3">
+                                    <InputFile OnChange="SelectLegalFile" accept=".pdf,.png,.jpg,.jpeg" class="mud-input-control-input" />
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" OnClick="SaveLegalDocumentAsync">
+                                        Lưu hồ sơ pháp nhân
+                                    </MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    </div>
+                </MudTabPanel>
+            </MudTabs>
         }
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Outlined" OnClick="@(() => _detailVisible = false)">Đóng</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Edit"
                    OnClick="@(() => { _detailVisible = false; if (_detailCompany != null) OpenEditDialog(_detailCompany); })">
-            Sửa
+            Sửa thông tin cơ bản
         </MudButton>
     </DialogActions>
 </MudDialog>
@@ -281,6 +500,8 @@
 @code {
     private List<CompanyDto> _companies = new();
     private List<FieldDto> _fields = new();
+    private List<AdministrativeUnitDto> _units = new();
+    private List<EconomicZoneDto> _zones = new();
     private string? _searchText;
     private int? _selectedFieldId;
     [CascadingParameter(Name = "IsAdmin")]
@@ -294,15 +515,25 @@
     private CompanyDto _form = new();
     private int _editingId;
 
-    // Detail dialog
+    // Detail & Extended Profile dialog state
     private bool _detailVisible;
     private CompanyDto? _detailCompany;
+    private CompanyProfileAggregateDto? _aggregate;
+    private CompanyProfileDto _profile = new();
+    private CompanySiteDto _site = new() { ValidFrom = DateTime.Today };
+    private int? _zoneId;
+    private EconomicZoneDto _newZone = new() { ValidFrom = DateTime.Today };
+    private CompanyRepresentativeDto _representative = new() { ValidFrom = DateTime.Today };
+    private CompanyLegalDocumentDto _legal = new();
+    private IBrowserFile? _file;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             _fields = await CatalogSvc.GetFieldsAsync();
+            _units = (await CatalogSvc.GetAdministrativeUnitsAsync()).ToList();
+            _zones = (await CatalogSvc.GetEconomicZonesAsync()).ToList();
             await LoadDataAsync();
         }
         finally
@@ -423,11 +654,119 @@
         }
     }
 
-    // ══════ CHI TIẾT ══════
-    private void OpenDetailDialog(CompanyDto company)
+    // ══════ CHI TIẾT & HỒ SƠ MỞ RỘNG (6 TAB) ══════
+    private async Task OpenDetailDialog(CompanyDto company)
     {
         _detailCompany = company;
+        await LoadExtendedProfileAsync(company.IDCompany);
         _detailVisible = true;
+    }
+
+    private async Task LoadExtendedProfileAsync(int companyId)
+    {
+        _aggregate = await Profiles.GetAsync(companyId);
+        _profile = _aggregate?.Profile ?? new CompanyProfileDto { CompanyId = companyId, ValidFrom = DateTime.Today };
+        _site = new CompanySiteDto { CompanyId = companyId, ValidFrom = DateTime.Today, AdministrativeUnitId = _units.FirstOrDefault()?.Id ?? 0 };
+        _representative = new CompanyRepresentativeDto { CompanyId = companyId, ValidFrom = DateTime.Today };
+        _legal = new CompanyLegalDocumentDto { CompanyId = companyId };
+    }
+
+    private async Task SaveProfileAsync()
+    {
+        if (_detailCompany is null) return;
+        try
+        {
+            await Profiles.SaveProfileAsync(_profile);
+            await LoadExtendedProfileAsync(_detailCompany.IDCompany);
+            Snackbar.Add("Đã lưu phân loại doanh nghiệp thành công.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task SaveSiteAsync()
+    {
+        if (_detailCompany is null) return;
+        try
+        {
+            await Profiles.SaveSiteAsync(_site, _zoneId.HasValue ? [_zoneId.Value] : []);
+            await LoadExtendedProfileAsync(_detailCompany.IDCompany);
+            Snackbar.Add("Đã thêm địa điểm hoạt động.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task SaveZoneAsync()
+    {
+        try
+        {
+            await CatalogSvc.SaveEconomicZoneAsync(_newZone);
+            _zones = (await CatalogSvc.GetEconomicZonesAsync()).ToList();
+            _newZone = new EconomicZoneDto { ValidFrom = DateTime.Today };
+            Snackbar.Add("Đã tạo mới khu/cụm kinh tế.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task SaveRepresentativeAsync()
+    {
+        if (_detailCompany is null) return;
+        try
+        {
+            await Profiles.SaveRepresentativeAsync(_representative);
+            await LoadExtendedProfileAsync(_detailCompany.IDCompany);
+            Snackbar.Add("Đã thêm người đại diện pháp luật.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private void SelectLegalFile(InputFileChangeEventArgs args) => _file = args.File;
+
+    private async Task SaveLegalDocumentAsync()
+    {
+        if (_detailCompany is null) return;
+        try
+        {
+            if (_file is not null)
+            {
+                await using var stream = _file.OpenReadStream(10 * 1024 * 1024);
+                var stored = await LegalDocuments.StoreAsync(stream, _file.Name, _file.ContentType);
+                _legal.StoredFileId = stored.Id;
+            }
+            await LegalDocuments.SaveMetadataAsync(_legal);
+            await LoadExtendedProfileAsync(_detailCompany.IDCompany);
+            Snackbar.Add("Đã lưu hồ sơ pháp nhân scan.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task DownloadLegalFileAsync(StoredFileDto file)
+    {
+        try
+        {
+            await using var stream = await LegalDocuments.OpenReadAsync(file.Id);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            await JS.InvokeVoidAsync("irmInterop.downloadFile", file.OriginalName, file.ContentType, Convert.ToBase64String(buffer.ToArray()));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
     }
 
     // ══════ XUẤT EXCEL ══════

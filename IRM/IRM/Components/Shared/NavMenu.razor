@@ -26,20 +26,11 @@
                 Icon="@Icons.Material.Filled.Badge"
                 Class="irm-nav-link"
                 ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Hồ sơ NNN hợp nhất"))'>
+                OnClick='@(() => NotifyPageChanged("Hồ sơ Người nước ngoài"))'>
         <div class="d-flex align-center justify-space-between w-100">
-            <span>Hồ sơ NNN hợp nhất</span>
-            <span class="nav-pill-badge badge-primary">Mới</span>
+            <span>Hồ sơ Người nước ngoài</span>
+            <span class="nav-pill-badge badge-primary">5 Tab</span>
         </div>
-    </MudNavLink>
-
-    <MudNavLink Href="/employees"
-                Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.Groups"
-                Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Nhân viên lao động"))'>
-        <span>Nhân viên lao động</span>
     </MudNavLink>
 
     <MudNavLink Href="/companies"
@@ -47,38 +38,11 @@
                 Icon="@Icons.Material.Filled.Business"
                 Class="irm-nav-link"
                 ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Quản lý Công ty"))'>
-        <span>Doanh nghiệp</span>
-    </MudNavLink>
-
-    <MudNavLink Href="/company-profiles"
-                Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.DomainVerification"
-                Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Hồ sơ doanh nghiệp"))'>
+                OnClick='@(() => NotifyPageChanged("Quản lý Doanh nghiệp"))'>
         <div class="d-flex align-center justify-space-between w-100">
-            <span>Hồ sơ mở rộng</span>
+            <span>Doanh nghiệp</span>
             <span class="nav-pill-badge badge-secondary">FDI/KKT</span>
         </div>
-    </MudNavLink>
-
-    <MudNavLink Href="/students"
-                Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.School"
-                Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Du học sinh"))'>
-        <span>Du học sinh</span>
-    </MudNavLink>
-
-    <MudNavLink Href="/family-visitors"
-                Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.FamilyRestroom"
-                Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Người thăm thân"))'>
-        <span>Người thăm thân</span>
     </MudNavLink>
 
     <MudNavLink Href="/accommodations"
@@ -221,6 +185,15 @@
                     ActiveClass="active"
                     OnClick='@(() => NotifyPageChanged("Quản trị"))'>
             <span>Quản trị hệ thống</span>
+        </MudNavLink>
+
+        <MudNavLink Href="/admin/legacy-sync"
+                    Match="NavLinkMatch.All"
+                    Icon="@Icons.Material.Filled.Storage"
+                    Class="irm-nav-link"
+                    ActiveClass="active"
+                    OnClick='@(() => NotifyPageChanged("Đồng bộ DB cũ"))'>
+            <span>Đồng bộ DB cũ</span>
         </MudNavLink>
     </AuthorizeView>
 </MudNavMenu>

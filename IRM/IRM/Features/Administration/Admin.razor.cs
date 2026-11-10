@@ -19,6 +19,7 @@ public partial class Admin : ComponentBase, IFeaturePage
     [Inject] public ICatalogService CatalogSvc { get; set; } = default!;
     [Inject] public IAuditService AuditSvc { get; set; } = default!;
     [Inject] public IAuthService AuthSvc { get; set; } = default!;
+    [Inject] public IForeignerRegistryService RegistrySvc { get; set; } = default!;
 
     [Parameter]
     public string? SectionKey { get; set; }
@@ -94,7 +95,7 @@ public partial class Admin : ComponentBase, IFeaturePage
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Khong tai du lieu quan tri: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Không tải được dữ liệu quản trị: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -151,7 +152,7 @@ public partial class Admin : ComponentBase, IFeaturePage
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Khong tai du lieu module '{_activeSection}': {ex.Message}", Severity.Error);
+            Snackbar.Add($"Không tải được dữ liệu module '{_activeSection}': {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -169,6 +170,7 @@ public partial class Admin : ComponentBase, IFeaturePage
         _adminCards.Add(new("districts", Icons.Material.Filled.Map, "Quận / Huyện", $"{_districts.Count} quận/huyện"));
         _adminCards.Add(new("wards", Icons.Material.Filled.Place, "Phường / Xã", $"{_wards.Count} phường/xã"));
         _adminCards.Add(new("admin-units", Icons.Material.Filled.LocationCity, "Địa bàn hành chính", $"{_adminUnits.Count} địa bàn"));
+        _adminCards.Add(new("legacy-sync", Icons.Material.Filled.Storage, "Đồng bộ DB cũ", "Nhập từ ReportManagerDB"));
         _adminCards.Add(new("audit", Icons.Material.Filled.ReceiptLong, "Nhật ký hệ thống", "Audit log"));
         _adminCards.Add(new("import-history", Icons.Material.Filled.CloudUpload, "Lịch sử Import", "Lịch sử phiên import"));
     }

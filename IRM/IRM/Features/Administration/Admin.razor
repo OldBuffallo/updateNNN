@@ -82,6 +82,10 @@ else if (!string.IsNullOrWhiteSpace(_activeSection))
             <AdminImportHistorySection Page="this" />
             break;
 
+        case "legacy-sync":
+            <AdminLegacySyncSection Page="this" />
+            break;
+
         default:
             <MudAlert Severity="Severity.Warning">Không tìm thấy module quản trị: @_activeSection</MudAlert>
             break;
