@@ -1,6 +1,6 @@
 # Thiết kế sắp xếp workspace IRM
 
-Ngày: 10/11/2026. Trạng thái: đã chọn phương án một Git repo chung; chờ duyệt thiết kế trước khi di chuyển.
+Ngày: 10/11/2026. Trạng thái: người dùng đã duyệt phương án một Git repo chung và yêu cầu thực hiện kế hoạch.
 
 ## Mục tiêu và phạm vi
 
