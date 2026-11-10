@@ -5,7 +5,7 @@
     "sourceHeadAtOrganization":  "65d129dc6d03965fcb750220c0a1a4ecbbd180af",
     "installerSourceCommit":  null,
     "installerSourceNote":  "The existing R4 installer predates the committed refactor. Its original source commit was not recorded; do not label the installer with the new source commit.",
-    "fileCount":  160,
+    "fileCount":  161,
     "moveCount":  14,
     "verifiedBy":  "Atomic same-volume moves; SHA-256 and byte length verified at the consolidated paths. Original release checksum files are preserved.",
     "pendingOriginalRemoval":  [
@@ -971,6 +971,12 @@
                       "path":  "05-HO-TRO/workspace-build-output/remove_docx_trailing_page.py",
                       "bytes":  311,
                       "sha256":  "520ABF196A09CACED7236BC9D4081ADDA41C74CBFC29523B3B8040E3079A23F7"
+                  },
+                  {
+                      "originalPath": "IRM/docs/HUONG-DAN-IMPORT-EXCEL.html",
+                      "path": "03-DU-LIEU-TEST/2026-11-10/HUONG-DAN-IMPORT-EXCEL.html",
+                      "bytes": 24810,
+                      "sha256": "5BEF799C2D55426C692A8B008237BC80A9A1ECB7552AF2B5968038D00E9DB631"
                   }
               ]
 }

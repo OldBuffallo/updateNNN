@@ -22,6 +22,10 @@ R4 giữ payload ứng dụng cũ từ R3. Nó không chứa đợt tách kiến
 
 File Excel mẫu cũ vẫn được giữ trong các gói gốc để bảo toàn checksum. Khi thử import với danh mục mặc định, dùng file đã sửa ở `03-DU-LIEU-TEST/2026-11-10/`. Ba hồ sơ giả có quốc tịch Đức, Pháp và Canada đã đổi sang Úc, Anh và Hoa Kỳ; các ô ngoài quốc tịch được giữ nguyên. Đây là sửa dữ liệu test, không phải nâng cấp EXE trên máy khách.
 
+Đối chiếu database cũ sau đó xác nhận bộ mã cũ khác bộ seed mặc định mới: USA/KOR/JPN/CHN... và D cho Đức. Vì vậy file DA-SUA chỉ là dữ liệu thử cho seed mới, không phải chuẩn sửa dữ liệu nghiệp vụ kế thừa. Khi làm việc với database cũ, lấy danh mục thật làm chuẩn và đọc [hướng dẫn import](HUONG-DAN-IMPORT-EXCEL.md).
+
+Bổ sung hướng dẫn HTML tự chứa tại `03-DU-LIEU-TEST/2026-11-10/HUONG-DAN-IMPORT-EXCEL.html`; danh mục tệp hiện gồm 160 tệp đã tập trung và hướng dẫn mới này. Bản Markdown nguồn và bản HTML tương ứng được quản lý trong `IRM/docs/`. Không thay workbook hoặc gói cài đặt trong lần đối chiếu database này.
+
 ## Kết thúc mỗi lần sửa source
 
 1. Kiểm tra `git status` và giữ nguyên thay đổi không liên quan.
