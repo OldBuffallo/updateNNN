@@ -55,16 +55,16 @@ public sealed class IrmThemePaletteTests
     }
 
     [Theory]
-    [InlineData(false, "#f4f5fa", "#ffffff", "#6e39cb")]
-    [InlineData(true, "#28243d", "#312d4b", "#b794f4")]
-    public void MaterioPalette_UsesExpectedCanvasAndReadableDrawerTokens(
-        bool dark, string expectedBackground, string expectedSurface, string expectedPrimary)
+    [InlineData(false, "#f4f6f9", "#ffffff", "#1d4ed8", "#ffffff")]
+    [InlineData(true, "#0b1120", "#0f172a", "#60a5fa", "#0f172a")]
+    public void GovernmentMvpPalette_UsesExpectedCanvasAndReadableDrawerTokens(
+        bool dark, string expectedBackground, string expectedSurface, string expectedPrimary, string expectedDrawer)
     {
         var palette = Palette(dark);
         Assert.Equal(new MudColor(expectedBackground), palette.Background);
         Assert.Equal(new MudColor(expectedSurface), palette.Surface);
         Assert.Equal(new MudColor(expectedPrimary), palette.Primary);
-        Assert.Equal(new MudColor(expectedBackground), palette.DrawerBackground);
+        Assert.Equal(new MudColor(expectedDrawer), palette.DrawerBackground);
         Readable(palette.DrawerText, palette.DrawerBackground, 4.5);
         Readable(palette.DrawerIcon, palette.DrawerBackground, 4.5);
     }
