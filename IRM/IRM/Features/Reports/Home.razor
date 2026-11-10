@@ -23,7 +23,7 @@ else if (_error != null)
 }
 
 <!-- ════════════ WELCOME HERO & QUICK ACTIONS ════════════ -->
-<div class="dashboard-hero-banner mb-5">
+<div class="dashboard-hero-banner mb-3">
     <div class="hero-content">
         <div class="d-flex align-center justify-space-between flex-wrap gap-3">
             <div>
@@ -48,7 +48,7 @@ else if (_error != null)
         </div>
 
         <!-- Quick Action Shortcuts -->
-        <div class="hero-quick-actions mt-4">
+        <div class="hero-quick-actions mt-2">
             <button class="hero-action-pill" @onclick='() => Nav.NavigateTo("/employees")'>
                 <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Small" />
                 <span>Nhân viên LĐ (@_totalEmployees.ToString("N0"))</span>
@@ -78,7 +78,7 @@ else if (_error != null)
 </div>
 
 <!-- ════════════ KPI CARDS GRID ════════════ -->
-<div class="kpi-grid mb-5">
+<div class="kpi-grid mb-3">
     <div class="kpi-card kpi-blue kpi-card-action" role="button" tabindex="0"
          @onclick='() => GoTo("/companies")' @onkeydown='e => OnCardKeyDown(e, "/companies")'>
         <div class="kpi-body">
@@ -173,7 +173,7 @@ else if (_error != null)
 </div>
 
 <!-- ════════════ CHARTS ROW 1: Bar + Doughnut ════════════ -->
-<div class="charts-grid mb-5">
+<div class="charts-grid mb-3">
     <div class="chart-card">
         <div class="chart-header">
             <div class="d-flex align-center">
@@ -191,7 +191,7 @@ else if (_error != null)
                 <MudSelectItem Value="@("2025")">Năm 2025</MudSelectItem>
             </MudSelect>
         </div>
-        <div class="chart-canvas-container" style="height: 280px; position: relative;">
+        <div class="chart-canvas-container" style="height: 220px; position: relative;">
             <canvas id="chartNationality"></canvas>
         </div>
     </div>
@@ -208,14 +208,14 @@ else if (_error != null)
                 </div>
             </div>
         </div>
-        <div class="chart-canvas-container" style="height: 280px; position: relative;">
+        <div class="chart-canvas-container" style="height: 220px; position: relative;">
             <canvas id="chartPermit"></canvas>
         </div>
     </div>
 </div>
 
 <!-- ════════════ CHARTS ROW 2: Trend + Expiration Watchlist ════════════ -->
-<div class="charts-grid mb-5">
+<div class="charts-grid mb-3">
     <div class="chart-card">
         <div class="chart-header">
             <div class="d-flex align-center">
@@ -228,7 +228,7 @@ else if (_error != null)
                 </div>
             </div>
         </div>
-        <div class="chart-canvas-container" style="height: 260px; position: relative;">
+        <div class="chart-canvas-container" style="height: 210px; position: relative;">
             <canvas id="chartTrend"></canvas>
         </div>
     </div>

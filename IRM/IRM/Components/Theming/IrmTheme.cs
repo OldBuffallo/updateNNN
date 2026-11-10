@@ -84,7 +84,7 @@ public static class IrmTheme
         },
         LayoutProperties = new LayoutProperties
         {
-            DrawerWidthLeft = "260px",
+            DrawerWidthLeft = "300px",
             DefaultBorderRadius = "10px"
         }
     };
