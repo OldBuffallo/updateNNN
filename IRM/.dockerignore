@@ -6,8 +6,7 @@
 **/*.user
 **/*.suo
 deploy/
-TestExcelGen/
-mockup-demo/
+reference/
 *.zip
 *.bak
 *.md
@@ -21,4 +20,3 @@ data-protection-keys/
 **/*.db
 **/*.db-shm
 **/*.db-wal
-immigration-reportmanager-master/

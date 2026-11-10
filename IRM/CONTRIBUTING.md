@@ -108,19 +108,16 @@ chore: update MudBlazor to v9.3
 ## Chạy Development
 
 ```bash
-# Clone repo
-git clone <repository-url>
-cd immigration-reportmanager-master
-
-# Chạy app (tự dùng SQLite nếu không có SQL Server)
-cd IRM
-dotnet run
-
-# Mở browser: http://localhost:5050
-# Tài khoản demo: admin / (mật khẩu bất kỳ khi dùng SQLite)
+# Clone repo vào workspace, sau đó mở solution nâng cấp
+git clone <repository-url> NNN
+cd NNN/IRM
+dotnet restore IRM.sln
+dotnet run --project IRM/IRM.csproj
 ```
 
-### Kết nối SQL Server (tùy chọn)
+### Kết nối SQL Server
+
+Runtime yêu cầu SQL Server đã được cấu hình và khởi tạo đúng schema. SQLite chỉ nằm trong test, không phải fallback cho ứng dụng. Dùng tài khoản IRM do người cài đặt tạo, không có mật khẩu demo mặc định. Cấu hình bí mật qua biến môi trường theo README; không lưu thông tin production vào Git.
 
 Sửa `IRM/appsettings.Development.json`:
 

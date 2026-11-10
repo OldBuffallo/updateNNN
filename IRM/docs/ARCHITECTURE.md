@@ -2,7 +2,7 @@
 
 ## Điểm bắt đầu
 
-Mở `IRM.sln` ở repository gốc. Solution chỉ chứa bản web hiện hành và test; solution WPF lồng bên trong là mã tham chiếu.
+Git root là workspace `NNN/`. Mở `IRM/IRM.sln` từ workspace, hoặc `IRM.sln` khi đang ở thư mục dự án nâng cấp `IRM/`. Tất cả đường dẫn project và lệnh .NET/EF trong tài liệu này tính từ thư mục nâng cấp. Solution chỉ chứa bản web hiện hành và test; WPF nằm ngang cấp tại `../immigration-reportmanager-master/ReportManager.sln`, giữ làm source cũ để đối chiếu database và nghiệp vụ. Demo/Excel experiment nằm trong `reference/` và không tham gia build solution.
 
 | Project | Trách nhiệm | Tham chiếu project |
 |---|---|---|

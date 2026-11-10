@@ -20,25 +20,25 @@
 
 ## Task 1: Capture the baseline
 
-- [ ] Record HEAD, branch, Git config and SHA-256 of tracked files and existing delivery files in a temporary audit directory outside the source.
-- [ ] Back up Git history using a bundle; check clean status and destination conflicts.
-- [ ] Save this plan, mark the design approved, and commit documentation before moving.
-- [ ] Run a temporary structural check; observe that the target root and new solution path are not present yet.
+- [x] Record HEAD, branch, Git config and SHA-256 of tracked files and existing delivery files in a temporary audit directory outside the source.
+- [x] Back up Git history using a bundle; check clean status and destination conflicts.
+- [x] Save this plan, mark the design approved, and commit documentation before moving.
+- [x] Run a temporary structural check; observe that the target root and new solution path are not present yet.
 
 ## Task 2: Relocate the existing workspace
 
-- [ ] Rename the current outer source directory to IRM; extract its nested WPF directory into the vacated legacy directory at workspace root.
-- [ ] Move the existing .git, .github and .gitignore to workspace root. Preserve the index and history; do not initialize a new repository.
-- [ ] Move TestExcelGen and mockup-demo into IRM/reference. Keep application projects, deploy, docs, configuration, caches and runtime state under IRM.
-- [ ] Consolidate remaining output support under BAN-GIAO/05-HO-TRO if Windows permits an ordinary same-volume move; otherwise preserve and report the locked item.
-- [ ] Verify root, branch, old commits, legacy file count and byte fingerprints immediately after the move.
+- [x] Rename the current outer source directory to IRM; extract its nested WPF directory into the vacated legacy directory at workspace root.
+- [x] Move the existing .git, .github and .gitignore to workspace root. Preserve the index and history; do not initialize a new repository.
+- [x] Move TestExcelGen and mockup-demo into IRM/reference. Keep application projects, deploy, docs, configuration, caches and runtime state under IRM.
+- [x] Consolidate remaining output support under BAN-GIAO/05-HO-TRO if Windows permits an ordinary same-volume move; otherwise preserve and report the locked item.
+- [x] Verify root, branch, old commits, legacy file count and byte fingerprints immediately after the move.
 
 ## Task 3: Update integrations and verify
 
-- [ ] Update root/project AGENTS and READMEs, ignore rules, current delivery links, and architecture documentation.
-- [ ] Set the appropriate IRM working directory in CI/release jobs; update artifact upload paths, Docker context and reference demo path.
-- [ ] Preserve solution-relative project paths and packaging source revision checks; keep candidates under BAN-GIAO/04-CHO-NGHIEM-THU.
-- [ ] Run structural/fingerprint/ignore checks; restore, build Release, test .NET, and verify PowerShell x64/x86. Check Docker if available; record unavailable tools or policy restrictions accurately.
+- [x] Update root/project AGENTS and READMEs, ignore rules, current delivery links, and architecture documentation.
+- [x] Set the appropriate IRM working directory in CI/release jobs; update artifact upload paths, Docker context and reference demo path.
+- [x] Preserve solution-relative project paths and packaging source revision checks; keep candidates under BAN-GIAO/04-CHO-NGHIEM-THU.
+- [x] Run structural/fingerprint/ignore checks; restore, build Release, test .NET, and verify PowerShell x64/x86. Check Docker if available; record unavailable tools or policy restrictions accurately.
 - [ ] Commit the complete move and integration changes; obtain one independent read-only review of the full change, fix material findings with focused verification, and leave a clean tree.
 
 ## Acceptance

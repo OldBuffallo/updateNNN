@@ -1,5 +1,7 @@
 > **Kiến trúc hiện hành:** đọc [ARCHITECTURE.md](ARCHITECTURE.md). Phần mô tả cấu trúc và SQLite development bên dưới là tài liệu lịch sử; ứng dụng hiện tại chỉ dùng SQL Server, SQLite chỉ phục vụ test.
 
+> **Workspace hiện hành:** một Git repo tại `NNN/`; WPF cũ ở `immigration-reportmanager-master/`, solution nâng cấp ở `IRM/`, bộ cài/dữ liệu test ở `BAN-GIAO/`. Chạy lệnh .NET/EF từ thư mục nâng cấp; xem [README workspace](../../README.md).
+
 > **Bàn giao và Git:** đọc [DELIVERY-LAYOUT.md](DELIVERY-LAYOUT.md). Toàn bộ gói bàn giao nằm trong `../../BAN-GIAO/`; các đường dẫn cũ trong biên bản R2/R3/R4 là vị trí lịch sử trước ngày 10/11/2026.
 
 # IRM — Immigration Report Manager

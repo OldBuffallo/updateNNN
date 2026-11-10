@@ -14,6 +14,9 @@ jobs:
   build-and-test:
     name: Build & Test (.NET 8)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: IRM
 
     steps:
       - name: Checkout Code
@@ -41,12 +44,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: ./TestResults
+          path: IRM/TestResults
 
   docker-build:
     name: Verify Docker Build
     runs-on: ubuntu-latest
     needs: build-and-test
+    defaults:
+      run:
+        working-directory: IRM
 
     steps:
       - name: Checkout Code
@@ -62,6 +68,9 @@ jobs:
   windows-installer-preflight:
     name: Windows installer environment checks (x64 and x86 PowerShell)
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: IRM
     steps:
       - uses: actions/checkout@v4
       - name: Check native Windows PowerShell

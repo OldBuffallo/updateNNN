@@ -3,6 +3,8 @@ bin/
 obj/
 packages/
 node_modules/
+TestResults/
+publish/
 *.dll
 *.exe
 *.pdb
@@ -33,7 +35,7 @@ data-protection-keys/
 memory-bank/
 
 # Generated publish, installer, and handoff artifacts
-IRM/publish-temp/
+IRM/IRM/publish-temp/
 build-output/
 deploy-package/
 IRM-v*-offline-installer/
@@ -46,7 +48,21 @@ IRM-v*-ubuntu-installer/
 *.msp
 
 # Licensed third-party installer media; keep deploy/vendor/**/README.md tracked
-deploy/SQLEXPRWT_x64_2014/
+IRM/deploy/SQLEXPRWT_x64_2014/
 
 # Local scripts may contain credentials
 create-*.ps1
+
+# Workspace delivery packages and open workbook copies are never source.
+/BAN-GIAO/
+/outputs/
+.superpowers/
+
+# Local connection settings and private signing material.
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+*.pem

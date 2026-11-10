@@ -1,6 +1,6 @@
 # Quản lý source và bàn giao IRM
 
-Cập nhật ngày 10/11/2026 (Asia/Bangkok). Repository hiện hành là `immigration-reportmanager-master/`, nhánh `develop`. Các gói cài đặt được lưu ngoài Git, tại `../BAN-GIAO/`.
+Cập nhật ngày 10/11/2026 (Asia/Bangkok). Git root là workspace `NNN/`, nhánh `develop`; solution nâng cấp nằm trong `IRM/`, còn `immigration-reportmanager-master/` là source WPF cũ ngang cấp. Các gói cài đặt nằm trong `BAN-GIAO/` ở workspace root và được Git bỏ qua. Các đường dẫn `../BAN-GIAO/` bên dưới được tính từ thư mục solution nâng cấp.
 
 ## Thư mục chung
 
@@ -31,7 +31,7 @@ File Excel mẫu cũ vẫn được giữ trong các gói gốc để bảo toà
 
 ## Tạo gói mới
 
-Sau khi commit và Git tree sạch, chạy `deploy/windows/build-windows-installer.ps1` từ repo. Output mặc định là `../BAN-GIAO/04-CHO-NGHIEM-THU/<timestamp>-v1.0.2/`. Có thể truyền `-OutputDirectory` cho môi trường build riêng; bản bàn giao cuối cùng vẫn phải chuyển vào thư mục chung.
+Sau khi commit và Git tree sạch, chạy `deploy/windows/build-windows-installer.ps1` từ thư mục solution nâng cấp `IRM/`. Output mặc định là `../BAN-GIAO/04-CHO-NGHIEM-THU/<timestamp>-v1.0.2/`. Có thể truyền `-OutputDirectory` cho môi trường build riêng; bản bàn giao cuối cùng vẫn phải chuyển vào thư mục chung.
 
 Script đóng gói ghi commit vào `SOURCE-REVISION.json` trước khi tạo checksum. Giữ các giới hạn ký số/nghiệm thu hiện có; không tự chạy cài đặt lên máy đang dùng để kiểm tra việc dọn thư mục. Không ghi đè bộ cài hoặc cập nhật checksum của gói đã giao để biến nó thành bản mới.
 
