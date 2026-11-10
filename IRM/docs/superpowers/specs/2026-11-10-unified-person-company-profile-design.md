@@ -1,6 +1,6 @@
 # Thiết kế hợp nhất Hồ sơ Người nước ngoài và Hồ sơ Doanh nghiệp
 
-Ngày: 10/11/2026. Trạng thái: **Chờ người dùng phê duyệt thiết kế**. Phạm vi: Hợp nhất giao diện quản lý hồ sơ người nước ngoài và hồ sơ doanh nghiệp theo Phương án 1, bảo toàn 100% tương thích database cũ và luồng import Excel.
+Ngày: 10/11/2026. Trạng thái: **Đã được người dùng phê duyệt thiết kế và yêu cầu triển khai**. Phạm vi: Hợp nhất giao diện quản lý hồ sơ người nước ngoài và hồ sơ doanh nghiệp theo Phương án 1, bảo toàn 100% tương thích database cũ (cả dữ liệu bảng cũ/backfill lẫn import Excel).
 
 ## 1. Mục tiêu và lý do (Intent & Why)
 
@@ -126,6 +126,16 @@ Khi người dùng bấm **Lưu hồ sơ**:
     - **Tab 5 — Người đại diện & Thân nhân NLĐ** (`CompanyRepresentative` & `SponsoredFamilyVisitors`).
     - **Tab 6 — Hồ sơ pháp nhân Scan** (`CompanyLegalDocument`: tải lên và tải về file PDF/ảnh scan ĐKKD, giấy phép).
 - Công ty từ database cũ chưa có bản ghi `CompanyProfile` sẽ tự động được khởi tạo đối tượng mặc định khi mở các tab mở rộng, không gây lỗi null.
+
+### 5.4. Hỗ trợ cả 2 luồng Import dữ liệu cũ (Database SQL cũ & File Excel cũ)
+
+1. **Luồng 1 — Nhập / Đồng bộ trực tiếp từ Database SQL cũ (`ReportManagerDB`) trong `/admin/legacy-sync`**:
+   - Cung cấp module quản trị **Đồng bộ & Nhập DB cũ** (`/admin/legacy-sync`, chỉ dành cho `ADMIN`) hỗ trợ 2 thao tác:
+     - **Nhập từ Database SQL cũ (`ReportManagerDB` hoặc chuỗi kết nối tùy chọn)**: Kết nối chỉ đọc (`SELECT`) tới database WPF cũ trên SQL Server và sao chép an toàn (idempotent, không ghi đè làm hỏng dữ liệu đang có) toàn bộ danh mục (`Nationality` giữ nguyên mã gốc như `USA`, `KOR`, `D`..., `Fields`, `CareerGroups`, `Careers`, `Districts`, `Wards`), danh sách `Companies` và danh sách `Employees` sang database hiện tại, sau đó tự động liên kết sang `ForeignPersons` + `ForeignPersonSourceLinks` + `StayCases`.
+     - **Đồng bộ bảng cũ nội bộ (`BackfillLegacyAsync` nâng cấp)**: Quét toàn bộ bản ghi `Employees` và `Students` hiện có trong DB để tạo `ForeignPerson`, `ForeignPersonSourceLink` và `StayCase`. Các bản ghi thiếu số hộ chiếu hoặc trùng số hộ chiếu vẫn được tạo hồ sơ `ForeignPerson` (`IsDataIncomplete = true`) để hiển thị đầy đủ trên giao diện hợp nhất (đồng thời ghi nhận vào `MigrationIssues` để tra cứu).
+2. **Luồng 2 — Nhập từ File Excel xuất từ phần mềm cũ (`/import`)**:
+   - Giữ nguyên luồng Import Excel và Rollback hiện tại.
+   - Nhờ cơ chế **Unified Read** (Mục 5.2.A), ngay sau khi import file Excel mẫu cũ vào bảng `Employees`, toàn bộ nhân viên vừa import lập tức xuất hiện trên màn hình `Hồ sơ Người nước ngoài` với đầy đủ thông tin Công ty, Nghề nghiệp, GPLĐ, Hạn tạm trú, Visa và Thăm thân mà không bị lỗi hay sót dòng.
 
 ## 6. Phần để người triển khai quyết định (Left to the Builder)
 
