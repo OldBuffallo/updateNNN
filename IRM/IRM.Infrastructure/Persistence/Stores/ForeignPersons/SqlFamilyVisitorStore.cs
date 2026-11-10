@@ -121,7 +121,16 @@ public sealed class SqlFamilyVisitorStore : IForeignerRegistryStore
     public async Task<int> SaveFamilyVisitAsync(FamilyVisitInput input, CancellationToken cancellationToken = default)
     {
         if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
-        IRM.Application.Features.ForeignPersons.FamilyVisitRules.Validate(input);
+
+        // Load valid nationality codes and validate input (including nationality
+        // check) before starting the transaction so the user gets a clear
+        // Vietnamese error message instead of a raw FK violation.
+        var validNationalityCodes = await _db.Nationality.AsNoTracking()
+            .Where(n => n.Delete_flag == 0)
+            .Select(n => n.NationalityCode)
+            .ToListAsync(cancellationToken);
+        IRM.Application.Features.ForeignPersons.FamilyVisitRules.Validate(input, validNationalityCodes);
+
         var strategy = _db.Database.CreateExecutionStrategy();
         return await strategy.ExecuteAsync(async () =>
         {

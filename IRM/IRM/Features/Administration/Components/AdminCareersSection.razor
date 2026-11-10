@@ -4,10 +4,10 @@
 <MudPaper Class="pa-4 mb-4">
                 <MudGrid>
                     <MudItem xs="12" md="4">
-                        <MudTextField T="string" Label="Ten nganh nghe" @bind-Value="Page._careerForm.CareerName" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Tên ngành nghề" @bind-Value="Page._careerForm.CareerName" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="4">
-                        <MudSelect T="int" Label="Nhom nganh" @bind-Value="Page._careerForm.IDCG" Variant="Variant.Outlined">
+                        <MudSelect T="int" Label="Nhóm ngành" @bind-Value="Page._careerForm.IDCG" Variant="Variant.Outlined">
                             @foreach (var group in Page._careerGroups)
                             {
                                 <MudSelectItem Value="@group.IDCG">@group.CareerGroupName</MudSelectItem>

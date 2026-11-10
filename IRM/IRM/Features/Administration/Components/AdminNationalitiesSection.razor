@@ -4,10 +4,10 @@
 <MudPaper Class="pa-4 mb-4">
                 <MudGrid>
                     <MudItem xs="12" md="3">
-                        <MudTextField T="string" Label="Ma quoc tich" @bind-Value="Page._nationalityForm.NationalityCode" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Mã quốc tịch" @bind-Value="Page._nationalityForm.NationalityCode" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="6">
-                        <MudTextField T="string" Label="Ten quoc tich" @bind-Value="Page._nationalityForm.NationalityName" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Tên quốc tịch" @bind-Value="Page._nationalityForm.NationalityName" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="3" Class="d-flex align-center">
                         <MudStack Row="true" Spacing="1">
@@ -18,7 +18,7 @@
                 </MudGrid>
             </MudPaper>
             <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
-                <thead><tr><th>Ma</th><th>Ten quoc tich</th><th></th></tr></thead>
+                <thead><tr><th>Mã</th><th>Tên quốc tịch</th><th></th></tr></thead>
                 <tbody>
                     @foreach (var n in Page._nationalities)
                     {

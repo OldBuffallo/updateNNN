@@ -10,10 +10,10 @@
                         <MudTextField T="string" Label="Action" @bind-Value="Page._auditFilterAction" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="2">
-                        <MudDatePicker Label="Tu ngay" @bind-Date="Page._auditFrom" Variant="Variant.Outlined" />
+                        <MudDatePicker Label="Từ ngày" @bind-Date="Page._auditFrom" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="2">
-                        <MudDatePicker Label="Den ngay" @bind-Date="Page._auditTo" Variant="Variant.Outlined" />
+                        <MudDatePicker Label="Đến ngày" @bind-Date="Page._auditTo" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="2" Class="d-flex align-center">
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.LoadAuditAsync">Loc</MudButton>

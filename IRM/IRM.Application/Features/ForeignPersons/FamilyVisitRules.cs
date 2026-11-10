@@ -12,4 +12,22 @@ public static class FamilyVisitRules
         if (input.ValidTo.HasValue && input.ValidTo.Value.Date < input.ValidFrom.Date)
             throw new ArgumentException("Ngày kết thúc không được trước ngày bắt đầu.");
     }
+
+    /// <summary>
+    /// Extended validation that also checks the nationality code against the
+    /// active catalog.  Call this overload when the caller has already loaded the
+    /// set of valid nationality codes from the database.
+    /// </summary>
+    public static void Validate(FamilyVisitInput input, IReadOnlyCollection<string> validNationalityCodes)
+    {
+        Validate(input);
+
+        if (!string.IsNullOrWhiteSpace(input.NationalityCode)
+            && !validNationalityCodes.Contains(input.NationalityCode))
+        {
+            throw new ArgumentException(
+                $"Quốc tịch \"{input.NationalityCode}\" không có trong danh mục. " +
+                "Vui lòng thêm quốc tịch tại Quản trị → Quốc tịch trước khi lưu hồ sơ.");
+        }
+    }
 }

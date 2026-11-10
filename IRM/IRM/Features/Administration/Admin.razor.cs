@@ -153,14 +153,14 @@ public partial class Admin : ComponentBase, IFeaturePage
     internal void BuildCards()
     {
         _adminCards.Clear();
-        _adminCards.Add(new("accounts", Icons.Material.Filled.ManageAccounts, "Tài khoản", $"{_accounts.Count} tai khoan"));
-        _adminCards.Add(new("fields", Icons.Material.Filled.Business, "Lĩnh vực", $"{_fields.Count} linh vuc"));
-        _adminCards.Add(new("careers", Icons.Material.Filled.Work, "Ngành nghề", $"{_careers.Count} nganh"));
-        _adminCards.Add(new("nationalities", Icons.Material.Filled.Public, "Quốc tịch", $"{_nationalities.Count} quoc tich"));
-        _adminCards.Add(new("districts", Icons.Material.Filled.Map, "Quận / Huyện", $"{_districts.Count} quan/huyen"));
-        _adminCards.Add(new("wards", Icons.Material.Filled.Place, "Phuong / Xa", $"{_wards.Count} phuong/xa"));
+        _adminCards.Add(new("accounts", Icons.Material.Filled.ManageAccounts, "Tài khoản", $"{_accounts.Count} tài khoản"));
+        _adminCards.Add(new("fields", Icons.Material.Filled.Business, "Lĩnh vực", $"{_fields.Count} lĩnh vực"));
+        _adminCards.Add(new("careers", Icons.Material.Filled.Work, "Ngành nghề", $"{_careers.Count} ngành"));
+        _adminCards.Add(new("nationalities", Icons.Material.Filled.Public, "Quốc tịch", $"{_nationalities.Count} quốc tịch"));
+        _adminCards.Add(new("districts", Icons.Material.Filled.Map, "Quận / Huyện", $"{_districts.Count} quận/huyện"));
+        _adminCards.Add(new("wards", Icons.Material.Filled.Place, "Phường / Xã", $"{_wards.Count} phường/xã"));
         _adminCards.Add(new("audit", Icons.Material.Filled.ReceiptLong, "Nhật ký hệ thống", "Audit log"));
-        _adminCards.Add(new("import-history", Icons.Material.Filled.CloudUpload, "Lich su Import", "Lich su phien import"));
+        _adminCards.Add(new("import-history", Icons.Material.Filled.CloudUpload, "Lịch sử Import", "Lịch sử phiên import"));
     }
 
     internal void ResetFormsAfterDataLoaded()

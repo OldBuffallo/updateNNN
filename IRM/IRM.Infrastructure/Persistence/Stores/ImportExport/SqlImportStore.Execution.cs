@@ -54,6 +54,10 @@ public partial class SqlImportStore
                     // whole writable batch before tracking or saving any employee.
                     var nationalities = await _db.Nationality.AsNoTracking()
                         .Where(n => n.Delete_flag == 0).ToListAsync();
+                    // Validate nationality codes for all writable rows before
+                    // tracking or saving.  Collect all errors so the user sees every
+                    // problematic row at once instead of failing on the first one.
+                    var nationalityErrors = new List<string>();
                     foreach (var row in previewRows.Where(r => r.ParsedEmployee is not null &&
                         (r.Status == "new" || (r.Status == "duplicate" && r.ExistingEmployeeId.HasValue &&
                             duplicateDecisions.GetValueOrDefault(r.ExistingEmployeeId.Value, "skip") == "update"))))
@@ -64,11 +68,17 @@ public partial class SqlImportStore
                         }
                         catch (InvalidOperationException ex)
                         {
-                            result.TotalRows = previewRows.Count;
-                            result.ErrorCount = 1;
-                            result.Errors.Add($"Dòng {row.RowNumber}: {ex.Message}");
-                            throw;
+                            nationalityErrors.Add($"Dòng {row.RowNumber}: {ex.Message}");
                         }
+                    }
+
+                    if (nationalityErrors.Count > 0)
+                    {
+                        result.TotalRows = previewRows.Count;
+                        result.ErrorCount = nationalityErrors.Count;
+                        result.Errors.AddRange(nationalityErrors);
+                        result.Success = false;
+                        return;
                     }
 
                     foreach (var row in previewRows)
@@ -297,7 +307,10 @@ public partial class SqlImportStore
                 }
             });
 
-            result.Success = true;
+            // Only mark success when the lambda did not short-circuit due
+            // to validation errors (e.g. unknown nationality codes).
+            if (result.ErrorCount == 0)
+                result.Success = true;
         }
         catch (Exception ex)
         {
