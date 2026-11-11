@@ -99,62 +99,50 @@
                 <span class="cell-secondary font-weight-bold tabular-nums">@(_companies.IndexOf(context.Item) + 1)</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Tên công ty & Địa chỉ" SortBy="@(x => x.CompanyName)">
+        <TemplateColumn Title="Doanh nghiệp" SortBy="@(x => x.CompanyName)">
             <CellTemplate>
-                <div class="d-flex align-center">
-                    <div class="table-avatar mr-3 bg-blue-soft">
-                        <MudIcon Icon="@Icons.Material.Outlined.Business" Size="Size.Small" Color="Color.Primary" />
-                    </div>
-                    <div class="cell-stack">
-                        <div class="cell-primary">@context.Item.CompanyName</div>
-                        <div class="cell-secondary cell-truncate" title="@context.Item.Address">
-                            @(string.IsNullOrWhiteSpace(context.Item.TypeOfBusiniess) ? "Doanh nghiệp" : context.Item.TypeOfBusiniess)
-                            @if (!string.IsNullOrWhiteSpace(context.Item.Address))
-                            {
-                                <text> · 📍 @context.Item.Address</text>
-                            }
-                        </div>
-                    </div>
+                <div class="cell-truncate" title="@context.Item.Address">
+                    <span class="cell-primary">@context.Item.CompanyName</span>
+                    @if (!string.IsNullOrWhiteSpace(context.Item.TypeOfBusiniess))
+                    {
+                        <span class="cell-secondary"> · @context.Item.TypeOfBusiniess</span>
+                    }
                 </div>
             </CellTemplate>
         </TemplateColumn>
         <TemplateColumn Title="Lĩnh vực">
             <CellTemplate>
-                @{
-                    var fieldName = context.Item.Field?.FieldName ?? "";
-                    var tagClass = GetFieldTagClass(fieldName);
-                }
-                <span class="tag @tagClass">@(string.IsNullOrWhiteSpace(fieldName) ? "Chưa phân loại" : fieldName)</span>
+                <span class="cell-secondary">@(string.IsNullOrWhiteSpace(context.Item.Field?.FieldName) ? "—" : context.Item.Field.FieldName)</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Tổng LĐ" SortBy="@(x => x.TotalAmount)" HeaderStyle="text-align: center;" CellStyle="text-align: center;">
+        <TemplateColumn Title="Tổng LĐ" SortBy="@(x => x.TotalAmount)" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
             <CellTemplate>
-                <span class="cell-primary font-weight-bold tabular-nums" style="font-size: 15px;">@context.Item.TotalAmount</span>
+                <span class="cell-primary font-weight-bold tabular-nums">@context.Item.TotalAmount</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Có GPLĐ" SortBy="@(x => x.QuantityAvailable)" HeaderStyle="text-align: center;" CellStyle="text-align: center;">
+        <TemplateColumn Title="Có GPLĐ" SortBy="@(x => x.QuantityAvailable)" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
             <CellTemplate>
-                <span class="tag tag-green metric-pill">@context.Item.QuantityAvailable</span>
+                <span class="cell-secondary tabular-nums">@context.Item.QuantityAvailable</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Chưa có" SortBy="@(x => x.QuantityNotYet)" HeaderStyle="text-align: center;" CellStyle="text-align: center;">
+        <TemplateColumn Title="Chưa có" SortBy="@(x => x.QuantityNotYet)" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
             <CellTemplate>
-                <span class="tag tag-orange metric-pill">@context.Item.QuantityNotYet</span>
+                <span class="cell-secondary tabular-nums">@context.Item.QuantityNotYet</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Miễn" SortBy="@(x => x.AmountOfExemption)" HeaderStyle="text-align: center;" CellStyle="text-align: center;">
+        <TemplateColumn Title="Miễn" SortBy="@(x => x.AmountOfExemption)" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
             <CellTemplate>
-                <span class="tag tag-blue metric-pill">@context.Item.AmountOfExemption</span>
+                <span class="cell-secondary tabular-nums">@context.Item.AmountOfExemption</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Người đại diện / Cán bộ TĐ">
+        <TemplateColumn Title="Đại diện / Theo dõi">
             <CellTemplate>
-                <div class="cell-stack">
-                    @if (!string.IsNullOrWhiteSpace(context.Item.LegalRepresentative))
+                <div class="cell-truncate">
+                    <span class="cell-primary">@(string.IsNullOrWhiteSpace(context.Item.LegalRepresentative) ? "—" : context.Item.LegalRepresentative)</span>
+                    @if (!string.IsNullOrWhiteSpace(context.Item.Tracker?.Name))
                     {
-                        <div class="cell-primary">@context.Item.LegalRepresentative</div>
+                        <span class="cell-secondary"> · @context.Item.Tracker.Name</span>
                     }
-                    <div class="cell-secondary">CB: @(context.Item.Tracker?.Name ?? "—")</div>
                 </div>
             </CellTemplate>
         </TemplateColumn>

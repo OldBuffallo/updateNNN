@@ -112,58 +112,50 @@ else
                  RowClassFunc="@((item, _) => item.Subjects.Any(s => s.ResultCode == "VIOLATION") ? "row-accent-danger" : "")"
                  Elevation="0">
         <Columns>
-            <TemplateColumn Title="Thời gian kiểm tra" SortBy="x => x.InspectedAt">
+            <TemplateColumn Title="Thời gian" SortBy="x => x.InspectedAt">
                 <CellTemplate>
-                    <div class="d-flex align-center">
-                        <MudIcon Icon="@Icons.Material.Outlined.AccessTime" Size="Size.Small" Class="mr-2 text-muted" />
-                        <div class="cell-stack">
-                            <span class="cell-primary tabular-nums">@context.Item.InspectedAt.ToString("dd/MM/yyyy")</span>
-                            <span class="cell-secondary tabular-nums">@context.Item.InspectedAt.ToString("HH:mm")</span>
-                        </div>
-                    </div>
+                    <span class="code-pill tabular-nums">@context.Item.InspectedAt.ToString("dd/MM/yyyy")</span>
+                    <span class="cell-secondary tabular-nums"> · @context.Item.InspectedAt.ToString("HH:mm")</span>
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Loại đợt kiểm tra" SortBy="x => x.TypeCode">
+            <TemplateColumn Title="Loại kiểm tra" SortBy="x => x.TypeCode">
                 <CellTemplate>
                     @{
-                        var (label, colorClass) = GetTypeMeta(context.Item.TypeCode);
+                        var (label, _) = GetTypeMeta(context.Item.TypeCode);
                     }
-                    <span class="type-pill @colorClass">@label</span>
+                    <span class="cell-secondary">@label</span>
                 </CellTemplate>
             </TemplateColumn>
 
             <TemplateColumn Title="Địa điểm & Địa bàn">
                 <CellTemplate>
-                    <div class="cell-stack">
+                    <div class="cell-truncate" title="@context.Item.LocationText">
                         <span class="cell-primary">@context.Item.LocationText</span>
-                        <span class="cell-secondary">📍 @(context.Item.AdministrativeUnit?.Name ?? "Chưa rõ địa bàn")</span>
+                        <span class="cell-secondary"> · @(context.Item.AdministrativeUnit?.Name ?? "Chưa rõ địa bàn")</span>
                     </div>
                 </CellTemplate>
             </TemplateColumn>
 
             <TemplateColumn Title="Đoàn kiểm tra">
                 <CellTemplate>
-                    <div class="cell-stack">
+                    <div class="cell-truncate">
                         <span class="cell-primary">@(string.IsNullOrWhiteSpace(context.Item.InspectorNames) ? "—" : context.Item.InspectorNames)</span>
                         @if (!string.IsNullOrWhiteSpace(context.Item.InspectionUnit))
                         {
-                            <span class="cell-secondary">@context.Item.InspectionUnit</span>
+                            <span class="cell-secondary"> · @context.Item.InspectionUnit</span>
                         }
                     </div>
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Số đối tượng">
+            <TemplateColumn Title="Đối tượng" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
-                    <span class="subject-count-badge tabular-nums">
-                        <MudIcon Icon="@Icons.Material.Outlined.Person" Size="Size.Small" Class="mr-1" />
-                        @context.Item.Subjects.Count người
-                    </span>
+                    <span class="code-pill tabular-nums">@context.Item.Subjects.Count người</span>
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Kết quả vi phạm">
+            <TemplateColumn Title="Kết quả" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
                     @{
                         var violationCount = context.Item.Subjects.Count(x => x.ResultCode == "VIOLATION");
@@ -179,7 +171,7 @@ else
                     {
                         <span class="status-pill status-safe tabular-nums">
                             <span class="status-dot"></span>
-                            0 vi phạm
+                            Hợp lệ
                         </span>
                     }
                 </CellTemplate>

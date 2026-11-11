@@ -114,81 +114,51 @@ else
                  Class="irm-data-table"
                  Elevation="0">
         <Columns>
-            <TemplateColumn Title="Họ tên người thăm thân" SortBy="x => x.FullName">
+            <TemplateColumn Title="Người thăm thân" SortBy="x => x.FullName">
                 <CellTemplate>
-                    <div class="d-flex align-center">
-                        <div class="table-avatar mr-3 bg-purple-soft">
-                            @(!string.IsNullOrEmpty(context.Item.FullName) ? context.Item.FullName[0].ToString().ToUpper() : "V")
-                        </div>
-                        <div class="cell-stack">
-                            <div class="cell-primary">@context.Item.FullName</div>
-                            <div class="d-flex align-center gap-1">
-                                <span class="cell-secondary">@context.Item.GenderString ·</span>
-                                <span class="code-pill">@(context.Item.Passport ?? "N/A")</span>
-                            </div>
-                        </div>
+                    <div class="cell-inline">
+                        <span class="cell-primary">@context.Item.FullName</span>
+                        <span class="cell-secondary">· @context.Item.GenderString</span>
                     </div>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Hộ chiếu" SortBy="x => x.Passport">
+                <CellTemplate>
+                    <span class="code-pill">@(context.Item.Passport ?? "—")</span>
                 </CellTemplate>
             </TemplateColumn>
 
             <TemplateColumn Title="Quốc tịch" SortBy="x => x.Nationality">
                 <CellTemplate>
-                    <span class="country-chip">
-                        <MudIcon Icon="@Icons.Material.Outlined.Flag" Size="Size.Small" Class="mr-1" />
-                        @(context.Item.Nationality ?? "N/A")
-                    </span>
+                    <span class="cell-secondary">@(context.Item.Nationality ?? "—")</span>
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Thân nhân & Lưu trú tại VN">
+            <TemplateColumn Title="Thân nhân bảo lãnh">
                 <CellTemplate>
-                    <div class="cell-stack">
-                        <div class="cell-primary">@context.Item.RelativeName</div>
-                        <div class="cell-secondary">
-                            <span class="badge-relationship">@context.Item.Relationship</span>
-                            <span>· @context.Item.RelativeTypeString</span>
-                        </div>
-                        @if (!string.IsNullOrWhiteSpace(context.Item.Address))
-                        {
-                            <div class="cell-secondary cell-truncate" title="@context.Item.Address">📍 @context.Item.Address</div>
-                        }
+                    <div class="cell-truncate" title="@context.Item.Address">
+                        <span class="cell-primary">@context.Item.RelativeName</span>
+                        <span class="cell-secondary"> · @context.Item.Relationship (@context.Item.RelativeTypeString)</span>
                     </div>
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Thời hạn thăm thân">
+            <TemplateColumn Title="Hạn thăm thân" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
-                    <div class="cell-stack">
-                        <div class="cell-primary tabular-nums">
-                            @(context.Item.VisitStartDate?.ToString("dd/MM/yyyy") ?? "—") → @(context.Item.VisitEndDate?.ToString("dd/MM/yyyy") ?? "Không thời hạn")
-                        </div>
-                        @if (context.Item.VisitEndDate.HasValue)
-                        {
-                            var days = (context.Item.VisitEndDate.Value.Date - _asOf.Date).Days;
-                            var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
-                            <div>
-                                <span class="status-pill @statusClass tabular-nums">
-                                    <span class="status-dot"></span>
-                                    @(days >= 0 ? $"Còn {days} ngày" : $"Quá hạn {-days} ngày")
-                                </span>
-                            </div>
-                        }
-                    </div>
-                </CellTemplate>
-            </TemplateColumn>
-
-            <TemplateColumn Title="Định danh điện tử">
-                <CellTemplate>
-                    @if (context.Item.HasElectronicId)
+                    @if (context.Item.VisitEndDate.HasValue)
                     {
-                        <span class="eid-chip eid-active tabular-nums">
-                            <span class="eid-dot"></span>
-                            @context.Item.ElectronicIdNumber
+                        var days = (context.Item.VisitEndDate.Value.Date - _asOf.Date).Days;
+                        var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
+                        <span class="status-pill @statusClass tabular-nums">
+                            <span class="status-dot"></span>
+                            <span class="code-pill">@context.Item.VisitEndDate.Value.ToString("dd/MM/yyyy")</span>
+                            <span>(@(days >= 0 ? $"{days} ngày" : $"Quá {-days} ngày"))</span>
                         </span>
                     }
                     else
                     {
-                        <span class="eid-chip eid-missing">Chưa cấp</span>
+                        <span class="status-pill status-neutral">Không thời hạn</span>
                     }
                 </CellTemplate>
             </TemplateColumn>

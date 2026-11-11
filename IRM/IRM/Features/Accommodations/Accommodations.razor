@@ -121,35 +121,30 @@ else
                  Class="irm-data-table"
                  Elevation="0">
         <Columns>
-            <TemplateColumn Title="Tên cơ sở lưu trú & Địa chỉ" SortBy="x => x.Name">
+            <TemplateColumn Title="Cơ sở lưu trú" SortBy="x => x.Name">
                 <CellTemplate>
-                    <div class="d-flex align-center">
-                        <div class="table-avatar mr-3 bg-teal-soft">
-                            <MudIcon Icon="@Icons.Material.Outlined.Hotel" Size="Size.Small" Color="Color.Info" />
-                        </div>
-                        <div class="cell-stack">
-                            <div class="cell-primary">@context.Item.Name</div>
-                            <div class="cell-secondary cell-truncate" title="@context.Item.AddressLine">
-                                📍 @context.Item.AddressLine
-                                @if (!string.IsNullOrWhiteSpace(context.Item.ContactName))
-                                {
-                                    <text> · LH: @context.Item.ContactName</text>
-                                }
-                            </div>
-                        </div>
+                    <div class="cell-truncate" title="@context.Item.AddressLine">
+                        <span class="cell-primary">@context.Item.Name</span>
+                        @if (!string.IsNullOrWhiteSpace(context.Item.AddressLine))
+                        {
+                            <span class="cell-secondary"> · @context.Item.AddressLine</span>
+                        }
                     </div>
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Loại hình & Địa bàn" SortBy="x => x.TypeCode">
+            <TemplateColumn Title="Loại hình" SortBy="x => x.TypeCode">
                 <CellTemplate>
                     @{
-                        var (label, colorClass) = GetTypeMeta(context.Item.TypeCode);
+                        var (label, _) = GetTypeMeta(context.Item.TypeCode);
                     }
-                    <div class="cell-stack">
-                        <div><span class="type-pill @colorClass">@label</span></div>
-                        <div class="cell-secondary">@(context.Item.AdministrativeUnit?.Name ?? "Chưa gắn địa bàn")</div>
-                    </div>
+                    <span class="cell-secondary">@label</span>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Địa bàn">
+                <CellTemplate>
+                    <span class="cell-secondary">@(context.Item.AdministrativeUnit?.Name ?? "—")</span>
                 </CellTemplate>
             </TemplateColumn>
 
@@ -162,31 +157,19 @@ else
                     }
                     @if (activeAgreements.Any())
                     {
-                        <div class="d-flex flex-wrap align-center gap-1">
-                            @foreach (var a in activeAgreements.Take(2))
-                            {
-                                <span class="company-badge">
-                                    <MudIcon Icon="@Icons.Material.Outlined.Business" Size="Size.Small" Class="mr-1" />
-                                    @(a.Company?.CompanyName ?? $"ID: {a.CompanyId}")
-                                </span>
-                            }
-                            @if (activeAgreements.Count > 2)
-                            {
-                                var extraNames = string.Join(", ", activeAgreements.Skip(2).Select(x => x.Company?.CompanyName ?? $"ID: {x.CompanyId}"));
-                                <MudTooltip Text="@extraNames">
-                                    <span class="meta-tag font-weight-bold">+@(activeAgreements.Count - 2) DN khác</span>
-                                </MudTooltip>
-                            }
-                        </div>
+                        var names = activeAgreements.Select(a => a.Company?.CompanyName ?? $"ID: {a.CompanyId}").ToList();
+                        <span class="cell-secondary cell-truncate" title="@string.Join(", ", names)">
+                            @string.Join(", ", names.Take(2))@(names.Count > 2 ? $" (+{names.Count - 2})" : "")
+                        </span>
                     }
                     else
                     {
-                        <span class="cell-secondary">NNN tự thuê / Trống</span>
+                        <span class="cell-secondary">Tự thuê / Trống</span>
                     }
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Sức chứa / Đang ở">
+            <TemplateColumn Title="Đang ở / Sức chứa" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
                     @{
                         var currentCount = context.Item.ResidencePeriods
@@ -195,21 +178,11 @@ else
                             .Distinct()
                             .Count();
                         var capacity = context.Item.Capacity ?? 0;
-                        var pct = capacity > 0 ? Math.Min(100, (int)Math.Round(currentCount * 100.0 / capacity)) : 0;
-                        var barClass = pct >= 100 ? "full" : pct >= 80 ? "high" : "";
                     }
-                    <div class="cell-stack">
-                        <div class="d-flex align-center gap-1 tabular-nums">
-                            <span class="cell-primary font-weight-bold">@currentCount</span>
-                            <span class="cell-secondary">/ @(capacity > 0 ? $"{capacity} người" : "—")</span>
-                        </div>
-                        @if (capacity > 0)
-                        {
-                            <div class="capacity-bar-track" title="@($"Đã lấp đầy {pct}%")">
-                                <div class="capacity-bar-fill @barClass" style="@($"width: {pct}%;")"></div>
-                            </div>
-                        }
-                    </div>
+                    <span class="code-pill tabular-nums">
+                        <span class="cell-primary">@currentCount</span>
+                        <span class="cell-secondary">/ @(capacity > 0 ? $"{capacity}" : "—")</span>
+                    </span>
                 </CellTemplate>
             </TemplateColumn>
 

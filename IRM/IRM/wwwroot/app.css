@@ -883,18 +883,31 @@ body {
     z-index: 2;
     background: var(--bg-surface-variant) !important;
     color: var(--text-secondary) !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.45px;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
     white-space: nowrap;
-    padding: 12px 16px !important;
-    border-bottom: 2px solid var(--border) !important;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+
+.mud-data-grid .mud-table-head .mud-icon-button,
+.mud-data-grid .mud-column-header-actions {
+    opacity: 0.4;
+    transition: opacity 0.15s ease;
+}
+
+.mud-data-grid .mud-table-head th:hover .mud-icon-button,
+.mud-data-grid .mud-table-head th:hover .mud-column-header-actions {
+    opacity: 1;
 }
 
 .mud-simple-table tbody tr:nth-child(even),
-.mud-table-body .mud-table-row:nth-child(even) {
-    background: rgba(var(--mud-palette-primary-rgb), 0.018);
+.mud-table-body .mud-table-row:nth-child(even),
+.mud-table-striped .mud-table-body .mud-table-row:nth-of-type(odd),
+.mud-table-striped .mud-table-body .mud-table-row:nth-of-type(even) {
+    background: var(--bg-surface) !important;
 }
 
 .mud-simple-table tbody tr:hover,
@@ -905,20 +918,20 @@ body {
 
 .group-header td {
     background: var(--bg-surface-variant) !important;
-    color: var(--primary) !important;
+    color: var(--text-primary) !important;
     border-top: 1px solid var(--border);
-    border-bottom: 2px solid var(--border);
-    font-size: 13px;
-    font-weight: 700;
-    padding: 10px 16px !important;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 14px !important;
 }
 
 .mud-table-cell,
 .mud-data-grid-cell,
 .mud-simple-table tbody td {
-    padding: 11px 16px !important;
-    font-size: 13.5px;
-    line-height: 1.45;
+    padding: 12px 14px !important;
+    font-size: 13px;
+    line-height: 1.4;
     vertical-align: middle;
     border-bottom: 1px solid var(--border);
 }
@@ -926,8 +939,8 @@ body {
 [data-density="compact"] .mud-table-cell,
 [data-density="compact"] .mud-data-grid-cell,
 [data-density="compact"] .mud-simple-table tbody td {
-    padding: 6px 12px !important;
-    font-size: 13px;
+    padding: 7px 12px !important;
+    font-size: 12.5px;
     line-height: 1.3;
 }
 
@@ -2585,7 +2598,7 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
     gap: 8px;
 }
 
-/* ── Enterprise Structured Grid Utilities (Two-line Cells, Code Pills & Status Badges) ── */
+/* ── Enterprise Minimalist Grid Utilities (Stripe / Linear Style — Mẫu 1) ── */
 .tabular-nums {
     font-variant-numeric: tabular-nums;
 }
@@ -2593,25 +2606,34 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
 .cell-stack {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     min-width: 0;
 }
 
+.cell-inline {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+    white-space: nowrap;
+}
+
 .cell-primary {
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-primary);
     line-height: 1.35;
 }
 
 .cell-secondary {
-    font-size: 12px;
+    font-size: 12.5px;
+    font-weight: 400;
     color: var(--text-secondary);
     line-height: 1.35;
 }
 
 .cell-truncate {
-    max-width: 280px;
+    max-width: 300px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2622,39 +2644,41 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
     align-items: center;
     gap: 4px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 5px;
-    background: var(--bg-surface-variant);
-    border: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    border: 0;
     color: var(--text-primary);
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 .status-pill {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 11.5px;
-    font-weight: 700;
-    padding: 2px 9px;
-    border-radius: 999px;
-    border: 1px solid transparent;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 0;
+    border-radius: 0;
+    background: transparent !important;
+    border: 0 !important;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 .status-dot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
+    display: inline-block;
 }
 
 .status-urgent {
-    background: var(--red-bg);
     color: var(--red);
-    border-color: var(--red-border);
 }
 
 .status-urgent .status-dot {
@@ -2662,9 +2686,7 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
 }
 
 .status-warning {
-    background: var(--orange-bg);
     color: var(--orange);
-    border-color: var(--orange-border);
 }
 
 .status-warning .status-dot {
@@ -2672,9 +2694,7 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
 }
 
 .status-safe {
-    background: var(--green-bg);
     color: var(--green);
-    border-color: var(--green-border);
 }
 
 .status-safe .status-dot {
@@ -2682,35 +2702,77 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
 }
 
 .status-neutral {
-    background: var(--bg-surface-variant);
-    color: var(--text-secondary);
-    border-color: var(--border);
+    color: var(--text-muted);
+    font-weight: 400;
 }
 
 .status-neutral .status-dot {
-    background: var(--text-secondary);
+    background: var(--border-strong);
 }
 
 .metric-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 44px;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 700;
+    min-width: 32px;
+    padding: 0;
+    background: transparent !important;
+    border: 0 !important;
+    font-size: 13px;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
+}
+
+/* Strip noisy colored badge/pill boxes inside tables for clean Stripe/Linear look */
+.irm-data-table .tag,
+.irm-data-table .purpose-chip,
+.irm-data-table .type-pill,
+.irm-data-table .country-chip,
+.irm-data-table .eid-chip,
+.irm-data-table .meta-tag,
+.irm-data-table .badge-relationship,
+.irm-data-table .subject-count-badge,
+.irm-data-table .violation-badge {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    color: var(--text-secondary) !important;
+}
+
+.irm-data-table .country-chip .mud-icon-root,
+.irm-data-table .subject-count-badge .mud-icon-root {
+    display: none !important;
+}
+
+.irm-data-table .table-avatar {
+    display: none !important;
+}
+
+.mud-data-grid .mud-table-cell:last-child .mud-icon-button,
+.mud-table .mud-table-cell:last-child .mud-icon-button {
+    opacity: 0.65;
+    color: var(--text-secondary) !important;
+    transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.mud-table-body .mud-table-row:hover .mud-table-cell:last-child .mud-icon-button,
+.mud-data-grid-row:hover .mud-table-cell:last-child .mud-icon-button {
+    opacity: 1;
+    color: var(--text-primary) !important;
 }
 
 .row-accent-danger td:first-child,
 .row-accent-danger .mud-table-cell:first-child {
-    border-left: 3px solid var(--red) !important;
+    border-left: 0 !important;
 }
 
 .row-accent-warning td:first-child,
 .row-accent-warning .mud-table-cell:first-child {
-    border-left: 3px solid var(--orange) !important;
+    border-left: 0 !important;
 }
 
 .capacity-bar-track {

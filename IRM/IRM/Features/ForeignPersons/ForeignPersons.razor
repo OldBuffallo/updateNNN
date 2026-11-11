@@ -220,109 +220,52 @@ else
                  RowsPerPage="15"
                  Elevation="0">
         <Columns>
-            <TemplateColumn Title="Họ và tên" SortBy="x => x.FullName">
+            <TemplateColumn Title="Người nước ngoài" SortBy="x => x.FullName">
                 <CellTemplate>
-                    <div class="d-flex align-center">
-                        <div class="table-avatar mr-3">
-                            @(!string.IsNullOrEmpty(context.Item.FullName) ? context.Item.FullName[0].ToString().ToUpper() : "N")
-                        </div>
-                        <div class="cell-stack">
-                            <div class="cell-primary">@context.Item.FullName</div>
-                            <div class="cell-secondary tabular-nums">
-                                @context.Item.GenderString
-                                @if (context.Item.Birthday.HasValue)
-                                {
-                                    <text> · @context.Item.Birthday.Value.ToString("dd/MM/yyyy")</text>
-                                }
-                            </div>
-                        </div>
+                    <div class="cell-inline">
+                        <span class="cell-primary">@context.Item.FullName</span>
+                        <span class="cell-secondary tabular-nums">
+                            · @context.Item.GenderString@(context.Item.Birthday.HasValue ? $", {context.Item.Birthday.Value:yyyy}" : "")
+                        </span>
                     </div>
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Hộ chiếu & Quốc tịch" SortBy="x => x.PassportNumber">
+            <TemplateColumn Title="Hộ chiếu" SortBy="x => x.PassportNumber">
                 <CellTemplate>
-                    <div class="cell-stack">
-                        <div>
-                            @if (!string.IsNullOrEmpty(context.Item.PassportNumber))
-                            {
-                                <span class="code-pill">@context.Item.PassportNumber</span>
-                            }
-                            else
-                            {
-                                <span class="cell-secondary">Chưa cập nhật</span>
-                            }
-                        </div>
-                        <div>
-                            <span class="country-chip">
-                                <MudIcon Icon="@Icons.Material.Outlined.Flag" Size="Size.Small" Class="mr-1" />
-                                @(context.Item.NationalityName ?? context.Item.NationalityCode ?? "N/A")
-                            </span>
-                        </div>
-                    </div>
+                    <span class="code-pill">@(string.IsNullOrEmpty(context.Item.PassportNumber) ? "—" : context.Item.PassportNumber)</span>
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Diện hồ sơ">
+            <TemplateColumn Title="Quốc tịch" SortBy="x => x.NationalityName">
                 <CellTemplate>
-                    <div class="d-flex flex-wrap gap-1">
+                    <span class="cell-secondary">@(context.Item.NationalityName ?? context.Item.NationalityCode ?? "—")</span>
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Đơn vị / Bảo lãnh">
+                <CellTemplate>
+                    <div class="cell-truncate">
                         @if (context.Item.HasWorkProfile)
                         {
-                            <span class="purpose-chip purpose-blue">Lao động</span>
+                            <span class="cell-primary" title="@context.Item.CompanyName">@(context.Item.CompanyName ?? "Chưa gắn công ty")</span>
+                            <span class="cell-secondary"> · @(context.Item.CareerName ?? context.Item.WorkPermitString)</span>
                         }
-                        @if (context.Item.HasStudyProfile)
+                        else if (context.Item.HasStudyProfile)
                         {
-                            <span class="purpose-chip purpose-cyan">Du học</span>
+                            <span class="cell-primary" title="@context.Item.SchoolName">@(context.Item.SchoolName ?? "Du học sinh")</span>
+                            <span class="cell-secondary"> · @(context.Item.Major ?? context.Item.EducationLevelString)</span>
                         }
-                        @if (context.Item.HasFamilyVisitProfile)
+                        else if (context.Item.HasFamilyVisitProfile)
                         {
-                            <span class="purpose-chip purpose-purple">Thăm thân</span>
+                            <span class="cell-primary">@(context.Item.RelativeName ?? "—")</span>
+                            <span class="cell-secondary"> · @(context.Item.Relationship ?? "Thân nhân")</span>
                         }
-                        @if (!context.Item.HasWorkProfile && !context.Item.HasStudyProfile && !context.Item.HasFamilyVisitProfile)
+                        else if (!string.IsNullOrEmpty(context.Item.ResidenceAddress))
                         {
-                            @foreach (var code in context.Item.PurposeCodes)
-                            {
-                                var (label, colorClass) = GetPurposeMeta(code);
-                                <span class="purpose-chip @colorClass">@label</span>
-                            }
-                            @if (!context.Item.PurposeCodes.Any())
-                            {
-                                <span class="cell-secondary">Chưa phân diện</span>
-                            }
+                            <span class="cell-secondary" title="@context.Item.ResidenceAddress">@context.Item.ResidenceAddress</span>
                         }
-                    </div>
-                </CellTemplate>
-            </TemplateColumn>
-
-            <TemplateColumn Title="Đơn vị / Chi tiết lưu trú">
-                <CellTemplate>
-                    <div class="cell-stack">
-                        @if (context.Item.HasWorkProfile)
-                        {
-                            <div class="cell-primary cell-truncate" title="@context.Item.CompanyName">🏢 @(context.Item.CompanyName ?? "Chưa gắn công ty")</div>
-                            <div class="cell-secondary cell-truncate">
-                                @(context.Item.CareerName ?? "Chưa rõ nghề") · @context.Item.WorkPermitString
-                            </div>
-                        }
-                        @if (context.Item.HasStudyProfile)
-                        {
-                            <div class="cell-primary cell-truncate" title="@context.Item.SchoolName">🎓 @(context.Item.SchoolName ?? "Du học sinh")</div>
-                            <div class="cell-secondary cell-truncate">
-                                @(context.Item.Major ?? "—") · @context.Item.EducationLevelString · @context.Item.StudentStatusString
-                            </div>
-                        }
-                        @if (context.Item.HasFamilyVisitProfile)
-                        {
-                            <div class="cell-primary cell-truncate">👪 TN: @(context.Item.RelativeName ?? "—")</div>
-                            <div class="cell-secondary cell-truncate">
-                                @(context.Item.Relationship ?? "Thân nhân") · @context.Item.RelativeTypeString
-                            </div>
-                        }
-                        @if (!string.IsNullOrEmpty(context.Item.ResidenceAddress))
-                        {
-                            <div class="cell-secondary cell-truncate" title="@context.Item.ResidenceAddress">📍 @context.Item.ResidenceAddress</div>
-                        }
-                        @if (!context.Item.HasWorkProfile && !context.Item.HasStudyProfile && !context.Item.HasFamilyVisitProfile && string.IsNullOrEmpty(context.Item.ResidenceAddress))
+                        else
                         {
                             <span class="cell-secondary">—</span>
                         }
@@ -330,51 +273,40 @@ else
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Giấy tờ & Thời hạn" SortBy="x => x.EffectiveExpiryDate">
+            <TemplateColumn Title="Diện">
                 <CellTemplate>
-                    <div class="cell-stack">
-                        @if (!string.IsNullOrEmpty(context.Item.PrimaryDocumentNumber))
+                    @{
+                        var purposes = new List<string>();
+                        if (context.Item.HasWorkProfile) purposes.Add("Lao động");
+                        if (context.Item.HasStudyProfile) purposes.Add("Du học");
+                        if (context.Item.HasFamilyVisitProfile) purposes.Add("Thăm thân");
+                        if (purposes.Count == 0)
                         {
-                            <div class="d-flex align-center gap-1">
-                                <span class="code-pill">@context.Item.PrimaryDocumentNumber</span>
-                                @if (!string.IsNullOrEmpty(context.Item.VisaSymbol))
-                                {
-                                    <span class="meta-tag">@context.Item.VisaSymbol</span>
-                                }
-                            </div>
+                            foreach (var code in context.Item.PurposeCodes)
+                            {
+                                purposes.Add(GetPurposeMeta(code).Label);
+                            }
                         }
-                        @if (context.Item.EffectiveExpiryDate.HasValue)
-                        {
-                            var days = context.Item.DaysUntilExpiry ?? (int)(context.Item.EffectiveExpiryDate.Value.Date - DateTime.Today).TotalDays;
-                            var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
-                            <div class="d-flex align-center flex-wrap gap-1 mt-1">
-                                <span class="cell-secondary tabular-nums font-weight-bold">@context.Item.EffectiveExpiryDate.Value.ToString("dd/MM/yyyy")</span>
-                                <span class="status-pill @statusClass tabular-nums">
-                                    <span class="status-dot"></span>
-                                    @(days >= 0 ? $"Còn {days} ngày" : $"Quá hạn {-days} ngày")
-                                </span>
-                            </div>
-                        }
-                        else
-                        {
-                            <span class="status-pill status-neutral">Chưa có hạn</span>
-                        }
-                    </div>
+                    }
+                    <span class="cell-secondary">@(purposes.Count > 0 ? string.Join(", ", purposes) : "Chưa phân diện")</span>
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Định danh ĐT">
+            <TemplateColumn Title="Hạn tạm trú" SortBy="x => x.EffectiveExpiryDate" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
-                    @if (!string.IsNullOrEmpty(context.Item.ElectronicIdNumber))
+                    @if (context.Item.EffectiveExpiryDate.HasValue)
                     {
-                        <span class="eid-chip eid-active tabular-nums">
-                            <span class="eid-dot"></span>
-                            @context.Item.ElectronicIdNumber
+                        var days = context.Item.DaysUntilExpiry ?? (int)(context.Item.EffectiveExpiryDate.Value.Date - DateTime.Today).TotalDays;
+                        var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
+                        <span class="status-pill @statusClass tabular-nums">
+                            <span class="status-dot"></span>
+                            <span class="code-pill">@context.Item.EffectiveExpiryDate.Value.ToString("dd/MM/yyyy")</span>
+                            <span>(@(days >= 0 ? $"{days} ngày" : $"Quá {-days} ngày"))</span>
                         </span>
                     }
                     else
                     {
-                        <span class="eid-chip eid-missing">Chưa cấp</span>
+                        <span class="status-pill status-neutral">Chưa có hạn</span>
                     }
                 </CellTemplate>
             </TemplateColumn>
