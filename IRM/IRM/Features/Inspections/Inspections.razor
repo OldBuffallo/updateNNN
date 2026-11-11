@@ -106,7 +106,6 @@ else
 {
     <MudDataGrid T="InspectionDto"
                  Items="_items"
-                 Dense="true"
                  Hover="true"
                  Striped="true"
                  Class="irm-data-table"
@@ -116,9 +115,9 @@ else
                 <CellTemplate>
                     <div class="d-flex align-center">
                         <MudIcon Icon="@Icons.Material.Outlined.AccessTime" Size="Size.Small" Class="mr-2 text-muted" />
-                        <div>
-                            <div class="font-weight-bold">@context.Item.InspectedAt.ToString("dd/MM/yyyy")</div>
-                            <div class="text-caption text-muted">@context.Item.InspectedAt.ToString("HH:mm")</div>
+                        <div class="cell-stack">
+                            <span class="cell-primary tabular-nums">@context.Item.InspectedAt.ToString("dd/MM/yyyy")</span>
+                            <span class="cell-secondary tabular-nums">@context.Item.InspectedAt.ToString("HH:mm")</span>
                         </div>
                     </div>
                 </CellTemplate>
@@ -135,21 +134,28 @@ else
 
             <TemplateColumn Title="Địa điểm & Địa bàn">
                 <CellTemplate>
-                    <div class="font-weight-bold">@context.Item.LocationText</div>
-                    <div class="text-caption text-muted">@(context.Item.AdministrativeUnit?.Name ?? "Chưa rõ địa bàn")</div>
+                    <div class="cell-stack">
+                        <span class="cell-primary">@context.Item.LocationText</span>
+                        <span class="cell-secondary">📍 @(context.Item.AdministrativeUnit?.Name ?? "Chưa rõ địa bàn")</span>
+                    </div>
                 </CellTemplate>
             </TemplateColumn>
 
             <TemplateColumn Title="Đoàn kiểm tra">
                 <CellTemplate>
-                    <div>@(context.Item.InspectorNames ?? "—")</div>
-                    <div class="text-caption text-muted">@(context.Item.InspectionUnit ?? "")</div>
+                    <div class="cell-stack">
+                        <span class="cell-primary">@(string.IsNullOrWhiteSpace(context.Item.InspectorNames) ? "—" : context.Item.InspectorNames)</span>
+                        @if (!string.IsNullOrWhiteSpace(context.Item.InspectionUnit))
+                        {
+                            <span class="cell-secondary">@context.Item.InspectionUnit</span>
+                        }
+                    </div>
                 </CellTemplate>
             </TemplateColumn>
 
             <TemplateColumn Title="Số đối tượng">
                 <CellTemplate>
-                    <span class="subject-count-badge">
+                    <span class="subject-count-badge tabular-nums">
                         <MudIcon Icon="@Icons.Material.Outlined.Person" Size="Size.Small" Class="mr-1" />
                         @context.Item.Subjects.Count người
                     </span>
@@ -163,15 +169,15 @@ else
                     }
                     @if (violationCount > 0)
                     {
-                        <span class="violation-badge violation-danger">
-                            <MudIcon Icon="@Icons.Material.Outlined.Warning" Size="Size.Small" Class="mr-1" />
+                        <span class="status-pill status-urgent tabular-nums">
+                            <span class="status-dot"></span>
                             @violationCount vi phạm
                         </span>
                     }
                     else
                     {
-                        <span class="violation-badge violation-ok">
-                            <MudIcon Icon="@Icons.Material.Outlined.Check" Size="Size.Small" Class="mr-1" />
+                        <span class="status-pill status-safe tabular-nums">
+                            <span class="status-dot"></span>
                             0 vi phạm
                         </span>
                     }

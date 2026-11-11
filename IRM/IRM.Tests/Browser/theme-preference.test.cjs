@@ -73,3 +73,26 @@ test('NavMenu MudNavLink items do not set OnClick alongside Href so MudBlazor re
     const navMenu = fs.readFileSync(path.join(__dirname, '..', '..', 'IRM', 'Components', 'Shared', 'NavMenu.razor'), 'utf8');
     assert.equal(navMenu.includes('NotifyPageChanged'), false, 'MudNavLink must not bind OnClick NotifyPageChanged which suppresses Href anchor rendering in MudBlazor');
 });
+
+test('irmInterop supports table density toggle (comfortable vs compact) with storage persistence', () => {
+    const b = browser();
+    assert.equal(b.api.getDensity(), 'comfortable');
+    assert.equal(b.attributes.get('data-density'), 'comfortable');
+    b.api.setDensity('compact');
+    assert.equal(b.attributes.get('data-density'), 'compact');
+    assert.equal(b.storage.get('irm-density'), 'compact');
+    b.api.setDensity('invalid');
+    assert.equal(b.attributes.get('data-density'), 'comfortable');
+});
+
+test('app.css defines Enterprise Structured Grid classes and replaces hardcoded light row borders', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const css = fs.readFileSync(path.join(__dirname, '..', '..', 'IRM', 'wwwroot', 'app.css'), 'utf8');
+    assert.equal(css.includes('rgba(226, 232, 240, 0.85)'), false, 'app.css must not use hardcoded light border on table cells');
+    assert.equal(css.includes('.cell-stack'), true, 'app.css must define .cell-stack for two-line structured cells');
+    assert.equal(css.includes('.code-pill'), true, 'app.css must define .code-pill for monospace identifiers');
+    assert.equal(css.includes('.status-pill'), true, 'app.css must define .status-pill for expiry/violation badges');
+    assert.equal(css.includes('.tabular-nums'), true, 'app.css must define .tabular-nums for numeric alignment');
+    assert.equal(css.includes('[data-density="compact"]'), true, 'app.css must support compact table density mode');
+});

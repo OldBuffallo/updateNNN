@@ -83,6 +83,15 @@
                         </MudMenu>
                     </AuthorizeView>
 
+                    <!-- Table Density Toggle Button -->
+                    <MudTooltip Text="@(_compactDensity ? "Mật độ bảng: Gọn (Nhấn để chuyển sang Thoáng)" : "Mật độ bảng: Thoáng (Nhấn để chuyển sang Gọn)")">
+                        <MudIconButton Icon="@(_compactDensity ? Icons.Material.Outlined.ViewHeadline : Icons.Material.Outlined.ViewAgenda)"
+                                       Color="Color.Inherit"
+                                       Class="density-toggle-btn"
+                                       aria-label="Chuyển mật độ hiển thị bảng"
+                                       OnClick="ToggleDensityAsync" />
+                    </MudTooltip>
+
                     <!-- Theme Toggle Button -->
                     <MudTooltip Text="@(_darkMode ? "Chuyển chế độ sáng" : "Chuyển chế độ tối")">
                         <MudIconButton Icon="@(_darkMode ? Icons.Material.Outlined.LightMode : Icons.Material.Outlined.DarkMode)"
@@ -235,6 +244,7 @@
     private bool _drawerOpen = true;
     [CascadingParameter] private IrmThemeContext Theme { get; set; } = null!;
     private bool _darkMode => Theme.IsDarkMode;
+    private bool _compactDensity;
     private bool _spotlightOpen;
     private DotNetObjectReference<MainLayout>? _dotNetRef;
 
@@ -246,6 +256,8 @@
 
             try
             {
+                var density = await JS.InvokeAsync<string>("irmInterop.getDensity");
+                _compactDensity = string.Equals(density, "compact", StringComparison.OrdinalIgnoreCase);
                 await JS.InvokeVoidAsync("irmInterop.registerShortcutHandler", _dotNetRef);
             }
             catch (JSException ex)
@@ -256,6 +268,19 @@
             }
 
             StateHasChanged();
+        }
+    }
+
+    private async Task ToggleDensityAsync()
+    {
+        _compactDensity = !_compactDensity;
+        try
+        {
+            await JS.InvokeAsync<string>("irmInterop.setDensity", _compactDensity ? "compact" : "comfortable");
+        }
+        catch (JSException ex)
+        {
+            Logger.LogWarning(ex, "Unable to persist table density preference");
         }
     }
 

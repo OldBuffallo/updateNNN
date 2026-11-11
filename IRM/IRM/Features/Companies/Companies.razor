@@ -87,50 +87,78 @@
 <MudDataGrid Items="@_companies"
              T="CompanyDto"
              Filterable="false"
-             Dense="true"
              Hover="true"
              Bordered="false"
-             Striped="false"
-             RowsPerPage="10">
+             Striped="true"
+             Class="irm-data-table"
+             RowsPerPage="10"
+             Elevation="0">
     <Columns>
-        <TemplateColumn Title="STT" Sortable="false" Filterable="false">
+        <TemplateColumn Title="STT" Sortable="false" Filterable="false" CellStyle="width: 60px; text-align: center;">
             <CellTemplate>
-                <MudText Typo="Typo.body2">@(_companies.IndexOf(context.Item) + 1)</MudText>
+                <span class="cell-secondary font-weight-bold tabular-nums">@(_companies.IndexOf(context.Item) + 1)</span>
             </CellTemplate>
         </TemplateColumn>
-        <PropertyColumn Property="x => x.CompanyName" Title="Tên công ty" Style="font-weight: 600;" />
-        <PropertyColumn Property="x => x.TypeOfBusiniess" Title="Loại hình" />
+        <TemplateColumn Title="Tên công ty & Địa chỉ" SortBy="@(x => x.CompanyName)">
+            <CellTemplate>
+                <div class="d-flex align-center">
+                    <div class="table-avatar mr-3 bg-blue-soft">
+                        <MudIcon Icon="@Icons.Material.Outlined.Business" Size="Size.Small" Color="Color.Primary" />
+                    </div>
+                    <div class="cell-stack">
+                        <div class="cell-primary">@context.Item.CompanyName</div>
+                        <div class="cell-secondary cell-truncate" title="@context.Item.Address">
+                            @(string.IsNullOrWhiteSpace(context.Item.TypeOfBusiniess) ? "Doanh nghiệp" : context.Item.TypeOfBusiniess)
+                            @if (!string.IsNullOrWhiteSpace(context.Item.Address))
+                            {
+                                <text> · 📍 @context.Item.Address</text>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
         <TemplateColumn Title="Lĩnh vực">
             <CellTemplate>
                 @{
                     var fieldName = context.Item.Field?.FieldName ?? "";
                     var tagClass = GetFieldTagClass(fieldName);
                 }
-                <span class="tag @tagClass">@fieldName</span>
+                <span class="tag @tagClass">@(string.IsNullOrWhiteSpace(fieldName) ? "Chưa phân loại" : fieldName)</span>
             </CellTemplate>
         </TemplateColumn>
-        <PropertyColumn Property="x => x.TotalAmount" Title="Tổng LĐ" Style="font-weight: 700; text-align: center;" />
-        <TemplateColumn Title="Có GPLĐ">
+        <TemplateColumn Title="Tổng LĐ" SortBy="@(x => x.TotalAmount)" CellStyle="text-align: center;">
             <CellTemplate>
-                <span class="tag tag-green">@context.Item.QuantityAvailable</span>
+                <span class="cell-primary font-weight-bold tabular-nums" style="font-size: 15px;">@context.Item.TotalAmount</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Chưa có">
+        <TemplateColumn Title="Có GPLĐ" SortBy="@(x => x.QuantityAvailable)" CellStyle="text-align: center;">
             <CellTemplate>
-                <span class="tag tag-orange">@context.Item.QuantityNotYet</span>
+                <span class="tag tag-green metric-pill">@context.Item.QuantityAvailable</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Miễn">
+        <TemplateColumn Title="Chưa có" SortBy="@(x => x.QuantityNotYet)" CellStyle="text-align: center;">
             <CellTemplate>
-                <span class="tag tag-blue">@context.Item.AmountOfExemption</span>
+                <span class="tag tag-orange metric-pill">@context.Item.QuantityNotYet</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Cán bộ TĐ">
+        <TemplateColumn Title="Miễn" SortBy="@(x => x.AmountOfExemption)" CellStyle="text-align: center;">
             <CellTemplate>
-                <MudText Typo="Typo.body2">@(context.Item.Tracker?.Name)</MudText>
+                <span class="tag tag-blue metric-pill">@context.Item.AmountOfExemption</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
+        <TemplateColumn Title="Người đại diện / Cán bộ TĐ">
+            <CellTemplate>
+                <div class="cell-stack">
+                    @if (!string.IsNullOrWhiteSpace(context.Item.LegalRepresentative))
+                    {
+                        <div class="cell-primary">@context.Item.LegalRepresentative</div>
+                    }
+                    <div class="cell-secondary">CB: @(context.Item.Tracker?.Name ?? "—")</div>
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" CellStyle="text-align: right;">
             <CellTemplate>
                 <MudTooltip Text="Hồ sơ đầy đủ 6 Tab (FDI, KCN/KKT, CSLT thuê, Đại diện, Pháp nhân Scan)">
                     <MudIconButton Icon="@Icons.Material.Outlined.Visibility" Size="Size.Small" Color="Color.Primary"

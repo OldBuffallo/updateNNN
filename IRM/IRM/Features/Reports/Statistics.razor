@@ -131,13 +131,21 @@
 
     <MudTabs Elevation="0" Rounded="true" Class="irm-tabs mb-5">
         <MudTabPanel Text="Doanh nghiệp tại địa bàn" Icon="@Icons.Material.Outlined.Business">
-            <MudDataGrid T="CompanySummary" Items="_territory.Companies" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+            <MudDataGrid T="CompanySummary" Items="_territory.Companies" Hover="true" Striped="true" Class="irm-data-table">
                 <Columns>
-                    <PropertyColumn Property="x => x.CompanyName" Title="Tên doanh nghiệp" />
-                    <PropertyColumn Property="x => x.OwnershipTypeCode" Title="Loại hình" />
-                    <TemplateColumn Title="Số lao động NN đang làm việc">
+                    <TemplateColumn Title="Tên doanh nghiệp" SortBy="x => x.CompanyName">
                         <CellTemplate>
-                            <span class="font-weight-bold text-primary">@context.Item.CurrentWorkerCount người</span>
+                            <span class="cell-primary">@context.Item.CompanyName</span>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Loại hình" SortBy="x => x.OwnershipTypeCode">
+                        <CellTemplate>
+                            <span class="type-pill type-blue">@context.Item.OwnershipTypeCode</span>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Số lao động NN đang làm việc" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+                        <CellTemplate>
+                            <span class="metric-pill tabular-nums text-primary">@context.Item.CurrentWorkerCount người</span>
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
@@ -145,13 +153,21 @@
         </MudTabPanel>
 
         <MudTabPanel Text="Cơ sở lưu trú tại địa bàn" Icon="@Icons.Material.Outlined.Hotel">
-            <MudDataGrid T="AccommodationSummary" Items="_territory.Accommodations" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+            <MudDataGrid T="AccommodationSummary" Items="_territory.Accommodations" Hover="true" Striped="true" Class="irm-data-table">
                 <Columns>
-                    <PropertyColumn Property="x => x.Name" Title="Tên cơ sở lưu trú" />
-                    <PropertyColumn Property="x => x.TypeCode" Title="Loại hình" />
-                    <TemplateColumn Title="Số người đang ở">
+                    <TemplateColumn Title="Tên cơ sở lưu trú" SortBy="x => x.Name">
                         <CellTemplate>
-                            <span class="font-weight-bold text-teal">@context.Item.CurrentResidentCount người</span>
+                            <span class="cell-primary">@context.Item.Name</span>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Loại hình" SortBy="x => x.TypeCode">
+                        <CellTemplate>
+                            <span class="type-pill type-purple">@context.Item.TypeCode</span>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Số người đang ở" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+                        <CellTemplate>
+                            <span class="metric-pill tabular-nums text-teal">@context.Item.CurrentResidentCount người</span>
                         </CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.Companies" Title="Doanh nghiệp thuê" />
@@ -227,14 +243,26 @@
                 Tổng quan thống kê 54 xã / phường / đặc khu (@_overview.Count đơn vị)
             </MudText>
         </div>
-        <MudDataGrid T="TerritoryOverview" Items="_overview" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+        <MudDataGrid T="TerritoryOverview" Items="_overview" Hover="true" Striped="true" Class="irm-data-table">
             <Columns>
-                <PropertyColumn Property="x => x.Code" Title="Mã địa bàn" />
-                <PropertyColumn Property="x => x.Name" Title="Tên xã / phường / thị trấn" />
-                <PropertyColumn Property="x => x.TypeCode" Title="Loại đơn vị" />
-                <TemplateColumn Title="Tổng người nước ngoài">
+                <TemplateColumn Title="Mã địa bàn" SortBy="x => x.Code">
                     <CellTemplate>
-                        <span class="font-weight-bold @(context.Item.TotalForeigners > 0 ? "text-primary" : "text-muted")">
+                        <span class="code-pill">@context.Item.Code</span>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Tên xã / phường / thị trấn" SortBy="x => x.Name">
+                    <CellTemplate>
+                        <span class="cell-primary">@context.Item.Name</span>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Loại đơn vị" SortBy="x => x.TypeCode">
+                    <CellTemplate>
+                        <span class="type-pill type-blue">@context.Item.TypeCode</span>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Tổng người nước ngoài" SortBy="x => x.TotalForeigners" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+                    <CellTemplate>
+                        <span class="metric-pill tabular-nums @(context.Item.TotalForeigners > 0 ? "text-primary" : "text-muted")">
                             @context.Item.TotalForeigners người
                         </span>
                     </CellTemplate>
@@ -252,14 +280,26 @@
                 Thống kê theo Khu công nghiệp & Khu kinh tế (@_zones.Count khu)
             </MudText>
         </div>
-        <MudDataGrid T="ZoneStatistics" Items="_zones" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+        <MudDataGrid T="ZoneStatistics" Items="_zones" Hover="true" Striped="true" Class="irm-data-table">
             <Columns>
-                <PropertyColumn Property="x => x.ZoneName" Title="Tên khu / cụm kinh tế" />
-                <PropertyColumn Property="x => x.TypeCode" Title="Loại hình" />
-                <PropertyColumn Property="x => x.CompanyCount" Title="Số doanh nghiệp" />
-                <TemplateColumn Title="Số người nước ngoài">
+                <TemplateColumn Title="Tên khu / cụm kinh tế" SortBy="x => x.ZoneName">
                     <CellTemplate>
-                        <span class="font-weight-bold text-primary">@context.Item.ForeignPersonCount người</span>
+                        <span class="cell-primary">@context.Item.ZoneName</span>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Loại hình" SortBy="x => x.TypeCode">
+                    <CellTemplate>
+                        <span class="type-pill type-blue">@context.Item.TypeCode</span>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Số doanh nghiệp" SortBy="x => x.CompanyCount" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+                    <CellTemplate>
+                        <span class="tabular-nums font-weight-bold">@context.Item.CompanyCount</span>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Số người nước ngoài" SortBy="x => x.ForeignPersonCount" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+                    <CellTemplate>
+                        <span class="metric-pill tabular-nums text-primary">@context.Item.ForeignPersonCount người</span>
                     </CellTemplate>
                 </TemplateColumn>
             </Columns>

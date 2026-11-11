@@ -24,6 +24,20 @@ window.irmInterop = {
         window.irmInterop.refreshCharts();
     },
 
+    // ── Table Density (Comfortable vs Compact) ──
+    setDensity: function (density) {
+        density = density === 'compact' ? 'compact' : 'comfortable';
+        document.documentElement.setAttribute('data-density', density);
+        try { localStorage.setItem('irm-density', density); } catch (_) { /* Session preference still applies. */ }
+        return density;
+    },
+    getDensity: function () {
+        var saved = 'comfortable';
+        try { saved = localStorage.getItem('irm-density') === 'compact' ? 'compact' : 'comfortable'; } catch (_) { /* Default comfortable */ }
+        document.documentElement.setAttribute('data-density', saved);
+        return saved;
+    },
+
     // ── Loading Screen ──
     hideLoadingScreen: function () {
         var el = document.getElementById('irmLoadingScreen');

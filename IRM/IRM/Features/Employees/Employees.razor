@@ -178,42 +178,58 @@
     <MudDataGrid Items="@_employees"
                  T="EmployeeDto"
                  Filterable="true"
-                 Dense="true"
                  Hover="true"
-                 Striped="false"
-                 RowsPerPage="10">
+                 Striped="true"
+                 Class="irm-data-table"
+                 RowsPerPage="10"
+                 Elevation="0">
         <Columns>
-            <TemplateColumn Title="STT" Sortable="false" Filterable="false">
+            <TemplateColumn Title="STT" Sortable="false" Filterable="false" CellStyle="width: 60px; text-align: center;">
                 <CellTemplate>
-                    <MudText Typo="Typo.body2">@(_employees.IndexOf(context.Item) + 1)</MudText>
+                    <span class="cell-secondary font-weight-bold tabular-nums">@(_employees.IndexOf(context.Item) + 1)</span>
                 </CellTemplate>
             </TemplateColumn>
-            <PropertyColumn Property="x => x.StaffName" Title="Họ tên" Style="font-weight: 600;" />
-            <TemplateColumn Title="Quốc tịch">
+            <TemplateColumn Title="Họ và tên" SortBy="@(x => x.StaffName)">
+                <CellTemplate>
+                    <div class="d-flex align-center">
+                        <div class="table-avatar mr-3">
+                            @(!string.IsNullOrEmpty(context.Item.StaffName) ? context.Item.StaffName[0].ToString().ToUpper() : "N")
+                        </div>
+                        <div class="cell-stack">
+                            <div class="cell-primary">@context.Item.StaffName</div>
+                            <div class="cell-secondary tabular-nums">
+                                @context.Item.GenderString
+                                @if (context.Item.Birthday.HasValue)
+                                {
+                                    <text> · @context.Item.Birthday.Value.ToString("dd/MM/yyyy")</text>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Hộ chiếu & Quốc tịch" SortBy="@(x => x.Passport)">
                 <CellTemplate>
                     @{
                         var natName = context.Item.NationalityNav?.NationalityName ?? context.Item.Nationality;
                         var natTag = GetNatTagClass(context.Item.Nationality);
                     }
-                    <span class="tag @natTag">@natName</span>
+                    <div class="cell-stack">
+                        <div>
+                            <span class="code-pill">@(string.IsNullOrWhiteSpace(context.Item.Passport) ? "—" : context.Item.Passport)</span>
+                        </div>
+                        <div>
+                            <span class="tag @natTag">@natName</span>
+                        </div>
+                    </div>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Hộ chiếu">
+            <TemplateColumn Title="Công ty & Nghề nghiệp">
                 <CellTemplate>
-                    <MudText Typo="Typo.body2"
-                             Style="font-family: monospace; font-size: 12px; background: var(--mud-palette-background); padding: 2px 8px; border-radius: 4px;">
-                        @context.Item.Passport
-                    </MudText>
-                </CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn Title="Công ty">
-                <CellTemplate>
-                    <MudText Typo="Typo.body2">@(context.Item.Company?.CompanyName)</MudText>
-                </CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn Title="Nghề nghiệp">
-                <CellTemplate>
-                    <MudText Typo="Typo.body2">@(context.Item.Career?.CareerName)</MudText>
+                    <div class="cell-stack">
+                        <div class="cell-primary cell-truncate" title="@context.Item.Company?.CompanyName">@(context.Item.Company?.CompanyName ?? "—")</div>
+                        <div class="cell-secondary cell-truncate">@(context.Item.Career?.CareerName ?? "Chưa cập nhật nghề nghiệp")</div>
+                    </div>
                 </CellTemplate>
             </TemplateColumn>
             <TemplateColumn Title="GPLĐ">
@@ -229,24 +245,31 @@
                     <span class="tag @wpTag">@context.Item.WorkPermitString</span>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Hạn tạm trú" SortBy="@(x => x.TemporaryStay)">
-                <CellTemplate>
-                    <MudText Typo="Typo.body2">@(context.Item.TemporaryStay?.ToString("dd/MM/yyyy") ?? "-")</MudText>
-                </CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn Title="Còn lại" SortBy="@(x => x.DaysUntilExpiry ?? 9999)">
+            <TemplateColumn Title="Hạn tạm trú & Còn lại" SortBy="@(x => x.DaysUntilExpiry ?? 9999)">
                 <CellTemplate>
                     @{
                         var days = context.Item.DaysUntilExpiry ?? 999;
-                        var daysStyle = days <= 7 ? "color: var(--red); font-weight: 700;" :
-                                        days <= 30 ? "color: var(--orange); font-weight: 700;" : "";
+                        var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
                     }
-                    <MudText Typo="Typo.body2" Style="@daysStyle">
-                        @(days < 999 ? $"{days} ngày" : "-")
-                    </MudText>
+                    <div class="cell-stack">
+                        <div class="cell-primary tabular-nums">@(context.Item.TemporaryStay?.ToString("dd/MM/yyyy") ?? "—")</div>
+                        <div>
+                            @if (days < 999)
+                            {
+                                <span class="status-pill @statusClass tabular-nums">
+                                    <span class="status-dot"></span>
+                                    @(days >= 0 ? $"Còn {days} ngày" : $"Quá hạn {-days} ngày")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="status-pill status-neutral">Chưa có hạn</span>
+                            }
+                        </div>
+                    </div>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
+            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" CellStyle="text-align: right;">
                 <CellTemplate>
                     <MudIconButton Icon="@Icons.Material.Outlined.Visibility" Size="Size.Small" Color="Color.Primary"
                                    OnClick="@(() => OpenDetailDialog(context.Item))" />

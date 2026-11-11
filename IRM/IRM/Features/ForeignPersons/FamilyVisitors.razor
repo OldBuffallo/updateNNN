@@ -109,7 +109,6 @@ else
 {
     <MudDataGrid T="FamilyVisitorDto"
                  Items="_items"
-                 Dense="true"
                  Hover="true"
                  Striped="true"
                  Class="irm-data-table"
@@ -118,12 +117,15 @@ else
             <TemplateColumn Title="Họ tên người thăm thân" SortBy="x => x.FullName">
                 <CellTemplate>
                     <div class="d-flex align-center">
-                        <div class="table-avatar mr-2 bg-purple-soft">
+                        <div class="table-avatar mr-3 bg-purple-soft">
                             @(!string.IsNullOrEmpty(context.Item.FullName) ? context.Item.FullName[0].ToString().ToUpper() : "V")
                         </div>
-                        <div>
-                            <div class="font-weight-bold">@context.Item.FullName</div>
-                            <div class="text-caption text-muted">@context.Item.GenderString · HC: @(context.Item.Passport ?? "N/A")</div>
+                        <div class="cell-stack">
+                            <div class="cell-primary">@context.Item.FullName</div>
+                            <div class="d-flex align-center gap-1">
+                                <span class="cell-secondary">@context.Item.GenderString ·</span>
+                                <span class="code-pill">@(context.Item.Passport ?? "N/A")</span>
+                            </div>
                         </div>
                     </div>
                 </CellTemplate>
@@ -138,22 +140,39 @@ else
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Thân nhân tại Việt Nam">
+            <TemplateColumn Title="Thân nhân & Lưu trú tại VN">
                 <CellTemplate>
-                    <div class="font-weight-bold">@context.Item.RelativeName</div>
-                    <div class="text-caption text-muted">
-                        <span class="badge-relationship">@context.Item.Relationship</span>
-                        <span>· @context.Item.RelativeTypeString</span>
+                    <div class="cell-stack">
+                        <div class="cell-primary">@context.Item.RelativeName</div>
+                        <div class="cell-secondary">
+                            <span class="badge-relationship">@context.Item.Relationship</span>
+                            <span>· @context.Item.RelativeTypeString</span>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(context.Item.Address))
+                        {
+                            <div class="cell-secondary cell-truncate" title="@context.Item.Address">📍 @context.Item.Address</div>
+                        }
                     </div>
                 </CellTemplate>
             </TemplateColumn>
 
-            <PropertyColumn Property="x => x.Address" Title="Địa chỉ tạm trú" />
-
             <TemplateColumn Title="Thời hạn thăm thân">
                 <CellTemplate>
-                    <div class="font-weight-bold">
-                        @context.Item.VisitStartDate?.ToString("dd/MM/yyyy") – @(context.Item.VisitEndDate?.ToString("dd/MM/yyyy") ?? "Không thời hạn")
+                    <div class="cell-stack">
+                        <div class="cell-primary tabular-nums">
+                            @(context.Item.VisitStartDate?.ToString("dd/MM/yyyy") ?? "—") → @(context.Item.VisitEndDate?.ToString("dd/MM/yyyy") ?? "Không thời hạn")
+                        </div>
+                        @if (context.Item.VisitEndDate.HasValue)
+                        {
+                            var days = (context.Item.VisitEndDate.Value.Date - DateTime.Today).Days;
+                            var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
+                            <div>
+                                <span class="status-pill @statusClass tabular-nums">
+                                    <span class="status-dot"></span>
+                                    @(days >= 0 ? $"Còn {days} ngày" : $"Quá hạn {-days} ngày")
+                                </span>
+                            </div>
+                        }
                     </div>
                 </CellTemplate>
             </TemplateColumn>
@@ -162,7 +181,7 @@ else
                 <CellTemplate>
                     @if (context.Item.HasElectronicId)
                     {
-                        <span class="eid-chip eid-active">
+                        <span class="eid-chip eid-active tabular-nums">
                             <span class="eid-dot"></span>
                             @context.Item.ElectronicIdNumber
                         </span>

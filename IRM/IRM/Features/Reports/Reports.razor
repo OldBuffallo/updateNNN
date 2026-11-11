@@ -140,10 +140,10 @@
         }
         else if (_previewEmployees.Any())
         {
-            <MudSimpleTable Dense="true" Hover="true" Striped="true" Style="max-height: 500px; overflow-y: auto;">
+            <MudSimpleTable Hover="true" Striped="true" Style="max-height: 560px; overflow: auto;">
                 <thead>
                     <tr>
-                        <th>STT</th>
+                        <th style="width: 56px;">STT</th>
                         @foreach (var col in _columns.Where(c => c.Selected))
                         {
                             <th>@col.Name</th>
@@ -162,18 +162,56 @@
                         {
                             currentGroup = groupVal;
                             <tr class="group-header">
-                                <td colspan="@(_columns.Count(c => c.Selected) + 1)"><strong>@currentGroup</strong></td>
+                                <td colspan="@(_columns.Count(c => c.Selected) + 1)"><strong>📂 @currentGroup</strong></td>
                             </tr>
                         }
                         stt++;
                         var days = emp.DaysUntilExpiry;
-                        var rowStyle = days.HasValue && days.Value <= 7 ? "color: var(--red); font-weight: 600;"
-                                     : days.HasValue && days.Value <= 30 ? "color: var(--orange);" : "";
-                        <tr style="@rowStyle">
-                            <td>@stt</td>
+                        <tr>
+                            <td class="tabular-nums text-muted">@stt</td>
                             @foreach (var col in _columns.Where(c => c.Selected))
                             {
-                                <td>@GetColumnValue(emp, col.Name)</td>
+                                <td>
+                                    @if (col.Name is "Hộ chiếu" or "Số GPLĐ" or "Số Visa" or "CMND người thân")
+                                    {
+                                        var codeVal = GetColumnValue(emp, col.Name);
+                                        @if (!string.IsNullOrWhiteSpace(codeVal))
+                                        {
+                                            <span class="code-pill">@codeVal</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    }
+                                    else if (col.Name == "Còn lại (ngày)")
+                                    {
+                                        @if (days.HasValue)
+                                        {
+                                            var statusCls = days.Value <= 7 ? "status-urgent" : days.Value <= 30 ? "status-warning" : "status-safe";
+                                            <span class="status-pill @statusCls tabular-nums">
+                                                <span class="status-dot"></span>
+                                                @(days.Value < 0 ? $"Quá {Math.Abs(days.Value)} ngày" : $"{days.Value} ngày")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    }
+                                    else if (col.Name is "Hạn tạm trú" or "Ngày sinh" or "Hạn thăm thân")
+                                    {
+                                        <span class="tabular-nums">@GetColumnValue(emp, col.Name)</span>
+                                    }
+                                    else if (col.Name == "Họ tên")
+                                    {
+                                        <span class="cell-primary">@GetColumnValue(emp, col.Name)</span>
+                                    }
+                                    else
+                                    {
+                                        @GetColumnValue(emp, col.Name)
+                                    }
+                                </td>
                             }
                         </tr>
                     }

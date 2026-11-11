@@ -78,40 +78,84 @@
 
 @if (_students.Any())
 {
-    <MudDataGrid Items="@_students" T="StudentDto" Filterable="true" Dense="true" Hover="true" Striped="false" RowsPerPage="10">
+    <MudDataGrid Items="@_students" T="StudentDto" Filterable="true" Hover="true" Striped="true" Class="irm-data-table" RowsPerPage="10" Elevation="0">
         <Columns>
-            <TemplateColumn Title="STT" Sortable="false" Filterable="false">
-                <CellTemplate><MudText Typo="Typo.body2">@(_students.IndexOf(context.Item) + 1)</MudText></CellTemplate>
+            <TemplateColumn Title="STT" Sortable="false" Filterable="false" CellStyle="width: 60px; text-align: center;">
+                <CellTemplate><span class="cell-secondary font-weight-bold tabular-nums">@(_students.IndexOf(context.Item) + 1)</span></CellTemplate>
             </TemplateColumn>
-            <PropertyColumn Property="x => x.FullName" Title="Họ tên" Style="font-weight:600;" />
-            <TemplateColumn Title="Quốc tịch">
+            <TemplateColumn Title="Họ và tên" SortBy="@(x => x.FullName)">
+                <CellTemplate>
+                    <div class="d-flex align-center">
+                        <div class="table-avatar mr-3">
+                            @(!string.IsNullOrEmpty(context.Item.FullName) ? context.Item.FullName[0].ToString().ToUpper() : "S")
+                        </div>
+                        <div class="cell-stack">
+                            <div class="cell-primary">@context.Item.FullName</div>
+                            <div class="cell-secondary tabular-nums">
+                                @context.Item.GenderString
+                                @if (context.Item.Birthday.HasValue)
+                                {
+                                    <text> · @context.Item.Birthday.Value.ToString("dd/MM/yyyy")</text>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Hộ chiếu & Quốc tịch" SortBy="@(x => x.Passport)">
                 <CellTemplate>
                     @{ var natName = context.Item.NationalityNav?.NationalityName ?? context.Item.Nationality; }
-                    <span class="tag tag-blue">@natName</span>
+                    <div class="cell-stack">
+                        <div><span class="code-pill">@(string.IsNullOrWhiteSpace(context.Item.Passport) ? "—" : context.Item.Passport)</span></div>
+                        <div><span class="tag tag-blue">@natName</span></div>
+                    </div>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Hộ chiếu">
-                <CellTemplate><MudText Typo="Typo.body2" Style="font-family:monospace;font-size:12px;background:var(--mud-palette-background);padding:2px 8px;border-radius:4px;">@context.Item.Passport</MudText></CellTemplate>
+            <TemplateColumn Title="Trường & Ngành học" SortBy="@(x => x.SchoolName)">
+                <CellTemplate>
+                    <div class="cell-stack">
+                        <div class="cell-primary cell-truncate" title="@context.Item.SchoolName">@(context.Item.SchoolName ?? "—")</div>
+                        <div class="cell-secondary cell-truncate">
+                            @(context.Item.Major ?? "Chưa rõ ngành")
+                            @if (!string.IsNullOrWhiteSpace(context.Item.StudentCode))
+                            {
+                                <text> · MSV: @context.Item.StudentCode</text>
+                            }
+                        </div>
+                    </div>
+                </CellTemplate>
             </TemplateColumn>
-            <PropertyColumn Property="x => x.SchoolName" Title="Trường" />
-            <PropertyColumn Property="x => x.Major" Title="Ngành" />
-            <TemplateColumn Title="Trình độ">
-                <CellTemplate><span class="tag tag-purple">@context.Item.EducationLevelString</span></CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn Title="Học bổng">
+            <TemplateColumn Title="Trình độ & Học bổng">
                 <CellTemplate>
                     @{ var schTag = context.Item.ScholarshipType == 0 ? "tag-orange" : "tag-green"; }
-                    <span class="tag @schTag">@context.Item.ScholarshipTypeString</span>
+                    <div class="d-flex flex-wrap gap-1">
+                        <span class="tag tag-purple">@context.Item.EducationLevelString</span>
+                        <span class="tag @schTag">@context.Item.ScholarshipTypeString</span>
+                    </div>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Hạn visa" SortBy="@(x => x.VisaExpiry)">
-                <CellTemplate><MudText Typo="Typo.body2">@(context.Item.VisaExpiry?.ToString("dd/MM/yyyy") ?? "-")</MudText></CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn Title="Còn lại" SortBy="@(x => x.DaysUntilVisaExpiry ?? 9999)">
+            <TemplateColumn Title="Hạn Visa & Còn lại" SortBy="@(x => x.DaysUntilVisaExpiry ?? 9999)">
                 <CellTemplate>
-                    @{ var days = context.Item.DaysUntilVisaExpiry ?? 999;
-                       var dStyle = days <= 7 ? "color:var(--red);font-weight:700;" : days <= 30 ? "color:var(--orange);font-weight:700;" : ""; }
-                    <MudText Typo="Typo.body2" Style="@dStyle">@(days < 999 ? $"{days} ngày" : "-")</MudText>
+                    @{
+                        var days = context.Item.DaysUntilVisaExpiry ?? 999;
+                        var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
+                    }
+                    <div class="cell-stack">
+                        <div class="cell-primary tabular-nums">@(context.Item.VisaExpiry?.ToString("dd/MM/yyyy") ?? "—")</div>
+                        <div>
+                            @if (days < 999)
+                            {
+                                <span class="status-pill @statusClass tabular-nums">
+                                    <span class="status-dot"></span>
+                                    @(days >= 0 ? $"Còn {days} ngày" : $"Quá hạn {-days} ngày")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="status-pill status-neutral">Chưa có hạn</span>
+                            }
+                        </div>
+                    </div>
                 </CellTemplate>
             </TemplateColumn>
             <TemplateColumn Title="Trạng thái">
@@ -120,7 +164,7 @@
                     <span class="tag @stTag">@context.Item.StatusString</span>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false">
+            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" CellStyle="text-align: right;">
                 <CellTemplate>
                     <MudIconButton Icon="@Icons.Material.Outlined.Visibility" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OpenDetailDialog(context.Item))" />
                     <MudIconButton Icon="@Icons.Material.Outlined.Edit" Size="Size.Small" Color="Color.Warning" OnClick="@(() => OpenEditDialog(context.Item))" />
