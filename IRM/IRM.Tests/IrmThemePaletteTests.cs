@@ -69,6 +69,16 @@ public sealed class IrmThemePaletteTests
         Readable(palette.DrawerIcon, palette.DrawerBackground, 4.5);
     }
 
+    [Fact]
+    public void GovernmentTheme_UsesOfflineVietnameseSystemFontFamily()
+    {
+        var theme = IrmTheme.Create();
+        Assert.Equal("6px", theme.LayoutProperties.DefaultBorderRadius);
+        Assert.Equal("300px", theme.LayoutProperties.DrawerWidthLeft);
+        Assert.NotNull(theme.Typography.Default.FontFamily);
+        Assert.Equal("Segoe UI", theme.Typography.Default.FontFamily![0]);
+    }
+
     private static Palette Palette(bool dark)
     {
         var theme = IrmTheme.Create();

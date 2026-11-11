@@ -86,6 +86,19 @@ public static class IrmTheme
         {
             DrawerWidthLeft = "300px",
             DefaultBorderRadius = "6px"
+        },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography
+            {
+                FontFamily = ["Segoe UI", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"]
+            },
+            Button = new ButtonTypography
+            {
+                FontFamily = ["Segoe UI", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+                TextTransform = "none",
+                FontWeight = "600"
+            }
         }
     };
 }
