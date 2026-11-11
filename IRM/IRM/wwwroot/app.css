@@ -2572,9 +2572,9 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
     white-space: nowrap;
 }
 
-.mud-data-grid .mud-icon-button,
-.mud-table .mud-icon-button,
-.mud-simple-table .mud-icon-button {
+.mud-data-grid .mud-table-body .mud-icon-button,
+.mud-table .mud-table-body .mud-icon-button,
+.mud-simple-table tbody .mud-icon-button {
     width: 30px;
     height: 30px;
     padding: 5px;
@@ -2585,11 +2585,26 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
     transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.mud-data-grid .mud-icon-button:hover,
-.mud-table .mud-icon-button:hover,
-.mud-simple-table .mud-icon-button:hover {
+.mud-data-grid .mud-table-body .mud-icon-button:hover,
+.mud-table .mud-table-body .mud-icon-button:hover,
+.mud-simple-table tbody .mud-icon-button:hover {
     background-color: var(--bg-hover);
     border-color: currentColor;
+}
+
+/* Keep column header sort/filter icons compact so they never bloat column width */
+.mud-data-grid .mud-table-head .mud-icon-button,
+.mud-table .mud-table-head .mud-icon-button {
+    width: 22px;
+    height: 22px;
+    padding: 2px;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+.mud-data-grid .mud-table-head .filter-button,
+.mud-data-grid .mud-table-head .mud-menu {
+    display: none !important;
 }
 
 .section-header h3 {
@@ -2832,4 +2847,156 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
 .density-toggle-btn {
     border: 1px solid var(--border);
     border-radius: 8px;
+}
+
+/* ── Responsive Multi-Device Table System (Laptop / Split-Screen / Tablet / Mobile) ── */
+@media (max-width: 1280px) {
+    .mud-simple-table thead th,
+    .mud-table-head .mud-table-cell,
+    .mud-data-grid-header-cell {
+        padding: 9px 10px !important;
+        font-size: 12px !important;
+    }
+
+    .mud-table-cell,
+    .mud-data-grid-cell,
+    .mud-simple-table tbody td {
+        padding: 10px 10px !important;
+        font-size: 12.5px;
+    }
+
+    .cell-inline {
+        flex-wrap: wrap;
+        white-space: normal;
+        row-gap: 1px;
+    }
+
+    .cell-truncate {
+        max-width: clamp(130px, 18vw, 220px);
+    }
+
+    /* Sticky right action column when intermediate viewport scrolls horizontally */
+    .irm-data-table .mud-table-head .mud-table-cell:last-child,
+    .irm-data-table .mud-table-body .mud-table-cell:last-child {
+        position: sticky;
+        right: 0;
+        z-index: 1;
+        background: var(--bg-surface);
+        box-shadow: -4px 0 8px -4px rgba(15, 23, 42, 0.08);
+    }
+
+    .irm-data-table .mud-table-head .mud-table-cell:last-child {
+        background: var(--bg-surface-variant) !important;
+        z-index: 3;
+    }
+
+    .irm-data-table .mud-table-body .mud-table-row:hover .mud-table-cell:last-child {
+        background: var(--bg-hover) !important;
+    }
+}
+
+@media (hover: none), (max-width: 1024px) {
+    .mud-data-grid .mud-table-cell:last-child .mud-icon-button,
+    .mud-table .mud-table-cell:last-child .mud-icon-button {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Transform data grids into clean Stripe/Linear stacked cards on Mobile & Portrait Tablet */
+    .irm-data-table.mud-data-grid,
+    .irm-data-table .mud-table-container {
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        overflow-x: visible !important;
+    }
+
+    .irm-data-table .mud-table-head {
+        display: none !important;
+    }
+
+    .irm-data-table .mud-table-body {
+        display: flex !important;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .irm-data-table .mud-table-body .mud-table-row {
+        display: block !important;
+        background: var(--bg-surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+        box-shadow: var(--shadow-xs) !important;
+    }
+
+    .irm-data-table .mud-table-body .mud-table-cell {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        width: 100% !important;
+        padding: 6px 0 !important;
+        border-bottom: 1px dashed var(--border) !important;
+        text-align: right !important;
+        white-space: normal !important;
+        position: static !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    .irm-data-table .mud-table-body .mud-table-cell::before {
+        content: attr(data-label);
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-align: left;
+        flex-shrink: 0;
+    }
+
+    /* Hide row index (STT) inside mobile card to keep cards clean */
+    .irm-data-table .mud-table-body .mud-table-cell[data-label="STT"] {
+        display: none !important;
+    }
+
+    /* Card footer for Action buttons */
+    .irm-data-table .mud-table-body .mud-table-cell:last-child {
+        border-bottom: 0 !important;
+        padding-top: 8px !important;
+        padding-bottom: 2px !important;
+        justify-content: flex-end !important;
+    }
+
+    .irm-data-table .mud-table-body .mud-table-cell:last-child::before {
+        content: none !important;
+        display: none !important;
+    }
+
+    .irm-data-table .cell-truncate {
+        max-width: 65vw;
+        text-align: right;
+    }
+
+    .irm-data-table .cell-inline {
+        justify-content: flex-end;
+        text-align: right;
+    }
+
+    .irm-data-table .mud-table-pagination {
+        background: var(--bg-surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 10px !important;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
+
+    .mud-table-pagination-toolbar {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 6px;
+        height: auto !important;
+        min-height: 48px;
+        padding: 6px 8px !important;
+    }
 }

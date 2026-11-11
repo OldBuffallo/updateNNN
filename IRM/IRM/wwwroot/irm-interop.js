@@ -299,6 +299,28 @@ window.irmInterop = {
         });
     },
 
+    // ── Responsive Table Data-Label Sync (for <= 768px Mobile Card View) ──
+    syncTableLabels: function () {
+        if (typeof document === 'undefined' || typeof document.querySelectorAll !== 'function') return;
+        var tables = document.querySelectorAll('.mud-table-root, .mud-simple-table table');
+        tables.forEach(function (table) {
+            var headers = Array.prototype.map.call(table.querySelectorAll('thead th'), function (th) {
+                var titleEl = th.querySelector('.mud-column-header-text');
+                return (titleEl ? titleEl.textContent : th.textContent || '').trim();
+            });
+            if (!headers.length) return;
+            var rows = table.querySelectorAll('tbody tr:not(.group-header)');
+            rows.forEach(function (row) {
+                var cells = row.querySelectorAll('td');
+                cells.forEach(function (td, idx) {
+                    if (headers[idx] && !td.getAttribute('data-label')) {
+                        td.setAttribute('data-label', headers[idx]);
+                    }
+                });
+            });
+        });
+    },
+
     // ── Global Shortcut Listener (Ctrl+K / Cmd+K) ──
     _dotNetRef: null,
     registerShortcutHandler: function (dotNetHelper) {
@@ -316,6 +338,13 @@ window.irmInterop = {
                 }
             }
         });
+        window.irmInterop.syncTableLabels();
+        if (typeof MutationObserver === 'function' && document.body) {
+            var observer = new MutationObserver(function () {
+                window.irmInterop.syncTableLabels();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
     }
 };
 
