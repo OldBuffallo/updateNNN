@@ -25,7 +25,7 @@
 </div>
 
 <div class="page-actions-bar">
-    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2" AlignItems="AlignItems.Center">
         <MudTextField T="string"
                       @bind-Value="_searchText"
                       Placeholder="Tìm tên công ty..."
@@ -33,7 +33,7 @@
                       Margin="Margin.Dense"
                       Adornment="Adornment.Start"
                       AdornmentIcon="@Icons.Material.Outlined.Search"
-                      Style="min-width: 240px;"
+                      Style="width: 220px; max-width: 100%;"
                       OnKeyUp="OnSearchKeyUp" />
 
         <MudSelect T="int?"
@@ -43,7 +43,7 @@
                    Variant="Variant.Outlined"
                    Margin="Margin.Dense"
                    Clearable="true"
-                   Style="min-width: 180px;">
+                   Style="width: 180px; max-width: 100%;">
             @foreach (var f in _fields)
             {
                 <MudSelectItem T="int?" Value="@((int?)f.IDField)">@f.FieldName</MudSelectItem>
@@ -51,7 +51,7 @@
         </MudSelect>
     </MudStack>
 
-    <MudStack Row="true" Spacing="2">
+    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2">
         <MudButton Variant="Variant.Text"
                    StartIcon="@Icons.Material.Outlined.Search"
                    Color="Color.Primary"
@@ -86,6 +86,7 @@
 
 <MudDataGrid Items="@_companies"
              T="CompanyDto"
+             Breakpoint="Breakpoint.None"
              Filterable="false"
              Hover="true"
              Bordered="false"
@@ -101,7 +102,7 @@
         </TemplateColumn>
         <TemplateColumn Title="Doanh nghiệp" SortBy="@(x => x.CompanyName)">
             <CellTemplate>
-                <div class="cell-truncate" title="@context.Item.Address">
+                <div class="cell-truncate" title="@($"{context.Item.CompanyName}{(string.IsNullOrWhiteSpace(context.Item.Address) ? "" : $" — {context.Item.Address}")}")">
                     <span class="cell-primary">@context.Item.CompanyName</span>
                     @if (!string.IsNullOrWhiteSpace(context.Item.TypeOfBusiniess))
                     {
@@ -146,7 +147,7 @@
                 </div>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+        <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" HeaderClass="col-actions" CellClass="col-actions" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
             <CellTemplate>
                 <MudTooltip Text="Hồ sơ đầy đủ 6 Tab (FDI, KCN/KKT, CSLT thuê, Đại diện, Pháp nhân Scan)">
                     <MudIconButton Icon="@Icons.Material.Outlined.Visibility" Size="Size.Small" Color="Color.Primary"
@@ -276,25 +277,25 @@
                         <MudItem xs="12">
                             <MudDivider Class="my-2" />
                         </MudItem>
-                        <MudItem xs="3">
+                        <MudItem xs="6" sm="3">
                             <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
                                 <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight: 800;">@_detailCompany.TotalAmount</MudText>
                                 <MudText Typo="Typo.caption" Color="Color.Secondary">Tổng LĐ</MudText>
                             </MudPaper>
                         </MudItem>
-                        <MudItem xs="3">
+                        <MudItem xs="6" sm="3">
                             <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
                                 <MudText Typo="Typo.h4" Color="Color.Success" Style="font-weight: 800;">@_detailCompany.QuantityAvailable</MudText>
                                 <MudText Typo="Typo.caption" Color="Color.Secondary">Có GPLĐ</MudText>
                             </MudPaper>
                         </MudItem>
-                        <MudItem xs="3">
+                        <MudItem xs="6" sm="3">
                             <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
                                 <MudText Typo="Typo.h4" Color="Color.Warning" Style="font-weight: 800;">@_detailCompany.QuantityNotYet</MudText>
                                 <MudText Typo="Typo.caption" Color="Color.Secondary">Chưa có</MudText>
                             </MudPaper>
                         </MudItem>
-                        <MudItem xs="3">
+                        <MudItem xs="6" sm="3">
                             <MudPaper Elevation="0" Class="pa-3 text-center rounded-lg" Style="border: 1px solid var(--mud-palette-divider);">
                                 <MudText Typo="Typo.h4" Color="Color.Info" Style="font-weight: 800;">@_detailCompany.AmountOfExemption</MudText>
                                 <MudText Typo="Typo.caption" Color="Color.Secondary">Miễn GPLĐ</MudText>
@@ -335,7 +336,7 @@
                 <!-- TAB 3: ĐỊA ĐIỂM & KHU KINH TẾ -->
                 <MudTabPanel Text="3. Địa điểm & Khu kinh tế" Icon="@Icons.Material.Outlined.Place">
                     <div class="pt-4">
-                        <MudDataGrid T="CompanySiteDto" Items="@(_aggregate?.Sites ?? Array.Empty<CompanySiteDto>())" Hover="true" Striped="true" Class="irm-data-table mb-4">
+                        <MudDataGrid T="CompanySiteDto" Breakpoint="Breakpoint.None" Items="@(_aggregate?.Sites ?? Array.Empty<CompanySiteDto>())" Hover="true" Striped="true" Class="irm-data-table mb-4">
                             <Columns>
                                 <TemplateColumn Title="Tên địa điểm / Chi nhánh">
                                     <CellTemplate>
@@ -431,7 +432,7 @@
                 <!-- TAB 4: CƠ SỞ LƯU TRÚ ĐÃ THUÊ -->
                 <MudTabPanel Text="4. Cơ sở lưu trú đã thuê" Icon="@Icons.Material.Outlined.Hotel">
                     <div class="pt-4">
-                        <MudDataGrid T="CompanyAccommodationAgreementDto" Items="@(_aggregate?.AccommodationAgreements ?? Array.Empty<CompanyAccommodationAgreementDto>())" Hover="true" Striped="true" Class="irm-data-table">
+                        <MudDataGrid T="CompanyAccommodationAgreementDto" Breakpoint="Breakpoint.None" Items="@(_aggregate?.AccommodationAgreements ?? Array.Empty<CompanyAccommodationAgreementDto>())" Hover="true" Striped="true" Class="irm-data-table">
                             <Columns>
                                 <TemplateColumn Title="Tên cơ sở lưu trú">
                                     <CellTemplate>
@@ -464,7 +465,7 @@
                 <MudTabPanel Text="5. Đại diện & Thân nhân NLĐ" Icon="@Icons.Material.Outlined.AccountBox">
                     <div class="pt-4">
                         <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Người đại diện pháp luật của Doanh nghiệp</MudText>
-                        <MudDataGrid T="CompanyRepresentativeDto" Items="@(_aggregate?.Representatives ?? Array.Empty<CompanyRepresentativeDto>())" Hover="true" Striped="true" Class="irm-data-table mb-3">
+                        <MudDataGrid T="CompanyRepresentativeDto" Breakpoint="Breakpoint.None" Items="@(_aggregate?.Representatives ?? Array.Empty<CompanyRepresentativeDto>())" Hover="true" Striped="true" Class="irm-data-table mb-3">
                             <Columns>
                                 <TemplateColumn Title="Họ và tên">
                                     <CellTemplate>
@@ -499,7 +500,7 @@
                         </MudPaper>
 
                         <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Thân nhân NLĐ được Doanh nghiệp bảo lãnh</MudText>
-                        <MudDataGrid T="FamilyVisitorDto" Items="@(_aggregate?.SponsoredFamilyVisitors ?? Array.Empty<FamilyVisitorDto>())" Hover="true" Striped="true" Class="irm-data-table">
+                        <MudDataGrid T="FamilyVisitorDto" Breakpoint="Breakpoint.None" Items="@(_aggregate?.SponsoredFamilyVisitors ?? Array.Empty<FamilyVisitorDto>())" Hover="true" Striped="true" Class="irm-data-table">
                             <Columns>
                                 <TemplateColumn Title="Họ tên người thăm thân">
                                     <CellTemplate>
@@ -525,7 +526,7 @@
                 <!-- TAB 6: HỒ SƠ PHÁP NHÂN SCAN -->
                 <MudTabPanel Text="6. Hồ sơ pháp nhân Scan" Icon="@Icons.Material.Outlined.AttachFile">
                     <div class="pt-4">
-                        <MudDataGrid T="CompanyLegalDocumentDto" Items="@(_aggregate?.LegalDocuments ?? Array.Empty<CompanyLegalDocumentDto>())" Hover="true" Striped="true" Class="irm-data-table mb-4">
+                        <MudDataGrid T="CompanyLegalDocumentDto" Breakpoint="Breakpoint.None" Items="@(_aggregate?.LegalDocuments ?? Array.Empty<CompanyLegalDocumentDto>())" Hover="true" Striped="true" Class="irm-data-table mb-4">
                             <Columns>
                                 <TemplateColumn Title="Loại tài liệu">
                                     <CellTemplate>
@@ -543,7 +544,7 @@
                                         <span class="cell-primary">@(context.Item.StoredFile?.OriginalName ?? "—")</span>
                                     </CellTemplate>
                                 </TemplateColumn>
-                                <TemplateColumn Title="Tải tệp" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+                                <TemplateColumn Title="Tải tệp" HeaderClass="col-actions" CellClass="col-actions" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                                     <CellTemplate>
                                         @if (context.Item.StoredFile is not null)
                                         {

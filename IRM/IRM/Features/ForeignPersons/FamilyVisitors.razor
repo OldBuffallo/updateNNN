@@ -108,6 +108,7 @@
 else
 {
     <MudDataGrid T="FamilyVisitorDto"
+                 Breakpoint="Breakpoint.None"
                  Items="_items"
                  Hover="true"
                  Striped="true"
@@ -116,7 +117,7 @@ else
         <Columns>
             <TemplateColumn Title="Người thăm thân" SortBy="x => x.FullName">
                 <CellTemplate>
-                    <div class="cell-inline">
+                    <div class="cell-inline" title="@context.Item.FullName">
                         <span class="cell-primary">@context.Item.FullName</span>
                         <span class="cell-secondary">· @context.Item.GenderString</span>
                     </div>
@@ -163,7 +164,7 @@ else
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Thao tác" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+            <TemplateColumn Title="Thao tác" HeaderClass="col-actions" CellClass="col-actions" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
                     <div class="d-flex align-center justify-end gap-1">
                         <AuthorizeView Roles="ADMIN,DATA_EDITOR" Context="permissionContext">

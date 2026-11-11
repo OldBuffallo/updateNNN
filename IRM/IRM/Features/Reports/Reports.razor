@@ -171,7 +171,7 @@
                             <td class="tabular-nums text-muted">@stt</td>
                             @foreach (var col in _columns.Where(c => c.Selected))
                             {
-                                <td>
+                                <td title="@GetColumnValue(emp, col.Name)">
                                     @if (col.Name is "Hộ chiếu" or "Số GPLĐ" or "Số Visa" or "CMND người thân")
                                     {
                                         var codeVal = GetColumnValue(emp, col.Name);
@@ -222,25 +222,25 @@
             <MudPaper Elevation="0" Class="pa-4 mt-4 rounded-lg border-solid border" Style="border-width: 1px;">
                 <MudText Typo="Typo.subtitle2" Style="font-weight: 700;" Class="mb-2">Thống kê tóm tắt</MudText>
                 <MudGrid Spacing="2">
-                    <MudItem xs="3">
+                    <MudItem xs="6" sm="3">
                         <div class="stat-mini-card">
                             <span class="stat-mini-num">@_previewEmployees.Count</span>
                             <span class="stat-mini-label">Tổng số NLĐ</span>
                         </div>
                     </MudItem>
-                    <MudItem xs="3">
+                    <MudItem xs="6" sm="3">
                         <div class="stat-mini-card">
                             <span class="stat-mini-num" style="color: var(--green);">@_previewEmployees.Count(e => e.WorkPermit == WorkPermitType.WorkerHasPermit || e.WorkPermit == WorkPermitType.InvestorHasPermit)</span>
                             <span class="stat-mini-label">Đã có GPLĐ</span>
                         </div>
                     </MudItem>
-                    <MudItem xs="3">
+                    <MudItem xs="6" sm="3">
                         <div class="stat-mini-card">
                             <span class="stat-mini-num" style="color: var(--orange);">@_previewEmployees.Count(e => e.WorkPermit == WorkPermitType.WorkerExempt || e.WorkPermit == WorkPermitType.InvestorExempt)</span>
                             <span class="stat-mini-label">Miễn GPLĐ</span>
                         </div>
                     </MudItem>
-                    <MudItem xs="3">
+                    <MudItem xs="6" sm="3">
                         <div class="stat-mini-card">
                             <span class="stat-mini-num" style="color: var(--red);">@_previewEmployees.Count(e => e.DaysUntilExpiry.HasValue && e.DaysUntilExpiry.Value <= 30)</span>
                             <span class="stat-mini-label">Sắp hết hạn (≤30 ngày)</span>

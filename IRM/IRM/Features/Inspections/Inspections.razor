@@ -105,6 +105,7 @@
 else
 {
     <MudDataGrid T="InspectionDto"
+                 Breakpoint="Breakpoint.None"
                  Items="_items"
                  Hover="true"
                  Striped="true"
@@ -114,8 +115,10 @@ else
         <Columns>
             <TemplateColumn Title="Thời gian" SortBy="x => x.InspectedAt">
                 <CellTemplate>
-                    <span class="code-pill tabular-nums">@context.Item.InspectedAt.ToString("dd/MM/yyyy")</span>
-                    <span class="cell-secondary tabular-nums"> · @context.Item.InspectedAt.ToString("HH:mm")</span>
+                    <div class="cell-inline tabular-nums">
+                        <span class="code-pill tabular-nums">@context.Item.InspectedAt.ToString("dd/MM/yyyy")</span>
+                        <span class="cell-secondary tabular-nums"> · @context.Item.InspectedAt.ToString("HH:mm")</span>
+                    </div>
                 </CellTemplate>
             </TemplateColumn>
 
@@ -177,7 +180,7 @@ else
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Thao tác" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+            <TemplateColumn Title="Thao tác" HeaderClass="col-actions" CellClass="col-actions" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
                     <div class="d-flex align-center justify-end gap-1">
                         <AuthorizeView Roles="ADMIN,INSPECTOR" Context="permissionContext">

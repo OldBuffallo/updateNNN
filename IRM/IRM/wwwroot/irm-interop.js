@@ -300,21 +300,31 @@ window.irmInterop = {
     },
 
     // ── Responsive Table Data-Label Sync (for <= 768px Mobile Card View) ──
+    _labelSyncPending: false,
     syncTableLabels: function () {
         if (typeof document === 'undefined' || typeof document.querySelectorAll !== 'function') return;
         var tables = document.querySelectorAll('.mud-table-root, .mud-simple-table table');
         tables.forEach(function (table) {
             var headers = Array.prototype.map.call(table.querySelectorAll('thead th'), function (th) {
                 var titleEl = th.querySelector('.mud-column-header-text');
-                return (titleEl ? titleEl.textContent : th.textContent || '').trim();
+                if (titleEl) return (titleEl.textContent || '').trim();
+                if (typeof th.cloneNode === 'function') {
+                    var clone = th.cloneNode(true);
+                    Array.prototype.forEach.call(clone.querySelectorAll('.mud-icon-root, .mud-button-root, svg'), function (n) {
+                        if (n && n.parentNode) n.parentNode.removeChild(n);
+                    });
+                    return (clone.textContent || '').trim();
+                }
+                return (th.textContent || '').trim();
             });
             if (!headers.length) return;
             var rows = table.querySelectorAll('tbody tr:not(.group-header)');
             rows.forEach(function (row) {
                 var cells = row.querySelectorAll('td');
                 cells.forEach(function (td, idx) {
-                    if (headers[idx] && !td.getAttribute('data-label')) {
-                        td.setAttribute('data-label', headers[idx]);
+                    var label = headers[idx];
+                    if (label && td.getAttribute('data-label') !== label) {
+                        td.setAttribute('data-label', label);
                     }
                 });
             });
@@ -323,10 +333,16 @@ window.irmInterop = {
 
     // ── Global Shortcut Listener (Ctrl+K / Cmd+K) ──
     _dotNetRef: null,
+    _shortcutsInitialized: false,
     registerShortcutHandler: function (dotNetHelper) {
         window.irmInterop._dotNetRef = dotNetHelper;
     },
     initGlobalShortcuts: function () {
+        if (window.irmInterop._shortcutsInitialized) {
+            window.irmInterop.syncTableLabels();
+            return;
+        }
+        window.irmInterop._shortcutsInitialized = true;
         document.addEventListener('keydown', function (e) {
             if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
                 e.preventDefault();
@@ -341,14 +357,26 @@ window.irmInterop = {
         window.irmInterop.syncTableLabels();
         if (typeof MutationObserver === 'function' && document.body) {
             var observer = new MutationObserver(function () {
-                window.irmInterop.syncTableLabels();
+                if (window.irmInterop._labelSyncPending) return;
+                window.irmInterop._labelSyncPending = true;
+                var schedule = typeof requestAnimationFrame === 'function'
+                    ? requestAnimationFrame
+                    : function (fn) { setTimeout(fn, 16); };
+                schedule(function () {
+                    window.irmInterop._labelSyncPending = false;
+                    window.irmInterop.syncTableLabels();
+                });
             });
             observer.observe(document.body, { childList: true, subtree: true });
         }
     }
 };
 
-// Initialize shortcuts on load
-document.addEventListener('DOMContentLoaded', function () {
+// Initialize shortcuts immediately if DOM is already interactive/complete, otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+        window.irmInterop.initGlobalShortcuts();
+    });
+} else {
     window.irmInterop.initGlobalShortcuts();
-});
+}

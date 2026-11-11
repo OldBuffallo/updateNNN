@@ -131,7 +131,7 @@
 
     <MudTabs Elevation="0" Rounded="true" Class="irm-tabs mb-5">
         <MudTabPanel Text="Doanh nghiệp tại địa bàn" Icon="@Icons.Material.Outlined.Business">
-            <MudDataGrid T="CompanySummary" Items="_territory.Companies" Hover="true" Striped="true" Class="irm-data-table">
+            <MudDataGrid T="CompanySummary" Breakpoint="Breakpoint.None" Items="_territory.Companies" Hover="true" Striped="true" Class="irm-data-table">
                 <Columns>
                     <TemplateColumn Title="Tên doanh nghiệp" SortBy="x => x.CompanyName">
                         <CellTemplate>
@@ -153,7 +153,7 @@
         </MudTabPanel>
 
         <MudTabPanel Text="Cơ sở lưu trú tại địa bàn" Icon="@Icons.Material.Outlined.Hotel">
-            <MudDataGrid T="AccommodationSummary" Items="_territory.Accommodations" Hover="true" Striped="true" Class="irm-data-table">
+            <MudDataGrid T="AccommodationSummary" Breakpoint="Breakpoint.None" Items="_territory.Accommodations" Hover="true" Striped="true" Class="irm-data-table">
                 <Columns>
                     <TemplateColumn Title="Tên cơ sở lưu trú" SortBy="x => x.Name">
                         <CellTemplate>
@@ -182,7 +182,7 @@
     <MudText Typo="Typo.subtitle1" Class="font-weight-bold">
         Chuyên đề phân tích mở rộng
     </MudText>
-    <div class="d-flex align-center gap-2">
+    <div class="d-flex align-center flex-wrap gap-2">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Map" OnClick="LoadOverview">
             Tổng quan 54 địa bàn
         </MudButton>
@@ -208,7 +208,7 @@
                         <div class="font-weight-bold text-success">ĐÃ CẤP ĐỊNH DANH ĐIỆN TỬ</div>
                         <div class="text-caption text-muted">Có mã định danh hoạt động</div>
                     </div>
-                    <span class="font-weight-bold" style="font-size: 24px; color: #059669;">@_documents.WithElectronicIdentity</span>
+                    <span class="font-weight-bold" style="font-size: 24px; color: var(--green);">@_documents.WithElectronicIdentity</span>
                 </div>
             </MudItem>
             <MudItem xs="12" sm="6">
@@ -217,7 +217,7 @@
                         <div class="font-weight-bold text-warning">CHƯA CẤP ĐỊNH DANH ĐIỆN TỬ</div>
                         <div class="text-caption text-muted">Cần rà soát bổ sung định danh</div>
                     </div>
-                    <span class="font-weight-bold" style="font-size: 24px; color: #d97706;">@_documents.WithoutElectronicIdentity</span>
+                    <span class="font-weight-bold" style="font-size: 24px; color: var(--orange);">@_documents.WithoutElectronicIdentity</span>
                 </div>
             </MudItem>
         </MudGrid>
@@ -243,7 +243,7 @@
                 Tổng quan thống kê 54 xã / phường / đặc khu (@_overview.Count đơn vị)
             </MudText>
         </div>
-        <MudDataGrid T="TerritoryOverview" Items="_overview" Hover="true" Striped="true" Class="irm-data-table">
+        <MudDataGrid T="TerritoryOverview" Breakpoint="Breakpoint.None" Items="_overview" Hover="true" Striped="true" Class="irm-data-table">
             <Columns>
                 <TemplateColumn Title="Mã địa bàn" SortBy="x => x.Code">
                     <CellTemplate>
@@ -280,7 +280,7 @@
                 Thống kê theo Khu công nghiệp & Khu kinh tế (@_zones.Count khu)
             </MudText>
         </div>
-        <MudDataGrid T="ZoneStatistics" Items="_zones" Hover="true" Striped="true" Class="irm-data-table">
+        <MudDataGrid T="ZoneStatistics" Breakpoint="Breakpoint.None" Items="_zones" Hover="true" Striped="true" Class="irm-data-table">
             <Columns>
                 <TemplateColumn Title="Tên khu / cụm kinh tế" SortBy="x => x.ZoneName">
                     <CellTemplate>

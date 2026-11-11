@@ -31,7 +31,7 @@
 </div>
 
 <div class="page-actions-bar">
-    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2" AlignItems="AlignItems.Center">
         <MudMenu Icon="@Icons.Material.Outlined.FilterList"
                  Label="@_filterLabel"
                  Variant="Variant.Outlined"
@@ -126,7 +126,7 @@
         }
     </MudStack>
 
-    <MudStack Row="true" Spacing="2">
+    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Download" Color="Color.Default"
                    OnClick="ExportExcelAsync">
             Xuất Excel
@@ -177,6 +177,7 @@
 {
     <MudDataGrid Items="@_employees"
                  T="EmployeeDto"
+                 Breakpoint="Breakpoint.None"
                  Filterable="true"
                  Hover="true"
                  Striped="true"
@@ -191,7 +192,7 @@
             </TemplateColumn>
             <TemplateColumn Title="Người lao động" SortBy="@(x => x.StaffName)">
                 <CellTemplate>
-                    <div class="cell-inline">
+                    <div class="cell-inline" title="@context.Item.StaffName">
                         <span class="cell-primary">@context.Item.StaffName</span>
                         <span class="cell-secondary tabular-nums">
                             · @context.Item.GenderString@(context.Item.Birthday.HasValue ? $", {context.Item.Birthday.Value:yyyy}" : "")
@@ -242,7 +243,7 @@
                     }
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" HeaderClass="col-actions" CellClass="col-actions" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
                     <MudIconButton Icon="@Icons.Material.Outlined.Visibility" Size="Size.Small" Color="Color.Primary"
                                    OnClick="@(() => OpenDetailDialog(context.Item))" />
@@ -257,7 +258,7 @@
             </TemplateColumn>
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="EmployeeDto" />
+            <MudDataGridPager T="EmployeeDto" PageSizeOptions="@(new[] { 10, 15, 25, 50, 100 })" />
         </PagerContent>
     </MudDataGrid>
 }

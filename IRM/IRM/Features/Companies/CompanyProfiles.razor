@@ -109,7 +109,7 @@
         <!-- ── TAB 2: ĐỊA ĐIỂM & KHU KINH TẾ ── -->
         <MudTabPanel Text="Địa điểm & Khu kinh tế" Icon="@Icons.Material.Outlined.Place">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Danh sách Địa điểm hoạt động & Phân bổ KCN/KKT</MudText>
-            <MudDataGrid T="CompanySiteDto" Items="_aggregate.Sites" Hover="true" Striped="true" Class="irm-data-table mb-4" Elevation="0">
+            <MudDataGrid T="CompanySiteDto" Breakpoint="Breakpoint.None" Items="_aggregate.Sites" Hover="true" Striped="true" Class="irm-data-table mb-4" Elevation="0">
                 <Columns>
                     <TemplateColumn Title="Tên địa điểm / Chi nhánh" SortBy="x => x.Name">
                         <CellTemplate>
@@ -198,7 +198,7 @@
         <!-- ── TAB 3: CƠ SỞ LƯU TRÚ ── -->
         <MudTabPanel Text="Cơ sở lưu trú đã thuê" Icon="@Icons.Material.Outlined.Hotel">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Hợp đồng thuê Cơ sở lưu trú của Doanh nghiệp</MudText>
-            <MudDataGrid T="CompanyAccommodationAgreementDto" Items="_aggregate.AccommodationAgreements" Hover="true" Striped="true" Class="irm-data-table" Elevation="0">
+            <MudDataGrid T="CompanyAccommodationAgreementDto" Breakpoint="Breakpoint.None" Items="_aggregate.AccommodationAgreements" Hover="true" Striped="true" Class="irm-data-table" Elevation="0">
                 <Columns>
                     <TemplateColumn Title="Tên cơ sở lưu trú">
                         <CellTemplate>
@@ -233,7 +233,7 @@
         <!-- ── TAB 4: THÂN NHÂN NLĐ ── -->
         <MudTabPanel Text="Thân nhân NLĐ" Icon="@Icons.Material.Outlined.FamilyRestroom">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Người nước ngoài thuộc diện Thân nhân của NLĐ tại Doanh nghiệp</MudText>
-            <MudDataGrid T="FamilyVisitorDto" Items="_aggregate.SponsoredFamilyVisitors" Hover="true" Striped="true" Class="irm-data-table" Elevation="0">
+            <MudDataGrid T="FamilyVisitorDto" Breakpoint="Breakpoint.None" Items="_aggregate.SponsoredFamilyVisitors" Hover="true" Striped="true" Class="irm-data-table" Elevation="0">
                 <Columns>
                     <TemplateColumn Title="Họ tên người thăm thân">
                         <CellTemplate>
@@ -267,7 +267,7 @@
         <!-- ── TAB 5: NGƯỜI ĐẠI DIỆN ── -->
         <MudTabPanel Text="Người đại diện pháp luật" Icon="@Icons.Material.Outlined.AccountBox">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Danh sách Người đại diện pháp luật của Doanh nghiệp</MudText>
-            <MudDataGrid T="CompanyRepresentativeDto" Items="_aggregate.Representatives" Hover="true" Striped="true" Class="irm-data-table mb-4" Elevation="0">
+            <MudDataGrid T="CompanyRepresentativeDto" Breakpoint="Breakpoint.None" Items="_aggregate.Representatives" Hover="true" Striped="true" Class="irm-data-table mb-4" Elevation="0">
                 <Columns>
                     <TemplateColumn Title="Họ và tên & Chức danh">
                         <CellTemplate>
@@ -308,7 +308,7 @@
         <!-- ── TAB 6: HỒ SƠ PHÁP NHÂN SCAN ── -->
         <MudTabPanel Text="Hồ sơ pháp nhân Scan" Icon="@Icons.Material.Outlined.AttachFile">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Tài liệu pháp nhân & Tệp đính kèm Scan</MudText>
-            <MudDataGrid T="CompanyLegalDocumentDto" Items="_aggregate.LegalDocuments" Hover="true" Striped="true" Class="irm-data-table mb-4" Elevation="0">
+            <MudDataGrid T="CompanyLegalDocumentDto" Breakpoint="Breakpoint.None" Items="_aggregate.LegalDocuments" Hover="true" Striped="true" Class="irm-data-table mb-4" Elevation="0">
                 <Columns>
                     <TemplateColumn Title="Loại tài liệu">
                         <CellTemplate>
@@ -322,7 +322,7 @@
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.IssuedBy" Title="Cơ quan cấp" />
                     <PropertyColumn Property="x => x.StoredFile!.OriginalName" Title="Tên tệp đính kèm" />
-                    <TemplateColumn Title="Tải tệp" CellStyle="text-align: right;">
+                    <TemplateColumn Title="Tải tệp" HeaderClass="col-actions" CellClass="col-actions" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                         <CellTemplate>
                             @if (context.Item.StoredFile is not null)
                             {

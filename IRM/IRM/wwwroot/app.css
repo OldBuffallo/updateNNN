@@ -474,6 +474,7 @@ body {
 
 .section-header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
@@ -482,19 +483,26 @@ body {
     border-bottom: 1px solid var(--mud-palette-divider);
 }
 
+.section-header > .d-flex {
+    width: 100%;
+}
+
 .section-header h3 {
-    margin: 0;
+    margin: 0 0 2px 0;
     font-size: 16px;
     font-weight: 700;
 }
 
 .section-meta {
+    display: block;
     color: var(--mud-palette-text-secondary);
     font-size: 12.5px;
+    line-height: 1.45;
 }
 
 .page-actions-bar {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
@@ -1088,6 +1096,8 @@ body {
 
 .report-builder-sidebar,
 .report-builder-preview {
+    min-width: 0;
+    max-width: 100%;
     border: 1px solid var(--mud-palette-divider);
     border-radius: var(--radius-lg);
     background: var(--bg-surface);
@@ -1219,7 +1229,7 @@ body {
     }
 
     .report-builder-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .report-builder-sidebar {
@@ -1238,9 +1248,16 @@ body {
         align-items: stretch;
     }
 
+    .page-actions-bar > div,
     .page-actions-bar .mud-stack {
         width: 100%;
-        flex-wrap: wrap;
+        flex-wrap: wrap !important;
+    }
+
+    .page-actions-bar .mud-input-control {
+        flex: 1 1 160px;
+        width: auto !important;
+        min-width: 0 !important;
     }
 
     .topbar-search {
@@ -2608,7 +2625,7 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
 }
 
 .section-header h3 {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
 }
@@ -2633,6 +2650,17 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
     white-space: nowrap;
 }
 
+.cell-inline .cell-primary {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: clamp(130px, 16vw, 240px);
+}
+
+.cell-inline .cell-secondary {
+    flex-shrink: 0;
+}
+
 .cell-primary {
     font-size: 13px;
     font-weight: 600;
@@ -2648,8 +2676,15 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
 }
 
 .cell-truncate {
-    max-width: 300px;
+    max-width: clamp(140px, 17vw, 230px);
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.report-builder-preview .mud-simple-table tbody td {
+    white-space: nowrap;
+    max-width: 220px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -2849,35 +2884,11 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
     border-radius: 8px;
 }
 
-/* ── Responsive Multi-Device Table System (Laptop / Split-Screen / Tablet / Mobile) ── */
-@media (max-width: 1280px) {
-    .mud-simple-table thead th,
-    .mud-table-head .mud-table-cell,
-    .mud-data-grid-header-cell {
-        padding: 9px 10px !important;
-        font-size: 12px !important;
-    }
-
-    .mud-table-cell,
-    .mud-data-grid-cell,
-    .mud-simple-table tbody td {
-        padding: 10px 10px !important;
-        font-size: 12.5px;
-    }
-
-    .cell-inline {
-        flex-wrap: wrap;
-        white-space: normal;
-        row-gap: 1px;
-    }
-
-    .cell-truncate {
-        max-width: clamp(130px, 18vw, 220px);
-    }
-
-    /* Sticky right action column when intermediate viewport scrolls horizontally */
-    .irm-data-table .mud-table-head .mud-table-cell:last-child,
-    .irm-data-table .mud-table-body .mud-table-cell:last-child {
+/* ── Responsive Multi-Device Table System (Desktop / Laptop / Split-Screen / Tablet / Mobile) ── */
+@media (min-width: 769px) {
+    /* Explicit sticky right action column so Thao tác never disappears off-screen on any desktop/laptop width */
+    .irm-data-table .mud-table-head .col-actions,
+    .irm-data-table .mud-table-body .col-actions {
         position: sticky;
         right: 0;
         z-index: 1;
@@ -2885,13 +2896,63 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
         box-shadow: -4px 0 8px -4px rgba(15, 23, 42, 0.08);
     }
 
-    .irm-data-table .mud-table-head .mud-table-cell:last-child {
+    .irm-data-table .mud-table-head .col-actions {
         background: var(--bg-surface-variant) !important;
         z-index: 3;
     }
 
-    .irm-data-table .mud-table-body .mud-table-row:hover .mud-table-cell:last-child {
+    .irm-data-table .mud-table-body .mud-table-row:hover .col-actions {
         background: var(--bg-hover) !important;
+    }
+}
+
+@media (max-width: 1440px) {
+    .mud-simple-table thead th,
+    .mud-table-head .mud-table-cell,
+    .mud-data-grid-header-cell {
+        padding: 9px 8px !important;
+        font-size: 12px !important;
+    }
+
+    .mud-table-cell,
+    .mud-data-grid-cell,
+    .mud-simple-table tbody td {
+        padding: 9px 8px !important;
+        font-size: 12.5px;
+    }
+
+    .cell-inline .cell-primary {
+        max-width: 125px;
+    }
+
+    .cell-truncate {
+        max-width: 145px;
+    }
+
+    .status-pill,
+    .code-pill {
+        font-size: 12.5px;
+        gap: 4px;
+    }
+
+    .mud-data-grid .mud-table-body .mud-icon-button,
+    .mud-table .mud-table-body .mud-icon-button {
+        width: 28px;
+        height: 28px;
+        padding: 4px;
+        margin-inline: 0;
+    }
+}
+
+@media (max-width: 1180px) {
+    .cell-inline {
+        flex-wrap: wrap;
+        white-space: normal;
+        row-gap: 1px;
+    }
+
+    .cell-truncate {
+        max-width: clamp(120px, 16vw, 200px);
     }
 }
 
@@ -2905,7 +2966,9 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
 @media (max-width: 768px) {
     /* Transform data grids into clean Stripe/Linear stacked cards on Mobile & Portrait Tablet */
     .irm-data-table.mud-data-grid,
-    .irm-data-table .mud-table-container {
+    .irm-data-table .mud-table-container,
+    .irm-data-table .mud-table-root {
+        display: block !important;
         border: 0 !important;
         background: transparent !important;
         box-shadow: none !important;
@@ -2946,6 +3009,10 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
         background: transparent !important;
     }
 
+    .irm-data-table .mud-table-body .mud-table-cell:last-child {
+        border-bottom: 0 !important;
+    }
+
     .irm-data-table .mud-table-body .mud-table-cell::before {
         content: attr(data-label);
         font-size: 12px;
@@ -2955,26 +3022,32 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
         flex-shrink: 0;
     }
 
+    .irm-data-table .mud-table-body .mud-table-empty-row .mud-table-cell::before {
+        content: none !important;
+        display: none !important;
+    }
+
     /* Hide row index (STT) inside mobile card to keep cards clean */
     .irm-data-table .mud-table-body .mud-table-cell[data-label="STT"] {
         display: none !important;
     }
 
-    /* Card footer for Action buttons */
-    .irm-data-table .mud-table-body .mud-table-cell:last-child {
+    /* Card footer scoped strictly to explicit .col-actions columns */
+    .irm-data-table .mud-table-body .mud-table-cell.col-actions {
         border-bottom: 0 !important;
         padding-top: 8px !important;
         padding-bottom: 2px !important;
         justify-content: flex-end !important;
     }
 
-    .irm-data-table .mud-table-body .mud-table-cell:last-child::before {
+    .irm-data-table .mud-table-body .mud-table-cell.col-actions::before {
         content: none !important;
         display: none !important;
     }
 
-    .irm-data-table .cell-truncate {
-        max-width: 65vw;
+    .irm-data-table .cell-truncate,
+    .irm-data-table .cell-inline .cell-primary {
+        max-width: 65vw !important;
         text-align: right;
     }
 

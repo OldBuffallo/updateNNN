@@ -60,13 +60,13 @@
             <MudSelectItem T="StudentStatus?" Value="StudentStatus.Returned">Đã về nước</MudSelectItem>
         </MudSelect>
     </MudStack>
-    <MudStack Row="true" Spacing="2">
+    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Download" Color="Color.Default" OnClick="ExportExcelAsync">Xuất Excel</MudButton>
         <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.PersonAdd" Color="Color.Primary" OnClick="OpenAddDialog">Thêm DHS</MudButton>
     </MudStack>
 </div>
 
-<MudStack Row="true" Spacing="2" Class="mb-3">
+<MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2" Class="mb-3">
     <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadAllAsync" Size="Size.Small">Tất cả</MudButton>
     <MudButton Variant="@(_showExpiring ? Variant.Filled : Variant.Outlined)" Color="Color.Warning" OnClick="LoadExpiringAsync" Size="Size.Small" StartIcon="@Icons.Material.Outlined.Warning">Sắp hết hạn visa</MudButton>
 </MudStack>
@@ -78,14 +78,14 @@
 
 @if (_students.Any())
 {
-    <MudDataGrid Items="@_students" T="StudentDto" Filterable="true" Hover="true" Striped="true" Class="irm-data-table" RowsPerPage="10" Elevation="0">
+    <MudDataGrid Items="@_students" T="StudentDto" Breakpoint="Breakpoint.None" Filterable="true" Hover="true" Striped="true" Class="irm-data-table" RowsPerPage="10" Elevation="0">
         <Columns>
             <TemplateColumn Title="STT" Sortable="false" Filterable="false" HeaderStyle="text-align: center;" CellStyle="width: 60px; text-align: center;">
                 <CellTemplate><span class="cell-secondary font-weight-bold tabular-nums">@(_students.IndexOf(context.Item) + 1)</span></CellTemplate>
             </TemplateColumn>
             <TemplateColumn Title="Du học sinh" SortBy="@(x => x.FullName)">
                 <CellTemplate>
-                    <div class="cell-inline">
+                    <div class="cell-inline" title="@context.Item.FullName">
                         <span class="cell-primary">@context.Item.FullName</span>
                         <span class="cell-secondary tabular-nums">
                             · @context.Item.GenderString@(context.Item.Birthday.HasValue ? $", {context.Item.Birthday.Value:yyyy}" : "")
@@ -142,7 +142,7 @@
                     <span class="tag @stTag">@context.Item.StatusString</span>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
+            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" HeaderClass="col-actions" CellClass="col-actions" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
                     <MudIconButton Icon="@Icons.Material.Outlined.Visibility" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OpenDetailDialog(context.Item))" />
                     <MudIconButton Icon="@Icons.Material.Outlined.Edit" Size="Size.Small" Color="Color.Warning" OnClick="@(() => OpenEditDialog(context.Item))" />
