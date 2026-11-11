@@ -146,7 +146,7 @@ async function main() {
         for (let i = 0; i < 4; i++) await page.locator('.theme-toggle-btn').click();
         await page.waitForTimeout(400);
         assert.equal(await page.locator('html').getAttribute('data-theme'), initial);
-        await page.locator('.irm-nav-link[href="/companies"]').click();
+        await page.locator('.irm-nav-link a[href$="companies"], a.irm-nav-link[href$="companies"]').click();
         await page.waitForURL('**/companies');
         assert.equal(await page.locator('html').getAttribute('data-theme'), initial);
         report.cases.push('rapid toggles and navigation preserve the final mode');
@@ -178,7 +178,7 @@ async function main() {
             await Promise.all([editor.waitForURL(url => !url.pathname.endsWith('/login')), editor.getByRole('button', { name: 'Đăng nhập', exact: true }).click()]);
             await editor.goto(new URL('/import', base).href);
             await editor.locator('.theme-toggle-btn').waitFor();
-            assert.equal(await editor.locator('.irm-nav-link[href="/admin"]').count(), 0);
+            assert.equal(await editor.locator('.irm-nav-link a[href$="admin"], a.irm-nav-link[href$="admin"]').count(), 0);
             for (const value of ['light', 'dark']) {
                 await mode(value, editor);
                 await contrast('.mud-button-root:not(:disabled) .mud-button-label', `editor controls ${value}`, 4.5, editor);

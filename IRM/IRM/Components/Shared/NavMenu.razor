@@ -11,8 +11,7 @@
                 Match="NavLinkMatch.All"
                 Icon="@Icons.Material.Outlined.Dashboard"
                 Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Dashboard"))'>
+                ActiveClass="active">
         <span>Bảng điều khiển</span>
     </MudNavLink>
 
@@ -25,8 +24,7 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Badge"
                 Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Hồ sơ Người nước ngoài"))'>
+                ActiveClass="active">
         <span>Hồ sơ Người nước ngoài</span>
     </MudNavLink>
 
@@ -34,8 +32,7 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Business"
                 Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Quản lý Doanh nghiệp"))'>
+                ActiveClass="active">
         <span>Doanh nghiệp</span>
     </MudNavLink>
 
@@ -43,8 +40,7 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Domain"
                 Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Cơ sở lưu trú"))'>
+                ActiveClass="active">
         <span>Cơ sở lưu trú</span>
     </MudNavLink>
 
@@ -57,8 +53,7 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.FactCheck"
                 Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Kiểm tra NNN"))'>
+                ActiveClass="active">
         <span>Đợt kiểm tra NNN</span>
     </MudNavLink>
 
@@ -71,8 +66,7 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Search"
                 Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Tìm kiếm"))'>
+                ActiveClass="active">
         <div class="d-flex align-center justify-space-between w-100">
             <span>Tra cứu toàn cục</span>
             <span class="nav-key-hint">Ctrl+K</span>
@@ -83,8 +77,7 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Description"
                 Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Báo cáo"))'>
+                ActiveClass="active">
         <span>Báo cáo định kỳ</span>
     </MudNavLink>
 
@@ -92,8 +85,7 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Analytics"
                 Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Thống kê"))'>
+                ActiveClass="active">
         <span>Thống kê 54 địa bàn</span>
     </MudNavLink>
 
@@ -101,8 +93,7 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.UploadFile"
                 Class="irm-nav-link"
-                ActiveClass="active"
-                OnClick='@(() => NotifyPageChanged("Import Excel"))'>
+                ActiveClass="active">
         <span>Nhập dữ liệu Excel</span>
     </MudNavLink>
 
@@ -121,42 +112,42 @@
                         Match="NavLinkMatch.All"
                         Icon="@Icons.Material.Outlined.Public"
                         Class="irm-nav-link"
-                        OnClick='@(() => NotifyPageChanged("Quốc tịch"))'>
+                        ActiveClass="active">
                 <span>Quốc tịch</span>
             </MudNavLink>
             <MudNavLink Href="/admin/districts"
                         Match="NavLinkMatch.All"
                         Icon="@Icons.Material.Outlined.Map"
                         Class="irm-nav-link"
-                        OnClick='@(() => NotifyPageChanged("Quận / Huyện"))'>
+                        ActiveClass="active">
                 <span>Quận / Huyện</span>
             </MudNavLink>
             <MudNavLink Href="/admin/wards"
                         Match="NavLinkMatch.All"
                         Icon="@Icons.Material.Outlined.Place"
                         Class="irm-nav-link"
-                        OnClick='@(() => NotifyPageChanged("Phường / Xã"))'>
+                        ActiveClass="active">
                 <span>Phường / Xã</span>
             </MudNavLink>
             <MudNavLink Href="/admin/fields"
                         Match="NavLinkMatch.All"
                         Icon="@Icons.Material.Outlined.Category"
                         Class="irm-nav-link"
-                        OnClick='@(() => NotifyPageChanged("Lĩnh vực"))'>
+                        ActiveClass="active">
                 <span>Lĩnh vực</span>
             </MudNavLink>
             <MudNavLink Href="/admin/careers"
                         Match="NavLinkMatch.All"
                         Icon="@Icons.Material.Outlined.WorkOutline"
                         Class="irm-nav-link"
-                        OnClick='@(() => NotifyPageChanged("Ngành nghề"))'>
+                        ActiveClass="active">
                 <span>Ngành nghề</span>
             </MudNavLink>
             <MudNavLink Href="/admin/admin-units"
                         Match="NavLinkMatch.All"
                         Icon="@Icons.Material.Outlined.AccountBalance"
                         Class="irm-nav-link"
-                        OnClick='@(() => NotifyPageChanged("Địa bàn hành chính"))'>
+                        ActiveClass="active">
                 <span>Địa bàn hành chính</span>
             </MudNavLink>
         </MudNavGroup>
@@ -170,8 +161,7 @@
                     Match="NavLinkMatch.All"
                     Icon="@Icons.Material.Outlined.Settings"
                     Class="irm-nav-link"
-                    ActiveClass="active"
-                    OnClick='@(() => NotifyPageChanged("Quản trị"))'>
+                    ActiveClass="active">
             <span>Quản trị hệ thống</span>
         </MudNavLink>
 
@@ -179,19 +169,8 @@
                     Match="NavLinkMatch.All"
                     Icon="@Icons.Material.Outlined.Storage"
                     Class="irm-nav-link"
-                    ActiveClass="active"
-                    OnClick='@(() => NotifyPageChanged("Đồng bộ DB cũ"))'>
+                    ActiveClass="active">
             <span>Đồng bộ DB cũ</span>
         </MudNavLink>
     </AuthorizeView>
 </MudNavMenu>
-
-@code {
-    [Parameter]
-    public EventCallback<string> OnPageChanged { get; set; }
-
-    private async Task NotifyPageChanged(string title)
-    {
-        await OnPageChanged.InvokeAsync(title);
-    }
-}

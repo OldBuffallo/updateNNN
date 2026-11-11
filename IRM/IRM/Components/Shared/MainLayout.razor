@@ -14,7 +14,7 @@
     <Authorized Context="auth">
         <MudLayout Class="irm-shell">
             <!-- ════════════ TOPBAR ════════════ -->
-            <MudAppBar Elevation="0" Dense="true" Class="irm-topbar">
+            <MudAppBar Elevation="0" Class="irm-topbar">
                 <MudIconButton Icon="@Icons.Material.Outlined.Menu"
                                Color="Color.Inherit"
                                Edge="Edge.Start"
@@ -48,32 +48,38 @@
 
                     <!-- Quick Add Action Menu -->
                     <AuthorizeView Roles="ADMIN,DATA_EDITOR" Context="permCtx">
-                        <MudMenu Icon="@Icons.Material.Outlined.AddCircle"
-                                 Color="Color.Primary"
-                                 Variant="Variant.Filled"
-                                 Size="Size.Small"
-                                 Label="Thêm nhanh"
-                                 EndIcon="@Icons.Material.Outlined.KeyboardArrowDown"
-                                 Class="topbar-quick-add d-none d-sm-inline-flex"
+                        <MudMenu Class="topbar-quick-add d-none d-sm-inline-flex"
                                  Dense="true"
                                  AnchorOrigin="Origin.BottomRight"
                                  TransformOrigin="Origin.TopRight">
-                            <MudMenuItem Icon="@Icons.Material.Outlined.PersonAdd" OnClick='() => Navigation.NavigateTo("/employees")'>
-                                Thêm nhân viên NNN
-                            </MudMenuItem>
-                            <MudMenuItem Icon="@Icons.Material.Outlined.FamilyRestroom" OnClick='() => Navigation.NavigateTo("/family-visitors")'>
-                                Thêm người thăm thân
-                            </MudMenuItem>
-                            <MudMenuItem Icon="@Icons.Material.Outlined.Hotel" OnClick='() => Navigation.NavigateTo("/accommodations")'>
-                                Thêm cơ sở lưu trú
-                            </MudMenuItem>
-                            <MudMenuItem Icon="@Icons.Material.Outlined.FactCheck" OnClick='() => Navigation.NavigateTo("/inspections")'>
-                                Tạo đợt kiểm tra
-                            </MudMenuItem>
-                            <MudDivider />
-                            <MudMenuItem Icon="@Icons.Material.Outlined.UploadFile" OnClick='() => Navigation.NavigateTo("/import")'>
-                                Import Excel
-                            </MudMenuItem>
+                            <ActivatorContent Context="quickAddMenu">
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           Size="Size.Small"
+                                           StartIcon="@Icons.Material.Outlined.Add"
+                                           EndIcon="@Icons.Material.Outlined.KeyboardArrowDown"
+                                           OnClick="quickAddMenu.ToggleAsync">
+                                    Thêm nhanh
+                                </MudButton>
+                            </ActivatorContent>
+                            <ChildContent>
+                                <MudMenuItem Icon="@Icons.Material.Outlined.PersonAdd" OnClick='() => Navigation.NavigateTo("/employees")'>
+                                    Thêm nhân viên NNN
+                                </MudMenuItem>
+                                <MudMenuItem Icon="@Icons.Material.Outlined.FamilyRestroom" OnClick='() => Navigation.NavigateTo("/family-visitors")'>
+                                    Thêm người thăm thân
+                                </MudMenuItem>
+                                <MudMenuItem Icon="@Icons.Material.Outlined.Hotel" OnClick='() => Navigation.NavigateTo("/accommodations")'>
+                                    Thêm cơ sở lưu trú
+                                </MudMenuItem>
+                                <MudMenuItem Icon="@Icons.Material.Outlined.FactCheck" OnClick='() => Navigation.NavigateTo("/inspections")'>
+                                    Tạo đợt kiểm tra
+                                </MudMenuItem>
+                                <MudDivider />
+                                <MudMenuItem Icon="@Icons.Material.Outlined.UploadFile" OnClick='() => Navigation.NavigateTo("/import")'>
+                                    Import Excel
+                                </MudMenuItem>
+                            </ChildContent>
                         </MudMenu>
                     </AuthorizeView>
 

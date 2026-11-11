@@ -85,6 +85,7 @@ public static class IrmTheme
         LayoutProperties = new LayoutProperties
         {
             DrawerWidthLeft = "300px",
+            AppbarHeight = "62px",
             DefaultBorderRadius = "6px"
         },
         Typography = new Typography

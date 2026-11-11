@@ -57,3 +57,19 @@ test('MainLayout docks responsive sidebar from Md 960px upward for split-screen 
     const layout = fs.readFileSync(path.join(__dirname, '..', '..', 'IRM', 'Components', 'Shared', 'MainLayout.razor'), 'utf8');
     assert.equal(layout.includes('Breakpoint="Breakpoint.Md"'), true, 'MainLayout MudDrawer should dock from Breakpoint.Md upward');
 });
+
+test('app.css targets MudNavLink inner anchor without double padding, offsets 62px topbar, and keeps table actions inline', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const css = fs.readFileSync(path.join(__dirname, '..', '..', 'IRM', 'wwwroot', 'app.css'), 'utf8');
+    assert.equal(css.includes('.irm-nav-link .mud-nav-link.active'), true, 'app.css must style MudNavLink inner active anchor');
+    assert.equal(css.includes('--mud-appbar-height: 62px'), true, 'app.css must sync --mud-appbar-height with 62px topbar');
+    assert.equal(css.includes('.mud-data-grid .mud-table-cell:last-child'), true, 'app.css must keep table action buttons on a single horizontal row');
+});
+
+test('NavMenu MudNavLink items do not set OnClick alongside Href so MudBlazor renders real anchor links', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const navMenu = fs.readFileSync(path.join(__dirname, '..', '..', 'IRM', 'Components', 'Shared', 'NavMenu.razor'), 'utf8');
+    assert.equal(navMenu.includes('NotifyPageChanged'), false, 'MudNavLink must not bind OnClick NotifyPageChanged which suppresses Href anchor rendering in MudBlazor');
+});

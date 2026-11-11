@@ -147,6 +147,8 @@ body {
 }
 
 .irm-shell {
+    --mud-appbar-height: 62px;
+    --mud-drawer-width-left: 300px;
     background: var(--bg-body);
 }
 
@@ -222,6 +224,7 @@ body {
 }
 
 .irm-drawer {
+    width: 300px !important;
     border-right: 1px solid var(--mud-palette-divider) !important;
     box-shadow: none !important;
 }
@@ -288,6 +291,11 @@ body {
 
 .irm-nav-link {
     margin: 2px 10px !important;
+    padding: 0 !important;
+    border-radius: 6px !important;
+}
+
+.irm-nav-link .mud-nav-link {
     padding: 8px 12px !important;
     border-radius: 6px !important;
     color: var(--text-sidebar) !important;
@@ -298,20 +306,28 @@ body {
     transition: background 0.15s ease, color 0.15s ease;
 }
 
+.irm-nav-link .mud-nav-link .mud-nav-link-icon {
+    margin-right: 10px !important;
+    min-width: 22px;
+    color: var(--mud-palette-drawer-icon) !important;
+}
+
 .irm-nav-link .mud-nav-link-text {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
     gap: 8px;
+    margin-left: 0 !important;
     white-space: nowrap;
 }
 
-.irm-nav-link:hover {
-    background: var(--bg-sidebar-hover);
+.irm-nav-link .mud-nav-link:hover {
+    background: var(--bg-sidebar-hover) !important;
     color: var(--text-primary) !important;
 }
 
+.irm-nav-link .mud-nav-link.active,
 .irm-nav-link.active {
     background: var(--bg-sidebar-active) !important;
     color: var(--primary) !important;
@@ -319,12 +335,16 @@ body {
     box-shadow: none;
 }
 
+.irm-nav-link .mud-nav-link.active .mud-nav-link-icon,
+.irm-nav-link .mud-nav-link.active .mud-nav-link-text,
+.irm-nav-link .mud-nav-link.active span,
 .irm-nav-link.active .mud-nav-link-icon,
 .irm-nav-link.active .mud-nav-link-text,
 .irm-nav-link.active span {
     color: var(--primary) !important;
 }
 
+.irm-nav-link .mud-nav-link.active::before,
 .irm-nav-link.active::before {
     content: "";
     display: block;
@@ -2508,6 +2528,11 @@ button:focus-visible, [role="button"]:focus-visible, .topbar-search-wrapper:focu
 .mud-button-outlined.mud-button-outlined-default:hover:not(:disabled) {
     background-color: var(--bg-surface-variant) !important;
     border-color: var(--text-secondary) !important;
+}
+
+.mud-data-grid .mud-table-cell:last-child,
+.mud-table .mud-table-cell:last-child {
+    white-space: nowrap;
 }
 
 .mud-data-grid .mud-icon-button,
