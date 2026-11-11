@@ -164,7 +164,7 @@ else
                         </div>
                         @if (context.Item.VisitEndDate.HasValue)
                         {
-                            var days = (context.Item.VisitEndDate.Value.Date - DateTime.Today).Days;
+                            var days = (context.Item.VisitEndDate.Value.Date - _asOf.Date).Days;
                             var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
                             <div>
                                 <span class="status-pill @statusClass tabular-nums">
@@ -193,7 +193,7 @@ else
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Thao tác" CellStyle="text-align: right;">
+            <TemplateColumn Title="Thao tác" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
                     <div class="d-flex align-center justify-end gap-1">
                         <AuthorizeView Roles="ADMIN,DATA_EDITOR" Context="permissionContext">

@@ -184,7 +184,7 @@
                  RowsPerPage="10"
                  Elevation="0">
         <Columns>
-            <TemplateColumn Title="STT" Sortable="false" Filterable="false" CellStyle="width: 60px; text-align: center;">
+            <TemplateColumn Title="STT" Sortable="false" Filterable="false" HeaderStyle="text-align: center;" CellStyle="width: 60px; text-align: center;">
                 <CellTemplate>
                     <span class="cell-secondary font-weight-bold tabular-nums">@(_employees.IndexOf(context.Item) + 1)</span>
                 </CellTemplate>
@@ -245,17 +245,14 @@
                     <span class="tag @wpTag">@context.Item.WorkPermitString</span>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Hạn tạm trú & Còn lại" SortBy="@(x => x.DaysUntilExpiry ?? 9999)">
+            <TemplateColumn Title="Hạn tạm trú & Còn lại" SortBy="@(x => x.DaysUntilExpiry ?? int.MaxValue)">
                 <CellTemplate>
-                    @{
-                        var days = context.Item.DaysUntilExpiry ?? 999;
-                        var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
-                    }
                     <div class="cell-stack">
                         <div class="cell-primary tabular-nums">@(context.Item.TemporaryStay?.ToString("dd/MM/yyyy") ?? "—")</div>
                         <div>
-                            @if (days < 999)
+                            @if (context.Item.DaysUntilExpiry is int days)
                             {
+                                var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
                                 <span class="status-pill @statusClass tabular-nums">
                                     <span class="status-dot"></span>
                                     @(days >= 0 ? $"Còn {days} ngày" : $"Quá hạn {-days} ngày")
@@ -269,7 +266,7 @@
                     </div>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" CellStyle="text-align: right;">
+            <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
                     <MudIconButton Icon="@Icons.Material.Outlined.Visibility" Size="Size.Small" Color="Color.Primary"
                                    OnClick="@(() => OpenDetailDialog(context.Item))" />

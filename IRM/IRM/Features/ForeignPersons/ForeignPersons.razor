@@ -216,6 +216,7 @@ else
                  Hover="true"
                  Striped="true"
                  Class="irm-data-table"
+                 RowClassFunc="@((item, _) => item.DaysUntilExpiry is int d ? (d <= 7 ? "row-accent-danger" : d <= 30 ? "row-accent-warning" : "") : "")"
                  RowsPerPage="15"
                  Elevation="0">
         <Columns>
@@ -298,21 +299,21 @@ else
                     <div class="cell-stack">
                         @if (context.Item.HasWorkProfile)
                         {
-                            <div class="cell-primary cell-truncate" title="@context.Item.CompanyName">@(context.Item.CompanyName ?? "Chưa gắn công ty")</div>
+                            <div class="cell-primary cell-truncate" title="@context.Item.CompanyName">🏢 @(context.Item.CompanyName ?? "Chưa gắn công ty")</div>
                             <div class="cell-secondary cell-truncate">
                                 @(context.Item.CareerName ?? "Chưa rõ nghề") · @context.Item.WorkPermitString
                             </div>
                         }
                         @if (context.Item.HasStudyProfile)
                         {
-                            <div class="cell-primary cell-truncate" title="@context.Item.SchoolName">@(context.Item.SchoolName ?? "Du học sinh")</div>
+                            <div class="cell-primary cell-truncate" title="@context.Item.SchoolName">🎓 @(context.Item.SchoolName ?? "Du học sinh")</div>
                             <div class="cell-secondary cell-truncate">
                                 @(context.Item.Major ?? "—") · @context.Item.EducationLevelString · @context.Item.StudentStatusString
                             </div>
                         }
                         @if (context.Item.HasFamilyVisitProfile)
                         {
-                            <div class="cell-primary cell-truncate">TN: @(context.Item.RelativeName ?? "—")</div>
+                            <div class="cell-primary cell-truncate">👪 TN: @(context.Item.RelativeName ?? "—")</div>
                             <div class="cell-secondary cell-truncate">
                                 @(context.Item.Relationship ?? "Thân nhân") · @context.Item.RelativeTypeString
                             </div>
@@ -320,6 +321,10 @@ else
                         @if (!string.IsNullOrEmpty(context.Item.ResidenceAddress))
                         {
                             <div class="cell-secondary cell-truncate" title="@context.Item.ResidenceAddress">📍 @context.Item.ResidenceAddress</div>
+                        }
+                        @if (!context.Item.HasWorkProfile && !context.Item.HasStudyProfile && !context.Item.HasFamilyVisitProfile && string.IsNullOrEmpty(context.Item.ResidenceAddress))
+                        {
+                            <span class="cell-secondary">—</span>
                         }
                     </div>
                 </CellTemplate>
@@ -340,7 +345,7 @@ else
                         }
                         @if (context.Item.EffectiveExpiryDate.HasValue)
                         {
-                            var days = context.Item.DaysUntilExpiry ?? 999;
+                            var days = context.Item.DaysUntilExpiry ?? (int)(context.Item.EffectiveExpiryDate.Value.Date - DateTime.Today).TotalDays;
                             var statusClass = days <= 7 ? "status-urgent" : days <= 30 ? "status-warning" : "status-safe";
                             <div class="d-flex align-center flex-wrap gap-1 mt-1">
                                 <span class="cell-secondary tabular-nums font-weight-bold">@context.Item.EffectiveExpiryDate.Value.ToString("dd/MM/yyyy")</span>
@@ -374,7 +379,7 @@ else
                 </CellTemplate>
             </TemplateColumn>
 
-            <TemplateColumn Title="Thao tác" CellStyle="text-align: right;">
+            <TemplateColumn Title="Thao tác" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                 <CellTemplate>
                     <div class="d-flex align-center justify-end gap-1">
                         <MudTooltip Text="Xem / Sửa hồ sơ đầy đủ (5 Tab)">

@@ -94,7 +94,7 @@
              RowsPerPage="10"
              Elevation="0">
     <Columns>
-        <TemplateColumn Title="STT" Sortable="false" Filterable="false" CellStyle="width: 60px; text-align: center;">
+        <TemplateColumn Title="STT" Sortable="false" Filterable="false" HeaderStyle="text-align: center;" CellStyle="width: 60px; text-align: center;">
             <CellTemplate>
                 <span class="cell-secondary font-weight-bold tabular-nums">@(_companies.IndexOf(context.Item) + 1)</span>
             </CellTemplate>
@@ -127,22 +127,22 @@
                 <span class="tag @tagClass">@(string.IsNullOrWhiteSpace(fieldName) ? "Chưa phân loại" : fieldName)</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Tổng LĐ" SortBy="@(x => x.TotalAmount)" CellStyle="text-align: center;">
+        <TemplateColumn Title="Tổng LĐ" SortBy="@(x => x.TotalAmount)" HeaderStyle="text-align: center;" CellStyle="text-align: center;">
             <CellTemplate>
                 <span class="cell-primary font-weight-bold tabular-nums" style="font-size: 15px;">@context.Item.TotalAmount</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Có GPLĐ" SortBy="@(x => x.QuantityAvailable)" CellStyle="text-align: center;">
+        <TemplateColumn Title="Có GPLĐ" SortBy="@(x => x.QuantityAvailable)" HeaderStyle="text-align: center;" CellStyle="text-align: center;">
             <CellTemplate>
                 <span class="tag tag-green metric-pill">@context.Item.QuantityAvailable</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Chưa có" SortBy="@(x => x.QuantityNotYet)" CellStyle="text-align: center;">
+        <TemplateColumn Title="Chưa có" SortBy="@(x => x.QuantityNotYet)" HeaderStyle="text-align: center;" CellStyle="text-align: center;">
             <CellTemplate>
                 <span class="tag tag-orange metric-pill">@context.Item.QuantityNotYet</span>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Miễn" SortBy="@(x => x.AmountOfExemption)" CellStyle="text-align: center;">
+        <TemplateColumn Title="Miễn" SortBy="@(x => x.AmountOfExemption)" HeaderStyle="text-align: center;" CellStyle="text-align: center;">
             <CellTemplate>
                 <span class="tag tag-blue metric-pill">@context.Item.AmountOfExemption</span>
             </CellTemplate>
@@ -158,7 +158,7 @@
                 </div>
             </CellTemplate>
         </TemplateColumn>
-        <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" CellStyle="text-align: right;">
+        <TemplateColumn Title="Thao tác" Sortable="false" Filterable="false" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
             <CellTemplate>
                 <MudTooltip Text="Hồ sơ đầy đủ 6 Tab (FDI, KCN/KKT, CSLT thuê, Đại diện, Pháp nhân Scan)">
                     <MudIconButton Icon="@Icons.Material.Outlined.Visibility" Size="Size.Small" Color="Color.Primary"
@@ -347,15 +347,44 @@
                 <!-- TAB 3: ĐỊA ĐIỂM & KHU KINH TẾ -->
                 <MudTabPanel Text="3. Địa điểm & Khu kinh tế" Icon="@Icons.Material.Outlined.Place">
                     <div class="pt-4">
-                        <MudDataGrid T="CompanySiteDto" Items="@(_aggregate?.Sites ?? Array.Empty<CompanySiteDto>())" Dense="true" Hover="true" Striped="true" Class="irm-data-table mb-4">
+                        <MudDataGrid T="CompanySiteDto" Items="@(_aggregate?.Sites ?? Array.Empty<CompanySiteDto>())" Hover="true" Striped="true" Class="irm-data-table mb-4">
                             <Columns>
-                                <PropertyColumn Property="x => x.Name" Title="Tên địa điểm / Chi nhánh" />
-                                <PropertyColumn Property="x => x.SiteTypeCode" Title="Loại địa điểm" />
-                                <PropertyColumn Property="x => x.AddressLine" Title="Địa chỉ cụ thể" />
-                                <PropertyColumn Property="x => x.AdministrativeUnit!.Name" Title="Địa bàn xã/phường" />
+                                <TemplateColumn Title="Tên địa điểm / Chi nhánh">
+                                    <CellTemplate>
+                                        <span class="cell-primary">@context.Item.Name</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Loại địa điểm">
+                                    <CellTemplate>
+                                        <span class="type-pill type-blue">@context.Item.SiteTypeCode</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Địa chỉ & Địa bàn">
+                                    <CellTemplate>
+                                        <div class="cell-stack">
+                                            <span class="cell-primary">@(string.IsNullOrWhiteSpace(context.Item.AddressLine) ? "—" : context.Item.AddressLine)</span>
+                                            <span class="cell-secondary">📍 @(context.Item.AdministrativeUnit?.Name ?? "Chưa rõ địa bàn")</span>
+                                        </div>
+                                    </CellTemplate>
+                                </TemplateColumn>
                                 <TemplateColumn Title="Khu công nghiệp / KKT">
                                     <CellTemplate>
-                                        @string.Join(", ", context.Item.ZoneMemberships.Select(x => x.EconomicZone?.Name))
+                                        @{
+                                            var zones = context.Item.ZoneMemberships.Select(x => x.EconomicZone?.Name).Where(n => !string.IsNullOrWhiteSpace(n)).ToList();
+                                        }
+                                        @if (zones.Any())
+                                        {
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach (var z in zones)
+                                                {
+                                                    <span class="tag tag-purple">@z</span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="cell-secondary">Ngoài KCN/KKT</span>
+                                        }
                                     </CellTemplate>
                                 </TemplateColumn>
                             </Columns>
@@ -414,14 +443,26 @@
                 <!-- TAB 4: CƠ SỞ LƯU TRÚ ĐÃ THUÊ -->
                 <MudTabPanel Text="4. Cơ sở lưu trú đã thuê" Icon="@Icons.Material.Outlined.Hotel">
                     <div class="pt-4">
-                        <MudDataGrid T="CompanyAccommodationAgreementDto" Items="@(_aggregate?.AccommodationAgreements ?? Array.Empty<CompanyAccommodationAgreementDto>())" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+                        <MudDataGrid T="CompanyAccommodationAgreementDto" Items="@(_aggregate?.AccommodationAgreements ?? Array.Empty<CompanyAccommodationAgreementDto>())" Hover="true" Striped="true" Class="irm-data-table">
                             <Columns>
-                                <PropertyColumn Property="x => x.Accommodation!.Name" Title="Tên cơ sở lưu trú" />
-                                <PropertyColumn Property="x => x.ScopeCode" Title="Phạm vi thuê" />
-                                <PropertyColumn Property="x => x.UnitLabel" Title="Căn / Phòng cụ thể" />
+                                <TemplateColumn Title="Tên cơ sở lưu trú">
+                                    <CellTemplate>
+                                        <span class="cell-primary">@(context.Item.Accommodation?.Name ?? "—")</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Phạm vi thuê">
+                                    <CellTemplate>
+                                        <span class="type-pill type-blue">@context.Item.ScopeCode</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Căn / Phòng cụ thể">
+                                    <CellTemplate>
+                                        <span class="code-pill">@(string.IsNullOrWhiteSpace(context.Item.UnitLabel) ? "Toàn bộ" : context.Item.UnitLabel)</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
                                 <TemplateColumn Title="Thời hạn thuê">
                                     <CellTemplate>
-                                        <span class="font-weight-bold">
+                                        <span class="cell-primary tabular-nums">
                                             @context.Item.ValidFrom.ToString("dd/MM/yyyy") – @(context.Item.ValidTo?.ToString("dd/MM/yyyy") ?? "Không thời hạn")
                                         </span>
                                     </CellTemplate>
@@ -435,12 +476,24 @@
                 <MudTabPanel Text="5. Đại diện & Thân nhân NLĐ" Icon="@Icons.Material.Outlined.AccountBox">
                     <div class="pt-4">
                         <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Người đại diện pháp luật của Doanh nghiệp</MudText>
-                        <MudDataGrid T="CompanyRepresentativeDto" Items="@(_aggregate?.Representatives ?? Array.Empty<CompanyRepresentativeDto>())" Dense="true" Hover="true" Striped="true" Class="irm-data-table mb-3">
+                        <MudDataGrid T="CompanyRepresentativeDto" Items="@(_aggregate?.Representatives ?? Array.Empty<CompanyRepresentativeDto>())" Hover="true" Striped="true" Class="irm-data-table mb-3">
                             <Columns>
-                                <PropertyColumn Property="x => x.FullName" Title="Họ và tên" />
+                                <TemplateColumn Title="Họ và tên">
+                                    <CellTemplate>
+                                        <span class="cell-primary">@context.Item.FullName</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
                                 <PropertyColumn Property="x => x.Title" Title="Chức danh / Chức vụ" />
-                                <PropertyColumn Property="x => x.IdNumber" Title="Số CCCD / Hộ chiếu" />
-                                <PropertyColumn Property="x => x.Phone" Title="Điện thoại liên hệ" />
+                                <TemplateColumn Title="Số CCCD / Hộ chiếu">
+                                    <CellTemplate>
+                                        <span class="code-pill">@(string.IsNullOrWhiteSpace(context.Item.IdNumber) ? "—" : context.Item.IdNumber)</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Điện thoại liên hệ">
+                                    <CellTemplate>
+                                        <span class="tabular-nums">@(string.IsNullOrWhiteSpace(context.Item.Phone) ? "—" : context.Item.Phone)</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
                             </Columns>
                         </MudDataGrid>
 
@@ -458,12 +511,24 @@
                         </MudPaper>
 
                         <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Thân nhân NLĐ được Doanh nghiệp bảo lãnh</MudText>
-                        <MudDataGrid T="FamilyVisitorDto" Items="@(_aggregate?.SponsoredFamilyVisitors ?? Array.Empty<FamilyVisitorDto>())" Dense="true" Hover="true" Striped="true" Class="irm-data-table">
+                        <MudDataGrid T="FamilyVisitorDto" Items="@(_aggregate?.SponsoredFamilyVisitors ?? Array.Empty<FamilyVisitorDto>())" Hover="true" Striped="true" Class="irm-data-table">
                             <Columns>
-                                <PropertyColumn Property="x => x.FullName" Title="Họ tên người thăm thân" />
-                                <PropertyColumn Property="x => x.Passport" Title="Số hộ chiếu" />
+                                <TemplateColumn Title="Họ tên người thăm thân">
+                                    <CellTemplate>
+                                        <span class="cell-primary">@context.Item.FullName</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Số hộ chiếu">
+                                    <CellTemplate>
+                                        <span class="code-pill">@(string.IsNullOrWhiteSpace(context.Item.Passport) ? "—" : context.Item.Passport)</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
                                 <PropertyColumn Property="x => x.RelativeName" Title="Thân nhân bảo lãnh" />
-                                <PropertyColumn Property="x => x.Relationship" Title="Mối quan hệ" />
+                                <TemplateColumn Title="Mối quan hệ">
+                                    <CellTemplate>
+                                        <span class="badge-relationship">@context.Item.Relationship</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
                             </Columns>
                         </MudDataGrid>
                     </div>
@@ -472,13 +537,25 @@
                 <!-- TAB 6: HỒ SƠ PHÁP NHÂN SCAN -->
                 <MudTabPanel Text="6. Hồ sơ pháp nhân Scan" Icon="@Icons.Material.Outlined.AttachFile">
                     <div class="pt-4">
-                        <MudDataGrid T="CompanyLegalDocumentDto" Items="@(_aggregate?.LegalDocuments ?? Array.Empty<CompanyLegalDocumentDto>())" Dense="true" Hover="true" Striped="true" Class="irm-data-table mb-4">
+                        <MudDataGrid T="CompanyLegalDocumentDto" Items="@(_aggregate?.LegalDocuments ?? Array.Empty<CompanyLegalDocumentDto>())" Hover="true" Striped="true" Class="irm-data-table mb-4">
                             <Columns>
-                                <PropertyColumn Property="x => x.TypeCode" Title="Loại tài liệu" />
-                                <PropertyColumn Property="x => x.DocumentNumber" Title="Số văn bản" />
+                                <TemplateColumn Title="Loại tài liệu">
+                                    <CellTemplate>
+                                        <span class="type-pill type-purple">@context.Item.TypeCode</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Số văn bản">
+                                    <CellTemplate>
+                                        <span class="code-pill">@(string.IsNullOrWhiteSpace(context.Item.DocumentNumber) ? "—" : context.Item.DocumentNumber)</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
                                 <PropertyColumn Property="x => x.IssuedBy" Title="Cơ quan cấp" />
-                                <PropertyColumn Property="x => x.StoredFile!.OriginalName" Title="Tên tệp đính kèm" />
-                                <TemplateColumn Title="Tải tệp" CellStyle="text-align: right;">
+                                <TemplateColumn Title="Tên tệp đính kèm">
+                                    <CellTemplate>
+                                        <span class="cell-primary">@(context.Item.StoredFile?.OriginalName ?? "—")</span>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                                <TemplateColumn Title="Tải tệp" HeaderStyle="text-align: right;" CellStyle="text-align: right;">
                                     <CellTemplate>
                                         @if (context.Item.StoredFile is not null)
                                         {

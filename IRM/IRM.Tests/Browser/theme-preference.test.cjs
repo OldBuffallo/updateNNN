@@ -95,4 +95,7 @@ test('app.css defines Enterprise Structured Grid classes and replaces hardcoded 
     assert.equal(css.includes('.status-pill'), true, 'app.css must define .status-pill for expiry/violation badges');
     assert.equal(css.includes('.tabular-nums'), true, 'app.css must define .tabular-nums for numeric alignment');
     assert.equal(css.includes('[data-density="compact"]'), true, 'app.css must support compact table density mode');
+    assert.equal(css.includes('.table-avatar.bg-blue-soft'), true, 'app.css must preserve soft background contrast on table avatars');
+    assert.equal(css.includes('.row-accent-danger'), true, 'app.css must define .row-accent-danger for urgent/violation rows');
+    assert.equal(css.includes('.mud-simple-table > .mud-table-container'), true, 'app.css must allow sticky headers inside MudSimpleTable');
 });
