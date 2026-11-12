@@ -112,4 +112,135 @@ public static class LegacyImportRules
         }
         return sb.ToString().Normalize(NormalizationForm.FormC).Trim();
     }
+
+    // ── Kết quả giải quyết ────────────────────────────────────────
+
+    public const string SettlementFormatError = "Sai định dạng kết quả giải quyết";
+    public const string SettlementTemporaryStayError =
+        "Thời hạn tạm trú nhập vào và kết quả giải quyết là khác nhau";
+    public const string SettlementVisaError =
+        "Thẻ tạm trú nhập vào và kết quả giải quyết là khác nhau";
+
+    /// <summary>Kết quả đọc ô "Kết quả giải quyết". <c>Error</c> không kèm số dòng.</summary>
+    public sealed record SettlementParse(int Result, string Text, DateTime? CardCreationDate, string? Error);
+
+    /// <summary>
+    /// Tiền tố <c>GHTT:</c> → 0, <c>Visa:</c> → 1, <c>TTT:</c> → 2 (bỏ cả tiền tố lẫn dấu hai chấm),
+    /// chữ khác → 3. Ô trống → (3, " "). Nội dung phải đúng
+    /// <c>[số thẻ] dd/MM/yyyy-dd/MM/yyyy</c> (hoặc <c>dd-MM-yyyy-dd-MM-yyyy</c>), như
+    /// <c>MethodHandler.checkSettlementResultsString</c>. Số thẻ lấy từ từ thứ 2 khi có 3 từ,
+    /// từ đầu khi có 2 từ (trừ khi đó là VISA/GHTT/TTT). Ngày sau phải bằng hạn tạm trú;
+    /// số thẻ (nếu có) phải bằng số visa (không phân biệt hoa/thường).
+    /// </summary>
+    public static SettlementParse ParseSettlement(string? cell, string visaNumber, DateTime temporaryStay)
+    {
+        if (string.IsNullOrWhiteSpace(cell))
+            return new SettlementParse(3, " ", null, null);
+
+        var trimmed = cell.Trim();
+        var result = 3;
+        var text = trimmed;
+        var folded = RemoveDiacritics(trimmed).ToUpperInvariant();
+        foreach (var (prefix, value) in new[] { ("GHTT:", 0), ("VISA:", 1), ("TTT:", 2) })
+        {
+            if (!folded.StartsWith(prefix, StringComparison.Ordinal)) continue;
+            result = value;
+            text = trimmed[(trimmed.IndexOf(':') + 1)..].Trim();
+            break;
+        }
+
+        var tokens = text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (tokens.Length == 0)
+            return new SettlementParse(result, text, null, SettlementFormatError);
+
+        var visa = "";
+        if (tokens.Length == 3)
+        {
+            visa = tokens[1];
+        }
+        else if (tokens.Length == 2)
+        {
+            var head = tokens[0].ToUpperInvariant();
+            if (head is not ("VISA" or "GHTT" or "TTT")) visa = tokens[0];
+        }
+
+        if (!TryParseDateRange(tokens[^1], out var created, out var expires))
+            return new SettlementParse(result, text, null, SettlementFormatError);
+
+        if (expires.Date != temporaryStay.Date)
+            return new SettlementParse(result, text, created, SettlementTemporaryStayError);
+
+        if (visa.Length > 0 &&
+            !string.Equals(visaNumber?.Trim(), visa.Trim(), StringComparison.OrdinalIgnoreCase))
+            return new SettlementParse(result, text, created, SettlementVisaError);
+
+        return new SettlementParse(result, text, created, null);
+    }
+
+    private static bool TryParseDateRange(string token, out DateTime created, out DateTime expires)
+    {
+        created = expires = default;
+        var parts = token.Split('-');
+        string first, second;
+        if (parts.Length == 2)
+        {
+            first = parts[0];
+            second = parts[1];
+        }
+        else if (parts.Length == 6)
+        {
+            first = $"{parts[0]}-{parts[1]}-{parts[2]}";
+            second = $"{parts[3]}-{parts[4]}-{parts[5]}";
+        }
+        else
+        {
+            return false;
+        }
+
+        return TryParseLegacyDate(first, out created) && TryParseLegacyDate(second, out expires);
+    }
+
+    // ── Địa chỉ ───────────────────────────────────────────────────
+
+    /// <summary>
+    /// Địa chỉ phải kết thúc bằng tên một phường/xã có trong danh mục (không dấu, không phân
+    /// biệt hoa/thường, bỏ ký tự ẩn như U+200D). Tên phường trống bị bỏ qua.
+    /// </summary>
+    public static bool AddressEndsWithWard(string? address, IEnumerable<string> wards)
+    {
+        if (string.IsNullOrWhiteSpace(address)) return false;
+        var normalizedAddress = RemoveDiacritics(address).ToUpperInvariant();
+        foreach (var ward in wards)
+        {
+            var normalizedWard = RemoveDiacritics(ward ?? "").ToUpperInvariant();
+            if (normalizedWard.Length == 0) continue;
+            if (normalizedAddress.EndsWith(normalizedWard, StringComparison.Ordinal)) return true;
+        }
+        return false;
+    }
+
+    // ── Nghề nghiệp ───────────────────────────────────────────────
+
+    /// <summary>
+    /// Tra nghề theo tên <b>trong đúng nhóm nghề đã chọn</b>, bỏ nghề đã xoá
+    /// (<c>IDCG = nhóm and Delete_flag = 0 and CareerName like tên</c>). Không phân biệt
+    /// hoa/thường, vẫn phân biệt dấu như SQL cũ. Nhiều dòng trùng thì lấy ID nhỏ nhất.
+    /// </summary>
+    public static int? FindCareerId(string? name, int careerGroupId, IEnumerable<IRM.Data.Models.Career> careers)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return null;
+        var wanted = name.Normalize(NormalizationForm.FormC).Trim();
+        return careers
+            .Where(c => c.Delete_flag == 0 && c.IDCG == careerGroupId &&
+                        string.Equals(c.CareerName.Normalize(NormalizationForm.FormC).Trim(), wanted,
+                            StringComparison.OrdinalIgnoreCase))
+            .OrderBy(c => c.IDCareer)
+            .Select(c => (int?)c.IDCareer)
+            .FirstOrDefault();
+    }
+
+    /// <summary>Nghề "Thân nhân" của nhóm "Khác" (ID 9 trong ReportManagerDB).</summary>
+    public static bool IsRelativeCareer(IRM.Data.Models.Career career, int otherCareerGroupId = 9) =>
+        career.IDCG == otherCareerGroupId &&
+        RemoveDiacritics(career.CareerName).ToUpperInvariant() == "THAN NHAN";
 }
