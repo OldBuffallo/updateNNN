@@ -211,7 +211,7 @@ public partial class Import : ComponentBase, IFeaturePage
 
             // Updates require an explicit choice.
             _duplicateDecisions = new();
-            foreach (var row in _previewRows.Where(r => r.Status == "duplicate" && r.ExistingEmployeeId.HasValue))
+            foreach (var row in _previewRows.Where(r => r.Status == "changed" && r.ExistingEmployeeId.HasValue))
             {
                 _duplicateDecisions[row.ExistingEmployeeId!.Value] = "skip";
             }

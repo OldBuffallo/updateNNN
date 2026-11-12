@@ -41,6 +41,7 @@ public partial class SqlImportStore
                 await using var transaction = await _db.Database.BeginTransactionAsync();
                 try
                 {
+                    var affected = new HashSet<int>();
                     foreach (var backup in backups)
                     {
                         await RollbackV010ChangesAsync(backup.OldData);
@@ -61,10 +62,23 @@ public partial class SqlImportStore
                                 var emp = await _db.Employees.FindAsync(backup.EntityId);
                                 if (emp != null)
                                 {
-                                    emp.Hidden_flag = 1;
+                                    affected.Add(emp.IDCompany);
+                                    var versioned = !string.IsNullOrEmpty(backup.OldData) &&
+                                        JsonSerializer.Deserialize<JsonElement>(backup.OldData).TryGetProperty("Versioned", out var version) && version.GetBoolean();
+                                    if (versioned) _db.Employees.Remove(emp);
+                                    else emp.Hidden_flag = 1;
                                     await _db.SaveChangesAsync();
                                 }
                             }
+                        }
+                        else if (backup.ActionType == "VERSION_HIDE")
+                        {
+                            var previous = await _db.Employees.FindAsync(backup.EntityId);
+                            if (previous == null) throw new InvalidOperationException("Không tìm thấy bản ghi cũ để hoàn tác.");
+                            var saved = JsonSerializer.Deserialize<JsonElement>(backup.OldData!);
+                            previous.Hidden_flag = saved.GetProperty("Hidden_flag").GetInt32();
+                            affected.Add(previous.IDCompany);
+                            await _db.SaveChangesAsync();
                         }
                         else if (backup.ActionType == "UPDATE" && !string.IsNullOrEmpty(backup.OldData))
                         {
@@ -72,6 +86,7 @@ public partial class SqlImportStore
                             var emp = await _db.Employees.FindAsync(backup.EntityId);
                             if (emp != null)
                             {
+                                affected.Add(emp.IDCompany);
                                 var oldData = JsonSerializer.Deserialize<JsonElement>(backup.OldData);
                                 if (oldData.TryGetProperty("StaffName", out var name))
                                     emp.StaffName = name.GetString() ?? "";
@@ -120,6 +135,7 @@ public partial class SqlImportStore
                         }
                     }
 
+                    foreach (var companyId in affected) await RecomputeCompanyCountersAsync(companyId);
                     history.Status = "rolledback";
                     await _db.SaveChangesAsync();
 

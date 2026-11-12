@@ -5,7 +5,7 @@
     @if (Page._currentStep == 3)
     {
         <MudAlert Severity="Severity.Info" Class="mb-3">
-            Tổng: @Page._previewRows.Count dòng · @(Page._previewRows.Count(r => r.Status == "new")) mới · @(Page._previewRows.Count(r => r.Status == "duplicate")) trùng · @(Page._previewRows.Count(r => r.Status == "error")) lỗi
+            Tổng: @Page._previewRows.Count dòng · @(Page._previewRows.Count(r => r.Status == "new")) mới · @(Page._previewRows.Count(r => r.Status == "changed")) trùng · @(Page._previewRows.Count(r => r.Status == "error")) lỗi
         </MudAlert>
 
         <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px; max-height: 400px; overflow-y: auto;">
@@ -15,32 +15,37 @@
                 {
                     var rowBg = row.Status switch
                     {
-                        "duplicate" => "background: var(--mud-palette-warning-hover);",
+                        "changed" => "background: var(--mud-palette-warning-hover);",
                         "error" => "background: var(--mud-palette-error-hover);",
                         _ => ""
                     };
                     var chipColor = row.Status switch
                     {
                         "new" => Color.Success,
-                        "duplicate" => Color.Warning,
+                        "unchanged" => Color.Info,
+                        "changed" => Color.Warning,
                         _ => Color.Error
                     };
                     var chipLabel = row.Status switch
                     {
                         "new" => "Mới",
-                        "duplicate" => "Trùng",
+                        "unchanged" => "Thông tin đã có sẵn",
+                        "changed" => "Nhân viên có thay đổi",
                         _ => "Lỗi"
                     };
                     <tr style="@rowBg">
                         <td>@row.RowNumber</td>
                         <td><MudChip T="string" Size="Size.Small" Color="@chipColor">@chipLabel</MudChip></td>
-                        <td>@row.StaffName</td>
+                        <td>@row.StaffName
+                            @foreach (var warning in row.Warnings)
+                            { <MudText Typo="Typo.caption" Color="Color.Warning">@warning</MudText> }
+                        </td>
                         <td>@row.NationalityDisplay</td>
                         <td><code>@row.Passport</code></td>
                         <td>
                             @if (row.CompanyDisplay != null)
                             {
-                                @if (row.CompanyDisplay.StartsWith(""))
+                                @if (row.ExtendedFields.ContainsKey("__AutoCreateCompanyName"))
                                 {
                                     <MudText Typo="Typo.caption" Color="Color.Error">@row.CompanyDisplay</MudText>
                                 }
@@ -53,15 +58,19 @@
                         <td>@row.CareerDisplay</td>
                         <td>@row.WorkPermitDisplay</td>
                         <td>
-                            @if (row.Status == "duplicate" && row.ExistingEmployeeId.HasValue)
+                            @if (row.Status == "changed" && row.ExistingEmployeeId.HasValue)
                             {
                                 <MudSelect T="string" Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
                                            Value="@Page.GetDuplicateDecision(row.ExistingEmployeeId.Value)"
                                            ValueChanged="@(val => Page.SetDuplicateDecision(row.ExistingEmployeeId.Value, val))"
                                            Style="min-width: 120px;">
                                     <MudSelectItem Value="@("update")">Cập nhật</MudSelectItem>
-                                    <MudSelectItem Value="@("skip")">⏭️ Bỏ qua</MudSelectItem>
+                                    <MudSelectItem Value="@("skip")">Bỏ qua</MudSelectItem>
                                 </MudSelect>
+                            }
+                            else if (row.Status == "unchanged")
+                            {
+                                <MudText Typo="Typo.caption">Thông tin đã có sẵn — bỏ qua</MudText>
                             }
                             else if (row.Status == "error")
                             {

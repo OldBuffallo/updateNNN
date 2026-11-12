@@ -243,4 +243,13 @@ public static class LegacyImportRules
     public static bool IsRelativeCareer(IRM.Data.Models.Career career, int otherCareerGroupId = 9) =>
         career.IDCG == otherCareerGroupId &&
         RemoveDiacritics(career.CareerName).ToUpperInvariant() == "THAN NHAN";
+    /// <summary>13 trường nghiệp vụ dùng nhận diện phiên bản trùng của WPF.</summary>
+    public static bool SameAs13Fields(IRM.Data.Models.Employee a, IRM.Data.Models.Employee b) =>
+        a.StaffName == b.StaffName && a.Gender == b.Gender && a.Birthday == b.Birthday &&
+        a.Nationality == b.Nationality && a.Passport == b.Passport && a.Address == b.Address &&
+        a.IDCareer == b.IDCareer && a.WorkPermit == b.WorkPermit && a.WorkPermitNumber == b.WorkPermitNumber &&
+        a.VisaNumber == b.VisaNumber && a.TemporaryStay == b.TemporaryStay &&
+        a.SettlementResults == b.SettlementResults &&
+        string.Equals(a.SettlementResultsString?.Trim(), b.SettlementResultsString?.Trim(), StringComparison.Ordinal) &&
+        string.Equals(a.Note?.Trim(), b.Note?.Trim(), StringComparison.Ordinal);
 }

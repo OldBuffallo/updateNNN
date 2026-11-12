@@ -171,6 +171,7 @@ internal static partial class DtoMapper
         result.RowNumber = value.RowNumber;
         result.Status = value.Status;
         result.ErrorMessage = value.ErrorMessage;
+        result.Warnings = value.Warnings.ToList();
         result.ExistingEmployeeId = value.ExistingEmployeeId;
         result.StaffName = value.StaffName;
         result.GenderDisplay = value.GenderDisplay;
@@ -200,6 +201,7 @@ internal static partial class DtoMapper
         result.RowNumber = value.RowNumber;
         result.Status = value.Status;
         result.ErrorMessage = value.ErrorMessage;
+        result.Warnings = value.Warnings.ToList();
         result.ExistingEmployeeId = value.ExistingEmployeeId;
         result.StaffName = value.StaffName;
         result.GenderDisplay = value.GenderDisplay;
@@ -225,6 +227,7 @@ internal static partial class DtoMapper
         target.RowNumber = mapped.RowNumber;
         target.Status = mapped.Status;
         target.ErrorMessage = mapped.ErrorMessage;
+        target.Warnings = mapped.Warnings.ToList();
         target.ExistingEmployeeId = mapped.ExistingEmployeeId;
         target.StaffName = mapped.StaffName;
         target.GenderDisplay = mapped.GenderDisplay;

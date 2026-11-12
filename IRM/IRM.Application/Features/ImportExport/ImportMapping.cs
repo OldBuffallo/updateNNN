@@ -20,28 +20,19 @@ public static class ImportMapping
 
         foreach (var header in headers)
         {
-            var headerLower = header.HeaderName.ToLower().Trim();
-            string matchedField = "skip";
-            string matchedLabel = "— Bỏ qua —";
-            bool isAuto = false;
-
-            foreach (var (field, keywords) in SystemFields.AutoMapKeywords)
-            {
-                if (usedFields.Contains(field)) continue;
-
-                foreach (var keyword in keywords)
-                {
-                    if (headerLower.Contains(keyword) || keyword.Contains(headerLower))
-                    {
-                        matchedField = field;
-                        matchedLabel = SystemFields.All[field];
-                        isAuto = true;
-                        usedFields.Add(field);
-                        break;
-                    }
-                }
-                if (isAuto) break;
-            }
+            var headerLower = header.HeaderName.ToLowerInvariant().Trim();
+            var match = SystemFields.AutoMapKeywords
+                .Where(item => !usedFields.Contains(item.Key))
+                .SelectMany(item => item.Value.Select(keyword => new { Field = item.Key, Keyword = keyword }))
+                .Where(item => headerLower.Length > 0 && headerLower.Contains(item.Keyword, StringComparison.Ordinal))
+                .OrderByDescending(item => headerLower == item.Keyword)
+                .ThenByDescending(item => item.Keyword.Length)
+                .ThenBy(item => item.Field, StringComparer.Ordinal)
+                .FirstOrDefault();
+            var matchedField = match?.Field ?? "skip";
+            var matchedLabel = SystemFields.All[matchedField];
+            var isAuto = match != null;
+            if (isAuto) usedFields.Add(matchedField);
 
             mappings.Add(new ColumnMapping
             {

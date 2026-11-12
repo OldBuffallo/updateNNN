@@ -149,18 +149,17 @@ public partial class SqlImportStore
                 var career = careers.FirstOrDefault(c => c.IDCareer == employee.IDCareer);
                 preview.CareerDisplay = career?.CareerName;
 
-                // Check duplicate passport
-                if (!string.IsNullOrWhiteSpace(employee.Passport))
+                var existing = await _db.Employees.AsNoTracking()
+                    .Where(e => e.Passport == employee.Passport && e.IDCompany == resolvedCompanyId && e.Hidden_flag == 0)
+                    .OrderByDescending(e => e.IDEmployee).FirstOrDefaultAsync();
+                if (existing != null)
                 {
-                    var existing = await _db.Employees
-                        .FirstOrDefaultAsync(e => e.Passport == employee.Passport
-                            && e.Hidden_flag == 0);
-                    if (existing != null)
-                    {
-                        preview.Status = "duplicate";
-                        preview.ExistingEmployeeId = existing.IDEmployee;
-                    }
+                    preview.Status = LegacyImportRules.SameAs13Fields(existing, employee) ? "unchanged" : "changed";
+                    preview.ExistingEmployeeId = existing.IDEmployee;
                 }
+                if (await _db.Employees.AnyAsync(e => e.Passport == employee.Passport && e.IDCompany != resolvedCompanyId &&
+                    e.Hidden_flag == 0 && e.WorkingStatus == 0))
+                    preview.Warnings.Add("Nhân viên đang làm ở một công ty khác");
             }
             catch (Exception ex)
             {
@@ -171,6 +170,11 @@ public partial class SqlImportStore
             previewRows.Add(preview);
         }
 
+        var importedPassports = allRows.Select(r => r.GetValueOrDefault("Passport", "").Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var importedCompanies = previewRows.Where(r => r.ResolvedCompanyId > 0).Select(r => r.ResolvedCompanyId!.Value).Distinct().ToList();
+        if (previewRows.Count > 0 && await _db.Employees.AnyAsync(e => importedCompanies.Contains(e.IDCompany) && e.Hidden_flag == 0 &&
+            e.TemporaryStay >= DateTime.Today && e.Passport != null && !importedPassports.Contains(e.Passport)))
+            previewRows[0].Warnings.Add("Nhân viên còn hạn tạm trú nhưng không được cập nhật trong file");
         return previewRows;
     }
 }
