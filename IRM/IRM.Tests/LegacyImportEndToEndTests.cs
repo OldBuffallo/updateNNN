@@ -15,7 +15,7 @@ public class LegacyImportEndToEndTests
         ["Nationality"] = "trung quoc", ["Passport"] = "TEST-001", ["Address"] = "12 Lê Duẩn, Hải Châu",
         ["Career"] = "Kỹ sư", ["WorkPermit"] = "GP-123", ["VisaNumber"] = "DN1",
         ["TemporaryStay"] = "29/05/2028", ["SettlementResults"] = "TTT: DN1 03/06/2026-29/05/2028",
-        ["__RowNumber"] = "9"
+        ["Note"] = "", ["__RowNumber"] = "9"
     };
 
     internal static List<Career> Careers() => [

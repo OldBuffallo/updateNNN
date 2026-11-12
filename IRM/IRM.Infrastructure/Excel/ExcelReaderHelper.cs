@@ -138,6 +138,11 @@ public static class ExcelReaderHelper
                 rowData[mapping.SystemField] = value;
                 if (value.Length > 0) hasData = true;
             }
+            // WPF footer rows may contain notes or formatting but no person identity.
+            // Keep interior blank rows for validation; only trim the trailing region.
+            if (activeMappings.Any(m => m.SystemField is "StaffName" or "Passport"))
+                hasData = !string.IsNullOrWhiteSpace(rowData.GetValueOrDefault("StaffName")) ||
+                          !string.IsNullOrWhiteSpace(rowData.GetValueOrDefault("Passport"));
             rowData[RowNumberKey] = rowNumber.ToString(CultureInfo.InvariantCulture);
             built.Add((rowData, hasData));
         }
