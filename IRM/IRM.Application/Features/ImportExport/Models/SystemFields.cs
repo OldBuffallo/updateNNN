@@ -20,6 +20,8 @@ public static class SystemFields
         { "VisaSymbol",    "Ký hiệu Visa" },
         { "TemporaryStay", "Hạn tạm trú" },
         { "Note",          "Ghi chú" },
+        { "SettlementResults", "Kết quả giải quyết" },
+        { "CardCreationDate", "Ngày cấp thẻ" },
         // Thăm thân
         { "FamilyVisit",              "Thăm thân (Có/Không)" },
         { "FamilyVisitRelativeName",  "Tên người thân" },

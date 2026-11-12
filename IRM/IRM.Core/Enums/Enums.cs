@@ -9,7 +9,8 @@ namespace IRM.Data.Models;
 public enum Gender
 {
     Female = 0,  // Nữ
-    Male = 1     // Nam
+    Male = 1,    // Nam
+    LegacyFemale = 2 // Nữ trong WPF; giữ 0 cho dữ liệu IRM đã có.
 }
 
 /// <summary>Loại GPLĐ (6 giá trị)</summary>
@@ -20,7 +21,8 @@ public enum WorkPermitType
     WorkerNoPermit = 2,    // NLĐ chưa có GPLĐ
     InvestorExempt = 3,    // NĐT miễn GPLĐ
     InvestorHasPermit = 4, // NĐT đã có GPLĐ
-    InvestorNoPermit = 5   // NĐT chưa có GPLĐ
+    InvestorNoPermit = 5,  // NĐT chưa có GPLĐ
+    RelativeLiving = 6    // Thân nhân sống cùng
 }
 
 /// <summary>Quyền tài khoản</summary>
@@ -74,7 +76,7 @@ public static class EnumExtensions
     public static string ToDisplay(this Gender gender) => gender switch
     {
         Gender.Male => "Nam",
-        Gender.Female => "Nữ",
+        Gender.Female or Gender.LegacyFemale => "Nữ",
         _ => "Khác"
     };
 
@@ -86,6 +88,7 @@ public static class EnumExtensions
         WorkPermitType.InvestorExempt => "NĐT miễn GPLĐ",
         WorkPermitType.InvestorHasPermit => "NĐT đã có GPLĐ",
         WorkPermitType.InvestorNoPermit => "NĐT chưa có GPLĐ",
+        WorkPermitType.RelativeLiving => "Thân nhân sống cùng",
         _ => "Khác"
     };
 

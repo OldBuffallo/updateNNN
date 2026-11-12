@@ -18,10 +18,10 @@ public sealed class ImportApplicationService(IImportStore store, IServiceAuthori
         return result;
     }
 
-    public async Task<List<ImportPreviewRowDto>> GeneratePreviewAsync(Stream stream, List<ColumnMapping> mappings, int companyId)
+    public async Task<List<ImportPreviewRowDto>> GeneratePreviewAsync(Stream stream, List<ColumnMapping> mappings, int companyId, ImportReadOptions? options = null)
     {
         await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
-        var result = await _store.GeneratePreviewAsync(stream, mappings, companyId);
+        var result = await _store.GeneratePreviewAsync(stream, mappings, companyId, options);
         return result.Select(item0 => ToDto(item0)).ToList();
     }
 

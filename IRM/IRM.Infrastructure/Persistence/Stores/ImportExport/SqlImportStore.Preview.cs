@@ -22,15 +22,23 @@ public partial class SqlImportStore
     /// Đọc file, check trùng passport, trả về danh sách preview
     /// </summary>
     public async Task<List<ImportPreviewRow>> GeneratePreviewAsync(
-        Stream stream, List<ColumnMapping> mappings, int companyId)
+        Stream stream, List<ColumnMapping> mappings, int companyId, ImportReadOptions? options = null)
     {
         if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
-        var allRows = ExcelReaderHelper.ReadAllRows(stream, mappings);
+        options ??= new();
+        if (options.SheetIndex < 0 || options.HeaderRow < 0 || options.StartRow < 0 ||
+            options.EndRow is <= 0 || (options.StartRow > 0 && options.EndRow < options.StartRow))
+            throw new InvalidOperationException("Vùng dòng hoặc sheet không hợp lệ.");
+        var allRows = ExcelReaderHelper.ReadAllRows(stream, mappings, options.SheetIndex, options.StartRow, options.EndRow);
         var previewRows = new List<ImportPreviewRow>();
 
         // Cache dữ liệu lookup
         var nationalities = await _db.Nationality.Where(n => n.Delete_flag == 0).ToListAsync();
         var careers = await _db.Careers.Where(c => c.Delete_flag == 0).ToListAsync();
+        var wards = await _db.Wards.Where(w => w.Delete_flag == 0).Select(w => w.WardName).ToListAsync();
+        var investors = await _db.Investments.AsNoTracking().ToListAsync();
+        var groups = await _db.CareerGroups.Select(g => g.IDCG).ToListAsync();
+        var groupId = options.CareerGroupId > 0 ? options.CareerGroupId : groups.Count == 1 ? groups[0] : 0;
         var companies = await _db.Companies.Where(c => c.Delete_flag == 0).ToListAsync();
         var effectiveCompanyId = companyId > 0
             ? companyId
@@ -44,7 +52,7 @@ public partial class SqlImportStore
         int rowNum = 0;
         foreach (var rowData in allRows)
         {
-            rowNum++;
+            rowNum = int.Parse(rowData[ExcelReaderHelper.RowNumberKey], System.Globalization.CultureInfo.InvariantCulture);
             var preview = new ImportPreviewRow { RowNumber = rowNum };
 
             try
@@ -59,20 +67,20 @@ public partial class SqlImportStore
                 {
                     var companyNameTrimmed = companyName.Trim();
                     var matchedCompany = companies.FirstOrDefault(c =>
-                        c.CompanyName.Equals(companyNameTrimmed, StringComparison.OrdinalIgnoreCase)
-                        || c.CompanyName.Contains(companyNameTrimmed, StringComparison.OrdinalIgnoreCase)
-                        || companyNameTrimmed.Contains(c.CompanyName, StringComparison.OrdinalIgnoreCase));
+                        c.CompanyName.Equals(companyNameTrimmed, StringComparison.OrdinalIgnoreCase));
 
                     if (matchedCompany != null)
                     {
                         resolvedCompanyId = matchedCompany.IDCompany;
                         companyDisplay = matchedCompany.CompanyName;
                     }
-                    else
+                    else if (options.AllowCreateCompanies)
                     {
+                        resolvedCompanyId = 0;
                         autoCreateCompanyName = companyNameTrimmed;
-                        companyDisplay = $"🆕 {companyNameTrimmed} (Tự động tạo mới)";
+                        companyDisplay = $"{companyNameTrimmed} (Tạo mới khi xác nhận import)";
                     }
+                    else throw new ImportRowException($"Công ty {companyNameTrimmed} chưa có; hãy bật cho phép tạo công ty hoặc chọn lại công ty tại dòng {rowNum}");
                 }
                 else if (hasCompanyColumn)
                 {
@@ -108,15 +116,19 @@ public partial class SqlImportStore
                 preview.CompanyDisplay = companyDisplay;
 
                 // Parse row data
-                var employee = ParseRowToEmployee(rowData, resolvedCompanyId, nationalities, careers);
-                if (!employee.IDCareer.HasValue && careers.Count > 0)
-                    employee.IDCareer = careers[0].IDCareer;
+                if (!groups.Contains(groupId)) throw new ImportRowException($"Chưa chọn nhóm nghề hợp lệ tại dòng {rowNum}");
+                var employee = ParseRowToEmployee(rowData, resolvedCompanyId, nationalities, careers, groupId,
+                    investors.Where(i => i.IDCompany == resolvedCompanyId && i.Passport != null)
+                        .Select(i => i.Passport!.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase), wards);
                 preview.ParsedEmployee = employee;
                 preview.ExtendedFields = rowData
                     .Where(item => V010ImportFields.Contains(item.Key) && !string.IsNullOrWhiteSpace(item.Value))
                     .ToDictionary(item => item.Key, item => item.Value.Trim(), StringComparer.OrdinalIgnoreCase);
                 if (!string.IsNullOrWhiteSpace(autoCreateCompanyName))
+                {
                     preview.ExtendedFields["__AutoCreateCompanyName"] = autoCreateCompanyName;
+                    preview.ExtendedFields["__AllowCreateCompany"] = "true";
+                }
 
                 // Set display values
                 preview.StaffName = employee.StaffName;
@@ -137,14 +149,6 @@ public partial class SqlImportStore
                 var career = careers.FirstOrDefault(c => c.IDCareer == employee.IDCareer);
                 preview.CareerDisplay = career?.CareerName;
 
-                // Validate required fields
-                if (string.IsNullOrWhiteSpace(employee.StaffName))
-                {
-                    preview.Status = "error";
-                    preview.ErrorMessage = "Thiếu họ tên";
-                    continue;
-                }
-
                 // Check duplicate passport
                 if (!string.IsNullOrWhiteSpace(employee.Passport))
                 {
@@ -161,7 +165,7 @@ public partial class SqlImportStore
             catch (Exception ex)
             {
                 preview.Status = "error";
-                preview.ErrorMessage = $"Lỗi parse dòng {rowNum}: {ex.Message}";
+                preview.ErrorMessage = ex is ImportRowException ? ex.Message : $"Lỗi parse dòng {rowNum}: {ex.Message}";
             }
 
             previewRows.Add(preview);

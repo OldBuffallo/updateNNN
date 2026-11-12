@@ -114,6 +114,7 @@ public sealed class NationalityImportTests
         // Match a fresh production catalog: CN exists, CHN/China do not.
         db.Context.Nationality.RemoveRange(await db.Context.Nationality
             .Where(n => n.NationalityCode != "CN").ToListAsync());
+        db.Context.Wards.Add(new() { WardName = "Hải Châu" });
         await db.Context.SaveChangesAsync();
     }
 
@@ -125,6 +126,9 @@ public sealed class NationalityImportTests
         sheet.Cell(1, 2).Value = "Quốc tịch";
         sheet.Cell(2, 1).Value = "Import nationality test";
         sheet.Cell(2, 2).Value = nationality;
+        string[] headers = ["Giới tính", "Ngày sinh", "Số hộ chiếu", "Địa chỉ", "Nghề nghiệp", "Số visa", "Hạn tạm trú"];
+        string[] values = ["Nam", "03/06/1990", "NAT-001", "12 Lê Duẩn, Hải Châu", "Kỹ sư", "DN1", "29/05/2028"];
+        for (int i = 0; i < headers.Length; i++) { sheet.Cell(1, i + 3).Value = headers[i]; sheet.Cell(2, i + 3).Value = values[i]; }
         var stream = new MemoryStream();
         workbook.SaveAs(stream);
         return stream;

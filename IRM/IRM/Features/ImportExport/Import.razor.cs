@@ -41,6 +41,14 @@ public partial class Import : ComponentBase, IFeaturePage
     internal MemoryStream? _fileStream;
     internal string? _uploadedFileName;
     internal string _sheetInfo = "";
+    internal List<string> _sheetNames = new();
+    internal int _sheetIndex;
+    internal int _headerRow;
+    internal int _startRow;
+    internal int? _endRow;
+    internal int _careerGroupId;
+    internal List<CareerGroupDto> _careerGroups = new();
+    internal bool _allowCreateCompanies;
     internal CompanyDto? _selectedCompany;
     internal int? _selectedTemplateId;
     internal List<ColumnMappingTemplateDto> _templates = new();
@@ -74,6 +82,8 @@ public partial class Import : ComponentBase, IFeaturePage
             _selectedCompany = companies[0];
         _mfNationalities = await CatalogSvc.GetNationalitiesAsync();
         _mfCareers = await CatalogSvc.GetCareersAsync();
+        _careerGroups = await CatalogSvc.GetCareerGroupsAsync();
+        if (_careerGroups.Count == 1) _careerGroupId = _careerGroups[0].IDCG;
     }
 
     // ══════════════════════════════════════════
@@ -85,10 +95,9 @@ public partial class Import : ComponentBase, IFeaturePage
         var file = e.File;
         if (file == null) return;
 
-        if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) &&
-            !file.Name.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
+        if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            Snackbar.Add("Chỉ hỗ trợ file Excel (.xlsx hoặc .xls)", Severity.Error);
+            Snackbar.Add("Chỉ hỗ trợ file Excel (.xlsx)", Severity.Error);
             return;
         }
 
@@ -99,6 +108,8 @@ public partial class Import : ComponentBase, IFeaturePage
 
         try
         {
+            _sheetNames = ExcelReader.ReadSheetNames(_fileStream);
+            _sheetIndex = 0; _headerRow = 0; _startRow = 0; _endRow = null;
             var (rowCount, colCount, sheetName) = ExcelReader.GetSheetInfo(_fileStream);
             _sheetInfo = $"Sheet: {sheetName} — {rowCount} dòng — {colCount} cột";
         }
@@ -131,7 +142,7 @@ public partial class Import : ComponentBase, IFeaturePage
 
         try
         {
-            var headers = ExcelReader.ReadHeaders(_fileStream);
+            var headers = ExcelReader.ReadHeaders(_fileStream, _sheetIndex, _headerRow);
 
             if (_selectedTemplateId.HasValue)
             {
@@ -193,13 +204,16 @@ public partial class Import : ComponentBase, IFeaturePage
                 Snackbar.Add($"Đã lưu template '{_templateName}'", Severity.Success);
             }
 
-            _previewRows = await ImportSvc.GeneratePreviewAsync(_fileStream, _columnMappings, _selectedCompany?.IDCompany ?? 0);
+            _previewRows = await ImportSvc.GeneratePreviewAsync(_fileStream, _columnMappings, _selectedCompany?.IDCompany ?? 0,
+                new IRM.Application.Features.ImportExport.ImportReadOptions {
+                    SheetIndex = _sheetIndex, HeaderRow = _headerRow, StartRow = _startRow, EndRow = _endRow,
+                    CareerGroupId = _careerGroupId, AllowCreateCompanies = _allowCreateCompanies });
 
-            // Init duplicate decisions — default to "update"
+            // Updates require an explicit choice.
             _duplicateDecisions = new();
             foreach (var row in _previewRows.Where(r => r.Status == "duplicate" && r.ExistingEmployeeId.HasValue))
             {
-                _duplicateDecisions[row.ExistingEmployeeId!.Value] = "update";
+                _duplicateDecisions[row.ExistingEmployeeId!.Value] = "skip";
             }
 
             _currentStep = 3;
@@ -317,6 +331,7 @@ public partial class Import : ComponentBase, IFeaturePage
         _fileStream = null;
         _uploadedFileName = null;
         _sheetInfo = "";
+        _sheetNames = new(); _sheetIndex = 0; _headerRow = 0; _startRow = 0; _endRow = null; _allowCreateCompanies = false;
         _columnMappings = new();
         _previewRows = new();
         _duplicateDecisions = new();

@@ -97,91 +97,58 @@ public static class ImportMapping
     }
 
     public static Employee ParseRowToEmployee(
-        Dictionary<string, string> rowData,
-        int companyId,
-        List<NationalityEntity> nationalities,
-        List<Career> careers)
+        Dictionary<string, string> rowData, int companyId,
+        List<NationalityEntity> nationalities, List<Career> careers,
+        int careerGroupId, ISet<string> investorPassports, IReadOnlyCollection<string> wards)
     {
-        var emp = new Employee
+        var row = rowData.GetValueOrDefault("__RowNumber", "?");
+        string Value(string key) => rowData.GetValueOrDefault(key, "").Trim();
+        ImportRowException Error(string text) => new($"{text} tại dòng {row}");
+        string Required(string key, string label)
         {
-            IDCompany = companyId,
-            IDUser = 1,
-            Hidden_flag = 0,
-            WorkingStatus = 0
+            var value = Value(key);
+            if (value.Length == 0) throw Error($"Lỗi đọc {label}");
+            return value;
+        }
+        var name = Required("StaffName", "tên nhân viên");
+        var passport = Required("Passport", "số hộ chiếu");
+        var gender = Required("Gender", "giới tính");
+        if (!LegacyImportRules.TryParseLegacyDate(Value("Birthday"), out var birthday)) throw Error("Lỗi đọc ngày sinh nhật");
+        var nationality = Required("Nationality", "quốc tịch");
+        var address = Required("Address", "địa chỉ");
+        var career = Required("Career", "tên nghề nghiệp");
+        var visa = Required("VisaNumber", "số visa");
+        if (!LegacyImportRules.TryParseLegacyDate(Value("TemporaryStay"), out var stay)) throw Error("Lỗi đọc thời hạn tạm trú");
+        string? nationalityCode;
+        try { nationalityCode = ResolveNationalityCode(nationality, nationalities); }
+        catch (InvalidOperationException) { throw Error($"Quốc tịch {nationality} chưa có trong dữ liệu. Vui lòng thêm quốc tịch"); }
+        if (!LegacyImportRules.AddressEndsWithWard(address, wards)) throw Error("Địa chỉ không có phường/ xã trong lưu trữ. Vui lòng kiểm tra lại");
+        var careerId = LegacyImportRules.FindCareerId(career, careerGroupId, careers);
+        if (!careerId.HasValue) throw Error("Nghề nghiệp chưa có trong dữ liệu. Vui lòng thêm nghề nghiệp");
+        var (permit, number) = LegacyImportRules.ParseWorkPermit(Value("WorkPermit"), investorPassports.Contains(passport));
+        if (LegacyImportRules.IsRelativeCareer(careers.First(c => c.IDCareer == careerId))) { permit = 6; number = ""; }
+        else if (permit == 6)
+        {
+            var relative = careers.Where(c => c.Delete_flag == 0 && LegacyImportRules.IsRelativeCareer(c)).OrderBy(c => c.IDCareer).FirstOrDefault();
+            if (relative != null) careerId = relative.IDCareer;
+        }
+        var settlement = LegacyImportRules.ParseSettlement(Value("SettlementResults"), visa, stay);
+        if (settlement.Error != null) throw Error(settlement.Error);
+        DateTime? cardDate = settlement.CardCreationDate;
+        if (Value("CardCreationDate").Length > 0)
+        {
+            if (!LegacyImportRules.TryParseLegacyDate(Value("CardCreationDate"), out var explicitDate)) throw Error("Lỗi đọc ngày cấp thẻ");
+            if (cardDate.HasValue && cardDate.Value != explicitDate) throw Error("Ngày cấp thẻ và kết quả giải quyết là khác nhau");
+            cardDate = explicitDate;
+        }
+        var emp = new Employee {
+            StaffName = name, Passport = passport, Gender = (Gender)LegacyImportRules.ParseGender(gender),
+            Birthday = birthday, Nationality = nationalityCode, Address = address, IDCareer = careerId,
+            WorkPermit = (WorkPermitType)permit, WorkPermitNumber = number, VisaNumber = visa,
+            VisaSymbol = Value("VisaSymbol"), TemporaryStay = stay, Note = Value("Note"),
+            SettlementResults = settlement.Result, SettlementResultsString = settlement.Text, CardCreationDate = cardDate,
+            IDCompany = companyId, IDUser = 1, Hidden_flag = 0, WorkingStatus = 0
         };
-
-        if (rowData.TryGetValue("StaffName", out var name))
-            emp.StaffName = name;
-
-        if (rowData.TryGetValue("Gender", out var gender))
-        {
-            emp.Gender = gender.ToLower() switch
-            {
-                "nam" or "male" or "1" or "m" => Gender.Male,
-                _ => Gender.Female
-            };
-        }
-
-        if (rowData.TryGetValue("Birthday", out var bday) && !string.IsNullOrWhiteSpace(bday))
-        {
-            if (DateTime.TryParse(bday, out var dt))
-                emp.Birthday = dt;
-            else if (TryParseVietnameseDate(bday, out dt))
-                emp.Birthday = dt;
-        }
-
-        if (rowData.TryGetValue("Nationality", out var nat) && !string.IsNullOrWhiteSpace(nat))
-        {
-            emp.Nationality = ResolveNationalityCode(nat, nationalities);
-        }
-
-        if (rowData.TryGetValue("Passport", out var passport))
-            emp.Passport = passport;
-
-        if (rowData.TryGetValue("Address", out var addr))
-            emp.Address = addr;
-
-        if (rowData.TryGetValue("Career", out var career) && !string.IsNullOrWhiteSpace(career))
-        {
-            var match = careers.FirstOrDefault(c =>
-                c.CareerName.Equals(career, StringComparison.OrdinalIgnoreCase));
-            emp.IDCareer = match?.IDCareer;
-        }
-
-        if (rowData.TryGetValue("WorkPermit", out var wp) && !string.IsNullOrWhiteSpace(wp))
-        {
-            emp.WorkPermit = wp.ToLower() switch
-            {
-                "có gplđ" or "đã có gplđ" or "có" or "1" => WorkPermitType.WorkerHasPermit,
-                "chưa có gplđ" or "chưa có" or "2" => WorkPermitType.WorkerNoPermit,
-                "miễn" or "miễn gplđ" or "0" => WorkPermitType.WorkerExempt,
-                "nhà đầu tư miễn" or "3" => WorkPermitType.InvestorExempt,
-                "nhà đầu tư có" or "4" => WorkPermitType.InvestorHasPermit,
-                "nhà đầu tư chưa" or "5" => WorkPermitType.InvestorNoPermit,
-                _ => WorkPermitType.WorkerExempt
-            };
-        }
-
-        if (rowData.TryGetValue("WorkPermitNumber", out var wpn))
-            emp.WorkPermitNumber = wpn;
-
-        if (rowData.TryGetValue("VisaNumber", out var visa))
-            emp.VisaNumber = visa;
-
-        if (rowData.TryGetValue("VisaSymbol", out var visaSym))
-            emp.VisaSymbol = visaSym;
-
-        if (rowData.TryGetValue("TemporaryStay", out var ts) && !string.IsNullOrWhiteSpace(ts))
-        {
-            if (DateTime.TryParse(ts, out var dt))
-                emp.TemporaryStay = dt;
-            else if (TryParseVietnameseDate(ts, out dt))
-                emp.TemporaryStay = dt;
-        }
-
-        if (rowData.TryGetValue("Note", out var note))
-            emp.Note = note;
-
         // Thăm thân
         if (rowData.TryGetValue("FamilyVisit", out var fv))
             emp.FamilyVisit = fv.ToLower() switch { "có" or "co" or "1" or "yes" or "x" => 1, _ => 0 };
@@ -193,13 +160,11 @@ public static class ImportMapping
             emp.FamilyVisitRelativeIdCard = frid;
         if (rowData.TryGetValue("FamilyVisitStartDate", out var fsd) && !string.IsNullOrWhiteSpace(fsd))
         {
-            if (DateTime.TryParse(fsd, out var dt)) emp.FamilyVisitStartDate = dt;
-            else if (TryParseVietnameseDate(fsd, out dt)) emp.FamilyVisitStartDate = dt;
+            if (LegacyImportRules.TryParseLegacyDate(fsd, out var dt)) emp.FamilyVisitStartDate = dt;
         }
         if (rowData.TryGetValue("FamilyVisitEndDate", out var fed) && !string.IsNullOrWhiteSpace(fed))
         {
-            if (DateTime.TryParse(fed, out var dt)) emp.FamilyVisitEndDate = dt;
-            else if (TryParseVietnameseDate(fed, out dt)) emp.FamilyVisitEndDate = dt;
+            if (LegacyImportRules.TryParseLegacyDate(fed, out var dt)) emp.FamilyVisitEndDate = dt;
         }
         if (rowData.TryGetValue("FamilyVisitNote", out var fnote))
             emp.FamilyVisitNote = fnote;
@@ -225,7 +190,7 @@ public static class ImportMapping
     }
 
     private static string NormalizeNationality(string value) =>
-        string.Join(" ", value.Normalize(System.Text.NormalizationForm.FormC)
+        string.Join(" ", LegacyImportRules.RemoveDiacritics(value)
             .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
     /// <summary>Parse date dạng dd/MM/yyyy</summary>

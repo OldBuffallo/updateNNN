@@ -89,7 +89,9 @@ public sealed class ImportExportFeatureTddTests
         var rows = await service.GeneratePreviewAsync(stream, mappings, companyId: 0);
 
         var row = Assert.Single(rows);
-        Assert.Equal("new", row.Status);
+        // Company selection is independent of row validity; missing required fields are errors.
+        Assert.Equal("error", row.Status);
+        Assert.Contains("giới tính", row.ErrorMessage);
         Assert.Equal(1, row.ResolvedCompanyId);
         Assert.Equal("Default Test Company", row.CompanyDisplay);
     }

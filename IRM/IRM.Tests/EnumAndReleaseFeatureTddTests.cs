@@ -166,13 +166,31 @@ public sealed class EnumAndReleaseFeatureTddTests
             new() { ExcelColumnIndex = 4, ExcelColumnName = "Hộ chiếu", SystemField = "Passport", SystemFieldLabel = "Hộ chiếu" }
         };
 
-        var preview = await importService.GeneratePreviewAsync(stream, mappings, 1);
+        // Fill every mandatory legacy field; investor status comes from Investment, not a label.
+        using var completeWorkbook = new XLWorkbook(stream);
+        var dataSheet = completeWorkbook.Worksheets.First();
+        string[] requiredHeaders = ["Ngày sinh", "Địa chỉ", "Nghề nghiệp", "Số visa", "Hạn tạm trú"];
+        string[] requiredFields = ["Birthday", "Address", "Career", "VisaNumber", "TemporaryStay"];
+        string[] requiredValues = ["03/06/1990", "12 Lê Duẩn, Hải Châu", "Kỹ sư", "DN1", "29/05/2028"];
+        for (int c = 0; c < 5; c++) {
+            dataSheet.Cell(1, c + 6).Value = requiredHeaders[c];
+            for (int r = 2; r <= 4; r++) dataSheet.Cell(r, c + 6).Value = requiredValues[c];
+            mappings.Add(new() { ExcelColumnIndex = c + 5, SystemField = requiredFields[c] });
+        }
+        dataSheet.Cell(2, 3).Value = "GP-001";
+        dataSheet.Cell(4, 2).Value = "Nam";
+        dataSheet.Cell(4, 3).Value = "GP-002";
+        db.Context.Wards.Add(new() { WardName = "Hải Châu" });
+        db.Context.Investments.Add(new() { IDCompany = 1, Passport = "P-CN-003" });
+        await db.Context.SaveChangesAsync();
+        using var completeStream = new MemoryStream(); completeWorkbook.SaveAs(completeStream);
+        var preview = await importService.GeneratePreviewAsync(completeStream, mappings, 1);
         Assert.Equal(3, preview.Count);
 
         Assert.Equal(Gender.Male, preview[0].ParsedEmployee!.Gender);
         Assert.Equal(WorkPermitType.WorkerHasPermit, preview[0].ParsedEmployee!.WorkPermit);
 
-        Assert.Equal(Gender.Female, preview[1].ParsedEmployee!.Gender);
+        Assert.Equal(Gender.LegacyFemale, preview[1].ParsedEmployee!.Gender);
         Assert.Equal(WorkPermitType.WorkerExempt, preview[1].ParsedEmployee!.WorkPermit);
 
         Assert.Equal(Gender.Male, preview[2].ParsedEmployee!.Gender);

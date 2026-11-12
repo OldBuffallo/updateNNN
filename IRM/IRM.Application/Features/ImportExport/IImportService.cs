@@ -8,7 +8,7 @@ namespace IRM.Application.Features.ImportExport;
 public interface IImportService
 {
     List<ColumnMapping> AutoMapColumns(List<ExcelColumnInfo> headers);
-    Task<List<ImportPreviewRowDto>> GeneratePreviewAsync(Stream stream, List<ColumnMapping> mappings, int companyId);
+    Task<List<ImportPreviewRowDto>> GeneratePreviewAsync(Stream stream, List<ColumnMapping> mappings, int companyId, ImportReadOptions? options = null);
     Task<ImportResult> ExecuteImportAsync(List<ImportPreviewRowDto> previewRows, Dictionary<int, string> duplicateDecisions, int companyId, string fileName, string? username = null);
     Task<bool> RollbackImportAsync(string sessionId);
     Task<List<ImportSessionInfo>> GetHistoryAsync();
