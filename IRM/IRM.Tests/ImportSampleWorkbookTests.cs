@@ -19,7 +19,7 @@ public class ImportSampleWorkbookTests
     ];
 
     [Fact]
-    public async Task Sample_TargetCatalogsAreNotExposedToAnonymousCallers()
+    public async Task Sample_DownloadRequiresAuthenticatedAccount()
     {
         await using var db = new TestDatabase(); await db.InitializeAsync();
         var store = new SqlExportStore(new SharedConnectionFactory(db.Context));
@@ -111,7 +111,7 @@ public class ImportSampleWorkbookTests
     }
 
     [Fact]
-    public async Task Sample_ReferencesUseActualActiveCatalogsAndSeparateAddressCatalogs()
+    public async Task Sample_DoesNotCopyExistingTargetCatalogsIntoTheDownloadedTemplate()
     {
         await using var db = new TestDatabase(); await db.InitializeAsync();
         db.Context.Nationality.AddRange(new NationalityEntity { NationalityCode = "D", NationalityName = "Đức thực tế" }, new NationalityEntity { NationalityCode = "HIDDEN", NationalityName = "HIDDEN-NATIONALITY", Delete_flag = 1 });
@@ -123,10 +123,10 @@ public class ImportSampleWorkbookTests
         using var stream = new MemoryStream(await Generate(db)); using var book = new XLWorkbook(stream);
         var reference = book.Worksheet("Danh mục tham chiếu");
         var rows = reference.RowsUsed().Select(row => row.Cells(1, 4).Select(cell => cell.GetString()).ToArray()).ToList();
-        Assert.Contains(rows, row => row[0] == "Quốc tịch" && row[1] == "D" && row[2] == "Đức thực tế");
-        Assert.Contains(rows, row => row[0] == "Phường/xã cho địa chỉ lõi" && row[2] == "Phường lõi thực tế");
-        Assert.Contains(rows, row => row[0] == "Mã địa bàn cư trú" && row[1] == "QN-W-DEFAULT");
-        Assert.Contains(rows, row => row[0] == "Nghề nghiệp" && row[2] == "Kỹ sư" && row[3].Contains("Kỹ thuật"));
+        var text = string.Join('\n', reference.CellsUsed().Select(cell => cell.GetString()));
+        foreach (var privateValue in new[] { "Đức thực tế", "Phường lõi thực tế", "QN-W-DEFAULT", "Test Company", "Kỹ sư" })
+            Assert.DoesNotContain(privateValue, text);
+        Assert.Contains("Tra cứu trong ứng dụng", text);
         Assert.DoesNotContain(reference.CellsUsed(), cell => cell.GetString().Contains("HIDDEN"));
         Assert.Contains(rows, row => row[1] == "BORDER_VISA_EXEMPT");
         Assert.Contains(rows, row => row[1] == "VISA_EXTENSION");
@@ -138,7 +138,24 @@ public class ImportSampleWorkbookTests
         await using var db = new TestDatabase(); await db.InitializeAsync(seedBaseline: false);
         using var stream = new MemoryStream(await Generate(db)); using var book = new XLWorkbook(stream);
         var text = string.Join('\n', book.Worksheet("Danh mục tham chiếu").CellsUsed().Select(cell => cell.GetString()));
-        Assert.Contains("Chưa có dữ liệu", text); Assert.DoesNotContain("USA", text); Assert.DoesNotContain("Kỹ sư", text);
+        Assert.Contains("Tra cứu trong ứng dụng", text); Assert.DoesNotContain("USA", text); Assert.DoesNotContain("Kỹ sư", text);
+    }
+
+    [Fact]
+    public async Task Sample_GenerationNeverOpensTheOperationalDatabase()
+    {
+        var store = new SqlExportStore(new DenyDatabaseFactory());
+        var bytes = await store.GenerateSampleExcelBytesAsync();
+        using var stream = new MemoryStream(bytes);
+        using var book = new XLWorkbook(stream);
+        Assert.Equal(35, book.Worksheet(1).LastColumnUsed()!.ColumnNumber());
+        Assert.Equal(1, book.Worksheet(1).LastRowUsed()!.RowNumber());
+    }
+
+    private sealed class DenyDatabaseFactory : IDbContextFactory<IrmDbContext>
+    {
+        public IrmDbContext CreateDbContext() => throw new InvalidOperationException("Template must not open the operational database.");
+        public Task<IrmDbContext> CreateDbContextAsync(CancellationToken cancellationToken = default) => throw new InvalidOperationException("Template must not open the operational database.");
     }
 
     private static Task<byte[]> Generate(TestDatabase db) => new SqlExportStore(new SharedConnectionFactory(db.Context)).GenerateSampleExcelBytesAsync();

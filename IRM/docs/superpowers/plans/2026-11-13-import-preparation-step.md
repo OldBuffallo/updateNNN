@@ -10,6 +10,8 @@
 
 **Spec:** `IRM/docs/superpowers/specs/2026-11-13-import-template-first-design.md` (paths below relative to the Git root).
 
+**Security amendment, 13/11/2026:** The user requires confidentiality of existing operational data. The completed task descriptions below record the original implementation. The current design supersedes their target-catalog export requirement. Template generation must use static guidance and supported technical codes exclusively, with zero database opens. Agent UI checks and screenshots must use isolated synthetic data. Regression coverage is in `Sample_GenerationNeverOpensTheOperationalDatabase` and `Sample_DoesNotCopyExistingTargetCatalogsIntoTheDownloadedTemplate`.
+
 ## Global Constraints
 
 - User approved A and explicitly requested inline execution on 13/11/2026; execute this first-stage plan without another permission round.
@@ -17,7 +19,7 @@
 - Only first-stage preparation ships here; do not claim the existing tabular preview is the new profile preview.
 - Keep all 35 import fields and the existing nine required fields; preserve engine semantics, schema, authorization and library versions.
 - Do not issue or generate official identity, document or permit numbers.
-- Use active target-database catalogs, with no hardcoded ISO replacements or sample person rows in the import region.
+- Build templates from static guidance and independent examples, with zero operational database access and an empty import region. Users consult authorized catalogs inside the application.
 - Share reviewed field guidance between Web and workbook, and preserve Vietnamese accents.
 - Stage/review/check/commit locally per deliverable; do not push or rebuild existing handed-over installers.
 

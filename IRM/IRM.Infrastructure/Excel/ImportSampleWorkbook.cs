@@ -6,7 +6,7 @@ namespace IRM.Infrastructure.Excel;
 
 internal sealed record ImportSampleCatalogRow(string Group, string Code, string Name, string Context);
 
-/// <summary>Formats a blank import template from shared guidance and materialized target catalogs.</summary>
+/// <summary>Builds a blank template exclusively from static guidance and supported technical codes.</summary>
 internal static class ImportSampleWorkbook
 {
     private static readonly string[] RequiredOrder = [
@@ -16,7 +16,7 @@ internal static class ImportSampleWorkbook
         "Quốc tịch", "Nghề nghiệp", "Nhóm nghề", "Phường/xã cho địa chỉ lõi", "Mã địa bàn cư trú", "Công ty", "Diện cư trú", "Loại giấy tờ"
     ];
 
-    public static byte[] Create(IReadOnlyList<ImportSampleCatalogRow> catalogs, DateTime exportedAt)
+    public static byte[] Create(DateTime exportedAt)
     {
         using var book = new XLWorkbook();
         var keys = RequiredOrder.Concat(SystemFields.All.Keys.Where(key => key != "skip" && !RequiredOrder.Contains(key))).ToArray();
@@ -64,17 +64,23 @@ internal static class ImportSampleWorkbook
         guide.Range(3, 1, keys.Length + 3, 10).SetAutoFilter();
 
         var reference = book.Worksheets.Add("Danh mục tham chiếu");
-        reference.Cell(1, 1).Value = "DANH MỤC THỰC TẾ TẠI THỜI ĐIỂM TẢI";
+        reference.Cell(1, 1).Value = "HƯỚNG DẪN TRA CỨU DANH MỤC";
         reference.Cell(1, 1).Style.Font.Bold = true;
-        reference.Cell(2, 1).Value = $"Xuất lúc {exportedAt:dd/MM/yyyy HH:mm:ss}. Đối chiếu lại nếu danh mục thay đổi. Tên nghề phải đúng nhóm; mã quốc tịch không tự đổi sang ISO. Địa chỉ lõi phải kết thúc bằng tên phường/xã lõi; mã địa bàn cư trú là danh mục riêng. Mã nghề/công ty chỉ để tham chiếu: cột Nghề nghiệp và Công ty trong file dùng tên.";
+        reference.Cell(2, 1).Value = $"Tạo mẫu lúc {exportedAt:dd/MM/yyyy HH:mm:ss}. Tra cứu danh mục bạn được phép xem trong ứng dụng để điền file. Tên nghề phải đúng nhóm. Quốc tịch dùng đúng mã hoặc tên đang sử dụng. Địa chỉ lõi phải kết thúc bằng tên phường/xã lõi. Mã địa bàn cư trú là danh mục riêng. Cột Nghề nghiệp và Công ty dùng tên đầy đủ.";
         reference.Range(2, 1, 2, 4).Merge().Style.Alignment.WrapText = true;
         reference.Row(2).Height = 70;
         WriteHeader(reference, 3, ["Danh mục", "Mã tham chiếu", "Tên / Giá trị", "Lưu ý / Nhóm"]);
+        var catalogs = StayPurposeCodes.All
+            .Select(code => new ImportSampleCatalogRow("Diện cư trú", code, code, "Mã diện cư trú được ứng dụng hỗ trợ.")).ToList();
+        string[] documentTypes = [ImmigrationDocumentTypeCodes.Visa, ImmigrationDocumentTypeCodes.VisaExtension,
+            ImmigrationDocumentTypeCodes.TemporaryResidenceCard, ImmigrationDocumentTypeCodes.VisaExemption, ImmigrationDocumentTypeCodes.Other];
+        catalogs.AddRange(documentTypes.Select(code => new ImportSampleCatalogRow("Loại giấy tờ", code, code,
+            "Nếu nhiều giấy tờ, phân cách bằng dấu ; theo đúng thứ tự số và hạn.")));
         var rowIndex = 4;
         foreach (var group in CatalogGroups)
         {
             var entries = catalogs.Where(row => row.Group == group).ToArray();
-            if (entries.Length == 0) entries = [new(group, "", "Chưa có dữ liệu", "Chuẩn bị danh mục tại hệ thống đích; không thay giá trị theo suy đoán.")];
+            if (entries.Length == 0) entries = [new(group, "", "Tra cứu trong ứng dụng", "Đối chiếu với danh mục bạn được phép xem trước khi điền file.")];
             foreach (var entry in entries)
             {
                 string[] values = [entry.Group, entry.Code, entry.Name, entry.Context];

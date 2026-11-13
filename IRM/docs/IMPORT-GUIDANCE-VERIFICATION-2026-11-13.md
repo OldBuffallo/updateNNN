@@ -1,5 +1,15 @@
 # Kiểm chứng hướng dẫn import và tiếng Việt trên UI
 
+## Bổ sung bảo mật theo yêu cầu người dùng
+
+Chức năng tải mẫu hiện được sửa để tạo workbook từ hướng dẫn tĩnh và các mã kỹ thuật được hỗ trợ. Một regression chặn mọi lần mở DbContext khi tạo mẫu. Regression khác gieo danh mục riêng tư trong database giả rồi kiểm tra các giá trị đó vắng mặt trong file xuất. Quy định kiểm thử trong `IRM/AGENTS.md` yêu cầu dữ liệu giả và môi trường biệt lập cho thao tác UI, ảnh chụp và tải file do agent thực hiện.
+
+Review bảo mật độc lập trên source đã chấp thuận, không thấy lỗi Critical/Important/Minor. Build Release đạt 0 cảnh báo và 0 lỗi. Toàn bộ kiểm thử .NET đạt 337/337 với SQL test biệt lập và JavaScript đạt 47/47. Kết quả này kiểm chứng bản sửa tải mẫu. Quyền SQL Server, bản sao lưu, cấu hình máy chủ và lịch sử xử lý dữ liệu của nền tảng hỗ trợ cần được đánh giá riêng khi xác nhận an toàn cho toàn hệ thống.
+
+Lượt kiểm tra Chrome trước bổ sung này đã đưa một phần thông tin hồ sơ đang hiển thị vào đầu ra công cụ của phiên hỗ trợ. Bản workbook đã tải lúc đó cũng có danh mục công ty thực tế. Đây là sự việc cần lưu lại để người dùng đánh giá việc xử lý dữ liệu của phiên. Agent không có khả năng thu hồi nội dung đã vào lịch sử phiên.
+
+Workbook chứa danh mục thực tế đã được chuyển khỏi `BAN-GIAO` vào vùng cục bộ `.superpowers/private-local/2026-11-13-import-template/` và giới hạn ACL cho tài khoản Windows hiện tại cùng SYSTEM. Cơ chế duyệt tự động chặn lệnh xóa file với thông báo `blocked by policy`. Tệp còn trong vùng hạn chế quyền, bị Git bỏ qua. Các phần phía dưới lưu bằng chứng lịch sử của phiên bản trước bổ sung bảo mật.
+
 ## Cập nhật bước chuẩn bị file
 
 Đợt triển khai đầu của phương án A bổ sung màn hình **Chuẩn bị file**, nút tải mẫu và tra cứu 35 trường trước phần nạp file. Nội dung dưới phần này lưu bằng chứng của đợt hướng dẫn trước đó.

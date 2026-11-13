@@ -6,7 +6,7 @@
     // Fixed copy only: never interpolate file names, headers or personal data into Driver HTML.
     const chapters = {
         0: [
-            ['prepare-download', 'Tải file Excel mẫu', 'Tải mẫu có đủ 35 cột, hướng dẫn từng trường và danh mục tham chiếu đang dùng. Điền dữ liệu tại sheet Hồ sơ từ dòng 2.'],
+            ['prepare-download', 'Tải file Excel mẫu', 'Tải mẫu có đủ 35 cột và hướng dẫn từng trường. Đối chiếu danh mục trong ứng dụng rồi điền dữ liệu tại sheet Hồ sơ từ dòng 2.'],
             ['prepare-fields', 'Điền đủ thông tin và đối chiếu', 'Chín trường bắt buộc đặt trước trong file mẫu. Mở Tra cứu 35 trường khi cần. Ô trống có thể ảnh hưởng dữ liệu cũ khi cập nhật.'],
             ['prepare-next', 'Chuyển sang nạp file đã điền', 'Khi đã chuẩn bị file, bấm Tôi đã chuẩn bị file. Có thể dùng lại file theo mẫu đã điền từ trước.', true]
         ],

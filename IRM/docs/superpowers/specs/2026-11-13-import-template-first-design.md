@@ -25,6 +25,8 @@ Giữ Blazor Server, MudBlazor và Driver.js đã có; không thêm thư viện 
 
 ## Phạm vi và giới hạn
 
+Yêu cầu bảo mật bổ sung của người dùng ngày 13/11/2026 áp dụng cho toàn bộ triển khai. File mẫu chỉ được tạo từ hướng dẫn tĩnh và ví dụ độc lập. Việc tra cứu danh mục thực tế diễn ra trong ứng dụng theo quyền người dùng. Mọi kiểm thử và ảnh chụp do agent thực hiện phải dùng dữ liệu giả trên môi trường biệt lập.
+
 - Chỉ đổi ứng dụng web, route `/import`, file mẫu và các DTO trình bày cần cho xem trước.
 - Giữ đủ 35 trường hiện tại; chín trường bắt buộc theo `IMPORT-EXCEL-SPEC.md`. Không mở rộng thêm nghiệp vụ import du học sinh hoặc toàn bộ trường của hồ sơ.
 - Giữ khả năng đọc file khác mẫu/WPF qua nhánh nâng cao; không sửa ứng dụng WPF.
@@ -80,9 +82,9 @@ File mẫu hiện tại không đủ để làm điểm bắt đầu: chỉ có 
 
 1. **Hồ sơ**: đủ 35 cột có tên duy nhất, chín cột bắt buộc đứng trước và được tô màu/chú thích; không chèn dữ liệu giả vào vùng sẽ import. Bắt đầu nhập tại dòng 2.
 2. **Hướng dẫn**: một dòng cho từng trường, gồm tên cột, bắt buộc/điều kiện, kiểu dữ liệu, ví dụ, ý nghĩa ô trống, cách sửa lỗi và lưu ý đối chiếu danh mục. Ví dụ chỉ nằm ở sheet này.
-3. **Danh mục tham chiếu**: quốc tịch đang hoạt động, nghề và nhóm nghề, phường/xã dùng cho địa chỉ lõi, đơn vị hành chính dùng cho mã cư trú, công ty đang có và mã diện cư trú/loại giấy tờ được luồng nhập hỗ trợ. Tách rõ phường/xã lõi với mã đơn vị hành chính. Chỉ cung cấp mã/tên cần đối chiếu, không xuất dữ liệu hồ sơ người.
+3. **Danh mục tham chiếu** hướng dẫn tra cứu quốc tịch, nghề/nhóm nghề, phường/xã lõi, đơn vị hành chính và công ty trong ứng dụng. Sheet liệt kê các mã diện cư trú/loại giấy tờ tĩnh mà luồng nhập hỗ trợ. Tách rõ phường/xã lõi với mã đơn vị hành chính.
 
-Danh mục lấy từ database đích khi tải; không dùng danh sách quốc gia ISO hoặc nghề giả cố định thay dữ liệu thực. Nếu danh mục rỗng thì sheet ghi rõ chưa có; không tạo danh mục hoặc thay mã thay người dùng. Ghi thời điểm xuất và nhắc rằng đây là bản tham chiếu, cần kiểm tra lại nếu danh mục đã đổi.
+Chức năng tạo mẫu phải hoạt động khi truy cập database bị chặn. Giá trị thực tế được người dùng tra cứu tại hệ thống có phân quyền khi điền file. Hướng dẫn dùng mã đang được tổ chức sử dụng và yêu cầu người dùng đối chiếu, tránh thay mã theo suy đoán.
 
 File không có macro, công thức hoặc liên kết ngoài. Đặt định dạng Text cho mã/số giấy tờ; ngày có định dạng rõ ràng, không tự thay số giấy tờ. Các cột có mô tả phải có thể xem bằng bộ đọc Excel mà ứng dụng đang dùng, không phụ thuộc người dùng mở đúng một phần mềm Excel cụ thể.
 
@@ -151,7 +153,7 @@ Giữ Driver.js cục bộ và nội dung có dấu. Bước chuẩn bị có bo
 - Web điều phối các bước bằng các component và code-behind hiện có. Application giữ hợp đồng dịch vụ/DTO; Infrastructure tạo workbook và đọc dữ liệu. Không truy cập DbContext từ UI.
 - Có thể dùng thêm trạng thái chuẩn bị nội bộ thay vì đổi ý nghĩa các chỉ số đang dùng trong import/tour. Bốn bước trình bày và nhánh ghép cột phải được ánh xạ tường minh, có kiểm chứng chuyển/quay lại/reset.
 - Không đưa dữ liệu người thật, số giấy tờ, tên file hoặc lỗi động vào HTML không mã hóa của tour.
-- Kiểm thử file mẫu: đủ 35 trường, đủ chín bắt buộc, không có hồ sơ giả trong vùng import; ghép đúng từng trường; định dạng Text cho số/mã; hướng dẫn không mâu thuẫn; danh mục đúng database và không lộ dữ liệu hồ sơ.
+- Kiểm thử file mẫu gồm đủ 35 trường, chín trường bắt buộc, vùng nhập trống, ghép đúng từng trường và định dạng Text cho số/mã. Kiểm thử bảo mật phải chặn mọi lần mở database khi tải mẫu và kiểm tra các giá trị riêng tư được gieo trong database giả đều vắng mặt trong workbook.
 - Kiểm thử UI: chuẩn bị là trạng thái đầu/reset, không bắt tải lại, lỗi download vẫn thao tác lại được, chỉ chuyển khi người dùng bấm, nhánh cũ vẫn sử dụng được trong đợt đầu, tour bước đầu chạy và dừng an toàn.
 - Các đợt sau kiểm tra file khác mẫu, thiếu/trùng cột, đổi file sau preview, dòng lỗi thiếu dữ liệu đã parse, ô trống cập nhật, nhiều giấy tờ và ngày, danh sách lớn và màn hình nhỏ. Giữ kiểm thử giao dịch/hoàn tác hiện có.
 - Chạy build Release, .NET tests và bộ Node browser tests phù hợp; SQL integration chỉ dùng database sinh tên `IRM_RefactorTest_*`. Báo rõ phần UI chỉ kiểm tra tự động và phần đã thử trực tiếp.

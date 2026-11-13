@@ -41,6 +41,12 @@ dotnet ef migrations list --project IRM.Infrastructure --startup-project IRM --n
 
 Production uses SQL Server. SQLite is test-only. SQL integration tests use `IRM_TEST_SQLSERVER` and create/drop only generated `IRM_RefactorTest_*` databases; never point tests or maintenance at production. Never commit credentials or generated installer media. Keep dependency versions and database schema unchanged during architectural refactoring.
 
+## Protect operational data during development
+
+- Use synthetic fixtures and isolated test databases for agent-driven UI checks, screenshots, imports and downloads. Never open existing operational records through agent/browser tools to verify an interface.
+- Downloadable import templates must be built from static guidance and examples. Do not query or embed existing people, companies or target-database catalogs in a template.
+- Keep operational data, screenshots, exports and credentials out of tool output, prompts, Git, test fixtures, diagnostic packages and handover folders. When inspecting security configuration, report redacted properties and counts.
+
 ## Commits and delivery packages
 
 - The user requires every completed source change to be committed locally. Run the appropriate checks, review the staged diff, and commit all related source, tests, configuration, and documentation before ending the task. Report commit IDs and any skipped checks. Do not push unless explicitly asked.

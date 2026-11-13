@@ -21,7 +21,7 @@ Tra [đặc tả và giới hạn áp dụng](IMPORT-EXCEL-SPEC.md), hoặc về
 
 Khi mở màn hình import, bắt đầu tại **Chuẩn bị file**. Chọn **Tải file Excel mẫu**, điền dữ liệu và bấm **Tôi đã chuẩn bị file** để sang phần nạp file. Nếu đã có file theo mẫu, có thể tiếp tục với bản đã điền.
 
-File tải xuống gồm ba sheet. **Hồ sơ** có 35 cột và bắt đầu nhập từ dòng 2. Chín cột bắt buộc đặt trước, tô màu xanh. **Hướng dẫn** giải thích từng trường và **Danh mục tham chiếu** chứa mã/tên thực tế tại thời điểm tải. Đọc lại danh mục nếu dữ liệu trong hệ thống đã thay đổi.
+File tải xuống gồm ba sheet. **Hồ sơ** có 35 cột và bắt đầu nhập từ dòng 2. Chín cột bắt buộc đặt trước, tô màu xanh. **Hướng dẫn** giải thích từng trường và **Danh mục tham chiếu** hướng dẫn cách đối chiếu trong ứng dụng, kèm các mã diện cư trú và loại giấy tờ được hỗ trợ. Khi điền file, tra cứu tên/mã qua màn hình danh mục theo quyền của bạn.
 
 Các ví dụ nằm trong sheet hướng dẫn. Điền hồ sơ của bạn vào sheet **Hồ sơ**, mỗi người một dòng. Khi cập nhật hồ sơ đã có, đọc quy tắc ô trống vì một số trường có thể bị xóa hoặc đổi thông tin. Bỏ cột tùy chọn hoặc chọn **Bỏ qua** tại bước ghép cột nếu muốn bỏ ghép trường đó.
 
