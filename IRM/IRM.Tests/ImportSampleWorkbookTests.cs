@@ -77,6 +77,25 @@ public class ImportSampleWorkbookTests
         Assert.DoesNotContain(ImportMapping.AutoMapColumns(headers).GroupBy(m => m.SystemField), group => group.Key != "skip" && group.Count() > 1);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ExactVisaHeaderKeepsItsFieldWhenAnAuxiliaryColumnAlsoContainsVisa(bool canonicalFirst)
+    {
+        var labels = canonicalFirst ? new[] { "Số Visa", "Số Visa cũ" } : new[] { "Số Visa cũ", "Số Visa" };
+        var headers = labels.Select((label, index) => new ExcelColumnInfo { Index = index, HeaderName = label }).ToList();
+        var expected = canonicalFirst ? new[] { "VisaNumber", "skip" } : new[] { "skip", "VisaNumber" };
+        Assert.Equal(expected, ImportMapping.AutoMapColumns(headers).Select(mapping => mapping.SystemField));
+    }
+
+    [Fact]
+    public void DuplicateCanonicalVisaHeaderDoesNotGiveItsFieldToAnEarlierAuxiliaryColumn()
+    {
+        var headers = new[] { "Số Visa cũ", "Số Visa", "Số Visa" }
+            .Select((label, index) => new ExcelColumnInfo { Index = index, HeaderName = label }).ToList();
+        Assert.Equal(new[] { "skip", "VisaNumber", "skip" }, ImportMapping.AutoMapColumns(headers).Select(mapping => mapping.SystemField));
+    }
+
     [Fact]
     public async Task Sample_GuideCoversAllFieldsAndWarnsAboutBlankUpdates()
     {

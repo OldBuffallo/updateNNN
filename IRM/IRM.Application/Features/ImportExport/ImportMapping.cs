@@ -17,25 +17,30 @@ public static class ImportMapping
     {
         var mappings = new List<ColumnMapping>();
         var usedFields = new HashSet<string>();
+        var exactFields = SystemFields.All
+            .Where(field => field.Key != "skip" && headers.Any(header =>
+                string.Equals(field.Value, header.HeaderName.Trim(), StringComparison.OrdinalIgnoreCase)))
+            .Select(field => field.Key)
+            .ToHashSet(StringComparer.Ordinal);
 
         foreach (var header in headers)
         {
             var headerLower = header.HeaderName.ToLowerInvariant().Trim();
             var match = SystemFields.AutoMapKeywords
-                .Where(item => !usedFields.Contains(item.Key))
+                .Where(item => !usedFields.Contains(item.Key) && !exactFields.Contains(item.Key))
                 .SelectMany(item => item.Value.Select(keyword => new { Field = item.Key, Keyword = keyword }))
                 .Where(item => headerLower.Length > 0 && headerLower.Contains(item.Keyword, StringComparison.Ordinal))
                 .OrderByDescending(item => headerLower == item.Keyword)
                 .ThenByDescending(item => item.Keyword.Length)
                 .ThenBy(item => item.Field, StringComparer.Ordinal)
                 .FirstOrDefault();
-            // The published template uses full labels; substring matches are only a fallback
-            // for other files. In particular, date labels share keywords with their parent fields.
+            // Reserve canonical headers across the whole sheet before keyword fallback.
+            // An auxiliary column must not consume a later canonical column's field.
             var exact = SystemFields.All.FirstOrDefault(item => item.Key != "skip" &&
                 string.Equals(item.Value, header.HeaderName.Trim(), StringComparison.OrdinalIgnoreCase));
-            var matchedField = exact.Key is not null
-                ? usedFields.Contains(exact.Key) ? "skip" : exact.Key
-                : match?.Field ?? "skip";
+            var matchedField = match?.Field ?? "skip";
+            if (exact.Key is not null)
+                matchedField = usedFields.Contains(exact.Key) ? "skip" : exact.Key;
             var matchedLabel = SystemFields.All[matchedField];
             var isAuto = matchedField != "skip";
             if (isAuto) usedFields.Add(matchedField);

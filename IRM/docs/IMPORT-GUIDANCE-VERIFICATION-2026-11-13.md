@@ -8,9 +8,13 @@ File mẫu mới thuộc commit `54f4a66`, thay workbook 19 cột bằng workboo
 
 Màn hình tiến trình có bốn bước. Ghép cột hiện tại nằm trong bước nạp file. Người dùng có thể quay lại chuẩn bị và tiếp tục với file đã có. Các phần nạp, ghép cột và bảng xem trước hiện tại tiếp tục phục vụ đợt đầu. Bản xem trước theo bố cục hồ sơ thuộc các đợt tiếp theo của [thiết kế A](superpowers/specs/2026-11-13-import-template-first-design.md).
 
-Bằng chứng tự động gồm kiểm thử round-trip 35 tiêu đề qua bộ đọc/ghép cột, parse một dòng dữ liệu bắt buộc giữ số 0 đầu, danh mục đích/mục đã xóa/danh mục rỗng, truy cập ẩn danh, trạng thái đầu/reset/quay lại, tải lỗi rồi thử lại, chặn bấm tải lặp và tour từ chuẩn bị sang nạp file. Build Release đạt với 0 cảnh báo và 0 lỗi. Toàn bộ .NET đạt 333/333 với SQL integration bật, JavaScript đạt 47/47, đều 0 bỏ qua.
+Bằng chứng tự động gồm kiểm thử round-trip 35 tiêu đề qua bộ đọc/ghép cột, parse một dòng dữ liệu bắt buộc giữ số 0 đầu, danh mục đích/mục đã xóa/danh mục rỗng, truy cập ẩn danh, trạng thái đầu/reset/quay lại, tải lỗi rồi thử lại, chặn bấm tải lặp và tour từ chuẩn bị sang nạp file. Build Release đạt với 0 cảnh báo và 0 lỗi. Toàn bộ .NET đạt 336/336 với SQL integration bật, JavaScript đạt 47/47, đều 0 bỏ qua.
 
-Thử kết nối Computer Use trong đợt này gặp lỗi native pipe `The system cannot find the file specified (os error 2)`. Phần nghiệm thu thao tác browser thật cần được ghi riêng sau khi có kết nối hoạt động.
+Review độc lập phát hiện cột phụ như **Số Visa cũ** có thể chiếm trường trước cột chuẩn **Số Visa**. Hai regression thất bại tái hiện việc bỏ cột chuẩn khi cột phụ đứng trước. Đã sửa bằng cách dành trường cho mọi tiêu đề chuẩn trên cả sheet trước khi dò từ khóa cho các cột còn lại. Ba ca thứ tự cột và tiêu đề trùng cùng bộ kiểm thử toàn bộ đạt sau sửa.
+
+Kết nối `@oai/sky` ban đầu gặp lỗi native pipe `The system cannot find the file specified (os error 2)`. Sau khi công cụ CUA mới khả dụng, đã dùng Chrome thật tại `127.0.0.1:5052/import` với bản Release `ce63c9a`. Đã quan sát màn hình chuẩn bị, bấm tải mẫu, lưu bằng hộp Save As vào `BAN-GIAO/03-DU-LIEU-TEST/2026-11-13-preparation/`, đi qua cả ba gợi ý chuẩn bị và bấm nút ứng dụng để sang nạp file. Tour chuyển đúng sang gợi ý upload. File đã lưu có ba sheet, 35 cột, chỉ dòng tiêu đề có nội dung tại sheet Hồ sơ. SHA-256 và kết quả kiểm tra cấu trúc nằm cạnh workbook.
+
+Lượt browser này dùng mức zoom 67% sẵn có. Kiểm tra kích thước màn hình nhỏ, zoom 200%, tải lỗi trên browser và thao tác ghi dữ liệu toàn luồng cần được nghiệm thu tiếp ở các đợt sau. Kiểm thử tự động đã kiểm tra tải lỗi và thử lại.
 
 Ngày 13/11/2026. Source ứng dụng được kiểm tra: `3573857` (bao gồm sửa tiếng Việt `c5d299d`); nghiệp vụ đọc/ghi import giữ mốc `5c9808d`. Các commit tài liệu kế tiếp không thay mã ứng dụng. Không build bộ cài, không gán source mới cho R4/các gói đã giao.
 
