@@ -1,0 +1,24 @@
+@namespace IRM.Components.Pages
+@using IRM.Features.ImportExport.Help
+
+<section class="import-field-help" aria-label="@($"Hướng dẫn trường {Entry.Label}")">
+    <MudText Typo="Typo.h6">@Entry.Label</MudText>
+    <MudText Typo="Typo.caption">@Entry.Group · @Entry.ExcelType · @(Entry.IsRequired ? "Bắt buộc" : "Tùy chọn")</MudText>
+    <p>@Entry.Summary</p>
+    @if (!string.IsNullOrEmpty(Entry.Condition))
+    {
+        <MudAlert Severity="Severity.Info" Dense="true">@Entry.Condition</MudAlert>
+    }
+    <dl>
+        <dt>Chương trình kiểm tra</dt><dd>@Entry.Checks</dd>
+        <dt>Không ghép / ô trống và cập nhật</dt><dd>@Entry.EmptyBehavior</dd>
+        <dt>Ví dụ có điều kiện</dt><dd>@Entry.ValidExample</dd>
+        <dt>Dễ nhập sai</dt><dd>@Entry.Pitfall</dd>
+        <dt>Lỗi và cách sửa</dt><dd>@Entry.Troubleshooting</dd>
+        <dt>Khuyến nghị nhập liệu</dt><dd>@Entry.Recommendation</dd>
+    </dl>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ImportFieldHelp Entry { get; set; } = default!;
+}

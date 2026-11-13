@@ -1,0 +1,24 @@
+@namespace IRM.Components.Pages
+@using IRM.Features.ImportExport.Help
+
+<MudDialog>
+    <DialogContent>
+        <MudSelect T="string" @bind-Value="_selectedKey" Label="Tra cứu 35 trường" Variant="Variant.Outlined" Class="mb-4">
+            @foreach (var entry in ImportFieldHelpCatalog.All.Values)
+            {
+                <MudSelectItem T="string" Value="@entry.Key">@entry.Label</MudSelectItem>
+            }
+        </MudSelect>
+        <ImportFieldHelpContent Entry="@ImportFieldHelpCatalog.All[_selectedKey]" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => Dialog.Close())" Color="Color.Primary">Đóng</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+    [Parameter] public string? FieldKey { get; set; }
+    private string _selectedKey = "StaffName";
+    protected override void OnInitialized() => _selectedKey = ImportFieldHelpCatalog.Get(FieldKey)?.Key ?? "StaffName";
+}

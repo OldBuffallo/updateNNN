@@ -1,5 +1,6 @@
 @namespace IRM.Components.Pages
 @inherits IRM.Components.Shared.FeatureSection<Import>
+@using IRM.Features.ImportExport.Help
 
 @* Step 2: Column Mapping *@
     @if (Page._currentStep == 2)
@@ -8,6 +9,8 @@
             <strong>@Page._uploadedFileName</strong> — @Page._sheetInfo
         </MudAlert>
 
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.HelpOutline" Class="mb-3"
+                   OnClick="@(() => Page.ShowFieldHelpAsync(null))">Tra cứu 35 trường</MudButton>
         <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px;">
             <thead><tr><th>Cột Excel</th><th></th><th>Trường hệ thống</th><th>Trạng thái</th></tr></thead>
             <tbody>
@@ -25,6 +28,15 @@
                                     <MudSelectItem Value="@key">@label</MudSelectItem>
                                 }
                             </MudSelect>
+                            @if (ImportFieldHelpCatalog.Get(m.SystemField) is { } help)
+                            {
+                                <div class="import-mapping-help">
+                                    <MudIconButton Icon="@Icons.Material.Outlined.HelpOutline" Size="Size.Small"
+                                                   aria-label="@($"Hướng dẫn {help.Label}")"
+                                                   OnClick="@(() => Page.ShowFieldHelpAsync(help.Key))" />
+                                    <MudText Typo="Typo.caption">@help.Summary</MudText>
+                                </div>
+                            }
                         </td>
                         <td>
                             @if (m.SystemField == "skip")
