@@ -83,7 +83,8 @@ public static class ImportMapping
     public static DateTime? ParseNullableImportDate(string? value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
-        if (DateTime.TryParse(value, out var parsed) || TryParseVietnameseDate(value, out parsed)) return parsed.Date;
+        if (DateTime.TryParseExact(value.Trim(), "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var parsed) || LegacyImportRules.TryParseLegacyDate(value, out parsed)) return parsed.Date;
         throw new InvalidOperationException($"Ngày không hợp lệ: {value}.");
     }
 
@@ -116,7 +117,13 @@ public static class ImportMapping
         if (!LegacyImportRules.AddressEndsWithWard(address, wards)) throw Error("Địa chỉ không có phường/ xã trong lưu trữ. Vui lòng kiểm tra lại");
         var careerId = LegacyImportRules.FindCareerId(career, careerGroupId, careers);
         if (!careerId.HasValue) throw Error("Nghề nghiệp chưa có trong dữ liệu. Vui lòng thêm nghề nghiệp");
-        var (permit, number) = LegacyImportRules.ParseWorkPermit(Value("WorkPermit"), investorPassports.Contains(passport));
+        var combinedPermit = Value("WorkPermit");
+        var separatePermit = Value("WorkPermitNumber");
+        // A separate number is an explicit IRM extension; absence keeps WPF blank semantics.
+        if (combinedPermit.Length == 0 && separatePermit.Length > 0) combinedPermit = separatePermit;
+        var (permit, number) = LegacyImportRules.ParseWorkPermit(combinedPermit, investorPassports.Contains(passport));
+        if (separatePermit.Length > 0 && (permit is not (1 or 4) || number != separatePermit))
+            throw Error("Cột GPLĐ và Số GPLĐ không thống nhất");
         if (LegacyImportRules.IsRelativeCareer(careers.First(c => c.IDCareer == careerId))) { permit = 6; number = ""; }
         else if (permit == 6)
         {
@@ -151,11 +158,13 @@ public static class ImportMapping
             emp.FamilyVisitRelativeIdCard = frid;
         if (rowData.TryGetValue("FamilyVisitStartDate", out var fsd) && !string.IsNullOrWhiteSpace(fsd))
         {
-            if (LegacyImportRules.TryParseLegacyDate(fsd, out var dt)) emp.FamilyVisitStartDate = dt;
+            try { emp.FamilyVisitStartDate = ParseNullableImportDate(fsd); }
+            catch (InvalidOperationException) { throw Error("Lỗi đọc ngày bắt đầu thăm thân"); }
         }
         if (rowData.TryGetValue("FamilyVisitEndDate", out var fed) && !string.IsNullOrWhiteSpace(fed))
         {
-            if (LegacyImportRules.TryParseLegacyDate(fed, out var dt)) emp.FamilyVisitEndDate = dt;
+            try { emp.FamilyVisitEndDate = ParseNullableImportDate(fed); }
+            catch (InvalidOperationException) { throw Error("Lỗi đọc hạn thăm thân"); }
         }
         if (rowData.TryGetValue("FamilyVisitNote", out var fnote))
             emp.FamilyVisitNote = fnote;

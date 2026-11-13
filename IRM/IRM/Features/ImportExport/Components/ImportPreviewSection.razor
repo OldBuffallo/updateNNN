@@ -4,6 +4,8 @@
 @* Step 3: Preview *@
     @if (Page._currentStep == 3)
     {
+        <MudCheckBox T="bool" Value="Page._allowCreateCompanies" ValueChanged="Page.ToggleCompanyCreationAsync"
+                     Disabled="Page._isProcessing" Label="Cho phép tạo công ty chưa có từ cột Công ty" />
         <MudAlert Severity="Severity.Info" Class="mb-3">
             Tổng: @Page._previewRows.Count dòng · @(Page._previewRows.Count(r => r.Status == "new")) mới · @(Page._previewRows.Count(r => r.Status == "changed")) trùng · @(Page._previewRows.Count(r => r.Status == "error")) lỗi
         </MudAlert>
@@ -89,7 +91,7 @@
         @if (Page._previewRows.Any(row => row.Status != "error"))
         {
             <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
-                <strong>Dữ liệu cũ sẽ được backup.</strong> Bạn có thể hoàn tác import bất cứ lúc nào từ lịch sử.
+                <strong>Dữ liệu cũ được giữ lại.</strong> Hoàn tác theo thứ tự phiên liên quan; dữ liệu đã chỉnh sửa sau import cần được kiểm tra trước.
             </MudAlert>
         }
         else

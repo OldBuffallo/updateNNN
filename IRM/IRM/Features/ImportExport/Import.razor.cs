@@ -233,6 +233,12 @@ public partial class Import : ComponentBase, IFeaturePage
         return _duplicateDecisions.GetValueOrDefault(employeeId, "skip");
     }
 
+    internal async Task ToggleCompanyCreationAsync(bool allow)
+    {
+        _allowCreateCompanies = allow;
+        await GoToStep3();
+    }
+
     internal void SetDuplicateDecision(int employeeId, string decision)
     {
         _duplicateDecisions[employeeId] = decision;
@@ -299,7 +305,7 @@ public partial class Import : ComponentBase, IFeaturePage
             }
             else
             {
-                Snackbar.Add("Không thể hoàn tác phiên này.", Severity.Error);
+                Snackbar.Add("Không thể hoàn tác phiên này. Kiểm tra dữ liệu đã chỉnh sửa và hoàn tác các phiên liên quan mới hơn trước.", Severity.Error);
             }
         }
         catch (Exception ex)

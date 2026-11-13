@@ -279,7 +279,7 @@ else if (!_loading)
     <DialogContent>
         <MudGrid Spacing="3">
             <MudItem xs="12" md="6"><MudTextField T="string" Label="Họ tên *" @bind-Value="_f.StaffName" Variant="Variant.Outlined" Required="true" /></MudItem>
-            <MudItem xs="6" md="3"><MudSelect T="Gender" Label="Giới tính" @bind-Value="_f.Gender" Variant="Variant.Outlined"><MudSelectItem Value="Gender.Male">Nam</MudSelectItem><MudSelectItem Value="Gender.Female">Nữ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="Gender" Label="Giới tính" @bind-Value="_f.Gender" Variant="Variant.Outlined"><MudSelectItem Value="Gender.Male">Nam</MudSelectItem><MudSelectItem Value="@(_f.Gender == Gender.LegacyFemale ? Gender.LegacyFemale : Gender.Female)">Nữ</MudSelectItem></MudSelect></MudItem>
             <MudItem xs="6" md="3"><MudDatePicker Label="Ngày sinh" @bind-Date="_f.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
             <MudItem xs="6" md="4"><MudSelect T="string" Label="Quốc tịch" @bind-Value="_f.Nationality" Variant="Variant.Outlined" Clearable="true">@foreach(var n in _nationalities){<MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>}</MudSelect></MudItem>
             <MudItem xs="6" md="4"><MudTextField T="string" Label="Số hộ chiếu" @bind-Value="_f.Passport" Variant="Variant.Outlined" /></MudItem>

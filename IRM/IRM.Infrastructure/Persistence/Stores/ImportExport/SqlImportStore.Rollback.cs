@@ -24,23 +24,21 @@ public partial class SqlImportStore
     public async Task<bool> RollbackImportAsync(string sessionId)
     {
         if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin);
-        var history = await _db.ImportHistories
-            .FirstOrDefaultAsync(h => h.SessionId == sessionId);
-        if (history == null || history.Status == "rolledback") return false;
-
-        var backups = await _db.ImportBackups
-            .Where(b => b.ImportSessionId == sessionId)
-            .OrderByDescending(b => b.Id)
-            .ToListAsync();
-
+        bool rollbackAttemptedCommit = false;
         try
         {
             var strategy = _db.Database.CreateExecutionStrategy();
             await strategy.ExecuteAsync(async () =>
             {
-                await using var transaction = await _db.Database.BeginTransactionAsync();
+                await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
                 try
                 {
+                    var history = await _db.ImportHistories.FirstOrDefaultAsync(h => h.SessionId == sessionId);
+                    if (history != null) await _db.Entry(history).ReloadAsync();
+                    if (history?.Status == "rolledback" && rollbackAttemptedCommit) return;
+                    if (history == null || history.Status == "rolledback") throw new InvalidOperationException("Phiên đã hoàn tác hoặc không tồn tại.");
+                    var backups = await _db.ImportBackups.Where(b => b.ImportSessionId == sessionId).OrderByDescending(b => b.Id).ToListAsync();
+                    await ValidateRollbackStateAsync(backups);
                     var affected = new HashSet<int>();
                     foreach (var backup in backups)
                     {
@@ -52,6 +50,7 @@ public partial class SqlImportStore
                                 var comp = await _db.Companies.FindAsync(backup.EntityId);
                                 if (comp != null)
                                 {
+                                    await _db.Entry(comp).ReloadAsync();
                                     comp.Delete_flag = 1;
                                     await _db.SaveChangesAsync();
                                 }
@@ -62,6 +61,7 @@ public partial class SqlImportStore
                                 var emp = await _db.Employees.FindAsync(backup.EntityId);
                                 if (emp != null)
                                 {
+                                    await _db.Entry(emp).ReloadAsync();
                                     affected.Add(emp.IDCompany);
                                     var versioned = !string.IsNullOrEmpty(backup.OldData) &&
                                         JsonSerializer.Deserialize<JsonElement>(backup.OldData).TryGetProperty("Versioned", out var version) && version.GetBoolean();
@@ -75,6 +75,7 @@ public partial class SqlImportStore
                         {
                             var previous = await _db.Employees.FindAsync(backup.EntityId);
                             if (previous == null) throw new InvalidOperationException("Không tìm thấy bản ghi cũ để hoàn tác.");
+                            await _db.Entry(previous).ReloadAsync();
                             var saved = JsonSerializer.Deserialize<JsonElement>(backup.OldData!);
                             previous.Hidden_flag = saved.GetProperty("Hidden_flag").GetInt32();
                             affected.Add(previous.IDCompany);
@@ -142,11 +143,13 @@ public partial class SqlImportStore
                     await _audit.LogAsync("ROLLBACK", "Import", null,
                         $"Hoàn tác import session {sessionId}", history.Username);
 
+                    rollbackAttemptedCommit = true;
                     await transaction.CommitAsync();
                 }
                 catch
                 {
-                    await transaction.RollbackAsync();
+                    try { await transaction.RollbackAsync(); } catch { }
+                    _db.ChangeTracker.Clear();
                     throw;
                 }
             });
@@ -155,7 +158,29 @@ public partial class SqlImportStore
         }
         catch
         {
+            _db.ChangeTracker.Clear();
             return false;
+        }
+    }
+    private async Task ValidateRollbackStateAsync(List<ImportBackup> backups)
+    {
+        var insertedEmployeeIds = backups.Where(b => b.ActionType == "INSERT" && b.EntityType == "Employee").Select(b => b.EntityId).ToArray();
+        foreach (var backup in backups)
+        {
+            await ValidateV010RollbackStateAsync(backup.OldData);
+            if (backup.EntityType == "Company" && backup.ActionType == "INSERT")
+            {
+                if (await _db.Employees.AnyAsync(e => e.IDCompany == backup.EntityId && e.Hidden_flag == 0 && !insertedEmployeeIds.Contains(e.IDEmployee)) ||
+                    await _db.Investments.AnyAsync(i => i.IDCompany == backup.EntityId))
+                    throw new InvalidOperationException("Công ty đã có dữ liệu phát sinh sau phiên import.");
+            }
+            if (backup.EntityType != "Employee" || string.IsNullOrWhiteSpace(backup.OldData)) continue;
+            using var data = JsonDocument.Parse(backup.OldData);
+            var property = backup.ActionType == "VERSION_HIDE" ? "HiddenFingerprint" : "NewFingerprint";
+            if (!data.RootElement.TryGetProperty(property, out var fingerprint)) continue; // Historical UPDATE backup format remains supported.
+            var current = await _db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.IDEmployee == backup.EntityId);
+            if (current == null || LegacyImportRules.EmployeeFingerprint(current) != fingerprint.GetString())
+                throw new InvalidOperationException("Hồ sơ đã thay đổi sau phiên import. Hãy hoàn tác các phiên sau trước.");
         }
     }
 }

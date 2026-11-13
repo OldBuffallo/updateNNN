@@ -29,7 +29,7 @@ public partial class SqlImportStore
         if (options.SheetIndex < 0 || options.HeaderRow < 0 || options.StartRow < 0 ||
             options.EndRow is <= 0 || (options.StartRow > 0 && options.EndRow < options.StartRow))
             throw new InvalidOperationException("Vùng dòng hoặc sheet không hợp lệ.");
-        var allRows = ExcelReaderHelper.ReadAllRows(stream, mappings, options.SheetIndex, options.StartRow, options.EndRow);
+        var allRows = ExcelReaderHelper.ReadAllRows(stream, mappings, options.SheetIndex, options.StartRow > 0 ? options.StartRow : options.HeaderRow > 0 ? options.HeaderRow + 1 : 0, options.EndRow);
         var previewRows = new List<ImportPreviewRow>();
 
         // Cache dữ liệu lookup
@@ -154,8 +154,11 @@ public partial class SqlImportStore
                     .OrderByDescending(e => e.IDEmployee).FirstOrDefaultAsync();
                 if (existing != null)
                 {
-                    preview.Status = LegacyImportRules.SameAs13Fields(existing, employee) ? "unchanged" : "changed";
+                    PreserveUnmappedExtensions(employee, existing, mappings.Select(m => m.SystemField).ToHashSet());
+                    preview.Status = LegacyImportRules.SameAsImportedEmployee(existing, employee) &&
+                        !await HasMappedExtensionChangesAsync(existing, preview.ExtendedFields) ? "unchanged" : "changed";
                     preview.ExistingEmployeeId = existing.IDEmployee;
+                    preview.ExistingFingerprint = LegacyImportRules.EmployeeFingerprint(existing);
                 }
                 if (await _db.Employees.AnyAsync(e => e.Passport == employee.Passport && e.IDCompany != resolvedCompanyId &&
                     e.Hidden_flag == 0 && e.WorkingStatus == 0))

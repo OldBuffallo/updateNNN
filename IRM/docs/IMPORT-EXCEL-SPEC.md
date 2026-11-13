@@ -4,7 +4,7 @@
 
 Dùng file `.xlsx`. Chọn công ty, nhóm nghề, sheet, dòng tiêu đề và vùng dữ liệu trước khi ghép cột. Số dòng là số hiển thị trong Excel, bắt đầu từ 1; sheet mặc định là sheet đầu.
 
-- Dòng tiêu đề `0`: tự tìm dòng đầu có dữ liệu. Dòng dữ liệu đầu `0`: bắt đầu sau dòng tiêu đề tự tìm.
+- Dòng tiêu đề `0`: tự tìm dòng đầu có dữ liệu. Dòng dữ liệu đầu `0`: bắt đầu sau dòng tiêu đề đã chọn, hoặc sau dòng tự tìm nếu chưa chọn.
 - Với file xuất WPF có nhiều dòng tiêu đề: nhập đúng dòng tiêu đề (ví dụ 8), dòng dữ liệu đầu (ví dụ 9), dòng cuối hoặc để trống để đọc hết sheet.
 - Chọn lại ánh xạ nếu tiêu đề không nhận đúng. Cột STT chọn “Bỏ qua”. Có thể lưu mẫu ánh xạ theo công ty.
 - Dòng trống giữa vùng được báo lỗi. Các dòng cuối không có cả họ tên và hộ chiếu được bỏ qua, kể cả khi còn ghi chú hoặc định dạng.
@@ -28,7 +28,7 @@ Dùng file `.xlsx`. Chọn công ty, nhóm nghề, sheet, dòng tiêu đề và 
 | Kết quả giải quyết | 20 | Không | Kiểm tra số thẻ và hạn tạm trú |
 | Ngày cấp thẻ | Tùy chọn IRM | Không | Nếu có, phải khớp ngày trong kết quả giải quyết |
 
-Vị trí cột thay đổi được bằng màn hình ghép cột. Tiêu đề “Số GPLĐ/Thời hạn” được ghép vào ô nghiệp vụ GPLĐ; “Số GPLĐ” riêng được ghép vào trường số GPLĐ. Kiểm tra lại hai cột này khi dùng mẫu cũ.
+Vị trí cột thay đổi được bằng màn hình ghép cột. Tiêu đề “Số GPLĐ/Thời hạn” được ghép vào ô nghiệp vụ GPLĐ; “Số GPLĐ” riêng được ghép vào trường số GPLĐ. Nếu ô GPLĐ trống nhưng cột số riêng có số, IRM dùng số đó để nhận “Đã có”. Nếu cả hai có nội dung mâu thuẫn, dòng bị từ chối; không âm thầm bỏ số riêng.
 
 ## Ngày tháng
 
@@ -37,7 +37,7 @@ Vị trí cột thay đổi được bằng màn hình ghép cột. Tiêu đề 
 - Năm 00–39 là 2000–2039; 40–99 là 1940–1999.
 - Nếu ô có nhiều từ, lấy từ đầu tiên đọc được thành ngày, ví dụ `15/03/1980 (nam)`.
 - Ngày lõi không nhận `yyyy-MM-dd` hoặc cách hiểu tháng/ngày của Mỹ. Ngày sai như `31/02/2026` bị báo lỗi.
-- Các cột mở rộng V010 giữ định dạng ISO đã có của IRM; không dùng quy tắc này để đổi nghĩa ngày lõi.
+- Ngày thăm thân và V010 nhận thêm ISO `yyyy-MM-dd`, đọc độc lập culture. Giá trị không trống nhưng sai định dạng bị báo lỗi; không dùng định dạng mở rộng này để đổi nghĩa ngày lõi.
 
 ## Giấy phép lao động
 
@@ -67,7 +67,7 @@ Ví dụ: `TTT: DN1 03/06/2026-29/05/2028`. Số thẻ `DN1` phải khớp cột
 ## Xem trước và xác nhận
 
 - **Mới:** sẽ thêm hồ sơ.
-- **Thông tin đã có sẵn:** 13 trường nghiệp vụ giống bản hiện hành trong cùng công ty; bỏ qua.
+- **Thông tin đã có sẵn:** 13 trường nghiệp vụ và các cột mở rộng được ánh xạ giống bản hiện hành trong cùng công ty; bỏ qua. Chỉ khác cột mở rộng cũng được đưa vào nhánh “Nhân viên có thay đổi”. Cột mở rộng không được ánh xạ giữ dữ liệu cũ.
 - **Nhân viên có thay đổi:** mặc định bỏ qua. Chọn cập nhật nếu chấp nhận thêm phiên bản mới và ẩn các phiên bản hiện hành của cùng hộ chiếu trong công ty. Bản cũ được giữ nguyên nội dung.
 - **Lỗi:** dòng không được ghi. Thông báo chỉ rõ số dòng Excel thật, trường thiếu, ngày sai hoặc danh mục không khớp. Các dòng hợp lệ khác vẫn được xử lý.
 - Cảnh báo nhân viên đang làm ở công ty khác không chặn dòng. Hệ thống cũng cảnh báo nếu còn người chưa hết hạn tạm trú nhưng không có trong file.
@@ -76,7 +76,11 @@ Cột Công ty có thể chỉ định nhiều công ty. Tên phải khớp chí
 
 Mỗi lần import có mã phiên riêng. Có thể hoàn tác từ lịch sử bằng tài khoản được phân quyền. Với cập nhật phiên bản, hoàn tác xóa phiên bản mới và hiện lại bản cũ. Các lần thêm mới thông thường được ẩn khi hoàn tác theo cơ chế lịch sử của IRM. Năm số liệu công ty được tính lại sau import và hoàn tác; loại trừ hồ sơ ẩn, hết hạn hoặc đã nghỉ việc.
 
+Nếu dữ liệu thay đổi sau xem trước, hệ thống yêu cầu xem trước lại. Nếu hồ sơ, dữ liệu mở rộng hoặc công ty đã phát sinh thay đổi sau phiên import, hoàn tác bị chặn để giữ dữ liệu mới hơn; hoàn tác các phiên liên quan theo thứ tự từ mới đến cũ trước. Khi đường truyền lỗi ở bước xác nhận giao dịch, hệ thống kiểm tra mã phiên đã lưu để tránh nhập hai lần.
+
 Các cột VisaSymbol, thăm thân, diện cư trú, giấy tờ, định danh điện tử và lưu trú V010 vẫn là tùy chọn. Không có cột mở rộng không làm mất các kiểm tra lõi.
+
+Đối với giấy tờ hoặc diện cư trú V010 đã có nhưng thời hạn trong file khác với hồ sơ, hệ thống báo lỗi yêu cầu chỉnh sửa hồ sơ trước; không báo thành công rồi bỏ qua thời hạn mới.
 
 ## Đối chiếu file mẫu ngày 10/11/2026
 

@@ -22,7 +22,32 @@ public partial class SqlImportStore
         {
             await _db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
             {
-                await using var transaction = await _db.Database.BeginTransactionAsync();
+                // A retry owns a fresh tracked graph and counters; no rolled-back state survives.
+                result.AddedCount = 0; result.UpdatedCount = 0; result.ErrorCount = 0; result.SkippedCount = 0;
+                result.Errors.Clear(); result.Success = false;
+                // A transient failure may occur after the server committed but before acknowledgement.
+                var committed = await _db.ImportHistories.AsNoTracking().FirstOrDefaultAsync(h => h.SessionId == result.SessionId && h.Status == "committed");
+                if (committed != null)
+                {
+                    result.AddedCount = committed.AddedRows; result.UpdatedCount = committed.UpdatedRows;
+                    result.ErrorCount = committed.ErrorRows;
+                    result.SkippedCount = committed.TotalRows - committed.AddedRows - committed.UpdatedRows - committed.ErrorRows;
+                    if (committed.ErrorDetails != null) result.Errors = JsonSerializer.Deserialize<List<string>>(committed.ErrorDetails) ?? new();
+                    var ids = await _db.ImportBackups.Where(b => b.ImportSessionId == result.SessionId && b.EntityType == "Employee" && b.ActionType == "INSERT")
+                        .Select(b => b.EntityId).ToListAsync();
+                    var saved = await _db.Employees.AsNoTracking().Where(e => ids.Contains(e.IDEmployee)).ToListAsync();
+                    var companies = await _db.Companies.AsNoTracking().Where(c => saved.Select(e => e.IDCompany).Contains(c.IDCompany)).ToListAsync();
+                    foreach (var row in previewRows.Where(Writable))
+                    {
+                        var target = row.ResolvedCompanyId is > 0 ? row.ResolvedCompanyId.Value : companyId;
+                        if (row.ExtendedFields.TryGetValue("__AutoCreateCompanyName",out var name)) target = companies.FirstOrDefault(c => c.CompanyName == name)?.IDCompany ?? target;
+                        var employee = saved.LastOrDefault(e => e.IDCompany == target && e.Passport == row.ParsedEmployee!.Passport);
+                        if (employee != null) { row.ParsedEmployee!.IDEmployee = employee.IDEmployee; row.ResolvedCompanyId = employee.IDCompany; }
+                    }
+                    result.Success = true;
+                    return;
+                }
+                await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
                 try
                 {
                     var nationalities = await _db.Nationality.AsNoTracking().Where(n => n.Delete_flag == 0).ToListAsync();
@@ -59,15 +84,26 @@ public partial class SqlImportStore
                         { result.ErrorCount++; result.Errors.Add($"Dòng {row.RowNumber}: Công ty không tồn tại hoặc chưa được chọn."); continue; }
                         var incoming = row.ParsedEmployee;
                         var active = await _db.Employees.Where(e => e.IDCompany == targetId && e.Passport == incoming.Passport && e.Hidden_flag == 0).ToListAsync();
-                        if (active.Any(e => LegacyImportRules.SameAs13Fields(e, incoming))) { result.SkippedCount++; continue; }
+                        foreach (var current in active) await _db.Entry(current).ReloadAsync();
+                        if (row.ExistingEmployeeId.HasValue)
+                        {
+                            var expected = active.FirstOrDefault(e => e.IDEmployee == row.ExistingEmployeeId);
+                            if (expected == null || string.IsNullOrEmpty(row.ExistingFingerprint) ||
+                                LegacyImportRules.EmployeeFingerprint(expected) != row.ExistingFingerprint)
+                                throw new InvalidOperationException($"Dòng {row.RowNumber}: Dữ liệu đã thay đổi sau xem trước. Hãy xem trước lại.");
+                        }
+                        if (active.Count > 0 && LegacyImportRules.SameAsImportedEmployee(active[0], incoming) &&
+                            !await HasMappedExtensionChangesAsync(active[0], row.ExtendedFields)) { result.SkippedCount++; continue; }
                         if (active.Count > 0 && !(row.ExistingEmployeeId.HasValue && active.Any(e => e.IDEmployee == row.ExistingEmployeeId) &&
                             duplicateDecisions.GetValueOrDefault(row.ExistingEmployeeId.Value, "skip") == "update"))
                             throw new InvalidOperationException($"Dòng {row.RowNumber}: Dữ liệu đã thay đổi sau xem trước. Hãy xem trước lại.");
                         foreach (var previous in active)
                         {
-                            _db.ImportBackups.Add(new() { ImportSessionId = result.SessionId, EntityType = "Employee", EntityId = previous.IDEmployee,
-                                ActionType = "VERSION_HIDE", OldData = JsonSerializer.Serialize(new { previous.Hidden_flag, previous.IDCompany }) });
+                            var oldHidden = previous.Hidden_flag;
                             previous.Hidden_flag = 1;
+                            _db.ImportBackups.Add(new() { ImportSessionId = result.SessionId, EntityType = "Employee", EntityId = previous.IDEmployee,
+                                ActionType = "VERSION_HIDE", OldData = JsonSerializer.Serialize(new { Hidden_flag = oldHidden, previous.IDCompany,
+                                    HiddenFingerprint = LegacyImportRules.EmployeeFingerprint(previous) }) });
                         }
                         var employee = new Employee();
                         _db.Entry(employee).CurrentValues.SetValues(incoming);
@@ -79,7 +115,8 @@ public partial class SqlImportStore
                         await _db.SaveChangesAsync();
                         var changes = await UpsertV010ExtensionsAsync(employee, row.ExtendedFields, targetId);
                         _db.ImportBackups.Add(new() { ImportSessionId = result.SessionId, ActionType = "INSERT", EntityType = "Employee", EntityId = employee.IDEmployee,
-                            OldData = JsonSerializer.Serialize(new { V010Changes = changes, Versioned = active.Count > 0 }) });
+                            OldData = JsonSerializer.Serialize(new { V010Changes = changes, Versioned = active.Count > 0,
+                                NewFingerprint = LegacyImportRules.EmployeeFingerprint(employee) }) });
                         if (active.Count > 0) result.UpdatedCount++; else result.AddedCount++;
                         affected.Add(targetId);
                         identities[row] = (employee.IDEmployee, targetId);
@@ -103,11 +140,18 @@ public partial class SqlImportStore
                         entry.Key.ResolvedCompanyId = entry.Value.Company;
                     }
                 }
-                catch { await transaction.RollbackAsync(); throw; }
+                catch
+                {
+                    // Keep the original transient exception when a committed/broken transaction cannot roll back.
+                    try { await transaction.RollbackAsync(); } catch { }
+                    _db.ChangeTracker.Clear();
+                    throw;
+                }
             });
         }
         catch (Exception ex)
         {
+            _db.ChangeTracker.Clear();
             result.Success = false; result.AddedCount = 0; result.UpdatedCount = 0;
             result.Errors.Add($"Import thất bại: {GetDetailedErrorMessage(ex)}");
         }

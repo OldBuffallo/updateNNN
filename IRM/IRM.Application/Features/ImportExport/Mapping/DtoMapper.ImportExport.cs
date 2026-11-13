@@ -173,6 +173,7 @@ internal static partial class DtoMapper
         result.ErrorMessage = value.ErrorMessage;
         result.Warnings = value.Warnings.ToList();
         result.ExistingEmployeeId = value.ExistingEmployeeId;
+        result.ExistingFingerprint = value.ExistingFingerprint;
         result.StaffName = value.StaffName;
         result.GenderDisplay = value.GenderDisplay;
         result.BirthdayDisplay = value.BirthdayDisplay;
@@ -203,6 +204,7 @@ internal static partial class DtoMapper
         result.ErrorMessage = value.ErrorMessage;
         result.Warnings = value.Warnings.ToList();
         result.ExistingEmployeeId = value.ExistingEmployeeId;
+        result.ExistingFingerprint = value.ExistingFingerprint;
         result.StaffName = value.StaffName;
         result.GenderDisplay = value.GenderDisplay;
         result.BirthdayDisplay = value.BirthdayDisplay;
@@ -229,6 +231,7 @@ internal static partial class DtoMapper
         target.ErrorMessage = mapped.ErrorMessage;
         target.Warnings = mapped.Warnings.ToList();
         target.ExistingEmployeeId = mapped.ExistingEmployeeId;
+        target.ExistingFingerprint = mapped.ExistingFingerprint;
         target.StaffName = mapped.StaffName;
         target.GenderDisplay = mapped.GenderDisplay;
         target.BirthdayDisplay = mapped.BirthdayDisplay;

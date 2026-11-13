@@ -84,7 +84,7 @@
         <MudCheckBox T="bool" @bind-Value="Page._allowCreateCompanies" Label="Cho phép tạo công ty chưa có từ cột Công ty; kiểm tra danh sách ở bước xem trước" />
 
         <MudAlert Severity="Severity.Info" Dense="true" Class="mt-3">
-            <strong>An toàn dữ liệu:</strong> Mỗi lần import tạo phiên riêng. Bạn có thể <strong>hoàn tác</strong> bất cứ lúc nào từ Lịch sử Import.
+            <strong>An toàn dữ liệu:</strong> Mỗi lần import tạo phiên riêng. Có thể <strong>hoàn tác</strong> từ Lịch sử Import khi dữ liệu chưa bị chỉnh sửa hoặc thay thế bởi phiên liên quan mới hơn.
         </MudAlert>
         <MudAlert Severity="Severity.Success" Dense="true" Class="mt-2">
             <strong>Tự động ghép công ty:</strong> Nếu file Excel có cột <strong>"Công ty"</strong> hoặc <strong>"CQ bảo lãnh"</strong>, hệ thống sẽ tự động ghép công ty theo từng dòng. Công ty chưa có chỉ được tạo khi bạn bật tùy chọn bên dưới.

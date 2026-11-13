@@ -252,4 +252,20 @@ public static class LegacyImportRules
         a.SettlementResults == b.SettlementResults &&
         string.Equals(a.SettlementResultsString?.Trim(), b.SettlementResultsString?.Trim(), StringComparison.Ordinal) &&
         string.Equals(a.Note?.Trim(), b.Note?.Trim(), StringComparison.Ordinal);
+    public static bool SameAsImportedEmployee(IRM.Data.Models.Employee a, IRM.Data.Models.Employee b) =>
+        SameAs13Fields(a,b) && (a.VisaSymbol ?? "") == (b.VisaSymbol ?? "") && a.CardCreationDate == b.CardCreationDate &&
+        a.FamilyVisit == b.FamilyVisit && (a.FamilyVisitRelativeName ?? "") == (b.FamilyVisitRelativeName ?? "") &&
+        (a.FamilyVisitRelationship ?? "") == (b.FamilyVisitRelationship ?? "") &&
+        (a.FamilyVisitRelativeIdCard ?? "") == (b.FamilyVisitRelativeIdCard ?? "") &&
+        a.FamilyVisitStartDate == b.FamilyVisitStartDate && a.FamilyVisitEndDate == b.FamilyVisitEndDate &&
+        (a.FamilyVisitNote ?? "") == (b.FamilyVisitNote ?? "");
+
+    public static string EmployeeFingerprint(IRM.Data.Models.Employee e) => Convert.ToHexString(
+        System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(new {
+            e.IDEmployee,e.IDCompany,e.StaffName,e.Gender,e.Birthday,e.Nationality,e.Passport,e.Address,e.IDCareer,
+            e.WorkPermit,e.WorkPermitNumber,e.VisaNumber,e.VisaSymbol,e.TemporaryStay,e.Note,e.SettlementResults,
+            e.SettlementResultsString,e.CardCreationDate,e.FamilyVisit,e.FamilyVisitRelativeName,e.FamilyVisitRelationship,
+            e.FamilyVisitRelativeIdCard,e.FamilyVisitStartDate,e.FamilyVisitEndDate,e.FamilyVisitNote,e.Hidden_flag,
+            e.WorkingStatus,e.DateOfJoin,e.DateOfLeave,e.IDUser
+        }))));
 }

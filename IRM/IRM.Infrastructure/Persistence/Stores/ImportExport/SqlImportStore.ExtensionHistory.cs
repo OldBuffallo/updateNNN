@@ -21,7 +21,7 @@ public partial class SqlImportStore
     private async Task<V010ImportChanges> UpsertV010ExtensionsAsync(Employee employee, Dictionary<string, string> fields, int companyId)
     {
         var changes = new V010ImportChanges();
-        if (fields.Count == 0) return changes;
+        if (!fields.Keys.Any(V010ImportFields.Contains)) return changes;
 
         var sourceId = employee.IDEmployee.ToString();
         var link = await _db.ForeignPersonSourceLinks
@@ -89,6 +89,9 @@ public partial class SqlImportStore
             }
             else if (overlap.PurposeCode != purpose)
                 throw new InvalidOperationException("Diện cư trú import chồng lấn một diện chính khác.");
+            else if ((fields.ContainsKey("StayValidFrom") && overlap.ValidFrom != validFrom) ||
+                     (fields.ContainsKey("StayValidTo") && overlap.ValidTo != validTo))
+                throw new InvalidOperationException("Diện cư trú đã có khoảng hiệu lực khác. Hãy chỉnh sửa hồ sơ trước khi import lại.");
         }
 
         if (fields.TryGetValue("ElectronicIdentityNumber", out var identityNumber))
@@ -120,7 +123,16 @@ public partial class SqlImportStore
                     ImmigrationDocumentTypeCodes.TemporaryResidenceCard, ImmigrationDocumentTypeCodes.VisaExemption, ImmigrationDocumentTypeCodes.Other };
                 if (!allowedTypes.Contains(type)) throw new InvalidOperationException($"Loại giấy tờ không hợp lệ: {type}.");
                 var number = numbers[index];
-                if (await _db.ImmigrationDocuments.AnyAsync(item => item.ForeignPersonId == person.Id && item.TypeCode == type && item.Number == number)) continue;
+                var existingDocument = await _db.ImmigrationDocuments.FirstOrDefaultAsync(item => item.ForeignPersonId == person.Id && item.TypeCode == type && item.Number == number);
+                if (existingDocument != null)
+                {
+                    var requestedFrom = ParseNullableImportDate(fields.GetValueOrDefault("DocumentValidFrom"));
+                    var requestedTo = index < validToValues.Length ? ParseNullableImportDate(validToValues[index]) : null;
+                    if ((requestedFrom.HasValue && requestedFrom != existingDocument.ValidFrom) ||
+                        (index < validToValues.Length && requestedTo != existingDocument.ValidTo))
+                        throw new InvalidOperationException("Giấy tờ đã có thời hạn khác. Hãy chỉnh sửa giấy tờ trong hồ sơ trước khi import lại.");
+                    continue;
+                }
                 var document = new ImmigrationDocument
                 {
                     ForeignPersonId = person.Id,
@@ -162,6 +174,14 @@ public partial class SqlImportStore
         changes.CreatedDocumentIds = changes.CreatedDocuments.Select(item => item.Id).ToList();
         changes.CreatedIdentityIds = changes.CreatedIdentities.Select(item => item.Id).ToList();
         changes.CreatedResidenceIds = changes.CreatedResidences.Select(item => item.Id).ToList();
+        void Remember<T>(string kind, IEnumerable<T> values, Func<T,int> key) where T : class =>
+            changes.CreatedFingerprints[kind] = values.ToDictionary(key, value => ImportEntityFingerprint(value));
+        Remember("StayCase",changes.CreatedStayCases,x => x.Id);
+        Remember("Document",changes.CreatedDocuments,x => x.Id);
+        Remember("Identity",changes.CreatedIdentities,x => x.Id);
+        Remember("Residence",changes.CreatedResidences,x => x.Id);
+        if (changes.CreatedForeignPerson) Remember("Person",new[] { person },x => x.Id);
+        if (createdSourceLink) Remember("SourceLink",new[] { link },x => x.Id);
         return changes;
     }
 
@@ -202,6 +222,7 @@ public partial class SqlImportStore
         public int? ForeignPersonId { get; set; }
         public bool CreatedForeignPerson { get; set; }
         public int? CreatedSourceLinkId { get; set; }
+        public Dictionary<string,Dictionary<int,string>> CreatedFingerprints { get; set; } = new();
         public List<int> CreatedStayCaseIds { get; set; } = [];
         public List<int> CreatedDocumentIds { get; set; } = [];
         public List<int> CreatedIdentityIds { get; set; } = [];
@@ -210,5 +231,39 @@ public partial class SqlImportStore
         [System.Text.Json.Serialization.JsonIgnore] public List<ImmigrationDocument> CreatedDocuments { get; } = [];
         [System.Text.Json.Serialization.JsonIgnore] public List<ElectronicIdentity> CreatedIdentities { get; } = [];
         [System.Text.Json.Serialization.JsonIgnore] public List<ResidencePeriod> CreatedResidences { get; } = [];
+    }
+    private string ImportEntityFingerprint(object entity)
+    {
+        var values = _db.Entry(entity).CurrentValues;
+        var snapshot = values.Properties.OrderBy(p => p.Name).ToDictionary(p => p.Name, p =>
+            values[p] is DateTime date ? (object)date.Ticks : values[p]);
+        return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(snapshot))));
+    }
+
+    private async Task ValidateV010RollbackStateAsync(string? oldData)
+    {
+        if (string.IsNullOrWhiteSpace(oldData)) return;
+        using var data = JsonDocument.Parse(oldData);
+        if (!data.RootElement.TryGetProperty("V010Changes",out var element)) return;
+        var changes = element.Deserialize<V010ImportChanges>();
+        if (changes == null) return;
+        foreach (var kind in changes.CreatedFingerprints)
+        foreach (var saved in kind.Value)
+        {
+            object? entity = kind.Key switch {
+                "StayCase" => await _db.StayCases.FindAsync(saved.Key),
+                "Document" => await _db.ImmigrationDocuments.FindAsync(saved.Key),
+                "Identity" => await _db.ElectronicIdentities.FindAsync(saved.Key),
+                "Residence" => await _db.ResidencePeriods.FindAsync(saved.Key),
+                "Person" => await _db.ForeignPersons.FindAsync(saved.Key),
+                "SourceLink" => await _db.ForeignPersonSourceLinks.FindAsync(saved.Key),
+                _ => null
+            };
+            if (entity == null) throw new InvalidOperationException("Dữ liệu mở rộng đã thay đổi sau import.");
+            await _db.Entry(entity).ReloadAsync();
+            if (ImportEntityFingerprint(entity) != saved.Value)
+                throw new InvalidOperationException("Dữ liệu mở rộng đã thay đổi sau import.");
+        }
     }
 }

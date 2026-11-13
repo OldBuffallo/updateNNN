@@ -1114,7 +1114,7 @@ public sealed partial class SqlFamilyVisitorStore
                 var emp = new Employee
                 {
                     StaffName = name,
-                    Gender = reader.GetInt32(2) == 0 ? Gender.Female : Gender.Male,
+                    Gender = (Gender)reader.GetInt32(2),
                     Birthday = reader.IsDBNull(3) ? null : reader.GetDateTime(3),
                     Nationality = reader.IsDBNull(4) ? null : reader.GetString(4).Trim(),
                     Passport = passport,
