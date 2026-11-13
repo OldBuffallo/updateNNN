@@ -103,7 +103,7 @@
             <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.VerifiedUser" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count(x => !string.IsNullOrEmpty(x.ElectronicIdNumber))</span>
-                <span class="stat-mini-label">Đã cấp định danh ĐT</span>
+                <span class="stat-mini-label">Đã ghi nhận định danh ĐT</span>
             </div>
         </div>
     </MudItem>
@@ -332,12 +332,6 @@ else
                                                    Size="Size.Small"
                                                    Color="Color.Primary"
                                                    OnClick="@(() => OpenDocument(context.Item))" />
-                                </MudTooltip>
-                                <MudTooltip Text="Cấp nhanh số định danh điện tử">
-                                    <MudIconButton Icon="@Icons.Material.Outlined.Fingerprint"
-                                                   Size="Size.Small"
-                                                   Color="Color.Secondary"
-                                                   OnClick="@(() => OpenIdentity(context.Item))" />
                                 </MudTooltip>
                             }
                             <MudTooltip Text="Xóa hồ sơ">
@@ -586,10 +580,10 @@ else
 
                     <MudItem xs="12">
                         <MudDivider Class="my-2" />
-                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Định danh điện tử (VNeID / EID)</MudText>
+                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold">Định danh điện tử đã được cấp</MudText>
                     </MudItem>
                     <MudItem xs="12" sm="4">
-                        <MudTextField @bind-Value="_form.ElectronicIdentityNumber" Label="Mã số định danh điện tử" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="VD: EID-2026-0001" />
+                        <MudTextField @bind-Value="_form.ElectronicIdentityNumber" Label="Mã số định danh điện tử" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Nhập số định danh đã có" />
                     </MudItem>
                     <MudItem xs="6" sm="4">
                         <MudDatePicker @bind-Date="_form.ElectronicIdentityValidFrom" Label="Ngày kích hoạt định danh" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" Clearable="true" />
@@ -645,30 +639,6 @@ else
     </DialogActions>
 </MudDialog>
 
-<!-- ════════════ DIALOG: CẤP NHANH ĐỊNH DANH ĐIỆN TỬ ════════════ -->
-<MudDialog @bind-Visible="_identityDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
-    <TitleContent>
-        <div class="d-flex align-center">
-            <MudIcon Icon="@Icons.Material.Outlined.Fingerprint" Color="Color.Secondary" Class="mr-2" />
-            <span>Cấp số định danh điện tử</span>
-        </div>
-    </TitleContent>
-    <DialogContent>
-        <MudGrid>
-            <MudItem xs="12">
-                <MudTextField @bind-Value="_identity.IdentityNumber" Label="Mã số định danh điện tử *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="VD: EID-2026-XXXXX" />
-            </MudItem>
-            <MudItem xs="12">
-                <MudDatePicker @bind-Date="_identityFrom" Label="Ngày kích hoạt *" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" />
-            </MudItem>
-        </MudGrid>
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="@(() => _identityDialog = false)">Hủy</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="SaveIdentity">Lưu định danh</MudButton>
-    </DialogActions>
-</MudDialog>
-
 <!-- ════════════ DIALOG: XÁC NHẬN XÓA LƯU TRỮ HẾT HẠN ════════════ -->
 <MudDialog @bind-Visible="_archiveDialogVisible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
     <TitleContent>
@@ -721,11 +691,6 @@ else
     private ImmigrationDocumentDto _document = new();
     private DateTime? _documentFrom = DateTime.Today;
     private DateTime? _documentTo;
-
-    // Quick Identity dialog
-    private bool _identityDialog;
-    private ElectronicIdentityDto _identity = new();
-    private DateTime? _identityFrom = DateTime.Today;
 
     // Archive dialog
     private bool _archiveDialogVisible;
@@ -1080,37 +1045,4 @@ else
         }
     }
 
-    private void OpenIdentity(UnifiedForeignPersonDto person)
-    {
-        if (!person.ForeignPersonId.HasValue) return;
-        _identity = new ElectronicIdentityDto
-        {
-            ForeignPersonId = person.ForeignPersonId.Value,
-            IdentityNumber = $"EID-{DateTime.Today.Year}-{person.ForeignPersonId.Value:D4}"
-        };
-        _identityFrom = DateTime.Today;
-        _identityDialog = true;
-    }
-
-    private async Task SaveIdentity()
-    {
-        if (string.IsNullOrWhiteSpace(_identity.IdentityNumber))
-        {
-            Snackbar.Add("Vui lòng nhập số định danh.", Severity.Warning);
-            return;
-        }
-
-        try
-        {
-            _identity.ValidFrom = (_identityFrom ?? DateTime.Today).Date;
-            await Registry.SaveElectronicIdentityAsync(_identity);
-            _identityDialog = false;
-            await Load();
-            Snackbar.Add("Đã cấp số định danh điện tử thành công.", Severity.Success);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-    }
 }

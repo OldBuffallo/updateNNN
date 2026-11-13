@@ -26,6 +26,7 @@ Ignore generated content: `bin/`, `obj/`, `build-output/`, `deploy-package/`, `.
 - SQL context and historical migrations are in the same Infrastructure assembly. Do not generate a migration merely to move code.
 - Store ports return materialized results, never IQueryable, DbSet or DbContext. Keep import/rollback transactions atomic.
 - Preserve authorization, password compatibility, enum values, soft-delete conventions and legacy sync behavior.
+- This application only records, manages and analyzes data. Do not generate or issue official identity, document or permit numbers; users enter or import numbers that already exist.
 
 ## Commands
 

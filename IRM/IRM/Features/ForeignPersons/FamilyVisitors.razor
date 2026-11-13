@@ -61,7 +61,7 @@
             <div class="stat-mini-icon"><MudIcon Icon="@Icons.Material.Outlined.Fingerprint" Size="Size.Small" /></div>
             <div class="stat-mini-data">
                 <span class="stat-mini-value">@_items.Count(x => x.HasElectronicId)</span>
-                <span class="stat-mini-label">Đã cấp định danh ĐT</span>
+                <span class="stat-mini-label">Đã ghi nhận định danh ĐT</span>
             </div>
         </div>
     </MudItem>
@@ -244,7 +244,7 @@ else
                     </MudItem>
                     <MudItem xs="12" sm="4"><MudTextField @bind-Value="_input.DocumentNumber" Label="Số văn bản / Số thị thực" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                     <MudItem xs="12" sm="4"><MudDatePicker @bind-Date="_documentValidTo" Label="Hạn giấy tờ đến ngày" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" DateFormat="dd/MM/yyyy" /></MudItem>
-                    <MudItem xs="12" sm="6"><MudTextField @bind-Value="_input.ElectronicIdentityNumber" Label="Mã số định danh điện tử" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="VD: EID-2026-XXXXX" /></MudItem>
+                    <MudItem xs="12" sm="6"><MudTextField @bind-Value="_input.ElectronicIdentityNumber" Label="Mã số định danh điện tử" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Nhập số định danh đã có" /></MudItem>
                     <MudItem xs="12" sm="6"><MudTextField @bind-Value="_input.SponsorCompanyId" Label="ID công ty bảo lãnh (nếu là thân nhân của NLĐ tại công ty)" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                     <MudItem xs="12"><MudTextField @bind-Value="_input.Note" Label="Ghi chú thêm" Lines="2" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                 </MudGrid>

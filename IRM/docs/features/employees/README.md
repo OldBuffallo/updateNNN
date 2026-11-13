@@ -1,5 +1,9 @@
 # Quản lý Người lao động
 
+## Phạm vi nghiệp vụ
+
+Ứng dụng chỉ quản lý và phân tích dữ liệu. Số định danh điện tử, số giấy tờ và số giấy phép là dữ liệu đã có do người dùng nhập hoặc import; ứng dụng không cấp và không tự sinh các số này. Không có thao tác cấp nhanh EID trên `/employees`. Thông tin định danh đã có được ghi nhận trong biểu mẫu hồ sơ.
+
 ## 1. Tổng quan
 
 Module quản lý lao động nước ngoài — lõi nghiệp vụ chính của hệ thống IRM. Gồm 2 tầng:

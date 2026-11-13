@@ -161,8 +161,9 @@ Thay vì quản lý NNN riêng lẻ theo từng diện (lao động, du học, t
 
 | Thao tác | Biểu tượng | Mô tả |
 |---|---|---|
-| **Thêm giấy tờ** | 📄 | Thêm visa, thẻ tạm trú, giấy phép lao động mới |
-| **Cấp định danh** | 🔑 | Cấp số định danh điện tử cho NNN |
+| **Thêm giấy tờ** | 📄 | Ghi nhận thông tin visa, thẻ tạm trú hoặc giấy phép lao động đã có |
+
+Số định danh điện tử được ghi nhận trong tab Giấy tờ XNC & Định danh điện tử của hồ sơ. Chỉ nhập số đã có; ứng dụng không cấp và không tự sinh số định danh, số giấy tờ hoặc số giấy phép.
 
 ### 3.7. Thêm hồ sơ NNN mới
 
