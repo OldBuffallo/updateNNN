@@ -130,8 +130,9 @@ window.irmInterop = {
                     label: 'Số lao động',
                     data: data,
                     backgroundColor: colors.series,
-                    borderRadius: 6,
-                    borderSkipped: false
+                    borderRadius: 999,
+                    borderSkipped: false,
+                    maxBarThickness: 22
                 }]
             },
             options: {
@@ -139,8 +140,15 @@ window.irmInterop = {
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: colors.gridColor } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        border: { display: false },
+                        grid: { color: colors.gridColor, tickBorderDash: [4, 4] }
+                    },
+                    x: {
+                        border: { display: false },
+                        grid: { display: false }
+                    }
                 },
                 animation: { duration: 1500, easing: 'easeOutQuart' }
             }
@@ -167,15 +175,16 @@ window.irmInterop = {
                 datasets: [{
                     data: data,
                     backgroundColor: colors.permits,
-                    borderWidth: 2,
+                    borderWidth: 4,
                     borderColor: colors.surfaceColor,
+                    borderRadius: 6,
                     spacing: 3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '62%',
+                cutout: '66%',
                 plugins: {
                     legend: {
                         position: 'bottom',
@@ -218,9 +227,11 @@ window.irmInterop = {
                         backgroundColor: colors.warningFill,
                         fill: true,
                         tension: 0.4,
-                        pointRadius: 4,
+                        pointRadius: 5,
                         pointHoverRadius: 7,
-                        pointBackgroundColor: colors.series[4],
+                        pointBackgroundColor: colors.surfaceColor || '#ffffff',
+                        pointBorderColor: colors.series[4],
+                        pointBorderWidth: 2.5,
                         borderWidth: 2.5
                     },
                     {
@@ -230,9 +241,11 @@ window.irmInterop = {
                         backgroundColor: colors.successFill,
                         fill: true,
                         tension: 0.4,
-                        pointRadius: 4,
+                        pointRadius: 5,
                         pointHoverRadius: 7,
-                        pointBackgroundColor: colors.series[3],
+                        pointBackgroundColor: colors.surfaceColor || '#ffffff',
+                        pointBorderColor: colors.series[3],
+                        pointBorderWidth: 2.5,
                         borderWidth: 2.5
                     }
                 ]
@@ -251,8 +264,15 @@ window.irmInterop = {
                     }
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: colors.gridColor } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        border: { display: false },
+                        grid: { color: colors.gridColor }
+                    },
+                    x: {
+                        border: { display: false },
+                        grid: { display: false }
+                    }
                 },
                 interaction: { mode: 'index', intersect: false },
                 animation: { duration: 1800, easing: 'easeOutQuart' }
@@ -289,7 +309,8 @@ window.irmInterop = {
                         ds.backgroundColor = colors.series;
                     } else if (chart.config.type === 'line') {
                         ds.borderColor = colors.series[index === 0 ? 4 : 3];
-                        ds.pointBackgroundColor = ds.borderColor;
+                        ds.pointBackgroundColor = colors.surfaceColor || '#ffffff';
+                        ds.pointBorderColor = ds.borderColor;
                         ds.backgroundColor = index === 0 ? colors.warningFill : colors.successFill;
                     }
                 });

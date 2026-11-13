@@ -13,6 +13,12 @@
 
 <AuthorizeView>
     <Authorized Context="auth">
+        @{
+            var displayName = auth.User.FindFirst("display_name")?.Value ?? auth.User.Identity?.Name ?? "Người dùng";
+            var isAdmin = auth.User.IsInRole(IrmRoles.Admin);
+            var roleLabel = isAdmin ? "Quản trị viên" : "Cán bộ quản lý";
+            var initial = !string.IsNullOrEmpty(displayName) ? displayName[0].ToString().ToUpper() : "U";
+        }
         <MudLayout Class="irm-shell">
             <!-- ════════════ TOPBAR ════════════ -->
             <MudAppBar Elevation="0" Class="irm-topbar">
@@ -102,13 +108,6 @@
                     </MudTooltip>
 
                     <!-- User Profile & Menu -->
-                    @{
-                        var displayName = auth.User.FindFirst("display_name")?.Value ?? auth.User.Identity?.Name ?? "Người dùng";
-                        var isAdmin = auth.User.IsInRole(IrmRoles.Admin);
-                        var roleLabel = isAdmin ? "Quản trị viên" : "Cán bộ quản lý";
-                        var initial = !string.IsNullOrEmpty(displayName) ? displayName[0].ToString().ToUpper() : "U";
-                    }
-
                     <MudMenu AnchorOrigin="Origin.BottomRight"
                              TransformOrigin="Origin.TopRight"
                              Class="user-profile-menu"
@@ -161,13 +160,16 @@
                        Variant="DrawerVariant.Responsive"
                        Breakpoint="Breakpoint.Md"
                        Class="irm-drawer">
-                <div class="irm-drawer-header d-flex align-center px-4 py-3">
-                    <div class="drawer-logo-icon">
-                        <MudIcon Icon="@Icons.Material.Outlined.Security" Color="Color.Inherit" />
-                    </div>
-                    <div class="ml-3 flex-grow-1">
-                        <div class="drawer-title">QUẢN LÝ NNN</div>
-                        <div class="drawer-sub">Hệ thống báo cáo & giám sát</div>
+                <div class="irm-drawer-header">
+                    <div class="drawer-profile-card">
+                        <div class="drawer-avatar-ring">
+                            <img src="images/logo-cand.png" alt="CAND" class="drawer-avatar-img" />
+                            <span class="drawer-avatar-status"></span>
+                        </div>
+                        <div class="drawer-profile-info">
+                            <div class="drawer-title">@displayName</div>
+                            <div class="drawer-sub">@roleLabel · IRM v1.0.2</div>
+                        </div>
                     </div>
                 </div>
 
@@ -175,14 +177,29 @@
                     <NavMenu />
                 </div>
 
-                <div class="drawer-footer px-4 py-3">
-                    <div class="d-flex align-center justify-space-between">
+                <div class="drawer-footer">
+                    <div class="drawer-active-label">TRẠNG THÁI HỆ THỐNG</div>
+                    <div class="drawer-active-row">
+                        <div class="drawer-avatar-stack">
+                            <span class="stack-bubble stack-1">QN</span>
+                            <span class="stack-bubble stack-2">HL</span>
+                            <span class="stack-bubble stack-3">MC</span>
+                            <span class="stack-bubble stack-4">CP</span>
+                        </div>
+                        <span class="drawer-count-pill">Sẵn sàng</span>
+                    </div>
+                    <div class="d-flex align-center justify-space-between mt-2" style="position:relative; z-index:2;">
                         <div class="d-flex align-center">
                             <span class="status-indicator-dot online"></span>
                             <span class="drawer-footer-text ml-2">Hệ thống sẵn sàng</span>
                         </div>
                         <span class="drawer-version-tag">v1.0.2</span>
                     </div>
+                    <svg class="drawer-wave-svg" viewBox="0 0 300 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M-20 75 C 50 20, 120 95, 200 40 C 250 10, 285 55, 320 25" stroke="rgba(45, 212, 191, 0.28)" stroke-width="2" fill="none"/>
+                        <path d="M-20 85 C 60 35, 135 100, 215 48 C 260 22, 290 62, 320 38" stroke="rgba(250, 204, 21, 0.22)" stroke-width="1.5" fill="none"/>
+                        <path d="M-20 62 C 40 12, 110 82, 190 28 C 240 0, 275 45, 320 15" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.2" fill="none"/>
+                    </svg>
                 </div>
             </MudDrawer>
 
