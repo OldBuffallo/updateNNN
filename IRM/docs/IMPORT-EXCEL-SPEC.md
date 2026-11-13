@@ -2,6 +2,10 @@
 
 Dành cho người tập huấn và người cần tra cứu lỗi tại màn hình `/import`. Có đúng 35 trường được hỗ trợ; “Bỏ qua” dùng cho cột không nhập, không phải trường thứ 36. Tên trong tiêu đề mỗi mục là tên tại màn hình ghép cột, kèm khóa để đối chiếu.
 
+Bắt đầu thao tác theo [Hướng dẫn nhanh](HUONG-DAN-IMPORT-EXCEL-NHANH.md); quay về [mục lục tài liệu](README.md) để tìm tài liệu liên quan.
+
+Đối chiếu ngày **13/11/2026**, theo mã ứng dụng `5c9808d1d213431d399ba51eb002e4844b9d69d5`; các commit kế tiếp trong đợt này chỉ thay Markdown. Áp dụng cho luồng import ở source này với danh mục đích đã chuẩn bị, không chứng nhận mọi workbook sẽ ghi thành công. Bộ cài R4 và các gói đã giao chưa được build lại từ source này; hướng dẫn [R4/database cũ](HUONG-DAN-IMPORT-EXCEL.md) và [kiểm chứng source trước đó](IMPORT-EXCEL-VERIFICATION-2026-11-13.md) là bằng chứng có phạm vi riêng, không đổi nhãn bộ cài cũ.
+
 Ứng dụng ghi nhận, quản lý và phân tích dữ liệu đã có. Mọi số hộ chiếu, GPLĐ, giấy tờ, định danh trong file phải lấy từ nguồn thực tế; chương trình không cấp hoặc tự sinh các số này. Các ví dụ là dữ liệu giả để giải thích cách đọc.
 
 ## Cách đọc và điều kiện áp dụng
@@ -438,7 +442,7 @@ File mới: `BAN-GIAO/03-DU-LIEU-TEST/2026-11-12/IRM-IMPORT-WPF-GOLDEN-20261112.
 
 Trên database test chuẩn bị đúng, lần đầu mong đợi 12 hồ sơ mới và 15 dòng lỗi có chủ ý. Nhập lại cùng file có 12 dòng đã có sẵn, 15 dòng vẫn lỗi; sửa tên một hồ sơ để kiểm tra nhánh thay đổi và hoàn tác. Test tự động đối chiếu từng cột, số dòng, thông điệp, hồ sơ thân nhân/nhà đầu tư và phiên bản trên SQLite và SQL Server riêng biệt.
 
-SHA-256 workbook golden: `D9A5C839E99AD48990684B475739C2C74CDCEF5E9E8E066A086C35F66E967576`. Bộ thử này không bao phủ toàn bộ 35 trường mở rộng.
+SHA-256 workbook golden: `D9A5C839E99AD48990684B475739C2C74CDCEF5E9E8E066A086C35F66E967576`. Bộ thử này không bao phủ toàn bộ 35 trường được hỗ trợ, đặc biệt các nhóm mở rộng.
 
 ## Nguồn tra cứu và giới hạn
 

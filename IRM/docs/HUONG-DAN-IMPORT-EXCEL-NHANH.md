@@ -5,6 +5,10 @@ Tra quy tắc từng cột trong [Đặc tả 35 trường](IMPORT-EXCEL-SPEC.md
 Ứng dụng chỉ ghi nhận dữ liệu đã có; không cấp hoặc tự sinh số hộ chiếu, GPLĐ, giấy tờ, định danh.
 Các quy tắc dưới đây mô tả chương trình; lời **khuyến nghị** là hướng dẫn chuẩn bị, không phải mọi điều đều đã có bộ kiểm tra.
 
+Đối chiếu **13/11/2026**, theo mã ứng dụng `5c9808d1d213431d399ba51eb002e4844b9d69d5`; đợt tài liệu này chỉ thay Markdown.
+Áp dụng cho source đó và danh mục database đích. Bộ cài R4/các gói cũ chưa được build lại từ source này, cần xác định đúng bản chạy trước khi tập huấn.
+Tra [đặc tả và giới hạn áp dụng](IMPORT-EXCEL-SPEC.md), hoặc về [mục lục tài liệu](README.md).
+
 ## 1. Chuẩn bị công ty và danh mục
 
 - Dùng tài khoản có quyền nhập dữ liệu; liên hệ quản trị viên nếu không truy cập được màn hình.
