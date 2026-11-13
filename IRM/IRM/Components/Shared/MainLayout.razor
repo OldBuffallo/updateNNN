@@ -2,6 +2,7 @@
 @inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @using IRM.Services
+@using IRM.Components.Shared
 @using IRM.Components.Theming
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
@@ -199,44 +200,7 @@
         </MudLayout>
     </Authorized>
     <NotAuthorized>
-        <div class="login-screen active-screen">
-            <div class="login-bg">
-                <div class="login-card">
-                    <div class="login-logo">
-                        <div class="logo-icon"><MudIcon Icon="@Icons.Material.Outlined.FactCheck" Color="Color.Inherit" /></div>
-                        <h1>Immigration Report Manager</h1>
-                        <p class="login-subtitle">Quản lý người nước ngoài · Phiên bản v1.0.2</p>
-                    </div>
-                    <form method="post" action="/auth/login">
-                        <div class="input-group">
-                            <label for="loginUser">Tài khoản</label>
-                            <input type="text" id="loginUser" name="username" autocomplete="username" required placeholder="Nhập tên đăng nhập..." />
-                        </div>
-                        <div class="input-group">
-                            <label for="loginPass">Mật khẩu</label>
-                            <input type="password" id="loginPass" name="password" autocomplete="current-password" required placeholder="Nhập mật khẩu..." />
-                        </div>
-                        @if (Navigation.Uri.Contains("loginError=1", StringComparison.Ordinal))
-                        {
-                            <div class="login-error-alert">
-                                <MudIcon Icon="@Icons.Material.Outlined.ErrorOutline" Size="Size.Small" Class="mr-1" />
-                                <span>Sai thông tin đăng nhập hoặc tài khoản tạm khóa.</span>
-                            </div>
-                        }
-                        <button type="submit" class="btn-login">
-                            <span>Đăng nhập hệ thống</span>
-                            <MudIcon Icon="@Icons.Material.Outlined.ArrowForward" Size="Size.Small" Class="ml-2" />
-                        </button>
-                    </form>
-                    <div class="login-footer">
-                        <span class="secure-badge">
-                            <MudIcon Icon="@Icons.Material.Outlined.Lock" Size="Size.Small" Class="mr-1" />
-                            Cookie bảo mật · RBAC phía máy chủ
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <LoginView />
     </NotAuthorized>
 </AuthorizeView>
 

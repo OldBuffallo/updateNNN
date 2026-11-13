@@ -1,0 +1,89 @@
+@namespace IRM.Components.Shared
+@inject NavigationManager Navigation
+
+<div class="login-screen active-screen">
+    <div class="login-tonal-bg">
+        <!-- Geometric Faceted Background Shapes -->
+        <svg class="login-facets" preserveAspectRatio="none" viewBox="0 0 1000 500" aria-hidden="true">
+            <polygon points="480,0 1000,0 1000,500 560,500" fill="rgba(0,0,0,0.08)" />
+            <polygon points="650,0 1000,180 1000,500 520,500" fill="rgba(0,0,0,0.07)" />
+            <polygon points="760,0 1000,0 840,340 590,120" fill="rgba(255,255,255,0.09)" />
+            <polygon points="0,320 420,500 0,500" fill="rgba(255,255,255,0.07)" />
+        </svg>
+
+        <!-- Subtle 3D Character Watermark Behind Form -->
+        <img src="images/police-3d.png"
+             alt=""
+             aria-hidden="true"
+             class="login-char-watermark" />
+
+        <div class="login-split-shell">
+            <!-- LEFT: Brand Header + Glassmorphic Login Form -->
+            <div class="login-form-pane">
+                <div class="login-brand-bar">
+                    <img src="images/logo-cand.png" alt="Công an hiệu" class="login-brand-logo" />
+                    <span class="login-brand-name">PHẦN MỀM QUẢN LÝ NNN</span>
+                </div>
+
+                <div class="login-form-wrap">
+                    <h1 class="login-heading">ĐĂNG NHẬP</h1>
+                    <p class="login-subheading">Nhập tài khoản nghiệp vụ được cấp phát</p>
+
+                    <form method="post" action="/auth/login" class="login-tonal-form">
+                        <label class="login-glass-field" for="loginUser">
+                            <div class="login-glass-field-body">
+                                <span class="login-glass-label">Tài khoản</span>
+                                <input type="text"
+                                       id="loginUser"
+                                       name="username"
+                                       autocomplete="username"
+                                       placeholder="Nhập tên đăng nhập..."
+                                       required />
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Outlined.Person" Size="Size.Small" Class="login-field-icon" />
+                        </label>
+
+                        <label class="login-glass-field" for="loginPass">
+                            <div class="login-glass-field-body">
+                                <span class="login-glass-label">Mật khẩu</span>
+                                <input type="password"
+                                       id="loginPass"
+                                       name="password"
+                                       autocomplete="current-password"
+                                       placeholder="············"
+                                       required />
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Outlined.Lock" Size="Size.Small" Class="login-field-icon" />
+                        </label>
+
+                        @if (Navigation.Uri.Contains("loginError=1", StringComparison.Ordinal))
+                        {
+                            <div class="login-error-alert">
+                                <MudIcon Icon="@Icons.Material.Outlined.ErrorOutline" Size="Size.Small" />
+                                <span>Sai thông tin đăng nhập hoặc tài khoản tạm khóa.</span>
+                            </div>
+                        }
+
+                        <button type="submit" class="btn-login-tonal">
+                            <span>ĐĂNG NHẬP</span>
+                            <MudIcon Icon="@Icons.Material.Outlined.ArrowForward" Size="Size.Small" />
+                        </button>
+                    </form>
+                </div>
+
+                <div class="login-status-bar">
+                    <span class="login-status-dot"></span>
+                    <span>Hệ thống nội bộ · Bảo mật RBAC · v1.0.2</span>
+                </div>
+            </div>
+
+            <!-- RIGHT: 3D Public Security Character -->
+            <div class="login-character-pane">
+                <div class="login-pedestal" aria-hidden="true"></div>
+                <img src="images/police-3d.png"
+                     alt="Cán bộ Công an Nhân dân"
+                     class="login-character-img" />
+            </div>
+        </div>
+    </div>
+</div>
