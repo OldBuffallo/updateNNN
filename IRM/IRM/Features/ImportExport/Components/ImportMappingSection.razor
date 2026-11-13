@@ -10,8 +10,8 @@
         </MudAlert>
 
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.HelpOutline" Class="mb-3"
-                   OnClick="@(() => Page.ShowFieldHelpAsync(null))">Tra cứu 35 trường</MudButton>
-        <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px;">
+                   OnClick="@(() => Page.ShowFieldHelpAsync(null))" data-import-tour="field-lookup">Tra cứu 35 trường</MudButton>
+        <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px;" data-import-tour="mapping">
             <thead><tr><th>Cột Excel</th><th></th><th>Trường hệ thống</th><th>Trạng thái</th></tr></thead>
             <tbody>
                 @foreach (var m in Page._columnMappings)
@@ -72,9 +72,9 @@
         }
 
         <MudStack Row="true" Justify="Justify.Center" Spacing="3">
-            <MudButton Variant="Variant.Outlined" OnClick="@(() => Page._currentStep = 1)" StartIcon="@Icons.Material.Outlined.ArrowBack">Quay lại</MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Page._currentStep = 1)" StartIcon="@Icons.Material.Outlined.ArrowBack" data-import-tour-control="true">Quay lại</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
-                       OnClick="Page.GoToStep3" EndIcon="@Icons.Material.Outlined.ArrowForward"
+                       OnClick="Page.GoToStep3" EndIcon="@Icons.Material.Outlined.ArrowForward" data-import-tour="go-preview"
                        Disabled="@Page._isProcessing">
                 @if (Page._isProcessing) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
                 Tiếp tục

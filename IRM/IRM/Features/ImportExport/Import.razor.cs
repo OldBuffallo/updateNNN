@@ -101,6 +101,7 @@ public partial class Import : ComponentBase, IFeaturePage
             return;
         }
 
+        if (_fileStream is not null) _tourContextVersion++;
         _fileStream?.Dispose();
         _fileStream = new MemoryStream();
         await file.OpenReadStream(maxAllowedSize: 100 * 1024 * 1024).CopyToAsync(_fileStream); // 100MB max
@@ -332,6 +333,7 @@ public partial class Import : ComponentBase, IFeaturePage
 
     internal void ResetWizard()
     {
+        _tourContextVersion++;
         _currentStep = 1;
         _fileStream?.Dispose();
         _fileStream = null;
@@ -408,11 +410,6 @@ public partial class Import : ComponentBase, IFeaturePage
         {
             Snackbar.Add($"Lỗi tải file mẫu: {ex.Message}", Severity.Error);
         }
-    }
-
-    public void Dispose()
-    {
-        _fileStream?.Dispose();
     }
 
     public Task RefreshAsync() => InvokeAsync(StateHasChanged);

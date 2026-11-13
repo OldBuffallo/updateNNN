@@ -88,7 +88,7 @@ Quay lại trong bong bóng chỉ đổi lời hướng dẫn trong cùng chươ
 - Ngày lõi/ngày mở rộng; năm bốn số; danh sách giấy tờ `;` giữ vị trí, ngày từ dùng chung; cột có điều kiện không tự tạo bản ghi khi thiếu chủ/cặp.
 - Không ghép khác ô trống khi cập nhật; ghi chú/GPLĐ/kết quả lõi có thể bị thay bằng mặc định. V010 trống không xóa bản ghi cũ; không hứa import cập nhật hạn kỳ lưu trú đã có.
 - Preview không bảo đảm ghi; lỗi phần mở rộng có thể hoàn tác cả giao dịch; dữ liệu thay đổi sau preview cần xem lại. Hoàn tác có chốt phiên/phụ thuộc/sửa thủ công.
-- Sửa câu kết quả “có thể hoàn tác bất cứ lúc nào” thành: “Có thể hoàn tác từ Lịch sử Import khi dữ liệu chưa bị chỉnh sửa hoặc có phiên/phụ thuộc mới hơn.” Đây là chỉnh lời UI, không đổi quyền hay logic rollback.
+- Sửa câu kết quả “có thể hoàn tác bất cứ lúc nào” thành: “Có thể hoàn tác từ Lịch sử Import khi dữ liệu chưa bị chỉnh sửa và chưa có phiên/phụ thuộc mới hơn.” Đây là chỉnh lời UI, không đổi quyền hay logic rollback.
 
 ## Tổ chức nguồn và đóng gói
 

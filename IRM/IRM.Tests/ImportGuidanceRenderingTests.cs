@@ -3,6 +3,7 @@ using System.Reflection;
 using IRM.Components.Pages;
 using IRM.Features.ImportExport.Help;
 using IRM.Data.Models;
+using IRM.Application.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,37 @@ namespace IRM.Tests;
 
 public class ImportGuidanceRenderingTests
 {
+    [Fact]
+    public async Task Result_RollbackCopyStatesGuards()
+    {
+        var page = new Import(); GuidanceRender.Set(page, "_currentStep", 4);
+        GuidanceRender.Set(page, "_importResult", new ImportResult { Success = true });
+        var html = WebUtility.HtmlDecode(await GuidanceRender.Render<ImportResultSection>(new() { ["Page"] = page }));
+        Assert.DoesNotContain("bất cứ lúc nào", html);
+        Assert.Contains("chưa bị chỉnh sửa", html);
+        Assert.Contains("phiên/phụ thuộc mới hơn", html);
+    }
+
+    [Theory]
+    [InlineData(1, "upload,company,career-group,read-options,create-company,go-mapping")]
+    [InlineData(2, "field-lookup,mapping,go-preview")]
+    [InlineData(3, "preview-summary,preview-table,execute-import")]
+    [InlineData(4, "result-summary,result-errors,result-actions")]
+    public async Task MappingAndWizard_ExposeStableTourAnchors(int stage, string anchors)
+    {
+        var page = new Import(); GuidanceRender.Set(page, "_currentStep", stage);
+        GuidanceRender.Set(page, "_previewRows", new List<ImportPreviewRowDto> { new() { Status = "new", RowNumber = 2 } });
+        GuidanceRender.Set(page, "_importResult", new ImportResult { Success = true, Errors = ["Test error"] });
+        var parameters = new Dictionary<string, object?> { ["Page"] = page };
+        var html = stage switch {
+            1 => await GuidanceRender.Render<ImportUploadSection>(parameters),
+            2 => await GuidanceRender.Render<ImportMappingSection>(parameters),
+            3 => await GuidanceRender.Render<ImportPreviewSection>(parameters),
+            _ => await GuidanceRender.Render<ImportResultSection>(parameters)
+        };
+        foreach (var anchor in anchors.Split(',')) Assert.Contains($"data-import-tour=\"{anchor}\"", html);
+    }
+
     [Fact]
     public async Task Mapping_ExposesLookupAndHelpForMappedFields()
     {

@@ -4,7 +4,7 @@
 @* Step 4: Result *@
     @if (Page._currentStep == 4 && Page._importResult != null)
     {
-        <MudPaper Elevation="0" Class="pa-8 rounded-xl border-solid border text-center" Style="border-width: 1px;">
+        <MudPaper Elevation="0" Class="pa-8 rounded-xl border-solid border text-center" Style="border-width: 1px;" data-import-tour="result-summary">
             <MudText Style="font-size: 3rem;">@(Page._importResult.Success ? "" : "")</MudText>
             <MudText Typo="Typo.h5" Color="@(Page._importResult.Success ? Color.Success : Color.Error)" Style="font-weight: 800;" Class="mt-2">
                 @(Page._importResult.Success ? "Import hoàn tất!" : "Import thất bại!")
@@ -37,7 +37,7 @@
 
             @if (Page._importResult.Errors.Any())
             {
-                <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4 text-left">
+                <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4 text-left" data-import-tour="result-errors">
                     @foreach (var err in Page._importResult.Errors.Take(5))
                     {
                         <div>@err</div>
@@ -52,7 +52,7 @@
             @if (Page._importResult.Success)
             {
                 <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4 text-left">
-                    <strong>Dữ liệu cũ đã được backup.</strong> Các bản ghi cập nhật có thể hoàn tác bất cứ lúc nào.
+                    <strong>Dữ liệu cũ được giữ lại.</strong> Có thể hoàn tác từ Lịch sử Import khi dữ liệu chưa bị chỉnh sửa và chưa có phiên/phụ thuộc mới hơn.
                 </MudAlert>
             }
             else
@@ -62,7 +62,7 @@
                 </MudAlert>
             }
 
-            <MudStack Row="true" Justify="Justify.Center" Spacing="3">
+            <MudStack Row="true" Justify="Justify.Center" Spacing="3" data-import-tour="result-actions">
                 @if (Page._importResult.Success)
                 {
                     <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Outlined.Undo"

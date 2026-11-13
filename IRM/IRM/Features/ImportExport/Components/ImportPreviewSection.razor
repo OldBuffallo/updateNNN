@@ -6,11 +6,11 @@
     {
         <MudCheckBox T="bool" Value="Page._allowCreateCompanies" ValueChanged="Page.ToggleCompanyCreationAsync"
                      Disabled="Page._isProcessing" Label="Cho phép tạo công ty chưa có từ cột Công ty" />
-        <MudAlert Severity="Severity.Info" Class="mb-3">
+        <MudAlert Severity="Severity.Info" Class="mb-3" data-import-tour="preview-summary">
             Tổng: @Page._previewRows.Count dòng · @(Page._previewRows.Count(r => r.Status == "new")) mới · @(Page._previewRows.Count(r => r.Status == "changed")) trùng · @(Page._previewRows.Count(r => r.Status == "error")) lỗi
         </MudAlert>
 
-        <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px; max-height: 400px; overflow-y: auto;">
+        <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px; max-height: 400px; overflow-y: auto;" data-import-tour="preview-table">
             <thead><tr><th>Dòng</th><th>TT</th><th>Họ tên</th><th>Quốc tịch</th><th>Hộ chiếu</th><th>Công ty</th><th>Nghề nghiệp</th><th>GPLĐ</th><th>Xử lý</th></tr></thead>
             <tbody>
                 @foreach (var row in Page._previewRows)
@@ -102,9 +102,9 @@
         }
 
         <MudStack Row="true" Justify="Justify.Center" Spacing="3">
-            <MudButton Variant="Variant.Outlined" OnClick="@(() => Page._currentStep = 2)" StartIcon="@Icons.Material.Outlined.ArrowBack">Quay lại</MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Page._currentStep = 2)" StartIcon="@Icons.Material.Outlined.ArrowBack" data-import-tour-control="true">Quay lại</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
-                       OnClick="Page.ExecuteImport" StartIcon="@Icons.Material.Outlined.FlashOn"
+                       OnClick="Page.ExecuteImport" StartIcon="@Icons.Material.Outlined.FlashOn" data-import-tour="execute-import"
                        Disabled="@(Page._isProcessing || !Page._previewRows.Any(row => row.Status != "error"))">
                 @if (Page._isProcessing) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
                 Bắt đầu Import

@@ -15,7 +15,7 @@
         }
 
         <MudPaper Elevation="0" Class="pa-8 rounded-xl border-dashed border-2 text-center"
-                  Style="border-color: var(--mud-palette-primary);">
+                  Style="border-color: var(--mud-palette-primary);" data-import-tour="upload">
             <MudIcon Icon="@Icons.Material.Outlined.CloudUpload" Size="Size.Large"
                      Style="font-size: 3rem; opacity: 0.4;" Color="Color.Primary" />
             <MudText Typo="Typo.h6" Class="mt-3" Style="font-weight: 700;">Kéo thả file Excel vào đây</MudText>
@@ -41,7 +41,7 @@
         </MudPaper>
 
         <MudGrid Spacing="3" Class="mt-3">
-            <MudItem xs="6">
+            <MudItem xs="6" data-import-tour="company">
                 <MudAutocomplete T="CompanyDto" @bind-Value="Page._selectedCompany" Label="Công ty mặc định (dùng khi file không có cột Công ty)"
                                  SearchFunc="Page.SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")"
                                  Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
@@ -59,7 +59,7 @@
             </MudItem>
         </MudGrid>
 
-        <MudGrid Spacing="3" Class="mt-3">
+        <MudGrid Spacing="3" Class="mt-3" data-import-tour="read-options">
             <MudItem xs="12" md="6">
                 <MudSelect T="int" Label="Sheet" @bind-Value="Page._sheetIndex" Variant="Variant.Outlined">
                     @for (var index = 0; index < Page._sheetNames.Count; index++)
@@ -69,7 +69,7 @@
                     }
                 </MudSelect>
             </MudItem>
-            <MudItem xs="12" md="6">
+            <MudItem xs="12" md="6" data-import-tour="career-group">
                 <MudSelect T="int" Label="Nhóm nghề (bắt buộc)" @bind-Value="Page._careerGroupId" Variant="Variant.Outlined">
                     @foreach (var group in Page._careerGroups)
                     {
@@ -81,7 +81,7 @@
             <MudItem xs="12" md="4"><MudNumericField T="int" Label="Dòng dữ liệu đầu (0: sau tiêu đề)" Min="0" @bind-Value="Page._startRow" Variant="Variant.Outlined" /></MudItem>
             <MudItem xs="12" md="4"><MudNumericField T="int?" Label="Dòng dữ liệu cuối (trống: hết sheet)" Min="1" @bind-Value="Page._endRow" Variant="Variant.Outlined" /></MudItem>
         </MudGrid>
-        <MudCheckBox T="bool" @bind-Value="Page._allowCreateCompanies" Label="Cho phép tạo công ty chưa có từ cột Công ty; kiểm tra danh sách ở bước xem trước" />
+        <div data-import-tour="create-company"><MudCheckBox T="bool" @bind-Value="Page._allowCreateCompanies" Label="Cho phép tạo công ty chưa có từ cột Công ty; kiểm tra danh sách ở bước xem trước" /></div>
 
         <MudAlert Severity="Severity.Info" Dense="true" Class="mt-3">
             <strong>An toàn dữ liệu:</strong> Mỗi lần import tạo phiên riêng. Có thể <strong>hoàn tác</strong> từ Lịch sử Import khi dữ liệu chưa bị chỉnh sửa hoặc thay thế bởi phiên liên quan mới hơn.
@@ -94,6 +94,6 @@
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
                        EndIcon="@Icons.Material.Outlined.ArrowForward"
                        Disabled="@(Page._fileStream == null || Page._careerGroupId <= 0)"
-                       OnClick="Page.GoToStep2">Tiếp tục</MudButton>
+                       OnClick="Page.GoToStep2" data-import-tour="go-mapping">Tiếp tục</MudButton>
         </MudStack>
     }

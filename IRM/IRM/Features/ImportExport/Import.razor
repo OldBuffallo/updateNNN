@@ -3,9 +3,11 @@
 @using IRM.Services
 @using IRM.Data.Models
 @using Microsoft.AspNetCore.Components.Authorization
-@implements IDisposable
+@implements IAsyncDisposable
 
 <PageTitle>Import Excel — IRM v1.0.2</PageTitle>
+<div id="@_tourRootId">
+<span data-import-tour="notice" role="status" aria-live="polite"></span>
 
 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
     <MudStack Spacing="0">
@@ -13,8 +15,15 @@
         <MudText Typo="Typo.body2" Color="Color.Secondary">Cập nhật danh sách lao động — Mỗi phiên import đều có lịch sử để hoàn tác</MudText>
     </MudStack>
     <MudStack Row="true" Spacing="2">
+        @if (!_manualMode)
+        {
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.HelpOutline"
+                       Disabled="_isProcessing" OnClick="StartImportTourAsync" data-import-tour-control="true">
+                Hướng dẫn từng bước
+            </MudButton>
+        }
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.History"
-                   Color="Color.Default" OnClick="@(() => _showHistory = !_showHistory)">
+                   Color="Color.Default" OnClick="@(() => _showHistory = !_showHistory)" data-import-tour-control="true">
             @(_showHistory ? "Ẩn lịch sử" : "Lịch sử Import")
         </MudButton>
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Download"
@@ -23,7 +32,7 @@
         </MudButton>
         <MudButton Variant="@(_manualMode ? Variant.Filled : Variant.Outlined)"
                    StartIcon="@Icons.Material.Outlined.Edit"
-                   Color="Color.Success" OnClick="@(() => _manualMode = !_manualMode)">
+                   Color="Color.Success" OnClick="@(() => _manualMode = !_manualMode)" data-import-tour-control="true">
             @(_manualMode ? "Chuyển Import Excel" : "Nhập thủ công")
         </MudButton>
     </MudStack>
@@ -196,3 +205,4 @@
         </MudStack>
     </MudOverlay>
 }
+</div>
