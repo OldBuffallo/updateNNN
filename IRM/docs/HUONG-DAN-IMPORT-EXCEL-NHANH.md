@@ -5,9 +5,17 @@ Tra quy tắc từng cột trong [Đặc tả 35 trường](IMPORT-EXCEL-SPEC.md
 Ứng dụng chỉ ghi nhận dữ liệu đã có; không cấp hoặc tự sinh số hộ chiếu, GPLĐ, giấy tờ, định danh.
 Các quy tắc dưới đây mô tả chương trình; lời **khuyến nghị** là hướng dẫn chuẩn bị, không phải mọi điều đều đã có bộ kiểm tra.
 
-Đối chiếu **13/11/2026**, theo mã ứng dụng `5c9808d1d213431d399ba51eb002e4844b9d69d5`; đợt tài liệu này chỉ thay Markdown.
-Áp dụng cho source đó và danh mục database đích. Bộ cài R4/các gói cũ chưa được build lại từ source này, cần xác định đúng bản chạy trước khi tập huấn.
+Quy tắc đọc dữ liệu đối chiếu **13/11/2026**, theo mã nghiệp vụ `5c9808d1d213431d399ba51eb002e4844b9d69d5`; UI hướng dẫn tại chỗ cập nhật đến source `3573857`.
+Áp dụng cho source tương ứng và danh mục database đích. Bộ cài R4/các gói cũ chưa được build lại từ source này, cần xác định đúng bản chạy trước khi tập huấn.
 Tra [đặc tả và giới hạn áp dụng](IMPORT-EXCEL-SPEC.md), hoặc về [mục lục tài liệu](README.md).
+
+**Hướng dẫn ngay trên màn hình:**
+
+- Ở `/import`, chọn **Hướng dẫn từng bước** để mở bong bóng tại bước đang thao tác; dùng Tiếp/Quay lại để đọc, × hoặc Esc để đóng.
+- Tour chỉ mở khi bạn chọn. Các bước chuyển sang ghép cột, xem trước và ghi dữ liệu vẫn cần bạn bấm nút thật của ứng dụng; tour không tự nhập hoặc hoàn tác.
+- Tại Ghép cột, chọn **Tra cứu 35 trường** hoặc dấu ? cạnh trường đang ghép để xem kiểu dữ liệu, ví dụ, ô trống và cách sửa lỗi. Mở tra cứu sẽ dừng tour; có thể mở lại từ nút đầu trang.
+- Thay file đã tải, reset hoặc chuyển nhập thủ công sẽ dừng tour. Nếu hướng dẫn chưa sẵn sàng, vẫn thao tác import bình thường và có thể mở lại sau.
+- Tour dùng tài nguyên cục bộ. Kết quả kiểm chứng và các tình huống trình duyệt chưa nghiệm thu: [biên bản hướng dẫn UI](IMPORT-GUIDANCE-VERIFICATION-2026-11-13.md).
 
 ## 1. Chuẩn bị công ty và danh mục
 

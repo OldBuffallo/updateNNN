@@ -4,6 +4,8 @@
 
 > **Tập huấn import Excel theo source hiện hành:** [Hướng dẫn nhanh](HUONG-DAN-IMPORT-EXCEL-NHANH.md) cho người nhập và [Đặc tả từng trường](IMPORT-EXCEL-SPEC.md) cho người hướng dẫn, đủ 35 trường hỗ trợ. Cả hai ghi rõ mốc source, điều kiện danh mục và giới hạn; bộ cài R4/các gói cũ chưa được build lại từ source này.
 
+> **Hướng dẫn trên UI:** `/import` có tour Driver.js mở theo yêu cầu và tra cứu 35 trường khi ghép cột. Xem [kết quả kiểm chứng và phần chưa nghiệm thu](IMPORT-GUIDANCE-VERIFICATION-2026-11-13.md).
+
 > **Import và database cũ — tài liệu lịch sử:** xem [hướng dẫn R4/database cũ](HUONG-DAN-IMPORT-EXCEL.md) và [kết quả đối chiếu database](IMPORT-LEGACY-DATABASE-AUDIT-2026-11-10.md). Mã quốc tịch của database cũ mới là chuẩn khi kế thừa nghiệp vụ; bộ seed mặc định IRM mới không thay thế danh mục này.
 
 > **Phân tích UI:** [báo cáo cấu trúc và lỗi light/dark](BAO-CAO-CAU-TRUC-VA-UI-2026-11-10.md), kèm [thiết kế chuẩn hóa theme đang chờ duyệt](superpowers/specs/2026-11-10-irm-theme-consistency-design.md).

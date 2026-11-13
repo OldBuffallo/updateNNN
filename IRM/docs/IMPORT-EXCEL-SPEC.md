@@ -4,7 +4,9 @@ Dành cho người tập huấn và người cần tra cứu lỗi tại màn h�
 
 Bắt đầu thao tác theo [Hướng dẫn nhanh](HUONG-DAN-IMPORT-EXCEL-NHANH.md); quay về [mục lục tài liệu](README.md) để tìm tài liệu liên quan.
 
-Đối chiếu ngày **13/11/2026**, theo mã ứng dụng `5c9808d1d213431d399ba51eb002e4844b9d69d5`; các commit kế tiếp trong đợt này chỉ thay Markdown. Áp dụng cho luồng import ở source này với danh mục đích đã chuẩn bị, không chứng nhận mọi workbook sẽ ghi thành công. Bộ cài R4 và các gói đã giao chưa được build lại từ source này; hướng dẫn [R4/database cũ](HUONG-DAN-IMPORT-EXCEL.md) và [kiểm chứng source trước đó](IMPORT-EXCEL-VERIFICATION-2026-11-13.md) là bằng chứng có phạm vi riêng, không đổi nhãn bộ cài cũ.
+Quy tắc nghiệp vụ đối chiếu ngày **13/11/2026**, theo mã `5c9808d1d213431d399ba51eb002e4844b9d69d5`; UI tour/tra cứu cập nhật đến source `3573857`, không đổi parser hoặc luật ghi dữ liệu. Áp dụng với danh mục đích đã chuẩn bị, không chứng nhận mọi workbook sẽ ghi thành công. Bộ cài R4 và các gói đã giao chưa được build lại từ source này; hướng dẫn [R4/database cũ](HUONG-DAN-IMPORT-EXCEL.md) và [kiểm chứng source trước đó](IMPORT-EXCEL-VERIFICATION-2026-11-13.md) là bằng chứng có phạm vi riêng, không đổi nhãn bộ cài cũ.
+
+Tại `/import`, nút **Hướng dẫn từng bước** mở tour trên UI thật. Bước Ghép cột có **Tra cứu 35 trường** và dấu ? cho từng trường đang ghép; nội dung tra cứu phản ánh các mục dưới đây, chỉ dùng để giải thích và không thay validator. Tour không tự đổi ánh xạ, chọn cập nhật, import hoặc hoàn tác. Đọc [biên bản kiểm chứng UI](IMPORT-GUIDANCE-VERIFICATION-2026-11-13.md) để biết phần đã kiểm tra và phần trình duyệt còn chưa nghiệm thu.
 
 Ứng dụng ghi nhận, quản lý và phân tích dữ liệu đã có. Mọi số hộ chiếu, GPLĐ, giấy tờ, định danh trong file phải lấy từ nguồn thực tế; chương trình không cấp hoặc tự sinh các số này. Các ví dụ là dữ liệu giả để giải thích cách đọc.
 
