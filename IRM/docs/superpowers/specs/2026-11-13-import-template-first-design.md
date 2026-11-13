@@ -5,7 +5,7 @@
 - Ngày: 13/11/2026. Nguồn trước thay đổi: `dbf6d74`.
 - Người dùng yêu cầu bắt đầu bằng tải file mẫu, hướng dẫn nạp Excel và xem trước dữ liệu theo cách hiển thị của hồ sơ.
 - Đã xem bản phác thảo tương tác và chọn **A — từng bước**, với yêu cầu: “Thực hiện A, từng bước 1”.
-- Phương án bố cục đã được chọn. Tài liệu này ghi phạm vi thực hiện và các quyết định còn lại do người thiết kế đề xuất, chờ duyệt trước khi lập kế hoạch code.
+- Phương án bố cục đã được chọn. Sau khi nhận tài liệu này, người dùng yêu cầu “executing-plans thực hiện”; đây là xác nhận triển khai đợt đầu, theo kế hoạch `../plans/2026-11-13-import-preparation-step.md`.
 - Triển khai tuần tự, bắt đầu từ bước chuẩn bị file. Không coi bản phác thảo là phần mềm đã hoàn thành.
 
 ## Mục đích
