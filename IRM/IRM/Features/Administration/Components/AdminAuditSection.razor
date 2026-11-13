@@ -4,10 +4,10 @@
 <MudPaper Class="pa-4 mb-4">
                 <MudGrid>
                     <MudItem xs="12" md="3">
-                        <MudTextField T="string" Label="Username" @bind-Value="Page._auditFilterUsername" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Tên người dùng" @bind-Value="Page._auditFilterUsername" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="3">
-                        <MudTextField T="string" Label="Action" @bind-Value="Page._auditFilterAction" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Hành động" @bind-Value="Page._auditFilterAction" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="2">
                         <MudDatePicker Label="Từ ngày" @bind-Date="Page._auditFrom" Variant="Variant.Outlined" />
@@ -16,12 +16,12 @@
                         <MudDatePicker Label="Đến ngày" @bind-Date="Page._auditTo" Variant="Variant.Outlined" />
                     </MudItem>
                     <MudItem xs="12" md="2" Class="d-flex align-center">
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.LoadAuditAsync">Loc</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.LoadAuditAsync">Lọc</MudButton>
                     </MudItem>
                 </MudGrid>
             </MudPaper>
             <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
-                <thead><tr><th>Thời gian</th><th>User</th><th>Action</th><th>Loai</th><th>Mo ta</th></tr></thead>
+                <thead><tr><th>Thời gian</th><th>Người dùng</th><th>Hành động</th><th>Loại</th><th>Mô tả</th></tr></thead>
                 <tbody>
                     @foreach (var log in Page._auditLogs)
                     {
@@ -35,7 +35,7 @@
                     }
                     @if (!Page._auditLogs.Any())
                     {
-                        <tr><td colspan="5" style="text-align:center;color:#94a3b8;">Khong co du lieu</td></tr>
+                        <tr><td colspan="5" style="text-align:center;color:#94a3b8;">Không có dữ liệu</td></tr>
                     }
                 </tbody>
             </MudSimpleTable>

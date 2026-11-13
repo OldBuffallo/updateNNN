@@ -18,7 +18,7 @@ public partial class Admin
     {
         if (string.IsNullOrWhiteSpace(_fieldForm.FieldName))
         {
-            Snackbar.Add("T�n linh v?c kh�ng du?c d? tr?ng.", Severity.Warning);
+            Snackbar.Add("Tên lĩnh vực không được để trống.", Severity.Warning);
             return;
         }
 
@@ -35,11 +35,11 @@ public partial class Admin
             _fields = await CatalogSvc.GetFieldsAsync();
             BuildCards();
             ResetFieldForm();
-            Snackbar.Add("�� luu linh v?c.", Severity.Success);
+            Snackbar.Add("Đã lưu lĩnh vực.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi luu linh vuc: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi lưu lĩnh vực: {ex.Message}", Severity.Error);
         }
     }
 
@@ -62,11 +62,11 @@ public partial class Admin
             await CatalogSvc.DeleteFieldAsync(id);
             _fields = await CatalogSvc.GetFieldsAsync();
             BuildCards();
-            Snackbar.Add("�� x�a linh v?c.", Severity.Success);
+            Snackbar.Add("Đã xóa lĩnh vực.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi xoa linh vuc: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi xóa lĩnh vực: {ex.Message}", Severity.Error);
         }
     }
 
@@ -80,7 +80,7 @@ public partial class Admin
     {
         if (string.IsNullOrWhiteSpace(_careerForm.CareerName))
         {
-            Snackbar.Add("T�n ng�nh ngh? kh�ng du?c d? tr?ng.", Severity.Warning);
+            Snackbar.Add("Tên ngành nghề không được để trống.", Severity.Warning);
             return;
         }
 
@@ -102,11 +102,11 @@ public partial class Admin
             _careers = await CatalogSvc.GetCareersAsync();
             BuildCards();
             ResetCareerForm();
-            Snackbar.Add("�� luu ng�nh ngh?.", Severity.Success);
+            Snackbar.Add("Đã lưu ngành nghề.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi luu nganh nghe: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi lưu ngành nghề: {ex.Message}", Severity.Error);
         }
     }
 
@@ -129,11 +129,11 @@ public partial class Admin
             await CatalogSvc.DeleteCareerAsync(id);
             _careers = await CatalogSvc.GetCareersAsync();
             BuildCards();
-            Snackbar.Add("�� x�a ng�nh ngh?.", Severity.Success);
+            Snackbar.Add("Đã xóa ngành nghề.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi xoa nganh nghe: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi xóa ngành nghề: {ex.Message}", Severity.Error);
         }
     }
 
@@ -150,7 +150,7 @@ public partial class Admin
     {
         if (string.IsNullOrWhiteSpace(_nationalityForm.NationalityCode) || string.IsNullOrWhiteSpace(_nationalityForm.NationalityName))
         {
-            Snackbar.Add("Vui l�ng nh?p d?y d? m� v� t�n qu?c t?ch.", Severity.Warning);
+            Snackbar.Add("Vui lòng nhập đầy đủ mã và tên quốc tịch.", Severity.Warning);
             return;
         }
 
@@ -167,11 +167,11 @@ public partial class Admin
             _nationalities = await CatalogSvc.GetNationalitiesAsync();
             BuildCards();
             ResetNationalityForm();
-            Snackbar.Add("�� luu qu?c t?ch.", Severity.Success);
+            Snackbar.Add("Đã lưu quốc tịch.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi luu quoc tich: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi lưu quốc tịch: {ex.Message}", Severity.Error);
         }
     }
 
@@ -194,11 +194,11 @@ public partial class Admin
             await CatalogSvc.DeleteNationalityAsync(id);
             _nationalities = await CatalogSvc.GetNationalitiesAsync();
             BuildCards();
-            Snackbar.Add("�� x�a qu?c t?ch.", Severity.Success);
+            Snackbar.Add("Đã xóa quốc tịch.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi xoa quoc tich: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi xóa quốc tịch: {ex.Message}", Severity.Error);
         }
     }
 
@@ -212,7 +212,7 @@ public partial class Admin
     {
         if (string.IsNullOrWhiteSpace(_districtForm.DisTrictName))
         {
-            Snackbar.Add("T�n qu?n/huy?n kh�ng du?c d? tr?ng.", Severity.Warning);
+            Snackbar.Add("Tên quận/huyện không được để trống.", Severity.Warning);
             return;
         }
 
@@ -229,11 +229,11 @@ public partial class Admin
             _districts = await CatalogSvc.GetDistrictsAsync();
             BuildCards();
             ResetDistrictForm();
-            Snackbar.Add("�� luu qu?n/huy?n.", Severity.Success);
+            Snackbar.Add("Đã lưu quận/huyện.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi luu quan/huyen: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi lưu quận/huyện: {ex.Message}", Severity.Error);
         }
     }
 
@@ -255,11 +255,11 @@ public partial class Admin
             await CatalogSvc.DeleteDistrictAsync(id);
             _districts = await CatalogSvc.GetDistrictsAsync();
             BuildCards();
-            Snackbar.Add("�� x�a qu?n/huy?n.", Severity.Success);
+            Snackbar.Add("Đã xóa quận/huyện.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi xoa quan/huyen: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi xóa quận/huyện: {ex.Message}", Severity.Error);
         }
     }
 
@@ -273,7 +273,7 @@ public partial class Admin
     {
         if (string.IsNullOrWhiteSpace(_wardForm.WardName))
         {
-            Snackbar.Add("T�n phu?ng/x� kh�ng du?c d? tr?ng.", Severity.Warning);
+            Snackbar.Add("Tên phường/xã không được để trống.", Severity.Warning);
             return;
         }
 
@@ -290,11 +290,11 @@ public partial class Admin
             _wards = await CatalogSvc.GetWardsAsync();
             BuildCards();
             ResetWardForm();
-            Snackbar.Add("�� luu phu?ng/x�.", Severity.Success);
+            Snackbar.Add("Đã lưu phường/xã.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi luu phuong/xa: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi lưu phường/xã: {ex.Message}", Severity.Error);
         }
     }
 
@@ -316,11 +316,11 @@ public partial class Admin
             await CatalogSvc.DeleteWardAsync(id);
             _wards = await CatalogSvc.GetWardsAsync();
             BuildCards();
-            Snackbar.Add("�� x�a phu?ng/x�.", Severity.Success);
+            Snackbar.Add("Đã xóa phường/xã.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi xoa phuong/xa: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi xóa phường/xã: {ex.Message}", Severity.Error);
         }
     }
 
