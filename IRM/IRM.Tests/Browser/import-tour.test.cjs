@@ -1,7 +1,20 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { browser } = require('./import-tour-fixture.cjs');
+const fs = require('node:fs');
+const path = require('node:path');
 const state = (stage = 1, extra = {}) => ({ stage, isBusy: false, isManual: false, contextVersion: 0, ...extra });
+
+test('dropdown portal layer stays above the pinned Driver popover', () => {
+    const root = path.join(__dirname, '../../IRM/wwwroot');
+    const vendor = fs.readFileSync(path.join(root, 'vendor/driverjs/1.12.1/driver.css'), 'utf8');
+    const css = fs.readFileSync(path.join(root, 'css/import-guidance.css'), 'utf8');
+    const popover = Number(vendor.match(/\.driver-popover\{[^}]*z-index:(\d+)/)?.[1]);
+    const portalRule = css.match(/\.driver-active \.mud-popover-open\.driver-allowed-element\s*\{([^}]+)\}/)?.[1] ?? '';
+    const portal = Number(portalRule.match(/--driver-allowed-z-index:\s*(\d+)/)?.[1] ?? 0);
+    assert.ok(portal > popover, `MudBlazor portal layer ${portal} must exceed Driver popover ${popover}`);
+    assert.match(portalRule, /(?:^|;)\s*z-index:\s*var\(--driver-allowed-z-index\)\s*!important/, 'Portal must override the inline z-index set by MudBlazor');
+});
 
 test('start uses current chapter without application clicks or external effects', () => {
     const b = browser();
@@ -11,6 +24,12 @@ test('start uses current chapter without application clicks or external effects'
     assert.equal(b.activeHint(), 'execute-import');
     assert.ok(b.driverConfigs.at(-1).steps.at(-1).popover.instruction);
     assert.equal(b.clickCount + b.networkCount + b.storageCount, 0);
+});
+test('rollback guidance requires unchanged data and no newer dependency', () => {
+    const b = browser(); b.api.start(b.rootId, state(4));
+    const description = b.driverConfigs.at(-1).steps.at(-1).popover.description;
+    assert.match(description, /chưa bị chỉnh sửa và chưa có phiên\/phụ thuộc mới hơn/);
+    assert.doesNotMatch(description, /hoặc có phiên/);
 });
 for (const reason of ['close', 'escape']) test(`${reason} survives later sync without restarting`, () => {
     const b = browser(); b.api.start(b.rootId, state(2)); b.userClose(reason);

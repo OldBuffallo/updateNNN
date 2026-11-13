@@ -26,7 +26,7 @@
         4: [
             ['result-summary', 'Đối chiếu kết quả đã ghi', 'Đọc số thêm mới, cập nhật, bỏ qua và lỗi. Thành công có thể vẫn có dòng lỗi. Kiểm tra hồ sơ đã lưu, nhất là giới tính và các trường mở rộng.'],
             ['result-errors', 'Đọc nguyên nhân lỗi', 'Lỗi ghi có thể hủy cả giao dịch. Sửa nguồn dữ liệu, danh mục hoặc khoảng ngày theo thông báo rồi tạo xem trước mới.', false, true],
-            ['result-actions', 'Lịch sử và hoàn tác', 'Hoàn tác phụ thuộc quyền và dữ liệu chưa bị sửa hoặc có phiên/phụ thuộc mới hơn. Không phải lúc nào cũng hoàn tác được; xử lý phiên liên quan từ mới về cũ.']
+            ['result-actions', 'Lịch sử và hoàn tác', 'Hoàn tác phụ thuộc quyền và dữ liệu chưa bị chỉnh sửa và chưa có phiên/phụ thuộc mới hơn. Không phải lúc nào cũng hoàn tác được; xử lý phiên liên quan từ mới về cũ.']
         ]
     };
 
