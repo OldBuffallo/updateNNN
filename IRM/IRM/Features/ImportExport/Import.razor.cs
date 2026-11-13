@@ -398,7 +398,7 @@ public partial class Import : ComponentBase, IFeaturePage
     {
         try
         {
-            var bytes = ExportSvc.GenerateSampleExcelBytes();
+            var bytes = await ExportSvc.GenerateSampleExcelBytesAsync();
             var base64 = Convert.ToBase64String(bytes);
             await JS.InvokeVoidAsync("irmInterop.downloadFile",
                 "Mau_Import_NLD.xlsx",

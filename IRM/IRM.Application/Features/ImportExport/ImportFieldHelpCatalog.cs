@@ -3,7 +3,7 @@ using IRM.Data.Models;
 
 namespace IRM.Features.ImportExport.Help;
 
-/// <summary>Presentation guidance only; never used to validate or change imported data.</summary>
+/// <summary>Shared UI/workbook guidance only; never used to validate or change imported data.</summary>
 public sealed record ImportFieldHelp(string Key, string Group, bool IsRequired, string Condition,
     string ExcelType, string Summary, string Checks, string EmptyBehavior, string ValidExample,
     string Pitfall, string Troubleshooting, string Recommendation)

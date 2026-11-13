@@ -33,9 +33,10 @@ public sealed class ExportApplicationService(IExportStore store, IServiceAuthori
         return result;
     }
 
-    public byte[] GenerateSampleExcelBytes()
+    public async Task<byte[]> GenerateSampleExcelBytesAsync()
     {
-        var result = _store.GenerateSampleExcelBytes();
+        await _guard.GetRequiredAccountIdAsync();
+        var result = await _store.GenerateSampleExcelBytesAsync();
         return result;
     }
 

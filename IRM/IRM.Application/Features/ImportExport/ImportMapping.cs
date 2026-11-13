@@ -29,9 +29,15 @@ public static class ImportMapping
                 .ThenByDescending(item => item.Keyword.Length)
                 .ThenBy(item => item.Field, StringComparer.Ordinal)
                 .FirstOrDefault();
-            var matchedField = match?.Field ?? "skip";
+            // The published template uses full labels; substring matches are only a fallback
+            // for other files. In particular, date labels share keywords with their parent fields.
+            var exact = SystemFields.All.FirstOrDefault(item => item.Key != "skip" &&
+                string.Equals(item.Value, header.HeaderName.Trim(), StringComparison.OrdinalIgnoreCase));
+            var matchedField = exact.Key is not null
+                ? usedFields.Contains(exact.Key) ? "skip" : exact.Key
+                : match?.Field ?? "skip";
             var matchedLabel = SystemFields.All[matchedField];
-            var isAuto = match != null;
+            var isAuto = matchedField != "skip";
             if (isAuto) usedFields.Add(matchedField);
 
             mappings.Add(new ColumnMapping
