@@ -1,0 +1,69 @@
+@namespace IRM.Components.Pages
+@using IRM.Features.ImportExport.Help
+@inherits IRM.Components.Shared.FeatureSection<Import>
+
+@if (Page._currentStep == 0)
+{
+    <section class="irm-import-preparation" aria-labelledby="import-preparation-title">
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6">
+                <MudPaper Elevation="0" Class="pa-6 rounded-xl border-solid border irm-import-preparation-card" Style="border-width: 1px;">
+                    <MudIcon Icon="@Icons.Material.Outlined.Description" Color="Color.Primary" Size="Size.Large" Class="mb-3" />
+                    <h2 id="import-preparation-title">Bắt đầu với file Excel mẫu</h2>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                        Tải mẫu có sẵn tên cột và cách điền từng trường, sau đó nhập thông tin hồ sơ của bạn.
+                    </MudText>
+                    <ul class="irm-import-preparation-list">
+                        <li>Mỗi dòng là thông tin của một người, bắt đầu từ dòng 2 trong sheet <strong>Hồ sơ</strong>.</li>
+                        <li>Giữ nguyên tên cột và điền đủ chín trường bắt buộc.</li>
+                        <li>Dùng <strong>Nam</strong> hoặc <strong>Nữ</strong>. Ngày ghi <strong>dd/MM/yyyy</strong>, năm bốn chữ số.</li>
+                        <li>Đặt số giấy tờ và mã ở dạng <strong>Text</strong> để giữ số 0 đầu.</li>
+                    </ul>
+                    <div data-import-tour="prepare-download" class="mb-4">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+                                   StartIcon="@Icons.Material.Outlined.Download" OnClick="Page.DownloadSampleFile"
+                                   Disabled="Page._isDownloadingSample">
+                            @(Page._isDownloadingSample ? "Đang chuẩn bị file mẫu…" : "Tải file Excel mẫu")
+                        </MudButton>
+                    </div>
+                    <MudAlert Severity="Severity.Info" Dense="true">
+                        Đã có file theo mẫu? Chọn <strong>Tôi đã chuẩn bị file</strong> để tiếp tục với file đã điền.
+                    </MudAlert>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudPaper Elevation="0" Class="pa-6 rounded-xl border-solid border irm-import-preparation-card" Style="border-width: 1px;">
+                    <h2>Trong file mẫu có gì?</h2>
+                    <dl class="irm-import-template-sheets">
+                        <dt>Hồ sơ</dt><dd>35 cột dữ liệu. Chín cột bắt buộc đặt trước và tô màu xanh.</dd>
+                        <dt>Hướng dẫn</dt><dd>Kiểu dữ liệu, điều kiện, ví dụ và cách xử lý lỗi cho từng trường.</dd>
+                        <dt>Danh mục tham chiếu</dt><dd>Mã và tên đang sử dụng trong hệ thống tại thời điểm tải mẫu.</dd>
+                    </dl>
+                    <div data-import-tour="prepare-fields">
+                        <MudText Typo="Typo.subtitle2" Class="mb-2">Chín trường bắt buộc</MudText>
+                        <ul class="irm-import-required-fields">
+                            @foreach (var field in ImportFieldHelpCatalog.All.Values.Where(field => field.IsRequired))
+                            {
+                                <li>@field.Label</li>
+                            }
+                        </ul>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.HelpOutline"
+                                   OnClick="@(() => Page.ShowFieldHelpAsync(null))" Disabled="Page._isDownloadingSample"
+                                   data-import-tour-control="true">Tra cứu 35 trường</MudButton>
+                    </div>
+                    <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-4">
+                        Khi cập nhật hồ sơ đã có, một số <strong>ô trống</strong> có thể xóa hoặc đổi thông tin cũ.
+                        Hãy xem quy tắc ô trống của từng trường và rà lại cột được ghép trước khi cập nhật.
+                    </MudAlert>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+        <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-5">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+                       EndIcon="@Icons.Material.Outlined.ArrowForward" OnClick="Page.GoToUpload"
+                       Disabled="Page._isDownloadingSample" data-import-tour="prepare-next">
+                Tôi đã chuẩn bị file
+            </MudButton>
+        </MudStack>
+    </section>
+}

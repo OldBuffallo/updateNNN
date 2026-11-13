@@ -5,6 +5,26 @@ const fs = require('node:fs');
 const path = require('node:path');
 const state = (stage = 1, extra = {}) => ({ stage, isBusy: false, isManual: false, contextVersion: 0, ...extra });
 
+test('preparation explains the template then waits for the real continue action', () => {
+    const b = browser();
+    assert.equal(b.api.start(b.rootId, state(0)), true);
+    assert.equal(b.activeHint(), 'prepare-download');
+    b.advanceHint();
+    assert.equal(b.activeHint(), 'prepare-fields');
+    b.advanceHint();
+    assert.equal(b.activeHint(), 'prepare-next');
+    assert.ok(b.driverConfigs.at(-1).steps.at(-1).popover.instruction);
+    b.advanceHint();
+    assert.equal(b.activeHint(), 'prepare-next');
+    b.api.sync(b.rootId, state(1));
+    assert.equal(b.activeHint(), 'upload');
+    assert.equal(b.clickCount, 0);
+    assert.equal(b.networkCount, 0);
+    assert.equal(b.storageCount, 0);
+    b.api.dispose(b.rootId);
+    assert.equal(b.resourceCount, 0);
+});
+
 test('dropdown portal layer stays above the pinned Driver popover', () => {
     const root = path.join(__dirname, '../../IRM/wwwroot');
     const vendor = fs.readFileSync(path.join(root, 'vendor/driverjs/1.12.1/driver.css'), 'utf8');

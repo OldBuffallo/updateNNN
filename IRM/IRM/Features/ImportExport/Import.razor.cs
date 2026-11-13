@@ -24,7 +24,9 @@ public partial class Import : ComponentBase, IFeaturePage
     [Inject] public IRM.Application.Abstractions.IExcelReader ExcelReader { get; set; } = default!;
 
     // ── State ──
-    internal int _currentStep = 1;
+    internal int _currentStep;
+    internal bool _isDownloadingSample;
+    internal int VisibleStep => _currentStep switch { 0 => 1, 1 or 2 => 2, _ => _currentStep };
     internal bool _showHistory = false;
     internal bool _isProcessing;
     internal bool _manualMode = false;
@@ -334,7 +336,7 @@ public partial class Import : ComponentBase, IFeaturePage
     internal void ResetWizard()
     {
         _tourContextVersion++;
-        _currentStep = 1;
+        _currentStep = 0;
         _fileStream?.Dispose();
         _fileStream = null;
         _uploadedFileName = null;
@@ -396,21 +398,33 @@ public partial class Import : ComponentBase, IFeaturePage
 
     internal async Task DownloadSampleFile()
     {
+        if (_isDownloadingSample) return;
+        _isDownloadingSample = true;
+        StateHasChanged();
         try
         {
             var bytes = await ExportSvc.GenerateSampleExcelBytesAsync();
             var base64 = Convert.ToBase64String(bytes);
             await JS.InvokeVoidAsync("irmInterop.downloadFile",
-                "Mau_Import_NLD.xlsx",
+                "Mau_Import_HoSo.xlsx",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 base64);
-            Snackbar.Add("Đã tải file mẫu — Xem sheet 'Hướng dẫn' trong file", Severity.Success);
+            Snackbar.Add("Đã gửi file mẫu tới trình duyệt. Kiểm tra thư mục tải xuống và xem sheet Hướng dẫn trong file.", Severity.Success);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Lỗi tải file mẫu: {ex.Message}", Severity.Error);
         }
+        finally
+        {
+            _isDownloadingSample = false;
+            StateHasChanged();
+        }
     }
+
+    internal void GoToUpload() => _currentStep = 1;
+
+    internal void GoToPreparation() => _currentStep = 0;
 
     public Task RefreshAsync() => InvokeAsync(StateHasChanged);
 }

@@ -4,6 +4,8 @@
 @* Step 1: Upload *@
     @if (Page._currentStep == 1)
     {
+        <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Outlined.ArrowBack"
+                   Class="mb-3" OnClick="Page.GoToPreparation">Quay lại chuẩn bị file</MudButton>
         @if (!Page._hasCompanies)
         {
             <MudAlert Severity="Severity.Info" Class="mb-3">

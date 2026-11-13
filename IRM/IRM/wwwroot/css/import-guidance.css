@@ -14,3 +14,75 @@
 [data-import-tour="notice"]:not(:empty) { display: block; padding: .75rem; margin-bottom: 1rem; color: var(--mud-palette-text-primary); background: var(--mud-palette-info-hover); }
 @media (max-width: 600px) { .irm-import-tour.driver-popover { min-width: 0; padding: 14px; } .irm-import-tour .driver-popover-footer { flex-wrap: wrap; gap: .5rem; } }
 @media (prefers-reduced-motion: reduce) { .irm-import-tour *, .driver-overlay { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+.irm-import-progress {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    padding: 18px 12px;
+    background: var(--mud-palette-surface);
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: 10px;
+}
+
+.irm-import-progress-step {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.irm-import-preparation-card {
+    height: 100%;
+}
+
+.irm-import-preparation h2 {
+    margin: 0 0 12px;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.irm-import-preparation-list {
+    padding-left: 20px;
+    margin: 0 0 24px;
+}
+
+.irm-import-preparation-list li {
+    margin-bottom: 12px;
+}
+
+.irm-import-template-sheets {
+    margin-bottom: 24px;
+}
+
+.irm-import-template-sheets dt {
+    font-weight: 600;
+    margin-top: 12px;
+}
+
+.irm-import-template-sheets dd {
+    margin: 4px 0 0;
+    color: var(--mud-palette-text-secondary);
+    font-size: .875rem;
+}
+
+.irm-import-required-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-left: 20px;
+    margin: 0 0 12px;
+    gap: 6px 20px;
+    font-size: .875rem;
+}
+
+@media (max-width: 600px) {
+    .irm-import-progress {
+        gap: 6px;
+        padding: 12px 6px;
+    }
+
+    .irm-import-progress-step {
+        flex-direction: column;
+        text-align: center;
+        gap: 6px;
+    }
+}

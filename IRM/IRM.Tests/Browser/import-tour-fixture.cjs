@@ -3,7 +3,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 function browser({ library = true, reducedMotion = false } = {}) {
-    const names = ['upload', 'company', 'career-group', 'read-options', 'create-company', 'go-mapping',
+    const names = ['prepare-download', 'prepare-fields', 'prepare-next', 'upload', 'company', 'career-group', 'read-options', 'create-company', 'go-mapping',
         'field-lookup', 'mapping', 'go-preview', 'preview-summary', 'preview-table', 'execute-import',
         'result-summary', 'result-errors', 'result-actions', 'notice'];
     let clickCount = 0, networkCount = 0, storageCount = 0, now = 0, timerId = 0, current = null;

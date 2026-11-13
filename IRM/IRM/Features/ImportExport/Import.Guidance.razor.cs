@@ -12,7 +12,7 @@ public partial class Import
     private int _tourContextVersion;
     private bool _guidanceDisposed;
 
-    private ImportTourSnapshot TourSnapshot() => new(_currentStep, _isProcessing, _manualMode, _tourContextVersion);
+    private ImportTourSnapshot TourSnapshot() => new(_currentStep, _isProcessing || _isDownloadingSample, _manualMode, _tourContextVersion);
 
     internal async Task StartImportTourAsync()
     {

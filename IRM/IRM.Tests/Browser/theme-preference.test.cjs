@@ -48,7 +48,9 @@ test('App.razor rotates static asset cache token beyond legacy theme-20261110', 
     const path = require('node:path');
     const appRazor = fs.readFileSync(path.join(__dirname, '..', '..', 'IRM', 'Components', 'App.razor'), 'utf8');
     assert.equal(appRazor.includes('v=theme-20261110'), false, 'App.razor must not serve stale theme-20261110 cache token');
-    assert.equal(appRazor.includes('app.css?v=mui-gov-20261111'), true, 'App.razor must use updated mui-gov-20261111 cache token');
+    const stylesheet = appRazor.match(/href="(app\.css\?v=[^"]+)"/);
+    assert.ok(stylesheet, 'App.razor must load the versioned app stylesheet');
+    assert.match(stylesheet[1], /^app\.css\?v=mui-gov-\d{8}(?:-[\w-]+)?$/);
 });
 
 test('MainLayout docks responsive sidebar from Md 960px upward for split-screen consistency', () => {

@@ -5,6 +5,11 @@
     const action = 'Thực hiện thao tác trên màn hình để tiếp tục.';
     // Fixed copy only: never interpolate file names, headers or personal data into Driver HTML.
     const chapters = {
+        0: [
+            ['prepare-download', 'Tải file Excel mẫu', 'Tải mẫu có đủ 35 cột, hướng dẫn từng trường và danh mục tham chiếu đang dùng. Điền dữ liệu tại sheet Hồ sơ từ dòng 2.'],
+            ['prepare-fields', 'Điền đủ thông tin và đối chiếu', 'Chín trường bắt buộc đặt trước trong file mẫu. Mở Tra cứu 35 trường khi cần. Ô trống có thể ảnh hưởng dữ liệu cũ khi cập nhật.'],
+            ['prepare-next', 'Chuyển sang nạp file đã điền', 'Khi đã chuẩn bị file, bấm Tôi đã chuẩn bị file. Có thể dùng lại file theo mẫu đã điền từ trước.', true]
+        ],
         1: [
             ['upload', 'Chuẩn bị file Excel', 'Dùng .xlsx. Đặt số hộ chiếu, GPLĐ, visa và mã thành Text trước khi dán để giữ số 0 đầu. Rà Nam/Nữ trong file.'],
             ['company', 'Đúng công ty', 'Chọn công ty mặc định. Ô Công ty trống trong file sẽ dùng công ty này; tên có nội dung phải khớp công ty đích.'],
@@ -74,7 +79,7 @@
         const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
         const driver = window.driver.js.driver({
             steps, animate: !reduced, smoothScroll: !reduced, allowClose: true,
-            overlayClickBehavior: 'none', showProgress: true, progressText: `Chương ${entry.snapshot.stage} · {{current}}/{{total}}`,
+            overlayClickBehavior: 'none', showProgress: true, progressText: 'Gợi ý {{current}}/{{total}}',
             nextBtnText: 'Tiếp', prevBtnText: 'Quay lại', doneBtnText: 'Hoàn tất', closeBtnLabel: 'Đóng hướng dẫn',
             popoverClass: 'irm-import-tour', waitForElement: 1500,
             allowedElements: () => [...document.querySelectorAll('.mud-popover-open'), ...entry.root.querySelectorAll('[data-import-tour-control]')],

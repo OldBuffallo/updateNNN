@@ -1,5 +1,17 @@
 # Kiểm chứng hướng dẫn import và tiếng Việt trên UI
 
+## Cập nhật bước chuẩn bị file
+
+Đợt triển khai đầu của phương án A bổ sung màn hình **Chuẩn bị file**, nút tải mẫu và tra cứu 35 trường trước phần nạp file. Nội dung dưới phần này lưu bằng chứng của đợt hướng dẫn trước đó.
+
+File mẫu mới thuộc commit `54f4a66`, thay workbook 19 cột bằng workbook 35 cột với ba sheet **Hồ sơ**, **Hướng dẫn**, **Danh mục tham chiếu**. Vùng nhập bắt đầu trống từ dòng 2. Danh mục lấy từ database đích và lọc mục đã xóa theo quy tắc hiện có. Tải mẫu có kiểm tra tài khoản đăng nhập do workbook chứa danh mục thực tế.
+
+Màn hình tiến trình có bốn bước. Ghép cột hiện tại nằm trong bước nạp file. Người dùng có thể quay lại chuẩn bị và tiếp tục với file đã có. Các phần nạp, ghép cột và bảng xem trước hiện tại tiếp tục phục vụ đợt đầu. Bản xem trước theo bố cục hồ sơ thuộc các đợt tiếp theo của [thiết kế A](superpowers/specs/2026-11-13-import-template-first-design.md).
+
+Bằng chứng tự động gồm kiểm thử round-trip 35 tiêu đề qua bộ đọc/ghép cột, parse một dòng dữ liệu bắt buộc giữ số 0 đầu, danh mục đích/mục đã xóa/danh mục rỗng, truy cập ẩn danh, trạng thái đầu/reset/quay lại, tải lỗi rồi thử lại, chặn bấm tải lặp và tour từ chuẩn bị sang nạp file. Build Release đạt với 0 cảnh báo và 0 lỗi. Toàn bộ .NET đạt 333/333 với SQL integration bật, JavaScript đạt 47/47, đều 0 bỏ qua.
+
+Thử kết nối Computer Use trong đợt này gặp lỗi native pipe `The system cannot find the file specified (os error 2)`. Phần nghiệm thu thao tác browser thật cần được ghi riêng sau khi có kết nối hoạt động.
+
 Ngày 13/11/2026. Source ứng dụng được kiểm tra: `3573857` (bao gồm sửa tiếng Việt `c5d299d`); nghiệp vụ đọc/ghi import giữ mốc `5c9808d`. Các commit tài liệu kế tiếp không thay mã ứng dụng. Không build bộ cài, không gán source mới cho R4/các gói đã giao.
 
 ## Đã triển khai

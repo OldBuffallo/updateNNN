@@ -9,12 +9,12 @@
 <div id="@_tourRootId">
 <span data-import-tour="notice" role="status" aria-live="polite"></span>
 
-<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4" Wrap="Wrap.Wrap">
     <MudStack Spacing="0">
-        <MudText Typo="Typo.h5" Style="font-weight: 800;">Import dữ liệu từ Excel</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Secondary">Cập nhật danh sách lao động — Mỗi phiên import đều có lịch sử để hoàn tác</MudText>
+        <MudText Typo="Typo.h5" Style="font-weight: 800;">Nhập hồ sơ từ Excel</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">Tải mẫu, điền thông tin và kiểm tra hồ sơ trước khi lưu.</MudText>
     </MudStack>
-    <MudStack Row="true" Spacing="2">
+    <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap">
         @if (!_manualMode)
         {
             <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.HelpOutline"
@@ -26,10 +26,13 @@
                    Color="Color.Default" OnClick="@(() => _showHistory = !_showHistory)" data-import-tour-control="true">
             @(_showHistory ? "Ẩn lịch sử" : "Lịch sử Import")
         </MudButton>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Download"
-                   Color="Color.Primary" OnClick="DownloadSampleFile">
-            Tải file mẫu
-        </MudButton>
+        @if (_currentStep > 0 || _manualMode)
+        {
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Download"
+                       Color="Color.Primary" OnClick="DownloadSampleFile" Disabled="_isDownloadingSample">
+                Tải lại file mẫu
+            </MudButton>
+        }
         <MudButton Variant="@(_manualMode ? Variant.Filled : Variant.Outlined)"
                    StartIcon="@Icons.Material.Outlined.Edit"
                    Color="Color.Success" OnClick="@(() => _manualMode = !_manualMode)" data-import-tour-control="true">
@@ -160,31 +163,26 @@
 @* ── Wizard Steps (Excel Import Mode) ── *@
 @if (!_manualMode)
 {
-<MudPaper Elevation="0" Class="pa-3 mb-4 rounded-lg border-solid border" Style="border-width: 1px;">
-    <MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center" Spacing="0">
+<nav class="irm-import-progress mb-4" aria-label="Tiến trình nhập hồ sơ từ Excel">
         @for (int i = 1; i <= 4; i++)
         {
             var step = i;
-            var labels = new[] { "Upload file", "Ghép cột", "Xem trước", "Kết quả" };
-            <MudStack AlignItems="AlignItems.Center" Spacing="1">
+            var labels = new[] { "Chuẩn bị file", "Nạp file Excel", "Xem trước", "Kết quả" };
+            <div class="irm-import-progress-step" aria-current="@(step == VisibleStep ? "step" : null)">
                 <MudAvatar Size="Size.Medium"
-                           Color="@(step < _currentStep ? Color.Success : step == _currentStep ? Color.Primary : Color.Default)"
-                           Variant="@(step <= _currentStep ? Variant.Filled : Variant.Outlined)">
-                    @(step < _currentStep ? "✓" : step.ToString())
+                           Color="@(step < VisibleStep ? Color.Success : step == VisibleStep ? Color.Primary : Color.Default)"
+                           Variant="@(step <= VisibleStep ? Variant.Filled : Variant.Outlined)">
+                    @(step < VisibleStep ? "✓" : step.ToString())
                 </MudAvatar>
-                <MudText Typo="Typo.caption" Style="@($"font-weight: {(step == _currentStep ? "700" : "500")}; color: {(step == _currentStep ? "var(--mud-palette-primary)" : "inherit")};")">
+                <MudText Typo="Typo.caption" Style="@($"font-weight: {(step == VisibleStep ? "700" : "500")}; color: {(step == VisibleStep ? "var(--mud-palette-primary)" : "inherit")};")">
                     @labels[step - 1]
                 </MudText>
-            </MudStack>
-            @if (i < 4)
-            {
-                <MudDivider Style="@($"width: 60px; margin: 0 8px; border-color: {(step < _currentStep ? "var(--mud-palette-success)" : "var(--mud-palette-divider)")};")"/>
-            }
+            </div>
         }
-    </MudStack>
-</MudPaper>
+</nav>
 
-<MudContainer MaxWidth="MaxWidth.Medium">
+<MudContainer MaxWidth="MaxWidth.Large">
+    <ImportPreparationSection Page="this" />
     <ImportUploadSection Page="this" />
 
     <ImportMappingSection Page="this" />

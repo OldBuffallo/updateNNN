@@ -19,6 +19,12 @@ Tra [đặc tả và giới hạn áp dụng](IMPORT-EXCEL-SPEC.md), hoặc về
 
 ## 1. Chuẩn bị công ty và danh mục
 
+Khi mở màn hình import, bắt đầu tại **Chuẩn bị file**. Chọn **Tải file Excel mẫu**, điền dữ liệu và bấm **Tôi đã chuẩn bị file** để sang phần nạp file. Nếu đã có file theo mẫu, có thể tiếp tục với bản đã điền.
+
+File tải xuống gồm ba sheet. **Hồ sơ** có 35 cột và bắt đầu nhập từ dòng 2. Chín cột bắt buộc đặt trước, tô màu xanh. **Hướng dẫn** giải thích từng trường và **Danh mục tham chiếu** chứa mã/tên thực tế tại thời điểm tải. Đọc lại danh mục nếu dữ liệu trong hệ thống đã thay đổi.
+
+Các ví dụ nằm trong sheet hướng dẫn. Điền hồ sơ của bạn vào sheet **Hồ sơ**, mỗi người một dòng. Khi cập nhật hồ sơ đã có, đọc quy tắc ô trống vì một số trường có thể bị xóa hoặc đổi thông tin. Bỏ cột tùy chọn hoặc chọn **Bỏ qua** tại bước ghép cột nếu muốn bỏ ghép trường đó.
+
 - Dùng tài khoản có quyền nhập dữ liệu; liên hệ quản trị viên nếu không truy cập được màn hình.
 - Xác định công ty nhận dữ liệu và chọn **Công ty mặc định**.
 - Nếu file có nhiều công ty, dùng cột **Công ty (CQ bảo lãnh)**; mỗi tên phải khớp đầy đủ công ty đang hoạt động.
