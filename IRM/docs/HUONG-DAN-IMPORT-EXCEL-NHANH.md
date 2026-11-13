@@ -31,6 +31,7 @@ Tra [đặc tả và giới hạn áp dụng](IMPORT-EXCEL-SPEC.md), hoặc về
 - Ngày sinh, Hạn tạm trú và Ngày cấp thẻ không nhận chữ ISO `2026-06-03`; ô Date thật của Excel vẫn được đọc.
 - Các ngày mở rộng nhận thêm ISO, nhưng dùng chung một cách ghi sẽ dễ rà hơn. Xem [quy tắc ngày](IMPORT-EXCEL-SPEC.md#ngay-thang).
 - Dùng `Nam`/`Nữ` cho Giới tính. Chương trình nhận mọi chữ khác Nam thành Nữ, nên chữ sai có thể không báo lỗi.
+- Bảng xem trước không hiển thị giới tính; rà file nguồn trước khi nhập và đối chiếu giới tính trong hồ sơ nhân viên sau khi nhập.
 - Chưa có GPLĐ: để trống cả GPLĐ và Số GPLĐ. Miễn: ghi `Miễn` ở GPLĐ và để trống số riêng.
 - Đã có GPLĐ: nhập số thật ở Số GPLĐ khi GPLĐ trống, hoặc cùng số ở hai cột; không dùng nhãn `Đã có` đi cùng số riêng.
 - Không nhập `Chưa có` vào GPLĐ: chương trình có thể lưu chính chữ đó như một số giấy phép.

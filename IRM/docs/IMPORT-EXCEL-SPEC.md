@@ -66,7 +66,7 @@ Các ví dụ có quốc tịch `CHN`/`Trung Quốc`, nghề `Kỹ sư` nhóm 1 
 - **Không ghép / ô trống:** đều lỗi; cập nhật không giữ giới tính cũ để bù.
 - **Ví dụ đúng:** `Nam`, `Nữ`. **Dễ hiểu sai:** `Male`, `1`, `không rõ` đều thành Nữ, không phải lỗi giá trị.
 - **Liên quan, lỗi/cách sửa:** `Lỗi đọc giới tính tại dòng N` khi thiếu. Nếu sai nghĩa nhưng vẫn được nhận, sửa file và xem trước lại.
-- **Khuyến nghị nhập liệu:** chỉ dùng Nam hoặc Nữ; kiểm tra giới tính hiển thị tại xem trước.
+- **Khuyến nghị nhập liệu:** chỉ dùng Nam hoặc Nữ, rà từng giá trị trong file nguồn trước khi nhập. Bảng xem trước hiện không hiển thị giới tính; sau khi nhập, đối chiếu lại trên hồ sơ nhân viên đã lưu.
 
 ### `Birthday` — Ngày sinh
 
