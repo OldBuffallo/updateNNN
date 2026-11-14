@@ -3,17 +3,17 @@
 ## Hai hình thức bàn giao
 
 1. **Online/VPS:** IRM chạy bằng Docker Compose phía sau HTTPS. Quy trình triển khai nằm tại `deploy/deploy-vps.ps1`.
-2. **Offline/Windows:** khách hàng chỉ chạy `IRM-v1.0.2-windows-x64-offline-setup.exe`. Gói đã chứa ứng dụng .NET self-contained, SQL Server 2022 Express Core và CU27; máy cài không cần Internet nếu đã có .NET Framework 4.7.2 trở lên cho SQL Server.
+2. **Offline/Windows R5:** tên artifact là `IRM-v1.0.2-windows-x64-offline-setup-R5.exe`. Gói chứa ứng dụng .NET self-contained, SQL Server 2022 Express Core và CU27; máy cài không cần Internet nếu đã có .NET Framework 4.7.2 trở lên cho SQL Server. Kiểm tra biên bản, trạng thái ký số và checksum đi kèm để phân biệt candidate thử với bản được phép bàn giao chính thức.
 
 ## Cài offline trên Windows
 
-Bộ cài dựng từ revision R4 mặc định dùng dark mode ở cửa sổ giải nén, các bước cài đặt, bảng quét, ô nhập mật khẩu và hộp thông báo. Theme chỉ áp dụng cho bộ cài; không đổi theme Windows. Các hộp thoại bảo mật của Windows vẫn do hệ điều hành hiển thị. Điều kiện Windows, RAM, SQL và hành vi nâng cấp giữ nguyên so với R3.
+Bộ cài R5 dùng giao diện sáng mint/emerald đồng bộ ứng dụng mới: cửa sổ giải nén sáng, header xanh đậm, nền mint, vùng nhập trắng và nút chính xanh emerald. Bảng quét, hộp thông báo và báo cáo môi trường HTML cùng palette; bản in dùng nền trắng. Theme chỉ áp dụng cho bộ cài; không đổi theme Windows. Hộp thoại bảo mật của Windows do hệ điều hành hiển thị. Điều kiện Windows, RAM, SQL và hành vi nâng cấp giữ nguyên. Gói R4 cũ vẫn giữ nội dung và checksum cũ.
 
 > Bộ cài bàn giao chính thức phải có chữ ký Authenticode từ chứng thư Code Signing tin cậy. Không bàn giao artifact được tạo với `-AllowUnsigned`, vì Windows SmartScreen hoặc chính sách doanh nghiệp có thể chặn hoàn toàn.
 
 Yêu cầu tối thiểu: Windows 10 phiên bản 1607 x64 trở lên (build tối thiểu 14393, bao gồm Windows 11) hoặc Windows Server 2016 x64 trở lên (build tối thiểu 14393; bộ cài giao diện cần Desktop Experience), đã có .NET Framework 4.7.2 trở lên, 2 CPU logic từ 2 GHz, 2 GB RAM khả dụng, 10 GB ổ đĩa trống và Windows Defender đang hoạt động để quét tệp tải lên.
 
-1. Sao chép file `IRM-v1.0.2-windows-x64-offline-setup.exe` vào máy cần cài.
+1. Sao chép file `IRM-v1.0.2-windows-x64-offline-setup-R5.exe` và checksum đi kèm vào máy cần cài; xác minh SHA-256 trước khi chạy.
 2. Nhấp đúp file và chọn **Yes** khi Windows hỏi quyền Administrator.
 3. Ở **Bước 1**, nhấn **Quét môi trường**. Trình cài đặt hiển thị báo cáo tickbox và lưu bản HTML tại `C:\ProgramData\IRM\logs`.
 4. Nếu thiếu SQL Server/CU27, báo cáo ghi **Sẽ cài bổ sung**. Các thành phần này được lấy ngay trong bộ cài, không tải Internet.

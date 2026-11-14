@@ -31,7 +31,7 @@
     "sqlBaseSha256": "2E61C8BBDE6021F9026C54AD9DB4BBB1227E68761D4C00A6A50A2C70FE7AFE05",
     "sqlCuMedia": "SQLServer2022-KB5104824-x64.exe",
     "sqlCuSha256": "675E3CEDD6C7A3D0FFBE713E46E54A86A92AF7B96CA4A6BEB987AE99C79B96F5",
-    "artifact": "IRM-v1.0.2-windows-x64-offline-setup.exe",
+    "artifact": "IRM-v1.0.2-windows-x64-offline-setup-R5.exe",
     "minimumOs": {
       "client": "Windows 10 1607 x64",
       "server": "Windows Server 2016 x64",
