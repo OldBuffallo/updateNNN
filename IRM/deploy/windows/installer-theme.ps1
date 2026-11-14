@@ -1,16 +1,18 @@
 ﻿# Local installer styling. Never changes the Windows theme or registry.
 $script:installerColors = @{
-    Window = [Drawing.ColorTranslator]::FromHtml('#111827')
-    Surface = [Drawing.ColorTranslator]::FromHtml('#1F2937')
-    Input = [Drawing.ColorTranslator]::FromHtml('#0F172A')
-    Text = [Drawing.ColorTranslator]::FromHtml('#F3F4F6')
-    Muted = [Drawing.ColorTranslator]::FromHtml('#CBD5E1')
-    Accent = [Drawing.ColorTranslator]::FromHtml('#60A5FA')
-    Button = [Drawing.ColorTranslator]::FromHtml('#2563EB')
-    Border = [Drawing.ColorTranslator]::FromHtml('#64748B')
-    Success = [Drawing.ColorTranslator]::FromHtml('#86EFAC')
-    Warning = [Drawing.ColorTranslator]::FromHtml('#FCD34D')
-    Error = [Drawing.ColorTranslator]::FromHtml('#FCA5A5')
+    Window = [Drawing.ColorTranslator]::FromHtml('#E6F3F0')
+    Surface = [Drawing.ColorTranslator]::FromHtml('#FFFFFF')
+    Input = [Drawing.ColorTranslator]::FromHtml('#FFFFFF')
+    Header = [Drawing.ColorTranslator]::FromHtml('#11534E')
+    Text = [Drawing.ColorTranslator]::FromHtml('#0F2E2B')
+    Muted = [Drawing.ColorTranslator]::FromHtml('#4A6B66')
+    Accent = [Drawing.ColorTranslator]::FromHtml('#157A72')
+    Button = [Drawing.ColorTranslator]::FromHtml('#157A72')
+    ButtonHover = [Drawing.ColorTranslator]::FromHtml('#0E5E57')
+    Border = [Drawing.ColorTranslator]::FromHtml('#B7D5CE')
+    Success = [Drawing.ColorTranslator]::FromHtml('#15803D')
+    Warning = [Drawing.ColorTranslator]::FromHtml('#8A4B0F')
+    Error = [Drawing.ColorTranslator]::FromHtml('#BE123C')
 }
 
 if (-not ('IrmInstaller.DarkListView' -as [type])) {
@@ -29,7 +31,7 @@ namespace IrmInstaller
         public static void ApplyTitleBar(Form form)
         {
             // Older Windows versions may not support this attribute. Body colors still apply.
-            try { int dark = 1; DwmSetWindowAttribute(form.Handle, 20, ref dark, sizeof(int)); }
+            try { int dark = 0; DwmSetWindowAttribute(form.Handle, 20, ref dark, sizeof(int)); }
             catch (DllNotFoundException) { }
             catch (EntryPointNotFoundException) { }
         }
@@ -43,7 +45,7 @@ namespace IrmInstaller
             e.Graphics.Clear(BackColor);
             var state = Checked ? System.Windows.Forms.VisualStyles.CheckBoxState.CheckedDisabled : System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedDisabled;
             CheckBoxRenderer.DrawCheckBox(e.Graphics, new Point(0,Math.Max(0,(Height-14)/2)), state);
-            TextRenderer.DrawText(e.Graphics, Text, Font, new Rectangle(18,0,Math.Max(1,Width-18),Height), Color.FromArgb(148,163,184),
+            TextRenderer.DrawText(e.Graphics, Text, Font, new Rectangle(18,0,Math.Max(1,Width-18),Height), Color.FromArgb(74,107,102),
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
         }
     }
@@ -53,26 +55,26 @@ namespace IrmInstaller
         protected override void OnPaint(PaintEventArgs e)
         {
             if (Enabled) { base.OnPaint(e); return; }
-            e.Graphics.Clear(BackColor);
-            using (var pen = new Pen(Color.FromArgb(71,85,105)))
+            e.Graphics.Clear(Color.FromArgb(230,243,240));
+            using (var pen = new Pen(Color.FromArgb(183,213,206)))
                 e.Graphics.DrawRectangle(pen, 0, 0, Width-1, Height-1);
-            TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, Color.FromArgb(148,163,184),
+            TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, Color.FromArgb(74,107,102),
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
     }
 
     public class DarkListView : ListView
     {
-        private static readonly Color Header = Color.FromArgb(51,65,85);
-        private static readonly Color Alternate = Color.FromArgb(26,36,52);
-        private static readonly Color Selection = Color.FromArgb(49,65,89);
-        private static readonly Color Line = Color.FromArgb(71,85,105);
+        private static readonly Color Header = Color.FromArgb(230,243,240);
+        private static readonly Color Alternate = Color.FromArgb(242,249,247);
+        private static readonly Color Selection = Color.FromArgb(211,235,229);
+        private static readonly Color Line = Color.FromArgb(183,213,206);
         public DarkListView()
         {
             OwnerDraw = true;
             DoubleBuffered = true;
-            BackColor = Color.FromArgb(31,41,55);
-            ForeColor = Color.FromArgb(243,244,246);
+            BackColor = Color.White;
+            ForeColor = Color.FromArgb(15,46,43);
             GridLines = false;
             HideSelection = false;
             ShowItemToolTips = true;
@@ -106,17 +108,17 @@ namespace IrmInstaller
             {
                 int size = Math.Max(10, Math.Min(14, e.Bounds.Height-4));
                 var box = new Rectangle(e.Bounds.Left+6, e.Bounds.Top+(e.Bounds.Height-size)/2, size, size);
-                using (var brush = new SolidBrush(Color.FromArgb(15,23,42))) e.Graphics.FillRectangle(brush, box);
-                using (var pen = new Pen(Color.FromArgb(148,163,184))) e.Graphics.DrawRectangle(pen, box);
+                using (var brush = new SolidBrush(Color.White)) e.Graphics.FillRectangle(brush, box);
+                using (var pen = new Pen(Color.FromArgb(74,107,102))) e.Graphics.DrawRectangle(pen, box);
                 if (e.Item.Checked)
-                    using (var pen = new Pen(Color.FromArgb(134,239,172), 2))
+                    using (var pen = new Pen(Color.FromArgb(21,128,61), 2))
                         e.Graphics.DrawLines(pen, new [] { new Point(box.Left+3, box.Top+size/2), new Point(box.Left+size/2, box.Bottom-3), new Point(box.Right-2, box.Top+3) });
                 text.X = box.Right+7;
                 text.Width = Math.Max(1, e.Bounds.Right-text.X-5);
             }
             TextRenderer.DrawText(e.Graphics, e.SubItem.Text, Font, text, e.Item.ForeColor,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.SingleLine | TextFormatFlags.NoPrefix);
-            using (var pen = new Pen(Color.FromArgb(42,55,74)))
+            using (var pen = new Pen(Line))
                 e.Graphics.DrawLine(pen, e.Bounds.Left, e.Bounds.Bottom-1, e.Bounds.Right, e.Bounds.Bottom-1);
         }
     }
@@ -131,8 +133,8 @@ namespace IrmInstaller
         public DarkProgressBar()
         {
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
-            BackColor = Color.FromArgb(31,41,55);
-            ForeColor = Color.FromArgb(96,165,250);
+            BackColor = Color.FromArgb(211,235,229);
+            ForeColor = Color.FromArgb(21,122,114);
             AccessibleRole = AccessibleRole.ProgressBar;
             animation.Interval = 30;
             animation.Tick += delegate { position = (position+6) % Math.Max(1, Width+Width/4); Invalidate(); };
@@ -163,10 +165,10 @@ function Set-IrmInstallerButtonTheme {
     $Button.UseVisualStyleBackColor = $false
     $Button.FlatStyle = 'Flat'
     $Button.BackColor = if ($Primary) { $script:installerColors.Button } else { $script:installerColors.Surface }
-    $Button.ForeColor = $script:installerColors.Text
+    $Button.ForeColor = if ($Primary) { [Drawing.Color]::White } else { $script:installerColors.Text }
     $Button.FlatAppearance.BorderColor = $script:installerColors.Border
-    $Button.FlatAppearance.MouseOverBackColor = [Drawing.Color]::FromArgb(51,65,85)
-    $Button.FlatAppearance.MouseDownBackColor = [Drawing.Color]::FromArgb(30,64,100)
+    $Button.FlatAppearance.MouseOverBackColor = if ($Primary) { $script:installerColors.ButtonHover } else { $script:installerColors.Window }
+    $Button.FlatAppearance.MouseDownBackColor = if ($Primary) { $script:installerColors.Header } else { $script:installerColors.Border }
 }
 
 function Show-IrmInstallerMessage {

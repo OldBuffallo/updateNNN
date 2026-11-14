@@ -96,12 +96,12 @@ function Save-EnvironmentReport {
     $script:reportPath = Join-Path $reportDir ("Bao-cao-moi-truong-{0}.html" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
     $rows = foreach ($row in $script:scanRows) {
         $mark = if ($row.Passed) { '&#9745;' } else { '&#9744;' }
-        $color = if ($row.Passed) { '#86efac' } elseif ($row.WillInstall) { '#fcd34d' } else { '#fca5a5' }
+        $color = if ($row.Passed) { '#15803d' } elseif ($row.WillInstall) { '#8a4b0f' } else { '#be123c' }
         '<tr><td style="font-size:22px">{0}</td><td>{1}</td><td style="color:{2};font-weight:600">{3}</td><td>{4}</td></tr>' -f $mark,[Net.WebUtility]::HtmlEncode($row.Name),$color,[Net.WebUtility]::HtmlEncode($row.Status),[Net.WebUtility]::HtmlEncode($row.Detail)
     }
     $html = @"
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Báo cáo môi trường IRM</title>
-<style>:root{color-scheme:dark}body{font:15px Segoe UI,Arial;margin:32px;color:#f3f4f6;background:#111827}h1{color:#93c5fd}table{border-collapse:collapse;width:100%}th,td{border:1px solid #475569;padding:10px;text-align:left}th{background:#334155}td{background:#1f2937}.meta{color:#cbd5e1}@media print{body{color:#172537;background:white}h1{color:#173f63}th{background:#e2e8f0}td{background:white}td[style]{color:#172537!important}.meta{color:#475569}}</style></head>
+<style>:root{color-scheme:light}body{font:15px Segoe UI,Arial;margin:32px;color:#0f2e2b;background:#e6f3f0}h1{color:#11534e}table{border-collapse:collapse;width:100%}th,td{border:1px solid #b7d5ce;padding:10px;text-align:left}th{background:#11534e;color:white}td{background:white}.meta{color:#4a6b66}@media print{body{color:#0f2e2b;background:white}h1{color:#11534e}th{background:#e6f3f0;color:#0f2e2b}td{background:white}td[style]{color:#0f2e2b!important}.meta{color:#4a6b66}}</style></head>
 <body><h1>Báo cáo môi trường cài đặt IRM v1.0.2</h1><p class="meta">Máy: $([Net.WebUtility]::HtmlEncode($env:COMPUTERNAME)) — Thời gian: $(Get-Date -Format 'dd/MM/yyyy HH:mm:ss')</p>
 <table><thead><tr><th>Tick</th><th>Hạng mục</th><th>Trạng thái</th><th>Chi tiết</th></tr></thead><tbody>$($rows -join "`r`n")</tbody></table></body></html>
 "@
@@ -384,14 +384,14 @@ $form.ForeColor = $script:installerColors.Text
 $form.Add_HandleCreated({ param($sender,$e) [IrmInstaller.WindowTheme]::ApplyTitleBar($sender) })
 
 $header = New-Object Windows.Forms.Panel
-$header.Dock = 'Top'; $header.Height = 82; $header.BackColor = $script:installerColors.Input
+$header.Dock = 'Top'; $header.Height = 82; $header.BackColor = $script:installerColors.Header
 $form.Controls.Add($header)
 $title = New-Object Windows.Forms.Label
 $title.Text = 'IRM — HỆ THỐNG QUẢN LÝ NGƯỜI NƯỚC NGOÀI'; $title.ForeColor = [Drawing.Color]::White
 $title.Font = New-Object Drawing.Font('Segoe UI Semibold',17); $title.AutoSize = $true; $title.Location = New-Object Drawing.Point(24,16)
 $header.Controls.Add($title)
 $subtitle = New-Object Windows.Forms.Label
-$subtitle.Text = 'Bộ cài đặt offline v1.0.2 • Không cần kết nối Internet'; $subtitle.ForeColor = [Drawing.Color]::FromArgb(205,225,242)
+$subtitle.Text = 'Bộ cài đặt offline v1.0.2 • Không cần kết nối Internet khi máy đủ điều kiện'; $subtitle.ForeColor = [Drawing.Color]::FromArgb(230,243,240)
 $subtitle.AutoSize = $true; $subtitle.Location = New-Object Drawing.Point(27,51); $header.Controls.Add($subtitle)
 
 $labelStep = New-Object Windows.Forms.Label
@@ -445,7 +445,7 @@ $buttonReport.Text='Mở báo cáo';$buttonReport.Enabled=$false;$buttonReport.L
     } elseif($script:reportPath) { Start-Process $script:reportPath }
 });$form.Controls.Add($buttonReport)
 $buttonMain = New-Object IrmInstaller.DarkButton
-$buttonMain.Text='Quét môi trường';$buttonMain.Location=New-Object Drawing.Point(678,558);$buttonMain.Size=New-Object Drawing.Size(200,38);$buttonMain.BackColor=[Drawing.Color]::FromArgb(21,101,192);$buttonMain.ForeColor=[Drawing.Color]::White;$buttonMain.FlatStyle='Flat';$buttonMain.Add_Click({switch($script:phase){'scan'{Invoke-EnvironmentScan}'configure'{Show-ConfigurationStep}'install'{Start-IrmInstallation}'done'{Start-Process 'http://localhost:5050';$form.Close()}}});$form.Controls.Add($buttonMain)
+$buttonMain.Text='Quét môi trường';$buttonMain.Location=New-Object Drawing.Point(678,558);$buttonMain.Size=New-Object Drawing.Size(200,38);$buttonMain.Add_Click({switch($script:phase){'scan'{Invoke-EnvironmentScan}'configure'{Show-ConfigurationStep}'install'{Start-IrmInstallation}'done'{Start-Process 'http://localhost:5050';$form.Close()}}});$form.Controls.Add($buttonMain)
 
 $script:installTimer = New-Object Windows.Forms.Timer
 Set-IrmInstallerButtonTheme $buttonClose

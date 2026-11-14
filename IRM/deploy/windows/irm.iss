@@ -22,7 +22,7 @@ OutputDir={#OutputDir}
 OutputBaseFilename=IRM-v1.0.2-windows-x64-offline-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
-WizardStyle=modern dark includetitlebar
+WizardStyle=modern light includetitlebar
 Uninstallable=no
 
 [Messages]
