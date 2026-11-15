@@ -1,6 +1,6 @@
 # IRM R5 — trạng thái phát hành offline
 
-Ngày: 15/11/2026 (Asia/Bangkok). **Đang hoàn thiện bản đóng gói R5 giao diện Landing Page (unsigned, bàn giao kiểm thử nội bộ).**
+Ngày: 15/11/2026 (Asia/Bangkok). **Đã dựng và hoàn thiện bàn giao gói R5 giao diện Landing Page (`UNSIGNED-TEST`) tại `BAN-GIAO/01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/`.**
 
 ## Phạm vi và căn cứ
 
@@ -19,11 +19,20 @@ Version ứng dụng `1.0.2`, revision `R5`; artifact `IRM-v1.0.2-windows-x64-of
 | Build Release | Đạt, 0 warning/error |
 | .NET với SQL biệt lập (`.\SQLEXPRESS`) | 337/337 đạt, 0 fail/skip |
 | JavaScript (`node --test`) | 47/47 đạt, 0 fail/skip |
-| Publish và Inno compile | Đang tiến hành đóng gói bản Landing Page (xem mục Candidate) |
-| Code Signing | Không tìm thấy Code Signing certificate trên máy build; đóng gói với `-AllowUnsigned` |
+| Publish và Inno compile | Đạt; Inno compile 174,265 giây (`790828274` byte); payload trước nén 406/406 khớp SHA-256 |
+| Code Signing | Không tìm thấy Code Signing certificate trên máy build; đóng gói với `-AllowUnsigned` (`NotSigned`) |
 | Cài mới/nâng cấp/backup/restore từ EXE R5 | Bị chặn bởi môi trường Windows Sandbox trên máy chủ; chưa nghiệm thu cài đặt end-to-end |
 
 Ảnh UI dữ liệu giả và báo cáo HTML mới lưu tại `BAN-GIAO/05-HO-TRO/2026-11-15-R5-LANDING/after/`. Các ảnh mint/emerald ngày 14/11 được giữ nguyên tại `BAN-GIAO/05-HO-TRO/2026-11-14-R5/`.
+
+## Candidate và gói bàn giao R5 Landing Page (15/11/2026)
+
+- Candidate gốc: `BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/`.
+- Thư mục bàn giao hiện hành: `BAN-GIAO/01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/`.
+- EXE: `IRM-v1.0.2-windows-x64-offline-setup-R5.exe` — `790828274` byte.
+- Source commit: `b42a277894b963d3a38ccc50ac924d0756f0a741`, `dirty=false` trong `SOURCE-REVISION.json` (`builtAtUtc`: `2026-11-15T05:44:47.2609258Z`).
+- SHA-256 EXE: `C10A1915646381331DB3481BCA0D2F546CAF3B54440721830DC38A8FB9125D45` (khớp sidecar `.sha256` và `SHA256SUMS.txt`).
+- Trạng thái ký: `NotSigned` (dựng với `-AllowUnsigned`; giữ nguyên gói R4 cũ ở `01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/`).
 
 ## Mốc candidate R5 trước đó (14/11/2026 — UI mint/emerald)
 

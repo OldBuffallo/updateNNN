@@ -5,7 +5,7 @@
     "sourceHeadAtOrganization":  "65d129dc6d03965fcb750220c0a1a4ecbbd180af",
     "installerSourceCommit":  null,
     "installerSourceNote":  "The existing R4 installer predates the committed refactor. Its original source commit was not recorded; do not label the installer with the new source commit.",
-    "fileCount":  161,
+    "fileCount":  169,
     "moveCount":  14,
     "verifiedBy":  "Atomic same-volume moves; SHA-256 and byte length verified at the consolidated paths. Original release checksum files are preserved.",
     "pendingOriginalRemoval":  [
@@ -977,6 +977,54 @@
                       "path": "03-DU-LIEU-TEST/2026-11-10/HUONG-DAN-IMPORT-EXCEL.html",
                       "bytes": 24810,
                       "sha256": "5BEF799C2D55426C692A8B008237BC80A9A1ECB7552AF2B5968038D00E9DB631"
+                  },
+                  {
+                      "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "bytes": 2058,
+                      "sha256": "CE3383F9E8003A78068D258E059683BCA0FD810059EE38F611D9D437DD416A8A"
+                  },
+                  {
+                      "originalPath": "IRM/docs/INSTALLATION-v1.0.2.md",
+                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.md",
+                      "bytes": 8660,
+                      "sha256": "60A96D5DDB0DFC16E6C522880CB6819564571C75F33CED3895668C6B619CB7FE"
+                  },
+                  {
+                      "originalPath": "BAN-GIAO/03-DU-LIEU-TEST/2026-11-10/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "bytes": 7696,
+                      "sha256": "5DC0518B9FA3086253B4BC7372D849C5A987409B858368E477084567DFBEE3CA"
+                  },
+                  {
+                      "originalPath": "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe",
+                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe",
+                      "bytes": 790828274,
+                      "sha256": "C10A1915646381331DB3481BCA0D2F546CAF3B54440721830DC38A8FB9125D45"
+                  },
+                  {
+                      "originalPath": "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe.sha256",
+                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe.sha256",
+                      "bytes": 111,
+                      "sha256": "53EC6CFD8076F8DC69816A09965B0D0CD14E820EDE9CA4615625A22DC668B180"
+                  },
+                  {
+                      "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "bytes": 678,
+                      "sha256": "B9C4F604BDD4D0778290080B866C6E830FE0636F931ADA105B596798CEADD2D2"
+                  },
+                  {
+                      "originalPath": "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/windows-stage/SOURCE-REVISION.json",
+                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SOURCE-REVISION.json",
+                      "bytes": 142,
+                      "sha256": "630B54AA579ED0BCCE3A43C141513D7AC7E83C9CE2AEE49495A5A8E8AC69AAD2"
+                  },
+                  {
+                      "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/VERIFICATION.json",
+                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/VERIFICATION.json",
+                      "bytes": 932,
+                      "sha256": "40E3BCB2C5DF1E2E05ACE28F3A0D5A02C19B91F0CCC7B743A7440009159033C7"
                   }
               ]
 }

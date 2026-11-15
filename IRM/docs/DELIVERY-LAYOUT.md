@@ -1,12 +1,13 @@
 # Quản lý source và bàn giao IRM
 
-Cập nhật ngày 10/11/2026 (Asia/Bangkok). Git root là workspace `NNN/`, nhánh `develop`; solution nâng cấp nằm trong `IRM/`, còn `immigration-reportmanager-master/` là source WPF cũ ngang cấp. Các gói cài đặt nằm trong `BAN-GIAO/` ở workspace root và được Git bỏ qua. Các đường dẫn `../BAN-GIAO/` bên dưới được tính từ thư mục solution nâng cấp.
+Cập nhật ngày 15/11/2026 (Asia/Bangkok). Git root là workspace `NNN/`, nhánh `develop`; solution nâng cấp nằm trong `IRM/`, còn `immigration-reportmanager-master/` là source WPF cũ ngang cấp. Các gói cài đặt nằm trong `BAN-GIAO/` ở workspace root và được Git bỏ qua. Các đường dẫn `../BAN-GIAO/` bên dưới được tính từ thư mục solution nâng cấp.
 
 ## Thư mục chung
 
 | Vị trí trong BAN-GIAO | Nội dung |
 |---|---|
-| `01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/` | Bộ cài R4 ngày 03/11/2026, bản mới nhất tìm thấy; giữ nguyên EXE, hướng dẫn và checksum đã có. |
+| `01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/` | Bộ cài R5 ngày 15/11/2026 giao diện Landing Page, build từ commit `b42a277894b963d3a38ccc50ac924d0756f0a741` (chưa ký số). |
+| `01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/` | Bộ cài R4 ngày 03/11/2026, giữ nguyên EXE, hướng dẫn và checksum đã có. |
 | `02-LUU-TRU/` | R2, R3, thư mục bàn giao 28/09/2026, các gói ZIP/RAR cũ và ZIP source ban đầu. |
 | `03-DU-LIEU-TEST/2026-11-10/` | File `IRM-MAU-IMPORT-TEST-DA-SUA.xlsx` đã sửa 10 mã quốc tịch để khớp danh mục mặc định. |
 | `04-CHO-NGHIEM-THU/` | Các bản build mới, mỗi lần một thư mục timestamp và phiên bản riêng. |
