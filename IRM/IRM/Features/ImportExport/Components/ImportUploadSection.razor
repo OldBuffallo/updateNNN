@@ -72,7 +72,11 @@
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" md="6" data-import-tour="career-group">
-                <MudSelect T="int" Label="Nhóm nghề (bắt buộc)" @bind-Value="Page._careerGroupId" Variant="Variant.Outlined">
+                <MudSelect T="int" Label="Nhóm nghề * (bắt buộc)" @bind-Value="Page._careerGroupId" Variant="Variant.Outlined"
+                           Required="true" RequiredError="Bắt buộc chọn nhóm nghề"
+                           Error="@(Page._fileStream != null && Page._careerGroupId <= 0)"
+                           ErrorText="Bắt buộc chọn nhóm nghề trước khi tiếp tục"
+                           HelperText="Bắt buộc — Dùng để đối chiếu tên nghề nghiệp trong file Excel">
                     @foreach (var group in Page._careerGroups)
                     {
                         <MudSelectItem T="int" Value="group.IDCG">@group.CareerGroupName</MudSelectItem>
@@ -84,6 +88,19 @@
             <MudItem xs="12" md="4"><MudNumericField T="int?" Label="Dòng dữ liệu cuối (trống: hết sheet)" Min="1" @bind-Value="Page._endRow" Variant="Variant.Outlined" /></MudItem>
         </MudGrid>
         <div data-import-tour="create-company"><MudCheckBox T="bool" @bind-Value="Page._allowCreateCompanies" Label="Cho phép tạo công ty chưa có từ cột Công ty; kiểm tra danh sách ở bước xem trước" /></div>
+
+        @if (Page._fileStream != null && Page._careerGroupId <= 0)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-2" data-import-warning="missing-career-group">
+                <strong>Cảnh báo trường bắt buộc:</strong> Vui lòng chọn <strong>Nhóm nghề</strong> trước khi tiếp tục sang bước ghép cột.
+            </MudAlert>
+        }
+        @if (Page._fileStream != null && Page._selectedCompany == null && !Page._allowCreateCompanies)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-2" data-import-warning="missing-company">
+                <strong>Cảnh báo trường bắt buộc:</strong> Chưa chọn <strong>Công ty mặc định</strong>. Nếu file Excel không có cột Tên công ty, hãy chọn Công ty mặc định hoặc bật tùy chọn tạo công ty mới.
+            </MudAlert>
+        }
 
         <MudAlert Severity="Severity.Info" Dense="true" Class="mt-3">
             <strong>An toàn dữ liệu:</strong> Mỗi lần import tạo phiên riêng. Có thể <strong>hoàn tác</strong> từ Lịch sử Import khi dữ liệu chưa bị chỉnh sửa hoặc thay thế bởi phiên liên quan mới hơn.

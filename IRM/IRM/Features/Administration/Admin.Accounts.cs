@@ -16,9 +16,10 @@ public partial class Admin
 
     internal async Task SaveAccountAsync()
     {
+        _accountSubmitted = true;
         if (string.IsNullOrWhiteSpace(_accountForm.Username) || string.IsNullOrWhiteSpace(_accountForm.Name) || string.IsNullOrWhiteSpace(_accountForm.Password))
         {
-            Snackbar.Add("Vui long nhap day du thong tin tai khoan.", Severity.Warning);
+            Snackbar.Add("Vui lòng nhập đầy đủ thông tin tài khoản.", Severity.Warning);
             return;
         }
 
@@ -40,7 +41,7 @@ public partial class Admin
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi luu tai khoan: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi lưu tài khoản: {ex.Message}", Severity.Error);
         }
     }
 
@@ -56,6 +57,7 @@ public partial class Admin
             Delete_flag = account.Delete_flag
         };
         _editingAccount = true;
+        _accountSubmitted = false;
     }
 
     internal async Task DeleteAccountAsync(int id)
@@ -65,11 +67,11 @@ public partial class Admin
             await AuthSvc.DeleteAccountAsync(id);
             _accounts = await AuthSvc.GetAllAccountsAsync();
             BuildCards();
-            Snackbar.Add("Da xoa tai khoan.", Severity.Success);
+            Snackbar.Add("Đã xóa tài khoản.", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Loi xoa tai khoan: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Lỗi xóa tài khoản: {ex.Message}", Severity.Error);
         }
     }
 
@@ -77,5 +79,6 @@ public partial class Admin
     {
         _accountForm = new AccountDto { Permission = 0 };
         _editingAccount = false;
+        _accountSubmitted = false;
     }
 }

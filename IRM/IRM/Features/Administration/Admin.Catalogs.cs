@@ -16,6 +16,7 @@ public partial class Admin
 
     internal async Task SaveFieldAsync()
     {
+        _fieldSubmitted = true;
         if (string.IsNullOrWhiteSpace(_fieldForm.FieldName))
         {
             Snackbar.Add("Tên lĩnh vực không được để trống.", Severity.Warning);
@@ -53,6 +54,7 @@ public partial class Admin
             Delete_flag = field.Delete_flag
         };
         _editingField = true;
+        _fieldSubmitted = false;
     }
 
     internal async Task DeleteFieldAsync(int id)
@@ -74,10 +76,12 @@ public partial class Admin
     {
         _fieldForm = new FieldDto();
         _editingField = false;
+        _fieldSubmitted = false;
     }
 
     internal async Task SaveCareerAsync()
     {
+        _careerSubmitted = true;
         if (string.IsNullOrWhiteSpace(_careerForm.CareerName))
         {
             Snackbar.Add("Tên ngành nghề không được để trống.", Severity.Warning);
@@ -120,6 +124,7 @@ public partial class Admin
             Delete_flag = career.Delete_flag
         };
         _editingCareer = true;
+        _careerSubmitted = false;
     }
 
     internal async Task DeleteCareerAsync(int id)
@@ -144,15 +149,26 @@ public partial class Admin
             IDCG = _careerGroups.FirstOrDefault()?.IDCG ?? 0
         };
         _editingCareer = false;
+        _careerSubmitted = false;
     }
 
     internal async Task SaveNationalityAsync()
     {
+        _nationalitySubmitted = true;
         if (string.IsNullOrWhiteSpace(_nationalityForm.NationalityCode) || string.IsNullOrWhiteSpace(_nationalityForm.NationalityName))
         {
             Snackbar.Add("Vui lòng nhập đầy đủ mã và tên quốc tịch.", Severity.Warning);
             return;
         }
+
+        if (!IRM.Application.Features.ImportExport.LegacyImportRules.IsValidNationalityCode(_nationalityForm.NationalityCode))
+        {
+            Snackbar.Add("Mã quốc tịch phải gồm đúng 3 chữ cái (VD: CHN, KOR, USA).", Severity.Warning);
+            return;
+        }
+
+        _nationalityForm.NationalityCode = IRM.Application.Features.ImportExport.LegacyImportRules.NormalizeNationalityCode(_nationalityForm.NationalityCode);
+        _nationalityForm.NationalityName = _nationalityForm.NationalityName.Trim();
 
         try
         {
@@ -185,6 +201,7 @@ public partial class Admin
             Delete_flag = nationality.Delete_flag
         };
         _editingNationality = true;
+        _nationalitySubmitted = false;
     }
 
     internal async Task DeleteNationalityAsync(int id)
@@ -206,10 +223,12 @@ public partial class Admin
     {
         _nationalityForm = new NationalityEntityDto();
         _editingNationality = false;
+        _nationalitySubmitted = false;
     }
 
     internal async Task SaveDistrictAsync()
     {
+        _districtSubmitted = true;
         if (string.IsNullOrWhiteSpace(_districtForm.DisTrictName))
         {
             Snackbar.Add("Tên quận/huyện không được để trống.", Severity.Warning);
@@ -246,6 +265,7 @@ public partial class Admin
             Delete_flag = district.Delete_flag
         };
         _editingDistrict = true;
+        _districtSubmitted = false;
     }
 
     internal async Task DeleteDistrictAsync(int id)
@@ -267,10 +287,12 @@ public partial class Admin
     {
         _districtForm = new DistrictDto();
         _editingDistrict = false;
+        _districtSubmitted = false;
     }
 
     internal async Task SaveWardAsync()
     {
+        _wardSubmitted = true;
         if (string.IsNullOrWhiteSpace(_wardForm.WardName))
         {
             Snackbar.Add("Tên phường/xã không được để trống.", Severity.Warning);
@@ -307,6 +329,7 @@ public partial class Admin
             Delete_flag = ward.Delete_flag
         };
         _editingWard = true;
+        _wardSubmitted = false;
     }
 
     internal async Task DeleteWardAsync(int id)
@@ -328,6 +351,7 @@ public partial class Admin
     {
         _wardForm = new WardDto();
         _editingWard = false;
+        _wardSubmitted = false;
     }
 
     // ── AdministrativeUnits (Địa bàn hành chính) ──
@@ -339,6 +363,7 @@ public partial class Admin
 
     internal async Task SaveAdminUnitAsync()
     {
+        _adminUnitSubmitted = true;
         if (string.IsNullOrWhiteSpace(_adminUnitForm.Code) || string.IsNullOrWhiteSpace(_adminUnitForm.Name))
         {
             Snackbar.Add("Vui lòng nhập đầy đủ mã và tên địa bàn.", Severity.Warning);
@@ -382,6 +407,7 @@ public partial class Admin
             LegacyWardId = unit.LegacyWardId
         };
         _editingAdminUnit = true;
+        _adminUnitSubmitted = false;
     }
 
     internal async Task DeactivateAdminUnitAsync(int id)
@@ -403,5 +429,6 @@ public partial class Admin
     {
         _adminUnitForm = new AdministrativeUnitDto { ValidFrom = DateTime.Today };
         _editingAdminUnit = false;
+        _adminUnitSubmitted = false;
     }
 }

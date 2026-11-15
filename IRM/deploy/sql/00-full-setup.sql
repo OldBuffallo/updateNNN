@@ -296,7 +296,8 @@ BEGIN
         (1, N'Quản lý'),
         (2, N'Kỹ thuật'),
         (3, N'Chuyên gia'),
-        (4, N'Lao động phổ thông');
+        (4, N'Lao động phổ thông'),
+        (5, N'Khác');
     SET IDENTITY_INSERT [CareerGroups] OFF;
     PRINT N'[OK] Seed CareerGroups';
 END
@@ -316,7 +317,8 @@ BEGIN
         (7,  N'Phiên dịch', 3, 0),
         (8,  N'Lao động', 4, 0),
         (9,  N'Trưởng phòng', 1, 0),
-        (10, N'Tư vấn', 3, 0);
+        (10, N'Tư vấn', 3, 0),
+        (11, N'Thân nhân', 5, 0);
     SET IDENTITY_INSERT [Careers] OFF;
     PRINT N'[OK] Seed Careers';
 END
@@ -327,21 +329,21 @@ IF NOT EXISTS (SELECT * FROM Nationality WHERE IDNationality = 1)
 BEGIN
     SET IDENTITY_INSERT [Nationality] ON;
     INSERT INTO [Nationality] (IDNationality, NationalityCode, NationalityName, Delete_flag) VALUES
-        (1,  'CN', N'Trung Quốc', 0),
-        (2,  'KR', N'Hàn Quốc', 0),
-        (3,  'JP', N'Nhật Bản', 0),
-        (4,  'TW', N'Đài Loan', 0),
-        (5,  'US', N'Hoa Kỳ', 0),
-        (6,  'GB', N'Anh Quốc', 0),
-        (7,  'FR', N'Pháp', 0),
-        (8,  'DE', N'Đức', 0),
-        (9,  'TH', N'Thái Lan', 0),
-        (10, 'MY', N'Malaysia', 0),
-        (11, 'SG', N'Singapore', 0),
-        (12, 'IN', N'Ấn Độ', 0),
-        (13, 'PH', N'Philippines', 0),
-        (14, 'ID', N'Indonesia', 0),
-        (15, 'AU', N'Úc', 0);
+        (1,  'CHN', N'Trung Quốc', 0),
+        (2,  'KOR', N'Hàn Quốc', 0),
+        (3,  'JPN', N'Nhật Bản', 0),
+        (4,  'TWN', N'Đài Loan', 0),
+        (5,  'USA', N'Hoa Kỳ', 0),
+        (6,  'GBR', N'Anh Quốc', 0),
+        (7,  'FRA', N'Pháp', 0),
+        (8,  'DEU', N'Đức', 0),
+        (9,  'THA', N'Thái Lan', 0),
+        (10, 'MYS', N'Malaysia', 0),
+        (11, 'SGP', N'Singapore', 0),
+        (12, 'IND', N'Ấn Độ', 0),
+        (13, 'PHL', N'Philippines', 0),
+        (14, 'IDN', N'Indonesia', 0),
+        (15, 'AUS', N'Úc', 0);
     SET IDENTITY_INSERT [Nationality] OFF;
     PRINT N'[OK] Seed Nationality';
 END
@@ -391,9 +393,9 @@ GO
 IF NOT EXISTS (SELECT * FROM Employees WHERE Passport = 'E12345678')
 BEGIN
     INSERT INTO [Employees] (StaffName, Gender, Birthday, Nationality, Passport, Address, IDCareer, WorkPermit, TemporaryStay, IDUser, IDCompany, WorkingStatus, Hidden_flag) VALUES
-        (N'Zhang Wei', 1, '1985-03-15', 'CN', 'E12345678', N'Bắc Kinh, Trung Quốc', 4, 1, '2027-06-30', 1, 1, 0, 0),
-        (N'Li Ming', 1, '1990-07-22', 'CN', 'E87654321', N'Thượng Hải, Trung Quốc', 5, 1, '2027-03-15', 1, 1, 0, 0),
-        (N'Park Ji-sung', 1, '1988-11-05', 'KR', 'M11223344', N'Seoul, Hàn Quốc', 3, 1, '2026-12-31', 1, 2, 0, 0);
+        (N'Zhang Wei', 1, '1985-03-15', 'CHN', 'E12345678', N'Bắc Kinh, Trung Quốc', 4, 1, '2027-06-30', 1, 1, 0, 0),
+        (N'Li Ming', 1, '1990-07-22', 'CHN', 'E87654321', N'Thượng Hải, Trung Quốc', 5, 1, '2027-03-15', 1, 1, 0, 0),
+        (N'Park Ji-sung', 1, '1988-11-05', 'KOR', 'M11223344', N'Seoul, Hàn Quốc', 3, 1, '2026-12-31', 1, 2, 0, 0);
     PRINT N'[OK] Seed Employees mẫu (3 records)';
 END
 GO

@@ -107,22 +107,69 @@
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">Điền thông tin bên dưới để thêm nhân viên mà không cần file Excel</MudText>
 
         <MudGrid Spacing="3">
-            <MudItem xs="12" md="6"><MudTextField T="string" Label="Họ tên *" @bind-Value="_mf.StaffName" Variant="Variant.Outlined" Required="true" HelperText="Bắt buộc — Nhập đầy đủ họ và tên" /></MudItem>
-            <MudItem xs="6" md="3"><MudSelect T="Gender" Label="Giới tính" @bind-Value="_mf.Gender" Variant="Variant.Outlined"><MudSelectItem Value="Gender.Male">Nam</MudSelectItem><MudSelectItem Value="Gender.Female">Nữ</MudSelectItem></MudSelect></MudItem>
-            <MudItem xs="6" md="3"><MudDatePicker Label="Ngày sinh" @bind-Date="_mf.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField T="string" Label="Họ tên *" @bind-Value="_mf.StaffName" Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập họ tên"
+                              HelperText="Bắt buộc — Nhập đầy đủ họ và tên"
+                              Error="@(_manualSubmitted && string.IsNullOrWhiteSpace(_mf.StaffName))" ErrorText="Bắt buộc nhập họ tên" />
+            </MudItem>
+            <MudItem xs="6" md="3">
+                <MudSelect T="Gender" Label="Giới tính *" @bind-Value="_mf.Gender" Variant="Variant.Outlined" Required="true">
+                    <MudSelectItem Value="Gender.Male">Nam</MudSelectItem>
+                    <MudSelectItem Value="Gender.Female">Nữ</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6" md="3">
+                <MudDatePicker Label="Ngày sinh *" @bind-Date="_mf.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" Required="true" RequiredError="Bắt buộc nhập ngày sinh"
+                               Error="@(_manualSubmitted && !_mf.Birthday.HasValue)" ErrorText="Bắt buộc nhập ngày sinh" />
+            </MudItem>
 
-            <MudItem xs="6" md="4"><MudSelect T="string" Label="Quốc tịch" @bind-Value="_mf.Nationality" Variant="Variant.Outlined" Clearable="true">@foreach(var n in _mfNationalities){<MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>}</MudSelect></MudItem>
-            <MudItem xs="6" md="4"><MudTextField T="string" Label="Số hộ chiếu *" @bind-Value="_mf.Passport" Variant="Variant.Outlined" HelperText="Quan trọng — Dùng để kiểm tra trùng lặp" /></MudItem>
-            <MudItem xs="12" md="4"><MudAutocomplete T="CompanyDto" Label="Công ty *" Value="_mfCompany" ValueChanged="v => { _mfCompany = v; _mf.IDCompany = v?.IDCompany ?? 0; }" SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")" Variant="Variant.Outlined" ResetValueOnEmptyText="true" /></MudItem>
+            <MudItem xs="6" md="4">
+                <MudSelect T="string" Label="Quốc tịch *" @bind-Value="_mf.Nationality" Variant="Variant.Outlined" Clearable="true" Required="true" RequiredError="Bắt buộc chọn quốc tịch"
+                           Error="@(_manualSubmitted && string.IsNullOrWhiteSpace(_mf.Nationality))" ErrorText="Bắt buộc chọn quốc tịch">
+                    @foreach (var n in _mfNationalities)
+                    {
+                        <MudSelectItem Value="@n.NationalityCode">@n.NationalityName (@n.NationalityCode)</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6" md="4">
+                <MudTextField T="string" Label="Số hộ chiếu *" @bind-Value="_mf.Passport" Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập số hộ chiếu"
+                              HelperText="Bắt buộc — Dùng để kiểm tra trùng lặp"
+                              Error="@(_manualSubmitted && string.IsNullOrWhiteSpace(_mf.Passport))" ErrorText="Bắt buộc nhập số hộ chiếu" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudAutocomplete T="CompanyDto" Label="Công ty *" Value="_mfCompany" ValueChanged="v => { _mfCompany = v; _mf.IDCompany = v?.IDCompany ?? 0; }"
+                                 SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")" Variant="Variant.Outlined" ResetValueOnEmptyText="true"
+                                 Required="true" RequiredError="Bắt buộc chọn công ty"
+                                 Error="@(_manualSubmitted && _mf.IDCompany <= 0)" ErrorText="Bắt buộc chọn công ty" />
+            </MudItem>
 
-            <MudItem xs="6" md="4"><MudSelect T="int?" Label="Nghề nghiệp" @bind-Value="_mf.IDCareer" Variant="Variant.Outlined" Clearable="true">@foreach(var c in _mfCareers){<MudSelectItem T="int?" Value="@((int?)c.IDCareer)">@c.CareerName</MudSelectItem>}</MudSelect></MudItem>
+            <MudItem xs="6" md="4">
+                <MudSelect T="int?" Label="Nghề nghiệp *" @bind-Value="_mf.IDCareer" Variant="Variant.Outlined" Clearable="true" Required="true" RequiredError="Bắt buộc chọn nghề nghiệp"
+                           Error="@(_manualSubmitted && _mf.IDCareer is null or <= 0)" ErrorText="Bắt buộc chọn nghề nghiệp">
+                    @foreach (var c in _mfCareers)
+                    {
+                        <MudSelectItem T="int?" Value="@((int?)c.IDCareer)">@c.CareerName</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
             <MudItem xs="6" md="4"><MudSelect T="WorkPermitType" Label="GPLĐ" @bind-Value="_mf.WorkPermit" Variant="Variant.Outlined"><MudSelectItem Value="WorkPermitType.WorkerExempt">Miễn GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.WorkerHasPermit">Đã có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.WorkerNoPermit">Chưa có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.InvestorExempt">NĐT miễn GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.InvestorHasPermit">NĐT đã có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.InvestorNoPermit">NĐT chưa có GPLĐ</MudSelectItem></MudSelect></MudItem>
-            <MudItem xs="6" md="4"><MudDatePicker Label="Hạn tạm trú" @bind-Date="_mf.TemporaryStay" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" HelperText="Quan trọng — Cảnh báo hết hạn" /></MudItem>
+            <MudItem xs="6" md="4">
+                <MudDatePicker Label="Hạn tạm trú *" @bind-Date="_mf.TemporaryStay" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" Required="true" RequiredError="Bắt buộc nhập hạn tạm trú"
+                               HelperText="Bắt buộc — Cảnh báo hết hạn"
+                               Error="@(_manualSubmitted && !_mf.TemporaryStay.HasValue)" ErrorText="Bắt buộc nhập hạn tạm trú" />
+            </MudItem>
 
             <MudItem xs="6" md="4"><MudTextField T="string" Label="Số GPLĐ" @bind-Value="_mf.WorkPermitNumber" Variant="Variant.Outlined" /></MudItem>
-            <MudItem xs="6" md="4"><MudTextField T="string" Label="Số Visa" @bind-Value="_mf.VisaNumber" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="6" md="4">
+                <MudTextField T="string" Label="Số Visa *" @bind-Value="_mf.VisaNumber" Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập số Visa"
+                              Error="@(_manualSubmitted && string.IsNullOrWhiteSpace(_mf.VisaNumber))" ErrorText="Bắt buộc nhập số Visa" />
+            </MudItem>
             <MudItem xs="6" md="4"><MudTextField T="string" Label="Ký hiệu Visa" @bind-Value="_mf.VisaSymbol" Variant="Variant.Outlined" /></MudItem>
-            <MudItem xs="12" md="4"><MudTextField T="string" Label="Địa chỉ" @bind-Value="_mf.Address" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="12" md="4">
+                <MudTextField T="string" Label="Địa chỉ *" @bind-Value="_mf.Address" Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập địa chỉ tạm trú"
+                              Error="@(_manualSubmitted && string.IsNullOrWhiteSpace(_mf.Address))" ErrorText="Bắt buộc nhập địa chỉ tạm trú" />
+            </MudItem>
 
             <MudItem xs="12"><MudTextField T="string" Label="Ghi chú" @bind-Value="_mf.Note" Variant="Variant.Outlined" Lines="2" /></MudItem>
 
@@ -139,24 +186,24 @@
             }
         </MudGrid>
 
+        @{
+            var missingManual = GetMissingManualEntryFields();
+        }
+        @if (missingManual.Any())
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-3" data-import-warning="manual-missing-required">
+                <strong>Cảnh báo các trường bắt buộc chưa nhập (*):</strong> @string.Join(", ", missingManual).
+            </MudAlert>
+        }
+
         <MudStack Row="true" Justify="Justify.Center" Spacing="3" Class="mt-4">
             <MudButton Variant="Variant.Outlined" OnClick="ResetManualForm" StartIcon="@Icons.Material.Outlined.Clear">Xóa form</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large"
                        StartIcon="@Icons.Material.Outlined.PersonAdd"
-                       OnClick="SaveManualEntryAsync"
-                       Disabled="@(string.IsNullOrWhiteSpace(_mf.StaffName) || _mf.IDCompany == 0)">
+                       OnClick="SaveManualEntryAsync">
                 Thêm nhân viên
             </MudButton>
         </MudStack>
-
-        @if (!string.IsNullOrWhiteSpace(_mf.StaffName) && _mf.IDCompany == 0)
-        {
-            <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-3">Vui lòng chọn <strong>Công ty</strong> trước khi thêm nhân viên.</MudAlert>
-        }
-        @if (!string.IsNullOrWhiteSpace(_mf.StaffName) && string.IsNullOrWhiteSpace(_mf.Passport))
-        {
-            <MudAlert Severity="Severity.Info" Dense="true" Class="mt-2">Nên điền <strong>Số hộ chiếu</strong> để hệ thống kiểm tra trùng lặp.</MudAlert>
-        }
     </MudPaper>
 }
 

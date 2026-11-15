@@ -243,9 +243,12 @@ public sealed class EnumAndReleaseFeatureTddTests
         // Verify lookups populated
         Assert.True(await db.Context.Accounts.AnyAsync(a => a.Username == "admin" && a.Permission == AccountPermission.Admin));
         Assert.Equal(8, await db.Context.Fields.CountAsync());
-        Assert.Equal(4, await db.Context.CareerGroups.CountAsync());
-        Assert.Equal(4, await db.Context.Careers.CountAsync());
+        Assert.Equal(5, await db.Context.CareerGroups.CountAsync());
+        Assert.Equal(5, await db.Context.Careers.CountAsync());
+        Assert.True(await db.Context.Careers.AnyAsync(c => c.CareerName == "Thân nhân"));
         Assert.Equal(34, await db.Context.Nationality.CountAsync());
+        Assert.All(await db.Context.Nationality.ToListAsync(), n =>
+            Assert.True(IRM.Application.Features.ImportExport.LegacyImportRules.IsValidNationalityCode(n.NationalityCode)));
         Assert.Equal(3, await db.Context.Districts.CountAsync());
         Assert.Equal(3, await db.Context.Wards.CountAsync());
         Assert.Equal(54, await db.Context.AdministrativeUnits.CountAsync());
@@ -306,6 +309,43 @@ public sealed class EnumAndReleaseFeatureTddTests
         Assert.Single(await db.Context.WebRoleAssignments
             .Where(role => role.AccountId == admin.IDUser && role.RoleCode == IrmRoles.Admin)
             .ToListAsync());
+    }
+
+    [Fact]
+    public async Task DatabaseSeeder_SeedCatalogsIfEmpty_UpgradesLegacyTwoLetterNationalitiesSafely()
+    {
+        await using var db = new TestDatabase();
+        await db.InitializeAsync(seedBaseline: false);
+
+        db.Context.Accounts.Add(new Account { Username = "admin", Name = "Admin", Password = "***", Permission = AccountPermission.Admin, Delete_flag = 0 });
+        db.Context.Fields.Add(new Field { FieldName = "Sản xuất", Delete_flag = 0 });
+        db.Context.CareerGroups.Add(new CareerGroup { CareerGroupName = "Kỹ thuật" });
+        await db.Context.SaveChangesAsync();
+        db.Context.Careers.Add(new Career { CareerName = "Kỹ sư", IDCG = 1, Delete_flag = 0 });
+        db.Context.Nationality.Add(new NationalityEntity { NationalityCode = "CN", NationalityName = "Trung Quốc" });
+        await db.Context.SaveChangesAsync();
+        db.Context.Companies.Add(new Company { CompanyName = "Co A", IDField = 1, TrackerID = 1, Delete_flag = 0 });
+        await db.Context.SaveChangesAsync();
+        db.Context.Employees.Add(new Employee
+        {
+            StaffName = "Legacy Emp",
+            Passport = "P-LEGACY-CN",
+            Nationality = "CN",
+            IDCompany = 1,
+            IDCareer = 1,
+            Hidden_flag = 0,
+            WorkingStatus = 0
+        });
+        await db.Context.SaveChangesAsync();
+        db.Context.ChangeTracker.Clear();
+
+        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context, "admin", "Test-Admin-Password-1!");
+
+        db.Context.ChangeTracker.Clear();
+        Assert.False(await db.Context.Nationality.AnyAsync(n => n.NationalityCode == "CN"));
+        Assert.True(await db.Context.Nationality.AnyAsync(n => n.NationalityCode == "CHN"));
+        var upgradedEmp = await db.Context.Employees.SingleAsync(e => e.Passport == "P-LEGACY-CN");
+        Assert.Equal("CHN", upgradedEmp.Nationality);
     }
 
     [Fact]

@@ -35,6 +35,7 @@ public partial class Import : ComponentBase, IFeaturePage
     // Manual entry
     internal EmployeeDto _mf = new() { Gender = Gender.Male };
     internal CompanyDto? _mfCompany;
+    internal bool _manualSubmitted;
     internal List<NationalityEntityDto> _mfNationalities = new();
     internal List<CareerDto> _mfCareers = new();
     internal string _processingMessage = "";
@@ -59,6 +60,29 @@ public partial class Import : ComponentBase, IFeaturePage
     internal List<ColumnMapping> _columnMappings = new();
     internal bool _saveTemplate;
     internal string _templateName = "";
+
+    internal IReadOnlyList<(string Key, string Label)> MissingRequiredMappings =>
+        IRM.Application.Features.ImportExport.ImportMapping.GetMissingRequiredFields(_columnMappings);
+
+    internal static bool IsRequiredSystemField(string? key) =>
+        !string.IsNullOrWhiteSpace(key) &&
+        IRM.Features.ImportExport.Help.ImportFieldHelpCatalog.All.TryGetValue(key, out var entry) &&
+        entry.IsRequired;
+
+    internal IReadOnlyList<string> GetMissingManualEntryFields()
+    {
+        var missing = new List<string>();
+        if (string.IsNullOrWhiteSpace(_mf.StaffName)) missing.Add("Họ tên");
+        if (!_mf.Birthday.HasValue) missing.Add("Ngày sinh");
+        if (string.IsNullOrWhiteSpace(_mf.Nationality)) missing.Add("Quốc tịch");
+        if (string.IsNullOrWhiteSpace(_mf.Passport)) missing.Add("Số hộ chiếu");
+        if (_mf.IDCompany == 0) missing.Add("Công ty");
+        if (_mf.IDCareer is null or <= 0) missing.Add("Nghề nghiệp");
+        if (string.IsNullOrWhiteSpace(_mf.VisaNumber)) missing.Add("Số Visa");
+        if (string.IsNullOrWhiteSpace(_mf.Address)) missing.Add("Địa chỉ");
+        if (!_mf.TemporaryStay.HasValue) missing.Add("Hạn tạm trú");
+        return missing;
+    }
 
     // Step 3
     internal List<ImportPreviewRowDto> _previewRows = new();
@@ -191,6 +215,14 @@ public partial class Import : ComponentBase, IFeaturePage
     internal async Task GoToStep3()
     {
         if (_fileStream == null) return;
+
+        var missingRequired = MissingRequiredMappings;
+        if (missingRequired.Count > 0)
+        {
+            Snackbar.Add(
+                $"Cảnh báo: Còn thiếu {missingRequired.Count} trường bắt buộc chưa ghép cột ({string.Join(", ", missingRequired.Select(m => m.Label))}).",
+                Severity.Warning);
+        }
 
         _isProcessing = true;
         _processingMessage = "Đang phân tích dữ liệu và kiểm tra trùng lặp...";
@@ -356,14 +388,11 @@ public partial class Import : ComponentBase, IFeaturePage
 
     internal async Task SaveManualEntryAsync()
     {
-        if (string.IsNullOrWhiteSpace(_mf.StaffName))
+        _manualSubmitted = true;
+        var missing = GetMissingManualEntryFields();
+        if (missing.Any())
         {
-            Snackbar.Add("Họ tên không được trống", Severity.Error);
-            return;
-        }
-        if (_mf.IDCompany == 0)
-        {
-            Snackbar.Add("Chưa chọn công ty", Severity.Error);
+            Snackbar.Add($"Vui lòng nhập đầy đủ các trường bắt buộc: {string.Join(", ", missing)}", Severity.Warning);
             return;
         }
 
@@ -394,6 +423,7 @@ public partial class Import : ComponentBase, IFeaturePage
     {
         _mf = new EmployeeDto { Gender = Gender.Male };
         _mfCompany = null;
+        _manualSubmitted = false;
     }
 
     internal async Task DownloadSampleFile()

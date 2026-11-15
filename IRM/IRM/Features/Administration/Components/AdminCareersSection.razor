@@ -4,10 +4,16 @@
 <MudPaper Class="pa-4 mb-4">
                 <MudGrid>
                     <MudItem xs="12" md="4">
-                        <MudTextField T="string" Label="Tên ngành nghề" @bind-Value="Page._careerForm.CareerName" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Tên ngành nghề *" @bind-Value="Page._careerForm.CareerName" Variant="Variant.Outlined"
+                                      Required="true" RequiredError="Bắt buộc nhập tên ngành nghề"
+                                      Error="@(Page._careerSubmitted && string.IsNullOrWhiteSpace(Page._careerForm.CareerName))"
+                                      ErrorText="Bắt buộc nhập tên ngành nghề" />
                     </MudItem>
                     <MudItem xs="12" md="4">
-                        <MudSelect T="int" Label="Nhóm ngành" @bind-Value="Page._careerForm.IDCG" Variant="Variant.Outlined">
+                        <MudSelect T="int" Label="Nhóm ngành *" @bind-Value="Page._careerForm.IDCG" Variant="Variant.Outlined"
+                                   Required="true" RequiredError="Bắt buộc chọn nhóm ngành"
+                                   Error="@(Page._careerSubmitted && Page._careerForm.IDCG <= 0)"
+                                   ErrorText="Bắt buộc chọn nhóm ngành">
                             @foreach (var group in Page._careerGroups)
                             {
                                 <MudSelectItem Value="@group.IDCG">@group.CareerGroupName</MudSelectItem>
@@ -16,14 +22,14 @@
                     </MudItem>
                     <MudItem xs="12" md="4" Class="d-flex align-center">
                         <MudStack Row="true" Spacing="1">
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.SaveCareerAsync">@(Page._editingCareer ? "Luu" : "Them")</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.SaveCareerAsync">@(Page._editingCareer ? "Lưu" : "Thêm")</MudButton>
                             <MudButton Variant="Variant.Text" OnClick="Page.ResetCareerForm">Hủy</MudButton>
                         </MudStack>
                     </MudItem>
                 </MudGrid>
             </MudPaper>
             <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
-                <thead><tr><th>ID</th><th>Ten nganh nghe</th><th>Nhom</th><th></th></tr></thead>
+                <thead><tr><th>ID</th><th>Tên ngành nghề</th><th>Nhóm</th><th></th></tr></thead>
                 <tbody>
                     @foreach (var c in Page._careers)
                     {

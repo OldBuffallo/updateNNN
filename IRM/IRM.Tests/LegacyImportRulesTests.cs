@@ -56,12 +56,24 @@ public class LegacyImportRulesTests
     [InlineData("31/02/2026")]
     [InlineData("2026-06-03")]
     [InlineData("06/13/2026")]
+    [InlineData("01/01/1899")]
+    [InlineData("01/01/0001")]
+    [InlineData("01/01/2100")]
     [InlineData("abc")]
     [InlineData("")]
     [InlineData(null)]
     public void Date_RejectsAnythingElse(string? text)
     {
         Assert.False(LegacyImportRules.TryParseLegacyDate(text, out _));
+    }
+
+    [Theory]
+    [InlineData("01/01/1900", 1900, 1, 1)]
+    [InlineData("31/12/2099", 2099, 12, 31)]
+    public void Date_AcceptsLegacy1900To2099Boundaries(string text, int y, int m, int d)
+    {
+        Assert.True(LegacyImportRules.TryParseLegacyDate(text, out var value));
+        Assert.Equal(new DateTime(y, m, d), value);
     }
 
     [Theory]
@@ -106,5 +118,50 @@ public class LegacyImportRulesTests
     public void RemoveDiacritics_HandlesVietnameseAndHiddenChars(string text, string expected)
     {
         Assert.Equal(expected, LegacyImportRules.RemoveDiacritics(text));
+    }
+
+    [Fact]
+    public void SameAs13Fields_IsCaseDiacriticAndBlankInsensitiveLikeLegacy()
+    {
+        var existing = new IRM.Data.Models.Employee
+        {
+            StaffName = "Nguyễn Văn A",
+            Gender = IRM.Data.Models.Gender.Male,
+            Birthday = new DateTime(1990, 5, 1),
+            Nationality = "CHN",
+            Passport = "e123456",
+            Address = "12 Lê Duẩn, Hải Châu",
+            IDCareer = 1,
+            WorkPermit = IRM.Data.Models.WorkPermitType.WorkerExempt,
+            WorkPermitNumber = " ",
+            VisaNumber = "dn1",
+            TemporaryStay = new DateTime(2028, 5, 29),
+            SettlementResults = 2,
+            SettlementResultsString = "TTT: DN1 03/06/2026-29/05/2028",
+            Note = null
+        };
+
+        var importedSame = new IRM.Data.Models.Employee
+        {
+            StaffName = "NGUYEN VAN A",
+            Gender = IRM.Data.Models.Gender.Male,
+            Birthday = new DateTime(1990, 5, 1),
+            Nationality = "chn",
+            Passport = "E123456",
+            Address = "12 LE DUAN, HAI CHAU",
+            IDCareer = 1,
+            WorkPermit = IRM.Data.Models.WorkPermitType.WorkerExempt,
+            WorkPermitNumber = "",
+            VisaNumber = "DN1",
+            TemporaryStay = new DateTime(2028, 5, 29),
+            SettlementResults = 2,
+            SettlementResultsString = "ttt: dn1 03/06/2026-29/05/2028",
+            Note = "   "
+        };
+
+        Assert.True(LegacyImportRules.SameAs13Fields(existing, importedSame));
+
+        importedSame.StaffName = "Nguyễn Văn B";
+        Assert.False(LegacyImportRules.SameAs13Fields(existing, importedSame));
     }
 }

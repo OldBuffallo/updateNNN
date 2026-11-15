@@ -2,16 +2,36 @@
 @inherits IRM.Components.Shared.FeatureSection<Admin>
 
 <MudPaper Class="pa-4 mb-4">
+                @if (string.IsNullOrWhiteSpace(Page._nationalityForm.NationalityCode) || string.IsNullOrWhiteSpace(Page._nationalityForm.NationalityName))
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3">
+                        Các trường có dấu <strong>*</strong> là bắt buộc. Mã quốc tịch theo chuẩn dự án cũ gồm <strong>3 chữ cái viết hoa</strong> (VD: CHN, KOR, JPN, USA).
+                    </MudAlert>
+                }
+                else if (!IRM.Application.Features.ImportExport.LegacyImportRules.IsValidNationalityCode(Page._nationalityForm.NationalityCode))
+                {
+                    <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
+                        Cảnh báo: Mã quốc tịch phải gồm đúng <strong>3 chữ cái</strong> (VD: CHN, KOR, USA).
+                    </MudAlert>
+                }
                 <MudGrid>
                     <MudItem xs="12" md="3">
-                        <MudTextField T="string" Label="Mã quốc tịch" @bind-Value="Page._nationalityForm.NationalityCode" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Mã quốc tịch *" @bind-Value="Page._nationalityForm.NationalityCode"
+                                      Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập mã quốc tịch"
+                                      MaxLength="3" HelperText="Bắt buộc — 3 chữ cái (VD: CHN, KOR, USA)"
+                                      Error="@((Page._nationalitySubmitted && string.IsNullOrWhiteSpace(Page._nationalityForm.NationalityCode)) || (!string.IsNullOrWhiteSpace(Page._nationalityForm.NationalityCode) && !IRM.Application.Features.ImportExport.LegacyImportRules.IsValidNationalityCode(Page._nationalityForm.NationalityCode)))"
+                                      ErrorText="@(string.IsNullOrWhiteSpace(Page._nationalityForm.NationalityCode) ? "Bắt buộc nhập mã quốc tịch" : "Mã quốc tịch phải gồm đúng 3 chữ cái viết hoa (VD: CHN, KOR, USA)")" />
                     </MudItem>
                     <MudItem xs="12" md="6">
-                        <MudTextField T="string" Label="Tên quốc tịch" @bind-Value="Page._nationalityForm.NationalityName" Variant="Variant.Outlined" />
+                        <MudTextField T="string" Label="Tên quốc tịch *" @bind-Value="Page._nationalityForm.NationalityName"
+                                      Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập tên quốc tịch"
+                                      HelperText="Bắt buộc — Tên quốc tịch tiếng Việt"
+                                      Error="@(Page._nationalitySubmitted && string.IsNullOrWhiteSpace(Page._nationalityForm.NationalityName))"
+                                      ErrorText="Bắt buộc nhập tên quốc tịch" />
                     </MudItem>
                     <MudItem xs="12" md="3" Class="d-flex align-center">
                         <MudStack Row="true" Spacing="1">
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.SaveNationalityAsync">@(Page._editingNationality ? "Luu" : "Them")</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Page.SaveNationalityAsync">@(Page._editingNationality ? "Lưu" : "Thêm")</MudButton>
                             <MudButton Variant="Variant.Text" OnClick="Page.ResetNationalityForm">Hủy</MudButton>
                         </MudStack>
                     </MudItem>

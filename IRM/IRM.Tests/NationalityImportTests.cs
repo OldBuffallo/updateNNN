@@ -8,7 +8,7 @@ namespace IRM.Tests;
 public sealed class NationalityImportTests
 {
     [Theory]
-    [InlineData("CHN")]
+    [InlineData("ZZZ")]
     [InlineData("China")]
     [InlineData("Quốc tịch chưa khai báo")]
     public async Task Preview_RejectsUnknownNationalityBeforeSqlWrite(string nationality)
@@ -29,7 +29,8 @@ public sealed class NationalityImportTests
     }
 
     [Theory]
-    [InlineData(" cn ")]
+    [InlineData(" chn ")]
+    [InlineData("CN")]
     [InlineData("Trung Quốc")]
     [InlineData("  Trung\u00a0Quo\u0302\u0301c  ")]
     public async Task PreviewAndExecute_UseExistingCatalogKey(string nationality)
@@ -43,12 +44,12 @@ public sealed class NationalityImportTests
 
         var row = Assert.Single(rows);
         Assert.Equal("new", row.Status);
-        Assert.Equal("CN", row.ParsedEmployee!.Nationality);
+        Assert.Equal("CHN", row.ParsedEmployee!.Nationality);
         var result = await service.ExecuteImportAsync(rows, [], 1, "nationality.xlsx");
 
         Assert.True(result.Success, string.Join("; ", result.Errors));
         db.Context.ChangeTracker.Clear();
-        Assert.Equal("CN", (await db.Context.Employees.SingleAsync()).Nationality);
+        Assert.Equal("CHN", (await db.Context.Employees.SingleAsync()).Nationality);
     }
 
     [Fact]
@@ -57,10 +58,10 @@ public sealed class NationalityImportTests
         await using var db = new TestDatabase();
         await InitializeCatalogAsync(db);
         var service = CreateService(db);
-        using var stream = CreateWorkbook("CN");
+        using var stream = CreateWorkbook("CHN");
         var rows = await service.GeneratePreviewAsync(stream,
             service.AutoMapColumns(ExcelReaderHelper.ReadHeaders(stream)), 1);
-        var nationality = await db.Context.Nationality.SingleAsync(n => n.NationalityCode == "CN");
+        var nationality = await db.Context.Nationality.SingleAsync(n => n.NationalityCode == "CHN");
         nationality.Delete_flag = 1;
         await db.Context.SaveChangesAsync();
         rows.Insert(0, new ImportPreviewRow { RowNumber = 1, Status = "new",
@@ -69,7 +70,7 @@ public sealed class NationalityImportTests
         var result = await service.ExecuteImportAsync(rows, [], 1, "changed-catalog.xlsx");
 
         Assert.False(result.Success);
-        Assert.Contains(result.Errors, error => error.Contains("Quốc tịch") && error.Contains("CN"));
+        Assert.Contains(result.Errors, error => error.Contains("Quốc tịch") && error.Contains("CHN"));
         Assert.Contains(result.Errors, error => error.Contains($"Dòng {rows[1].RowNumber}:"));
         db.Context.ChangeTracker.Clear();
         Assert.Empty(await db.Context.Employees.ToListAsync());
@@ -82,11 +83,11 @@ public sealed class NationalityImportTests
     {
         await using var db = new TestDatabase();
         await InitializeCatalogAsync(db);
-        var nationality = await db.Context.Nationality.SingleAsync(n => n.NationalityCode == "CN");
+        var nationality = await db.Context.Nationality.SingleAsync(n => n.NationalityCode == "CHN");
         nationality.Delete_flag = 1;
         await db.Context.SaveChangesAsync();
         var service = CreateService(db);
-        using var stream = CreateWorkbook("CN");
+        using var stream = CreateWorkbook("CHN");
 
         var rows = await service.GeneratePreviewAsync(stream,
             service.AutoMapColumns(ExcelReaderHelper.ReadHeaders(stream)), 1);
@@ -108,12 +109,27 @@ public sealed class NationalityImportTests
         Assert.Throws<InvalidOperationException>(() => ImportMapping.ResolveNationalityCode("CN", catalog));
     }
 
+    [Theory]
+    [InlineData("CHN", true)]
+    [InlineData("usa", true)]
+    [InlineData(" Kor ", true)]
+    [InlineData("CN", false)]
+    [InlineData("VN", false)]
+    [InlineData("US_CUSTOM", false)]
+    [InlineData("123", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void IsValidNationalityCode_EnforcesThreeAsciiLetters(string? code, bool expected)
+    {
+        Assert.Equal(expected, LegacyImportRules.IsValidNationalityCode(code));
+    }
+
     private static async Task InitializeCatalogAsync(TestDatabase db)
     {
         await db.InitializeAsync();
-        // Match a fresh production catalog: CN exists, CHN/China do not.
+        // Match a 3-letter production catalog: CHN exists, unseeded codes do not.
         db.Context.Nationality.RemoveRange(await db.Context.Nationality
-            .Where(n => n.NationalityCode != "CN").ToListAsync());
+            .Where(n => n.NationalityCode != "CHN").ToListAsync());
         db.Context.Wards.Add(new() { WardName = "Hải Châu" });
         await db.Context.SaveChangesAsync();
     }

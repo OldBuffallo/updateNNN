@@ -55,20 +55,18 @@ internal sealed class TestDatabase : IAsyncDisposable
                 new NationalityEntity { NationalityCode = "USA", NationalityName = "Hoa Kỳ" },
                 new NationalityEntity { NationalityCode = "GBR", NationalityName = "Vương quốc Anh" },
                 new NationalityEntity { NationalityCode = "CHN", NationalityName = "Trung Quốc" },
-                new NationalityEntity { NationalityCode = "CN", NationalityName = "Trung Quốc" },
-                new NationalityEntity { NationalityCode = "KR", NationalityName = "Hàn Quốc" },
                 new NationalityEntity { NationalityCode = "KOR", NationalityName = "Hàn Quốc" },
-                new NationalityEntity { NationalityCode = "JP", NationalityName = "Nhật Bản" },
                 new NationalityEntity { NationalityCode = "JPN", NationalityName = "Nhật Bản" },
-                new NationalityEntity { NationalityCode = "VN", NationalityName = "Việt Nam" },
-                new NationalityEntity { NationalityCode = "LA", NationalityName = "Lào" },
-                new NationalityEntity { NationalityCode = "KH", NationalityName = "Campuchia" },
-                new NationalityEntity { NationalityCode = "TH", NationalityName = "Thái Lan" },
-                new NationalityEntity { NationalityCode = "ID", NationalityName = "Indonesia" },
-                new NationalityEntity { NationalityCode = "IN", NationalityName = "Ấn Độ" },
-                new NationalityEntity { NationalityCode = "MY", NationalityName = "Malaysia" },
-                new NationalityEntity { NationalityCode = "PH", NationalityName = "Philippines" },
-                new NationalityEntity { NationalityCode = "TW", NationalityName = "Đài Loan" }
+                new NationalityEntity { NationalityCode = "VNM", NationalityName = "Việt Nam" },
+                new NationalityEntity { NationalityCode = "VN", NationalityName = "Việt Nam (Legacy)" },
+                new NationalityEntity { NationalityCode = "LAO", NationalityName = "Lào" },
+                new NationalityEntity { NationalityCode = "KHM", NationalityName = "Campuchia" },
+                new NationalityEntity { NationalityCode = "THA", NationalityName = "Thái Lan" },
+                new NationalityEntity { NationalityCode = "IDN", NationalityName = "Indonesia" },
+                new NationalityEntity { NationalityCode = "IND", NationalityName = "Ấn Độ" },
+                new NationalityEntity { NationalityCode = "MYS", NationalityName = "Malaysia" },
+                new NationalityEntity { NationalityCode = "PHL", NationalityName = "Philippines" },
+                new NationalityEntity { NationalityCode = "TWN", NationalityName = "Đài Loan" }
             );
             await Context.SaveChangesAsync();
         }

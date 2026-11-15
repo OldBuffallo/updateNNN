@@ -199,8 +199,31 @@ public class LegacyImportLookupRulesTests
         var careers = Careers();
 
         Assert.True(LegacyImportRules.IsRelativeCareer(careers.Single(c => c.IDCareer == 14)));
+        Assert.True(LegacyImportRules.IsRelativeCareer(new Career
+        {
+            IDCareer = 11,
+            CareerName = "Thân nhân",
+            IDCG = 5,
+            CareerGroup = new CareerGroup { IDCG = 5, CareerGroupName = "Khác" }
+        }));
         Assert.False(LegacyImportRules.IsRelativeCareer(careers.Single(c => c.IDCareer == 3038)));
         Assert.False(LegacyImportRules.IsRelativeCareer(
             new Career { IDCareer = 1, CareerName = "Thân nhân", IDCG = 7 }));
+    }
+
+    [Fact]
+    public void ResolveNationality_HandlesThreeLetterCodesAndErrorsWithRowNumber()
+    {
+        List<NationalityEntity> catalog = [new() { NationalityCode = "KOR", NationalityName = "Hàn Quốc" }];
+
+        Assert.Equal("KOR", LegacyImportRules.ResolveNationality("kor", catalog, 9));
+        Assert.Equal("KOR", LegacyImportRules.ResolveNationality("kr", catalog, 9));
+        Assert.Equal("KOR", LegacyImportRules.ResolveNationality("Han Quoc", catalog, 9));
+
+        var missing = Assert.Throws<ImportRowException>(() => LegacyImportRules.ResolveNationality(" ", catalog, 9));
+        Assert.Equal("Lỗi đọc quốc tịch tại dòng 9", missing.Message);
+
+        var unknown = Assert.Throws<ImportRowException>(() => LegacyImportRules.ResolveNationality("ZZZ", catalog, 9));
+        Assert.Equal("Quốc tịch ZZZ chưa có trong dữ liệu. Vui lòng thêm quốc tịch tại dòng 9", unknown.Message);
     }
 }

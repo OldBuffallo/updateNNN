@@ -34,7 +34,7 @@ public partial class SqlImportStore
 
         // Cache dữ liệu lookup
         var nationalities = await _db.Nationality.Where(n => n.Delete_flag == 0).ToListAsync();
-        var careers = await _db.Careers.Where(c => c.Delete_flag == 0).ToListAsync();
+        var careers = await _db.Careers.Include(c => c.CareerGroup).Where(c => c.Delete_flag == 0).ToListAsync();
         var wards = await _db.Wards.Where(w => w.Delete_flag == 0).Select(w => w.WardName).ToListAsync();
         var investors = await _db.Investments.AsNoTracking().ToListAsync();
         var groups = await _db.CareerGroups.Select(g => g.IDCG).ToListAsync();

@@ -5,6 +5,26 @@ namespace IRM.Application.Features.ImportExport;
 
 public static class ImportMapping
 {
+    /// <summary>9 trường bắt buộc của hồ sơ nhân viên khi import từ Excel (khớp WPF cũ).</summary>
+    public static readonly IReadOnlyList<string> RequiredCoreFields =
+    [
+        "StaffName", "Passport", "Gender", "Birthday", "Nationality",
+        "Address", "Career", "VisaNumber", "TemporaryStay"
+    ];
+
+    /// <summary>Trả về danh sách (Key, Label) các trường bắt buộc chưa được ghép cột.</summary>
+    public static IReadOnlyList<(string Key, string Label)> GetMissingRequiredFields(IEnumerable<ColumnMapping>? mappings)
+    {
+        var mapped = (mappings ?? [])
+            .Where(m => !string.IsNullOrWhiteSpace(m.SystemField) && m.SystemField != "skip")
+            .Select(m => m.SystemField)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        return RequiredCoreFields
+            .Where(req => !mapped.Contains(req))
+            .Select(req => (Key: req, Label: SystemFields.All.GetValueOrDefault(req, req)))
+            .ToList();
+    }
 
     // ══════════════════════════════════════════
     // AUTO-MAP COLUMNS
@@ -126,8 +146,6 @@ public static class ImportMapping
         try { nationalityCode = ResolveNationalityCode(nationality, nationalities); }
         catch (InvalidOperationException) { throw Error($"Quốc tịch {nationality} chưa có trong dữ liệu. Vui lòng thêm quốc tịch"); }
         if (!LegacyImportRules.AddressEndsWithWard(address, wards)) throw Error("Địa chỉ không có phường/ xã trong lưu trữ. Vui lòng kiểm tra lại");
-        var careerId = LegacyImportRules.FindCareerId(career, careerGroupId, careers);
-        if (!careerId.HasValue) throw Error("Nghề nghiệp chưa có trong dữ liệu. Vui lòng thêm nghề nghiệp");
         var combinedPermit = Value("WorkPermit");
         var separatePermit = Value("WorkPermitNumber");
         // A separate number is an explicit IRM extension; absence keeps WPF blank semantics.
@@ -135,6 +153,16 @@ public static class ImportMapping
         var (permit, number) = LegacyImportRules.ParseWorkPermit(combinedPermit, investorPassports.Contains(passport));
         if (separatePermit.Length > 0 && (permit is not (1 or 4) || number != separatePermit))
             throw Error("Cột GPLĐ và Số GPLĐ không thống nhất");
+        var careerId = LegacyImportRules.FindCareerId(career, careerGroupId, careers);
+        if (!careerId.HasValue && permit == LegacyImportRules.WorkPermitOther &&
+            LegacyImportRules.RemoveDiacritics(career).Equals("THAN NHAN", StringComparison.OrdinalIgnoreCase))
+        {
+            careerId = careers.Where(c => c.Delete_flag == 0 && LegacyImportRules.IsRelativeCareer(c))
+                .OrderBy(c => c.IDCareer)
+                .Select(c => (int?)c.IDCareer)
+                .FirstOrDefault();
+        }
+        if (!careerId.HasValue) throw Error("Nghề nghiệp chưa có trong dữ liệu. Vui lòng thêm nghề nghiệp");
         if (LegacyImportRules.IsRelativeCareer(careers.First(c => c.IDCareer == careerId))) { permit = 6; number = ""; }
         else if (permit == 6)
         {
@@ -183,26 +211,8 @@ public static class ImportMapping
         return emp;
     }
 
-    public static string? ResolveNationalityCode(string? value, IReadOnlyCollection<NationalityEntity> nationalities)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        var normalized = NormalizeNationality(value);
-        var active = nationalities.Where(n => n.Delete_flag == 0).ToList();
-        // Preserve the actual database key, including legacy/custom codes.
-        var byCode = active.FirstOrDefault(n =>
-            NormalizeNationality(n.NationalityCode).Equals(normalized, StringComparison.OrdinalIgnoreCase));
-        if (byCode is not null) return byCode.NationalityCode;
-
-        var byName = active.FirstOrDefault(n =>
-            NormalizeNationality(n.NationalityName).Equals(normalized, StringComparison.OrdinalIgnoreCase));
-        if (byName is not null) return byName.NationalityCode;
-
-        throw new InvalidOperationException($"Quốc tịch \"{value.Trim()}\" không có trong danh mục đang hoạt động. Hãy dùng đúng tên hoặc mã tại Quản trị → Quốc tịch.");
-    }
-
-    private static string NormalizeNationality(string value) =>
-        string.Join(" ", LegacyImportRules.RemoveDiacritics(value)
-            .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+    public static string? ResolveNationalityCode(string? value, IReadOnlyCollection<NationalityEntity> nationalities) =>
+        LegacyImportRules.ResolveNationalityCode(value, nationalities);
 
     /// <summary>Parse date dạng dd/MM/yyyy</summary>
     private static bool TryParseVietnameseDate(string input, out DateTime result)

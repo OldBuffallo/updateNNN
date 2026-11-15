@@ -8,10 +8,16 @@
     </MudText>
     <MudGrid>
         <MudItem xs="12" md="2">
-            <MudTextField T="string" Label="Mã" @bind-Value="Page._adminUnitForm.Code" Variant="Variant.Outlined" />
+            <MudTextField T="string" Label="Mã *" @bind-Value="Page._adminUnitForm.Code" Variant="Variant.Outlined"
+                          Required="true" RequiredError="Bắt buộc nhập mã địa bàn"
+                          Error="@(Page._adminUnitSubmitted && string.IsNullOrWhiteSpace(Page._adminUnitForm.Code))"
+                          ErrorText="Bắt buộc nhập mã địa bàn" />
         </MudItem>
         <MudItem xs="12" md="3">
-            <MudTextField T="string" Label="Tên địa bàn" @bind-Value="Page._adminUnitForm.Name" Variant="Variant.Outlined" />
+            <MudTextField T="string" Label="Tên địa bàn *" @bind-Value="Page._adminUnitForm.Name" Variant="Variant.Outlined"
+                          Required="true" RequiredError="Bắt buộc nhập tên địa bàn"
+                          Error="@(Page._adminUnitSubmitted && string.IsNullOrWhiteSpace(Page._adminUnitForm.Name))"
+                          ErrorText="Bắt buộc nhập tên địa bàn" />
         </MudItem>
         <MudItem xs="12" md="2">
             <MudSelect T="string" Label="Loại" @bind-Value="Page._adminUnitForm.TypeCode" Variant="Variant.Outlined">

@@ -102,6 +102,19 @@ public class LegacyImportEndToEndTests
         Assert.Equal("", employee.WorkPermitNumber);
     }
 
+    [Fact]
+    public void RelativePermitWithRelativeCareerName_ResolvesEvenWhenSelectedCareerGroupIsNotOther()
+    {
+        var row = ValidRow();
+        row["WorkPermit"] = "Khác";
+        row["Career"] = "Thân nhân";
+
+        var employee = Parse(row);
+        Assert.Equal(6, (int)employee.WorkPermit);
+        Assert.Equal(14, employee.IDCareer);
+        Assert.Equal("", employee.WorkPermitNumber);
+    }
+
     internal static MemoryStream Workbook(IEnumerable<Dictionary<string, string>> rows, int startRow = 9)
     {
         using var book = new XLWorkbook(); var sheet = book.AddWorksheet("WPF");

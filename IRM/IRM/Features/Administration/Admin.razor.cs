@@ -44,20 +44,27 @@ public partial class Admin : ComponentBase, IFeaturePage
 
     internal AccountDto _accountForm = new();
     internal bool _editingAccount;
+    internal bool _accountSubmitted;
     internal FieldDto _fieldForm = new();
     internal bool _editingField;
+    internal bool _fieldSubmitted;
     internal CareerDto _careerForm = new();
     internal bool _editingCareer;
+    internal bool _careerSubmitted;
     internal NationalityEntityDto _nationalityForm = new();
     internal bool _editingNationality;
+    internal bool _nationalitySubmitted;
     internal DistrictDto _districtForm = new();
     internal bool _editingDistrict;
+    internal bool _districtSubmitted;
     internal WardDto _wardForm = new();
     internal bool _editingWard;
+    internal bool _wardSubmitted;
 
     internal List<AdministrativeUnitDto> _adminUnits = new();
     internal AdministrativeUnitDto _adminUnitForm = new() { ValidFrom = DateTime.Today };
     internal bool _editingAdminUnit;
+    internal bool _adminUnitSubmitted;
     internal string _adminUnitTypeFilter = "";
 
     internal string? _auditFilterUsername;

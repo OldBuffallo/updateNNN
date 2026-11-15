@@ -165,13 +165,13 @@ else if (!_loading)
     <TitleContent><MudText Typo="Typo.h6" Style="font-weight:700;">@(_dlgEditing ? "Sửa du học sinh" : "Thêm du học sinh")</MudText></TitleContent>
     <DialogContent>
         <MudGrid Spacing="3">
-            <MudItem xs="12" md="6"><MudTextField T="string" Label="Họ tên *" @bind-Value="_f.FullName" Variant="Variant.Outlined" Required="true" /></MudItem>
+            <MudItem xs="12" md="6"><MudTextField T="string" Label="Họ tên *" @bind-Value="_f.FullName" Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập họ tên" Error="@(_dlgSubmitted && string.IsNullOrWhiteSpace(_f.FullName))" ErrorText="Bắt buộc nhập họ tên" /></MudItem>
             <MudItem xs="6" md="3"><MudSelect T="Gender" Label="Giới tính" @bind-Value="_f.Gender" Variant="Variant.Outlined"><MudSelectItem Value="Gender.Male">Nam</MudSelectItem><MudSelectItem Value="Gender.Female">Nữ</MudSelectItem></MudSelect></MudItem>
             <MudItem xs="6" md="3"><MudDatePicker Label="Ngày sinh" @bind-Date="_f.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
-            <MudItem xs="6" md="4"><MudSelect T="string" Label="Quốc tịch" @bind-Value="_f.Nationality" Variant="Variant.Outlined" Clearable="true">@foreach(var n in _nationalities){<MudSelectItem Value="@n.NationalityCode">@n.NationalityName</MudSelectItem>}</MudSelect></MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="string" Label="Quốc tịch" @bind-Value="_f.Nationality" Variant="Variant.Outlined" Clearable="true">@foreach(var n in _nationalities){<MudSelectItem Value="@n.NationalityCode">@n.NationalityName (@n.NationalityCode)</MudSelectItem>}</MudSelect></MudItem>
             <MudItem xs="6" md="4"><MudTextField T="string" Label="Số hộ chiếu" @bind-Value="_f.Passport" Variant="Variant.Outlined" /></MudItem>
             <MudItem xs="12" md="4"><MudTextField T="string" Label="Địa chỉ tại VN" @bind-Value="_f.Address" Variant="Variant.Outlined" /></MudItem>
-            <MudItem xs="12" md="6"><MudTextField T="string" Label="Trường *" @bind-Value="_f.SchoolName" Variant="Variant.Outlined" Required="true" /></MudItem>
+            <MudItem xs="12" md="6"><MudTextField T="string" Label="Trường *" @bind-Value="_f.SchoolName" Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập tên trường" Error="@(_dlgSubmitted && string.IsNullOrWhiteSpace(_f.SchoolName))" ErrorText="Bắt buộc nhập tên trường" /></MudItem>
             <MudItem xs="6" md="3"><MudTextField T="string" Label="Ngành học" @bind-Value="_f.Major" Variant="Variant.Outlined" /></MudItem>
             <MudItem xs="6" md="3"><MudTextField T="string" Label="Mã sinh viên" @bind-Value="_f.StudentCode" Variant="Variant.Outlined" /></MudItem>
             <MudItem xs="6" md="3"><MudSelect T="EducationLevel" Label="Trình độ" @bind-Value="_f.EducationLevel" Variant="Variant.Outlined"><MudSelectItem Value="EducationLevel.University">Đại học</MudSelectItem><MudSelectItem Value="EducationLevel.Master">Thạc sĩ</MudSelectItem><MudSelectItem Value="EducationLevel.Doctorate">Tiến sĩ</MudSelectItem><MudSelectItem Value="EducationLevel.ShortTerm">Ngắn hạn</MudSelectItem><MudSelectItem Value="EducationLevel.Other">Khác</MudSelectItem></MudSelect></MudItem>
@@ -187,7 +187,7 @@ else if (!_loading)
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Text" OnClick="@(() => _dlgVisible = false)">Hủy</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync" Disabled="@(string.IsNullOrWhiteSpace(_f.FullName))">@(_dlgEditing ? "Cập nhật" : "Thêm")</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAsync">@(_dlgEditing ? "Cập nhật" : "Thêm")</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -235,7 +235,7 @@ else if (!_loading)
     private EducationLevel? _fltEdu; private ScholarshipType? _fltScholarship; private StudentStatus? _fltStatus;
 
     // Dialog
-    private bool _dlgVisible; private bool _dlgEditing; private StudentDto _f = new(); private int _dlgEditId;
+    private bool _dlgVisible; private bool _dlgEditing; private bool _dlgSubmitted; private StudentDto _f = new(); private int _dlgEditId;
     private bool _detVisible; private StudentDto? _det;
     private List<NationalityEntityDto> _nationalities = new();
 
@@ -287,14 +287,14 @@ else if (!_loading)
 
     private void OpenAddDialog()
     {
-        _dlgEditing = false; _dlgEditId = 0;
+        _dlgEditing = false; _dlgSubmitted = false; _dlgEditId = 0;
         _f = new StudentDto { Gender = Gender.Male };
         _dlgVisible = true;
     }
 
     private void OpenEditDialog(StudentDto s)
     {
-        _dlgEditing = true; _dlgEditId = s.IDStudent;
+        _dlgEditing = true; _dlgSubmitted = false; _dlgEditId = s.IDStudent;
         _f = new StudentDto
         {
             FullName = s.FullName, Gender = s.Gender, Birthday = s.Birthday,
@@ -310,11 +310,14 @@ else if (!_loading)
 
     private async Task SaveAsync()
     {
+        _dlgSubmitted = true;
         if (string.IsNullOrWhiteSpace(_f.FullName)) { Snackbar.Add("Họ tên không được trống", Severity.Error); return; }
+        if (string.IsNullOrWhiteSpace(_f.SchoolName)) { Snackbar.Add("Tên trường không được trống", Severity.Error); return; }
         try
         {
             if (_dlgEditing) { _f.IDStudent = _dlgEditId; await StudentSvc.UpdateAsync(_f); Snackbar.Add($"Đã cập nhật \"{_f.FullName}\"", Severity.Success); }
             else { await StudentSvc.CreateAsync(_f); Snackbar.Add($"Đã thêm \"{_f.FullName}\"", Severity.Success); }
+            _dlgSubmitted = false;
             _dlgVisible = false; await LoadAllAsync();
         }
         catch (Exception ex) { Snackbar.Add($"Lỗi: {ex.Message}", Severity.Error); }

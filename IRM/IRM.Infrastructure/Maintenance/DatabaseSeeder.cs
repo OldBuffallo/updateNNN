@@ -9,6 +9,49 @@ namespace IRM.Data;
 /// </summary>
 public static class DatabaseSeeder
 {
+    private static readonly (string Iso2, string Iso3, string Name)[] DefaultNationalities =
+    [
+        // Đông Á & Đông Nam Á (phổ biến nhất với lao động nước ngoài tại VN)
+        ("CN", "CHN", "Trung Quốc"),
+        ("KR", "KOR", "Hàn Quốc"),
+        ("JP", "JPN", "Nhật Bản"),
+        ("TW", "TWN", "Đài Loan"),
+        ("IN", "IND", "Ấn Độ"),
+        ("MY", "MYS", "Malaysia"),
+        ("PH", "PHL", "Philippines"),
+        ("TH", "THA", "Thái Lan"),
+        ("ID", "IDN", "Indonesia"),
+        ("SG", "SGP", "Singapore"),
+        ("MM", "MMR", "Myanmar"),
+        ("LA", "LAO", "Lào"),
+        ("KH", "KHM", "Campuchia"),
+        ("BN", "BRN", "Brunei"),
+        // Châu Âu & Bắc Mỹ
+        ("US", "USA", "Hoa Kỳ"),
+        ("GB", "GBR", "Anh Quốc"),
+        ("FR", "FRA", "Pháp"),
+        ("DE", "DEU", "Đức"),
+        ("RU", "RUS", "Nga"),
+        ("IT", "ITA", "Ý"),
+        ("ES", "ESP", "Tây Ban Nha"),
+        ("CA", "CAN", "Canada"),
+        ("NL", "NLD", "Hà Lan"),
+        ("SE", "SWE", "Thụy Điển"),
+        ("DK", "DNK", "Đan Mạch"),
+        ("AU", "AUS", "Úc"),
+        ("NZ", "NZL", "New Zealand"),
+        // Nam Á & Trung Đông
+        ("BD", "BGD", "Bangladesh"),
+        ("PK", "PAK", "Pakistan"),
+        ("LK", "LKA", "Sri Lanka"),
+        ("NP", "NPL", "Nepal"),
+        // Châu Phi
+        ("NG", "NGA", "Nigeria"),
+        ("ZA", "ZAF", "Nam Phi"),
+        // Châu Mỹ Latinh
+        ("BR", "BRA", "Brazil")
+    ];
+
     public const string InitialCompanyName = "CÔNG TY MẪU - HÃY ĐỔI TÊN";
 
     /// <summary>
@@ -193,7 +236,8 @@ public static class DatabaseSeeder
                 new CareerGroup { CareerGroupName = "Quản lý" },
                 new CareerGroup { CareerGroupName = "Kỹ thuật" },
                 new CareerGroup { CareerGroupName = "Chuyên gia" },
-                new CareerGroup { CareerGroupName = "Lao động phổ thông" }
+                new CareerGroup { CareerGroupName = "Lao động phổ thông" },
+                new CareerGroup { CareerGroupName = "Khác" }
             );
             await db.SaveChangesAsync();
 
@@ -202,58 +246,30 @@ public static class DatabaseSeeder
             var kt = groups.First(g => g.CareerGroupName == "Kỹ thuật").IDCG;
             var cg = groups.First(g => g.CareerGroupName == "Chuyên gia").IDCG;
             var ld = groups.First(g => g.CareerGroupName == "Lao động phổ thông").IDCG;
+            var kh = groups.First(g => g.CareerGroupName == "Khác").IDCG;
             db.Careers.AddRange(
                 new Career { CareerName = "Giám đốc", IDCG = ql },
                 new Career { CareerName = "Kỹ sư", IDCG = kt },
                 new Career { CareerName = "Chuyên gia tư vấn", IDCG = cg },
-                new Career { CareerName = "Công nhân", IDCG = ld }
+                new Career { CareerName = "Công nhân", IDCG = ld },
+                new Career { CareerName = "Thân nhân", IDCG = kh }
             );
             await db.SaveChangesAsync();
+        }
+        else
+        {
+            await EnsureRelativeCareerGroupAsync(db);
         }
 
         if (!await db.Nationality.AnyAsync())
         {
-            db.Nationality.AddRange(
-                // Đông Á & Đông Nam Á (phổ biến nhất với lao động nước ngoài tại VN)
-                new NationalityEntity { NationalityCode = "CN", NationalityName = "Trung Quốc" },
-                new NationalityEntity { NationalityCode = "KR", NationalityName = "Hàn Quốc" },
-                new NationalityEntity { NationalityCode = "JP", NationalityName = "Nhật Bản" },
-                new NationalityEntity { NationalityCode = "TW", NationalityName = "Đài Loan" },
-                new NationalityEntity { NationalityCode = "IN", NationalityName = "Ấn Độ" },
-                new NationalityEntity { NationalityCode = "MY", NationalityName = "Malaysia" },
-                new NationalityEntity { NationalityCode = "PH", NationalityName = "Philippines" },
-                new NationalityEntity { NationalityCode = "TH", NationalityName = "Thái Lan" },
-                new NationalityEntity { NationalityCode = "ID", NationalityName = "Indonesia" },
-                new NationalityEntity { NationalityCode = "SG", NationalityName = "Singapore" },
-                new NationalityEntity { NationalityCode = "MM", NationalityName = "Myanmar" },
-                new NationalityEntity { NationalityCode = "LA", NationalityName = "Lào" },
-                new NationalityEntity { NationalityCode = "KH", NationalityName = "Campuchia" },
-                new NationalityEntity { NationalityCode = "BN", NationalityName = "Brunei" },
-                // Châu Âu & Bắc Mỹ
-                new NationalityEntity { NationalityCode = "US", NationalityName = "Hoa Kỳ" },
-                new NationalityEntity { NationalityCode = "GB", NationalityName = "Anh Quốc" },
-                new NationalityEntity { NationalityCode = "FR", NationalityName = "Pháp" },
-                new NationalityEntity { NationalityCode = "DE", NationalityName = "Đức" },
-                new NationalityEntity { NationalityCode = "RU", NationalityName = "Nga" },
-                new NationalityEntity { NationalityCode = "IT", NationalityName = "Ý" },
-                new NationalityEntity { NationalityCode = "ES", NationalityName = "Tây Ban Nha" },
-                new NationalityEntity { NationalityCode = "CA", NationalityName = "Canada" },
-                new NationalityEntity { NationalityCode = "NL", NationalityName = "Hà Lan" },
-                new NationalityEntity { NationalityCode = "SE", NationalityName = "Thụy Điển" },
-                new NationalityEntity { NationalityCode = "DK", NationalityName = "Đan Mạch" },
-                new NationalityEntity { NationalityCode = "AU", NationalityName = "Úc" },
-                new NationalityEntity { NationalityCode = "NZ", NationalityName = "New Zealand" },
-                // Nam Á & Trung Đông
-                new NationalityEntity { NationalityCode = "BD", NationalityName = "Bangladesh" },
-                new NationalityEntity { NationalityCode = "PK", NationalityName = "Pakistan" },
-                new NationalityEntity { NationalityCode = "LK", NationalityName = "Sri Lanka" },
-                new NationalityEntity { NationalityCode = "NP", NationalityName = "Nepal" },
-                // Châu Phi
-                new NationalityEntity { NationalityCode = "NG", NationalityName = "Nigeria" },
-                new NationalityEntity { NationalityCode = "ZA", NationalityName = "Nam Phi" },
-                // Châu Mỹ Latinh
-                new NationalityEntity { NationalityCode = "BR", NationalityName = "Brazil" });
+            db.Nationality.AddRange(DefaultNationalities.Select(item =>
+                new NationalityEntity { NationalityCode = item.Iso3, NationalityName = item.Name }));
             await db.SaveChangesAsync();
+        }
+        else
+        {
+            await UpgradeLegacySeededNationalitiesAsync(db);
         }
 
         if (!await db.Districts.AnyAsync())
@@ -353,7 +369,7 @@ public static class DatabaseSeeder
             .Select(a => a.IDUser)
             .FirstOrDefaultAsync();
         var nationalityCode = await db.Nationality
-            .Where(n => n.Delete_flag == 0 && (n.NationalityCode == "KR" || n.NationalityCode == "US"))
+            .Where(n => n.Delete_flag == 0 && (n.NationalityCode == "KOR" || n.NationalityCode == "USA"))
             .Select(n => n.NationalityCode)
             .FirstOrDefaultAsync()
             ?? await db.Nationality.Where(n => n.Delete_flag == 0).Select(n => n.NationalityCode).FirstOrDefaultAsync();
@@ -520,6 +536,71 @@ public static class DatabaseSeeder
             });
 
             await db.SaveChangesAsync();
+        }
+    }
+
+    private static async Task EnsureRelativeCareerGroupAsync(IrmDbContext db)
+    {
+        var groups = await db.CareerGroups.ToListAsync();
+        var otherGroup = groups.FirstOrDefault(g =>
+            IRM.Application.Features.ImportExport.LegacyImportRules.RemoveDiacritics(g.CareerGroupName)
+                .Equals("KHAC", StringComparison.OrdinalIgnoreCase));
+        if (otherGroup is null)
+        {
+            otherGroup = new CareerGroup { CareerGroupName = "Khác" };
+            db.CareerGroups.Add(otherGroup);
+            await db.SaveChangesAsync();
+        }
+
+        var hasRelative = await db.Careers.AnyAsync(c =>
+            c.Delete_flag == 0 && c.IDCG == otherGroup.IDCG && c.CareerName == "Thân nhân");
+        if (!hasRelative)
+        {
+            db.Careers.Add(new Career { CareerName = "Thân nhân", IDCG = otherGroup.IDCG });
+            await db.SaveChangesAsync();
+        }
+    }
+
+    private static async Task UpgradeLegacySeededNationalitiesAsync(IrmDbContext db)
+    {
+        var existing = await db.Nationality.ToListAsync();
+        var existingByCode = existing.ToDictionary(n => n.NationalityCode.Trim(), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (iso2, iso3, name) in DefaultNationalities)
+        {
+            if (!existingByCode.TryGetValue(iso2, out var legacyRow))
+                continue;
+
+            if (!existingByCode.ContainsKey(iso3))
+            {
+                var upgraded = new NationalityEntity
+                {
+                    NationalityCode = iso3,
+                    NationalityName = string.IsNullOrWhiteSpace(legacyRow.NationalityName) ? name : legacyRow.NationalityName,
+                    Delete_flag = legacyRow.Delete_flag
+                };
+                db.Nationality.Add(upgraded);
+                await db.SaveChangesAsync();
+                existingByCode[iso3] = upgraded;
+            }
+
+            foreach (var item in await db.Employees.Where(e => e.Nationality == iso2).ToListAsync())
+                item.Nationality = iso3;
+            foreach (var item in await db.Students.Where(s => s.Nationality == iso2).ToListAsync())
+                item.Nationality = iso3;
+            foreach (var item in await db.ForeignPersons.Where(p => p.NationalityCode == iso2).ToListAsync())
+                item.NationalityCode = iso3;
+            foreach (var item in await db.Investments.Where(i => i.Nationality == iso2).ToListAsync())
+                item.Nationality = iso3;
+            foreach (var item in await db.ArchivedEmployees.Where(a => a.Nationality == iso2).ToListAsync())
+                item.Nationality = iso3;
+            foreach (var item in await db.FamilyVisitDetails.Where(f => f.RelativeNationalityCode == iso2).ToListAsync())
+                item.RelativeNationalityCode = iso3;
+            await db.SaveChangesAsync();
+
+            db.Nationality.Remove(legacyRow);
+            await db.SaveChangesAsync();
+            existingByCode.Remove(iso2);
         }
     }
 }

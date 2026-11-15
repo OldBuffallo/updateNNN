@@ -178,8 +178,10 @@
     <DialogContent>
         <MudGrid Spacing="3">
             <MudItem xs="12" md="8">
-                <MudTextField T="string" Label="Tên công ty" @bind-Value="_form.CompanyName"
-                              Variant="Variant.Outlined" Required="true" />
+                <MudTextField T="string" Label="Tên công ty *" @bind-Value="_form.CompanyName"
+                              Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập tên công ty"
+                              Error="@(_dlgSubmitted && string.IsNullOrWhiteSpace(_form.CompanyName))"
+                              ErrorText="Bắt buộc nhập tên công ty" />
             </MudItem>
             <MudItem xs="12" md="4">
                 <MudTextField T="string" Label="Loại hình doanh nghiệp" @bind-Value="_form.TypeOfBusiniess"
@@ -225,8 +227,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Text" OnClick="@(() => _dialogVisible = false)">Hủy</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCompanyAsync"
-                   Disabled="@(string.IsNullOrWhiteSpace(_form.CompanyName))">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCompanyAsync">
             @(_isEditing ? "Cập nhật" : "Thêm mới")
         </MudButton>
     </DialogActions>
@@ -606,6 +607,7 @@
     // Dialog state
     private bool _dialogVisible;
     private bool _isEditing;
+    private bool _dlgSubmitted;
     private CompanyDto _form = new();
     private int _editingId;
 
@@ -665,6 +667,7 @@
     private void OpenAddDialog()
     {
         _isEditing = false;
+        _dlgSubmitted = false;
         _editingId = 0;
         _form = new CompanyDto
         {
@@ -677,6 +680,7 @@
     private void OpenEditDialog(CompanyDto company)
     {
         _isEditing = true;
+        _dlgSubmitted = false;
         _editingId = company.IDCompany;
         _form = new CompanyDto
         {
@@ -698,6 +702,7 @@
     // ══════ LƯU ══════
     private async Task SaveCompanyAsync()
     {
+        _dlgSubmitted = true;
         if (string.IsNullOrWhiteSpace(_form.CompanyName))
         {
             Snackbar.Add("Tên công ty không được để trống", Severity.Error);
@@ -718,6 +723,7 @@
                 Snackbar.Add($"Đã thêm công ty \"{_form.CompanyName}\"", Severity.Success);
             }
 
+            _dlgSubmitted = false;
             _dialogVisible = false;
             await LoadDataAsync();
         }
