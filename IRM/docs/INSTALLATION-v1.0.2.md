@@ -7,7 +7,7 @@
 
 ## Cài offline trên Windows
 
-Bộ cài R5 dùng giao diện sáng mint/emerald đồng bộ ứng dụng mới: cửa sổ giải nén sáng, header xanh đậm, nền mint, vùng nhập trắng và nút chính xanh emerald. Bảng quét, hộp thông báo và báo cáo môi trường HTML cùng palette; bản in dùng nền trắng. Theme chỉ áp dụng cho bộ cài; không đổi theme Windows. Hộp thoại bảo mật của Windows do hệ điều hành hiển thị. Điều kiện Windows, RAM, SQL và hành vi nâng cấp giữ nguyên. Gói R4 cũ vẫn giữ nội dung và checksum cũ.
+Bộ cài R5 dùng giao diện đồng bộ màn hình đăng nhập (Landing Page) của ứng dụng: bố cục 2 cột với nền xanh olive vát khối đa giác (`#C2D67C → #9AB55C → #6D8446`), Công an hiệu ở phần đầu, nhân vật 3D Công an Nhân dân đứng trên bệ ở cột phải, khung bảng kiểm tra/biểu mẫu sáng rõ ở cột trái và nút chính màu cam (`#EA580C`). Bảng quét, hộp thông báo và báo cáo môi trường HTML dùng chung bảng màu olive sáng; bản in dùng nền trắng. Theme chỉ áp dụng cho bộ cài; không đổi theme Windows. Hộp thoại bảo mật của Windows do hệ điều hành hiển thị. Điều kiện Windows, RAM, SQL và hành vi nâng cấp giữ nguyên. Gói R4 cũ vẫn giữ nội dung và checksum cũ.
 
 > Bộ cài bàn giao chính thức phải có chữ ký Authenticode từ chứng thư Code Signing tin cậy. Không bàn giao artifact được tạo với `-AllowUnsigned`, vì Windows SmartScreen hoặc chính sách doanh nghiệp có thể chặn hoàn toàn.
 

@@ -101,7 +101,7 @@ function Save-EnvironmentReport {
     }
     $html = @"
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><title>Báo cáo môi trường IRM</title>
-<style>:root{color-scheme:light}body{font:15px Segoe UI,Arial;margin:32px;color:#0f2e2b;background:#e6f3f0}h1{color:#11534e}table{border-collapse:collapse;width:100%}th,td{border:1px solid #b7d5ce;padding:10px;text-align:left}th{background:#11534e;color:white}td{background:white}.meta{color:#4a6b66}@media print{body{color:#0f2e2b;background:white}h1{color:#11534e}th{background:#e6f3f0;color:#0f2e2b}td{background:white}td[style]{color:#0f2e2b!important}.meta{color:#4a6b66}}</style></head>
+<style>:root{color-scheme:light}body{font:15px Segoe UI,Arial;margin:32px;color:#1e2d10;background:#eef5dc}h1{color:#16240b}table{border-collapse:collapse;width:100%}th,td{border:1px solid #c5d6a7;padding:10px;text-align:left}th{background:#3f5223;color:white}td{background:white}.meta{color:#4d6136}@media print{body{color:#1e2d10;background:white}h1{color:#16240b}th{background:#eef5dc;color:#1e2d10}td{background:white}td[style]{color:#1e2d10!important}.meta{color:#4d6136}}</style></head>
 <body><h1>Báo cáo môi trường cài đặt IRM v1.0.2</h1><p class="meta">Máy: $([Net.WebUtility]::HtmlEncode($env:COMPUTERNAME)) — Thời gian: $(Get-Date -Format 'dd/MM/yyyy HH:mm:ss')</p>
 <table><thead><tr><th>Tick</th><th>Hạng mục</th><th>Trạng thái</th><th>Chi tiết</th></tr></thead><tbody>$($rows -join "`r`n")</tbody></table></body></html>
 "@
@@ -372,54 +372,63 @@ function Start-IrmInstallation {
 }
 
 $form = New-Object Windows.Forms.Form
+$form.Dispose()
+$form = New-Object IrmInstaller.LandingForm
 $form.AutoScaleDimensions = New-Object Drawing.SizeF(96,96)
 $form.AutoScaleMode = 'Dpi'
 $form.Text = 'IRM v1.0.2 — Bộ cài đặt offline'
 $form.StartPosition = 'CenterScreen'
-$form.Size = New-Object Drawing.Size(920,650)
+$form.Size = New-Object Drawing.Size(960,650)
 $form.MinimumSize = New-Object Drawing.Size(920,650)
 $form.Font = New-Object Drawing.Font('Segoe UI',10)
 $form.BackColor = $script:installerColors.Window
 $form.ForeColor = $script:installerColors.Text
+$form.BrandLogo = Get-IrmInstallerImage -FileName 'logo-cand.png' -PayloadRoot $PayloadRoot
+$form.CharacterImage = Get-IrmInstallerImage -FileName 'police-3d.png' -PayloadRoot $PayloadRoot
 $form.Add_HandleCreated({ param($sender,$e) [IrmInstaller.WindowTheme]::ApplyTitleBar($sender) })
+$form.Add_FormClosed({
+    if ($form.BrandLogo) { $form.BrandLogo.Dispose(); $form.BrandLogo = $null }
+    if ($form.CharacterImage) { $form.CharacterImage.Dispose(); $form.CharacterImage = $null }
+})
 
-$header = New-Object Windows.Forms.Panel
-$header.Dock = 'Top'; $header.Height = 82; $header.BackColor = $script:installerColors.Header
-$form.Controls.Add($header)
 $title = New-Object Windows.Forms.Label
-$title.Text = 'IRM — HỆ THỐNG QUẢN LÝ NGƯỜI NƯỚC NGOÀI'; $title.ForeColor = [Drawing.Color]::White
-$title.Font = New-Object Drawing.Font('Segoe UI Semibold',17); $title.AutoSize = $true; $title.Location = New-Object Drawing.Point(24,16)
-$header.Controls.Add($title)
+$title.Text = 'PHẦN MỀM QUẢN LÝ NGƯỜI NƯỚC NGOÀI'; $title.ForeColor = [Drawing.ColorTranslator]::FromHtml('#16240B')
+$title.BackColor = [Drawing.Color]::Transparent
+$title.Font = New-Object Drawing.Font('Segoe UI',16,[Drawing.FontStyle]::Bold); $title.AutoSize = $true; $title.Location = New-Object Drawing.Point(92,16)
+$form.Controls.Add($title)
 $subtitle = New-Object Windows.Forms.Label
-$subtitle.Text = 'Bộ cài đặt offline v1.0.2 • Không cần kết nối Internet khi máy đủ điều kiện'; $subtitle.ForeColor = [Drawing.Color]::FromArgb(230,243,240)
-$subtitle.AutoSize = $true; $subtitle.Location = New-Object Drawing.Point(27,51); $header.Controls.Add($subtitle)
+$subtitle.Text = 'Bộ cài đặt offline v1.0.2 • Không cần kết nối Internet khi máy đủ điều kiện'; $subtitle.ForeColor = [Drawing.ColorTranslator]::FromHtml('#293D14')
+$subtitle.BackColor = [Drawing.Color]::Transparent
+$subtitle.AutoSize = $true; $subtitle.Location = New-Object Drawing.Point(94,48); $form.Controls.Add($subtitle)
 
 $labelStep = New-Object Windows.Forms.Label
 $labelStep.Text = 'BƯỚC 1/3 — QUÉT VÀ LẬP BÁO CÁO MÔI TRƯỜNG'; $labelStep.Font = New-Object Drawing.Font('Segoe UI Semibold',11)
-$labelStep.ForeColor = $script:installerColors.Accent; $labelStep.Location = New-Object Drawing.Point(24,98); $labelStep.Size = New-Object Drawing.Size(850,28)
+$labelStep.BackColor = [Drawing.Color]::Transparent
+$labelStep.ForeColor = [Drawing.ColorTranslator]::FromHtml('#16240B'); $labelStep.Location = New-Object Drawing.Point(24,96); $labelStep.Size = New-Object Drawing.Size(646,26)
 $form.Controls.Add($labelStep)
 
 $list = New-Object IrmInstaller.DarkListView
-$list.Location = New-Object Drawing.Point(24,132); $list.Size = New-Object Drawing.Size(854,350); $list.View = 'Details'
+$list.Location = New-Object Drawing.Point(24,128); $list.Size = New-Object Drawing.Size(646,354); $list.View = 'Details'
 $list.FullRowSelect = $true; $list.CheckBoxes = $true; $list.HeaderStyle = 'Nonclickable'
-$list.Columns.Add('Hạng mục kiểm tra',285) | Out-Null; $list.Columns.Add('Trạng thái',140) | Out-Null; $list.Columns.Add('Chi tiết',405) | Out-Null
+$list.Columns.Add('Hạng mục kiểm tra',220) | Out-Null; $list.Columns.Add('Trạng thái',125) | Out-Null; $list.Columns.Add('Chi tiết',280) | Out-Null
 $form.Controls.Add($list)
 
 $panelConfig = New-Object Windows.Forms.Panel
 $panelConfig.Location = $list.Location; $panelConfig.Size = $list.Size; $panelConfig.Visible = $false; $panelConfig.BorderStyle = 'FixedSingle'
+$panelConfig.AutoScroll = $true
 $panelConfig.BackColor = $script:installerColors.Surface
 $form.Controls.Add($panelConfig)
 $configTitle = New-Object Windows.Forms.Label
-$configTitle.Text = 'Thông tin đăng nhập lần đầu'; $configTitle.Font = New-Object Drawing.Font('Segoe UI Semibold',14); $configTitle.AutoSize=$true; $configTitle.Location=New-Object Drawing.Point(28,24); $panelConfig.Controls.Add($configTitle)
-$labelAdmin = New-Object Windows.Forms.Label; $labelAdmin.Text='Tên tài khoản quản trị';$labelAdmin.Location=New-Object Drawing.Point(32,78);$labelAdmin.AutoSize=$true;$panelConfig.Controls.Add($labelAdmin)
-$textAdmin = New-Object Windows.Forms.TextBox; $textAdmin.Text='admin';$textAdmin.Location=New-Object Drawing.Point(260,74);$textAdmin.Width=310;$panelConfig.Controls.Add($textAdmin)
-$labelPassword = New-Object Windows.Forms.Label; $labelPassword.Text='Mật khẩu (ít nhất 12 ký tự)';$labelPassword.Location=New-Object Drawing.Point(32,124);$labelPassword.AutoSize=$true;$panelConfig.Controls.Add($labelPassword)
-$textPassword = New-Object Windows.Forms.TextBox; $textPassword.UseSystemPasswordChar=$true;$textPassword.Location=New-Object Drawing.Point(260,120);$textPassword.Width=310;$panelConfig.Controls.Add($textPassword)
-$labelPassword2 = New-Object Windows.Forms.Label; $labelPassword2.Text='Nhập lại mật khẩu';$labelPassword2.Location=New-Object Drawing.Point(32,170);$labelPassword2.AutoSize=$true;$panelConfig.Controls.Add($labelPassword2)
-$textPasswordConfirm = New-Object Windows.Forms.TextBox; $textPasswordConfirm.UseSystemPasswordChar=$true;$textPasswordConfirm.Location=New-Object Drawing.Point(260,166);$textPasswordConfirm.Width=310;$panelConfig.Controls.Add($textPasswordConfirm)
-$checkLan = New-Object IrmInstaller.DarkCheckBox; $checkLan.Text='Cho phép các máy khác trong mạng LAN truy cập IRM qua HTTPS';$checkLan.Checked=$true;$checkLan.AutoSize=$true;$checkLan.Location=New-Object Drawing.Point(32,220);$panelConfig.Controls.Add($checkLan)
-$checkLicense = New-Object IrmInstaller.DarkCheckBox; $checkLicense.Text='Tôi đồng ý điều khoản sử dụng Microsoft SQL Server Express';$checkLicense.AutoSize=$true;$checkLicense.Location=New-Object Drawing.Point(32,258);$panelConfig.Controls.Add($checkLicense)
-$note = New-Object Windows.Forms.Label; $note.Text='Bộ cài sẽ tự động cài SQL Server nếu máy chưa có, tạo database, đăng ký dịch vụ và kiểm tra hoạt động trước khi hoàn tất.';$note.ForeColor=$script:installerColors.Muted;$note.Location=New-Object Drawing.Point(32,300);$note.Size=New-Object Drawing.Size(770,42);$panelConfig.Controls.Add($note)
+$configTitle.Text = 'Thông tin đăng nhập lần đầu'; $configTitle.Font = New-Object Drawing.Font('Segoe UI Semibold',14); $configTitle.AutoSize=$true; $configTitle.Location=New-Object Drawing.Point(24,22); $panelConfig.Controls.Add($configTitle)
+$labelAdmin = New-Object Windows.Forms.Label; $labelAdmin.Text='Tên tài khoản quản trị';$labelAdmin.Location=New-Object Drawing.Point(28,76);$labelAdmin.AutoSize=$true;$panelConfig.Controls.Add($labelAdmin)
+$textAdmin = New-Object Windows.Forms.TextBox; $textAdmin.Text='admin';$textAdmin.Location=New-Object Drawing.Point(250,72);$textAdmin.Width=368;$panelConfig.Controls.Add($textAdmin)
+$labelPassword = New-Object Windows.Forms.Label; $labelPassword.Text='Mật khẩu (ít nhất 12 ký tự)';$labelPassword.Location=New-Object Drawing.Point(28,122);$labelPassword.AutoSize=$true;$panelConfig.Controls.Add($labelPassword)
+$textPassword = New-Object Windows.Forms.TextBox; $textPassword.UseSystemPasswordChar=$true;$textPassword.Location=New-Object Drawing.Point(250,118);$textPassword.Width=368;$panelConfig.Controls.Add($textPassword)
+$labelPassword2 = New-Object Windows.Forms.Label; $labelPassword2.Text='Nhập lại mật khẩu';$labelPassword2.Location=New-Object Drawing.Point(28,168);$labelPassword2.AutoSize=$true;$panelConfig.Controls.Add($labelPassword2)
+$textPasswordConfirm = New-Object Windows.Forms.TextBox; $textPasswordConfirm.UseSystemPasswordChar=$true;$textPasswordConfirm.Location=New-Object Drawing.Point(250,164);$textPasswordConfirm.Width=368;$panelConfig.Controls.Add($textPasswordConfirm)
+$checkLan = New-Object IrmInstaller.DarkCheckBox; $checkLan.Text='Cho phép các máy khác trong mạng LAN truy cập IRM qua HTTPS';$checkLan.Checked=$true;$checkLan.AutoSize=$true;$checkLan.Location=New-Object Drawing.Point(28,218);$panelConfig.Controls.Add($checkLan)
+$checkLicense = New-Object IrmInstaller.DarkCheckBox; $checkLicense.Text='Tôi đồng ý điều khoản sử dụng Microsoft SQL Server Express';$checkLicense.AutoSize=$true;$checkLicense.Location=New-Object Drawing.Point(28,254);$panelConfig.Controls.Add($checkLicense)
+$note = New-Object Windows.Forms.Label; $note.Text='Bộ cài sẽ tự động cài SQL Server nếu máy chưa có, tạo database, đăng ký dịch vụ và kiểm tra hoạt động trước khi hoàn tất.';$note.ForeColor=$script:installerColors.Muted;$note.Location=New-Object Drawing.Point(28,294);$note.Size=New-Object Drawing.Size(580,48);$panelConfig.Controls.Add($note)
 foreach ($inputBox in $textAdmin,$textPassword,$textPasswordConfirm) {
     $inputBox.BackColor = $script:installerColors.Input
     $inputBox.ForeColor = $script:installerColors.Text
@@ -432,25 +441,27 @@ foreach ($checkBox in $checkLan,$checkLicense) {
 }
 
 $progress = New-Object IrmInstaller.DarkProgressBar
-$progress.Location = New-Object Drawing.Point(24,495); $progress.Size = New-Object Drawing.Size(854,20); $form.Controls.Add($progress)
+$progress.Location = New-Object Drawing.Point(24,494); $progress.Size = New-Object Drawing.Size(646,18); $form.Controls.Add($progress)
 $labelStatus = New-Object Windows.Forms.Label
-$labelStatus.Text = 'Nhấn “Quét môi trường” để bắt đầu.'; $labelStatus.Location = New-Object Drawing.Point(24,522); $labelStatus.Size = New-Object Drawing.Size(850,25); $form.Controls.Add($labelStatus)
+$labelStatus.Text = 'Nhấn “Quét môi trường” để bắt đầu.'; $labelStatus.BackColor = [Drawing.Color]::Transparent
+$labelStatus.ForeColor = [Drawing.ColorTranslator]::FromHtml('#16240B'); $labelStatus.Location = New-Object Drawing.Point(24,518); $labelStatus.Size = New-Object Drawing.Size(646,25); $form.Controls.Add($labelStatus)
 
 $buttonClose = New-Object IrmInstaller.DarkButton
-$buttonClose.Text='Đóng';$buttonClose.Location=New-Object Drawing.Point(24,558);$buttonClose.Size=New-Object Drawing.Size(110,38);$buttonClose.Add_Click({$form.Close()});$form.Controls.Add($buttonClose)
+$buttonClose.Text='Đóng';$buttonClose.Location=New-Object Drawing.Point(24,556);$buttonClose.Size=New-Object Drawing.Size(110,38);$buttonClose.Add_Click({$form.Close()});$form.Controls.Add($buttonClose)
 $buttonReport = New-Object IrmInstaller.DarkButton
-$buttonReport.Text='Mở báo cáo';$buttonReport.Enabled=$false;$buttonReport.Location=New-Object Drawing.Point(145,558);$buttonReport.Size=New-Object Drawing.Size(150,38);$buttonReport.Add_Click({
+$buttonReport.Text='Mở báo cáo';$buttonReport.Enabled=$false;$buttonReport.Location=New-Object Drawing.Point(144,556);$buttonReport.Size=New-Object Drawing.Size(150,38);$buttonReport.Add_Click({
     if($script:phase -eq 'install' -and $script:installLogPath -and (Test-Path -LiteralPath $script:installLogPath)) {
         Start-Process notepad.exe -ArgumentList "`"$script:installLogPath`""
     } elseif($script:reportPath) { Start-Process $script:reportPath }
 });$form.Controls.Add($buttonReport)
 $buttonMain = New-Object IrmInstaller.DarkButton
-$buttonMain.Text='Quét môi trường';$buttonMain.Location=New-Object Drawing.Point(678,558);$buttonMain.Size=New-Object Drawing.Size(200,38);$buttonMain.Add_Click({switch($script:phase){'scan'{Invoke-EnvironmentScan}'configure'{Show-ConfigurationStep}'install'{Start-IrmInstallation}'done'{Start-Process 'http://localhost:5050';$form.Close()}}});$form.Controls.Add($buttonMain)
+$buttonMain.Text='Quét môi trường';$buttonMain.Location=New-Object Drawing.Point(470,556);$buttonMain.Size=New-Object Drawing.Size(200,38);$buttonMain.Add_Click({switch($script:phase){'scan'{Invoke-EnvironmentScan}'configure'{Show-ConfigurationStep}'install'{Start-IrmInstallation}'done'{Start-Process 'http://localhost:5050';$form.Close()}}});$form.Controls.Add($buttonMain)
 
 $script:installTimer = New-Object Windows.Forms.Timer
 Set-IrmInstallerButtonTheme $buttonClose
 Set-IrmInstallerButtonTheme $buttonReport
 Set-IrmInstallerButtonTheme $buttonMain -Primary
+$labelStep.Anchor = 'Top,Left,Right'
 $list.Anchor = 'Top,Bottom,Left,Right'
 $panelConfig.Anchor = 'Top,Bottom,Left,Right'
 $progress.Anchor = 'Bottom,Left,Right'

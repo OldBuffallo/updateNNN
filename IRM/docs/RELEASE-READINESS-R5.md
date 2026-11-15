@@ -1,68 +1,53 @@
 # IRM R5 — trạng thái phát hành offline
 
-Ngày: 14/11/2026 (Asia/Bangkok). **Đã dựng candidate unsigned, chưa xác nhận phát hành chính thức.**
+Ngày: 15/11/2026 (Asia/Bangkok). **Đang hoàn thiện bản đóng gói R5 giao diện Landing Page (unsigned, bàn giao kiểm thử nội bộ).**
 
 ## Phạm vi và căn cứ
 
-Người dùng xác nhận bộ cài trước đã hoạt động tốt và yêu cầu UI phù hợp ứng dụng mới. R5 kế thừa Inno/WinForms/worker, thay palette sang mint/emerald và đóng gói source hiện tại. Không đổi worker cài đặt, SQL media, database schema, dịch vụ, cổng hoặc quy tắc đặt lại Admin khi nâng cấp.
+Người dùng xác nhận bộ cài trước đã hoạt động tốt và yêu cầu đồng bộ giao diện bộ cài sử dụng hình nền Landing Page (Phương án A: Split 2 cột). R5 kế thừa Inno/WinForms/worker, thay giao diện sang nền xanh olive vát khối (`#C2D67C → #9AB55C → #6D8446`), Công an hiệu (`logo-cand.png`), nhân vật 3D Công an Nhân dân (`police-3d.png`) đứng trên bệ ở cột phải, khung bảng kiểm tra/cấu hình sáng rõ ở cột trái, nút hành động chính màu cam (`#EA580C`) và đóng gói source hiện tại. Không đổi worker cài đặt, SQL media, database schema, dịch vụ, cổng hoặc quy tắc đặt lại Admin khi nâng cấp.
 
-Version ứng dụng `1.0.2`, revision `R5`; artifact `IRM-v1.0.2-windows-x64-offline-setup-R5.exe`. Commit nguồn cuối và SHA-256 phải lấy từ candidate thực sau build; không gán commit mới cho R4/candidate 11/11.
+Version ứng dụng `1.0.2`, revision `R5`; artifact `IRM-v1.0.2-windows-x64-offline-setup-R5.exe`. Commit nguồn cuối và SHA-256 phải lấy từ candidate thực sau build; không gán commit mới cho R4/candidate cũ.
 
-## Kiểm chứng trong phiên
+## Kiểm chứng trong phiên (15/11/2026)
 
 | Hạng mục | Trạng thái |
 |---|---|
-| Render WinForms dữ liệu giả: scan/configure/upgrade/busy/retry/done | Đã dựng và xem ảnh cả 6 trạng thái |
+| Render WinForms dữ liệu giả: scan/configure/upgrade/busy/retry/done | Đã dựng và xem ảnh cả 6 trạng thái theo Landing Page (Phương án A) |
 | Khóa input khi busy, mở lại khi retry; che ô mật khẩu | Đạt trong harness dựng UI, không chạy worker |
-| Parser Windows PowerShell 5.1 | 3 tệp UI/theme/environment không lỗi |
-| Preflight x64/x86 | 46/47 assertion đạt |
+| Báo cáo HTML & hộp thoại lỗi dài | Đạt; HTML encode bảo toàn ký tự đặc biệt |
+| Parser Windows PowerShell 5.1 & Preflight x64/x86 | Đạt: 46/46 assertion x64, 47/47 assertion x86 (`SysWOW64`) |
 | Build Release | Đạt, 0 warning/error |
-| .NET với SQL biệt lập | 337/337 đạt, 0 fail/skip |
-| JavaScript | 47/47 đạt, 0 fail/skip |
-| Publish và Inno compile | Đạt; Inno compile 175,266 giây |
-| Checksum stage trước nén | 406/406 khớp; chưa xác minh payload giải nén từ EXE |
-| SHA-256 EXE | Khớp sidecar; chữ ký `NotSigned` |
-| Code Signing | Không tìm thấy Code Signing certificate ở CurrentUser/My và LocalMachine/My trong lần kiểm tra |
-| Cài mới/nâng cấp/backup/restore từ EXE R5 | Chưa thực hiện |
-| DPI thực, bàn phím, dialog, browser smoke trên bản đã cài | Chưa thực hiện |
+| .NET với SQL biệt lập (`.\SQLEXPRESS`) | 337/337 đạt, 0 fail/skip |
+| JavaScript (`node --test`) | 47/47 đạt, 0 fail/skip |
+| Publish và Inno compile | Đang tiến hành đóng gói bản Landing Page (xem mục Candidate) |
+| Code Signing | Không tìm thấy Code Signing certificate trên máy build; đóng gói với `-AllowUnsigned` |
+| Cài mới/nâng cấp/backup/restore từ EXE R5 | Bị chặn bởi môi trường Windows Sandbox trên máy chủ; chưa nghiệm thu cài đặt end-to-end |
 
-Ảnh và script hỗ trợ ở `BAN-GIAO/05-HO-TRO/2026-11-14-R5/`. Harness scratch chỉ lấy đoạn dựng UI và ba hàm UI, không gọi scanner, worker, finish handler hay database. Đã dựng thêm dialog lỗi dài và HTML báo cáo từ dữ liệu giả; kiểm tra HTML vẫn encode ký tự đặc biệt. Render không phải nghiệm thu thao tác hoặc cài đặt thực.
+Ảnh UI dữ liệu giả và báo cáo HTML mới lưu tại `BAN-GIAO/05-HO-TRO/2026-11-15-R5-LANDING/after/`. Các ảnh mint/emerald ngày 14/11 được giữ nguyên tại `BAN-GIAO/05-HO-TRO/2026-11-14-R5/`.
 
-Review độc lập fresh-context trên `d86815e..a58a2ad` không thấy Critical/Important/Minor trong source UI/metadata. Reviewer không chạy lại test, không xác nhận nghiệm thu EXE. Worker, schema, media hashes và cơ chế ký/provenance không đổi. Kiểm tra theo tên tệp trong stage không thấy test binaries/database/backup/keys/logs; connection strings và bootstrap password trong appsettings đều trống. Đây không phải kiểm toán bí mật toàn diện.
-
-## Candidate đã dựng
+## Mốc candidate R5 trước đó (14/11/2026 — UI mint/emerald)
 
 - Thư mục: `BAN-GIAO/04-CHO-NGHIEM-THU/20261114-v1.0.2-R5-UNSIGNED-TEST/`.
 - EXE: `IRM-v1.0.2-windows-x64-offline-setup-R5.exe` — `790825037` byte.
-- Source commit: `a58a2adfd75099afa41f939e78fe3a5b0a74013b`, `dirty=false` trong `SOURCE-REVISION.json`.
-- SHA-256: `D3C28EB488C0C7E5A434D1CBD954A51586B9814221DFFBAD4DA080763810D4B4`.
-- Build dùng `-AllowUnsigned`, chữ ký `NotSigned`; chỉ dùng kiểm thử. Không promote hoặc đổi con trỏ bản hiện hành R4.
-- Commit tài liệu ghi kết quả sau build không thuộc source đã nhúng trong EXE. Không dùng HEAD tài liệu để thay source commit ở trên.
+- Source commit: `a58a2adfd75099afa41f939e78fe3a5b0a74013b`, `dirty=false`.
+- SHA-256: `D3C28EB488C0C7E5A434D1CBD954A51586B9814221DFFBAD4DA080763810D4B4` (`NotSigned`).
 
-## Môi trường thử và điều kiện còn thiếu
+## Môi trường thử và điều kiện còn thiếu (Sandbox ngày 14/11)
 
-Lệnh đọc Hyper-V bị từ chối quyền. Theo yêu cầu bổ sung của người dùng, đã bật Windows Sandbox bằng `Enable-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -All -NoRestart` qua UAC. Windows báo `Disabled → Enabled`, `RestartNeeded=true`; chưa khởi động lại máy.
+Lệnh đọc Hyper-V trước đó bị từ chối quyền. Đã bật Windows Sandbox bằng `Enable-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM -All -NoRestart` qua UAC và reboot.
 
-Sau reboot cần kiểm tra Sandbox khởi chạy được trước khi dùng. Sandbox là môi trường tạm, không thay bằng chứng cài đặt/nâng cấp qua reboot trên VM có thể lưu trạng thái. Không tự cài đè lên máy làm việc để thay thế nghiệm thu.
+Sau reboot, Windows tự cập nhật client Sandbox lên `0.8.114.0`. Máy ảo khởi chạy được nhưng desktop không đăng nhập được, mất kết nối lặp lại. Guest Application log ghi `dwm.exe 10.0.26100.9818` crash trong `udwm.dll 10.0.26100.9974`, exception `0xc00001ad`. Thử cấu hình riêng `VGpu=Disable` vẫn gặp lỗi.
 
-Đã chuẩn bị `BAN-GIAO/05-HO-TRO/2026-11-14-R5/IRM-R5-OFFLINE.wsb`: RAM 8192 MB, tắt mạng/clipboard/audio/video/printer, chỉ map candidate đọc-only vào `C:\IRM-R5`, mở Explorer thay vì tự chạy installer. XML hợp lệ, thư mục host tồn tại; **chưa thử khởi chạy Sandbox sau reboot**. Hướng dẫn kèm tại `HUONG-DAN-SANDBOX.md`.
+Đã chạy `BAN-GIAO/05-HO-TRO/2026-11-14-R5/IRM-R5-OFFLINE.wsb`: guest Windows 11 Enterprise build 26100 có 8 CPU logic, khoảng 7 GB RAM trống, hơn 76 GB đĩa trống, Framework Release 533320 và 0 adapter mạng Up. CLI Sandbox thực thi được lệnh System; `ExistingLogin` báo không có logon session (`0x80070520`). Defender `AntivirusEnabled=false`, service `WinDefend` ở trạng thái Stopped/Disabled. Thử EXE dưới System thì Inno giải nén thành công nhưng WinForms từ chối `ShowDialog` do không có `UserInteractive` session. Chưa thực hiện cài mới/nâng cấp/backup/restore/browser smoke trong VM.
 
 ## Các quyết định thực thi và giới hạn
 
-- Giữ checkout `develop` theo yêu cầu workspace thay vì worktree mới; cần kiểm tra thay đổi đồng thời trước mỗi commit.
-- Thay đổi trình bày xác minh bằng render và kiểm tra hiện có; không thêm test lặp màu/markup. Render không chứng minh DPI hoặc tương tác thật.
-- Khi Hyper-V chưa truy cập được, dùng harness dựng UI cô lập khỏi scanner/worker; các bước cài thực vẫn chờ môi trường thử.
-- Khi thiếu chứng thư, dựng candidate unsigned có nhãn rõ ràng, không phát hành chính thức.
-- Thực hiện review source trước khi hoàn tất đóng gói để sửa lỗi vào candidate nếu có; review không thay nghiệm thu artifact.
-- Giữ thiết kế worker/Admin/schema/WPF ngoài phạm vi UI; không suy ra các hành vi cũ đã được nghiệm thu trên candidate mới.
+- Giữ checkout `develop` theo yêu cầu workspace; không thay đổi worker/Admin/schema/WPF.
+- Đọc ảnh `logo-cand.png` và `police-3d.png` qua `MemoryStream` + clone `Bitmap` để không giữ khóa tệp trong `$PayloadRoot`.
+- Giữ nguyên gói R4 tại `BAN-GIAO/01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/` và candidate 14/11 tại `04-CHO-NGHIEM-THU/`; đưa bản R5 Landing Page vào `04-CHO-NGHIEM-THU/` và hoàn thiện bản giao tại `01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/`.
+- Thiếu chứng thư Code Signing nên gói vẫn gắn nhãn `UNSIGNED-TEST`, lưu ý SmartScreen khi chạy trên máy khách.
 
-Không có minor nào được reviewer đề nghị hoãn. Giữ ledger của kế hoạch để tiếp tục Task 1 phần nghiệm thu, Task 3 ký/kiểm tra EXE, Task 4 và Task 5 sau reboot/chuẩn bị chứng thư.
+## Công việc tiếp theo (nếu phát hành chính thức có ký số)
 
-Máy cài cần sẵn .NET Framework 4.7.2+, Windows/Defender và tài nguyên theo hướng dẫn. Gói chưa bundle Framework, không tự tải mạng lúc cài. Thiếu chứng thư thì chỉ dựng candidate thử bằng `-AllowUnsigned`, giữ trong `04-CHO-NGHIEM-THU`; không đưa vào `01-HIEN-HANH` hoặc gọi là bản chính thức.
-
-## Công việc còn lại trước phát hành
-
-1. Kiểm tra UI thực trên môi trường biệt lập, gồm DPI 100/125/150/200%, focus/dialog và lỗi dài.
-2. Nghiệm thu cài mới và nâng cấp offline bằng dữ liệu giả, smoke ứng dụng, backup/restore và dịch vụ sau reboot.
-3. Ký số bằng chứng thư tin cậy, kiểm tra artifact cuối và SHA-256 sau ký; nghiệm thu đúng artifact đó.
-4. Cập nhật biên bản, inventory và thư mục hiện hành sau khi các điều kiện đạt. Gói cũ giữ nguyên.
+1. Chuẩn bị VM/máy Windows thử có desktop hoạt động và Defender; nghiệm thu cài mới, nâng cấp offline bằng dữ liệu giả, DPI 100/125/150/200%, smoke ứng dụng và backup/restore.
+2. Ký số bằng chứng thư Code Signing tin cậy, kiểm tra lại chữ ký và SHA-256 sau ký.
