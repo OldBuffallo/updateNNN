@@ -352,6 +352,84 @@ window.irmInterop = {
         });
     },
 
+    // ── Customer Feedback Spotlight & Initial Highlight (R6) ──
+    _feedbackDriver: null,
+    initFeedbackSpotlight: function (forceReplay) {
+        try {
+            if (!forceReplay && localStorage.getItem('irm-r6-feedback-seen') === '1') {
+                return false;
+            }
+        } catch (e) {
+            if (!forceReplay) return false;
+        }
+
+        var btn = document.getElementById('btnCustomerFeedback');
+        if (!btn) return false;
+
+        if (btn.classList && typeof btn.classList.add === 'function') {
+            btn.classList.add('irm-feedback-highlight');
+        }
+        if (!btn._irmFeedbackBound && typeof btn.addEventListener === 'function') {
+            btn._irmFeedbackBound = true;
+            btn.addEventListener('click', function () {
+                window.irmInterop.dismissFeedbackSpotlight();
+            });
+        }
+
+        if (window.driver && window.driver.js && typeof window.driver.js.driver === 'function') {
+            try {
+                var reduced = typeof window.matchMedia === 'function'
+                    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                var drv = window.driver.js.driver({
+                    animate: !reduced,
+                    showProgress: false,
+                    allowClose: true,
+                    overlayOpacity: 0.45,
+                    stagePadding: 6,
+                    stageRadius: 10,
+                    popoverClass: 'irm-feedback-popover',
+                    doneBtnText: 'Đã hiểu — Bắt đầu dùng thử',
+                    closeBtnText: 'Đóng',
+                    onDestroyStarted: function () {
+                        window.irmInterop.dismissFeedbackSpotlight();
+                        if (window.irmInterop._feedbackDriver) {
+                            var instance = window.irmInterop._feedbackDriver;
+                            window.irmInterop._feedbackDriver = null;
+                            if (typeof instance.destroy === 'function') {
+                                instance.destroy();
+                            }
+                        }
+                    },
+                    steps: [
+                        {
+                            element: '#btnCustomerFeedback',
+                            popover: {
+                                title: '📍 Phiếu Khảo Sát & Góp Ý Nghiệm Thu (R6)',
+                                description: 'Nhấn nút "Khảo sát & Góp ý" trên thanh tiêu đề bất kỳ lúc nào để đánh giá từng chức năng, giao diện & định dạng Excel (mở bản HTML trực tiếp hoặc tải file Excel).',
+                                side: 'bottom',
+                                align: 'end'
+                            }
+                        }
+                    ]
+                });
+                window.irmInterop._feedbackDriver = drv;
+                drv.drive(0);
+            } catch (err) {
+                // Keep CSS pulse highlight even if Driver.js fails
+            }
+        }
+        return true;
+    },
+    dismissFeedbackSpotlight: function () {
+        try {
+            localStorage.setItem('irm-r6-feedback-seen', '1');
+        } catch (e) {}
+        var btn = document.getElementById('btnCustomerFeedback');
+        if (btn && btn.classList && typeof btn.classList.remove === 'function') {
+            btn.classList.remove('irm-feedback-highlight');
+        }
+    },
+
     // ── Global Shortcut Listener (Ctrl+K / Cmd+K) ──
     _dotNetRef: null,
     _shortcutsInitialized: false,

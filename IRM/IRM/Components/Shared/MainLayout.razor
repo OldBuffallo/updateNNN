@@ -90,6 +90,42 @@
                         </MudMenu>
                     </AuthorizeView>
 
+                    <!-- Customer Feedback Survey Menu & Initial Spotlight Target -->
+                    <MudMenu Class="topbar-feedback-menu"
+                             Dense="true"
+                             AnchorOrigin="Origin.BottomRight"
+                             TransformOrigin="Origin.TopRight">
+                        <ActivatorContent Context="feedbackMenu">
+                            <MudButton id="btnCustomerFeedback"
+                                       Variant="Variant.Outlined"
+                                       Color="Color.Warning"
+                                       Size="Size.Small"
+                                       Class="irm-feedback-btn"
+                                       StartIcon="@Icons.Material.Outlined.RateReview"
+                                       EndIcon="@Icons.Material.Outlined.KeyboardArrowDown"
+                                       OnClick="feedbackMenu.ToggleAsync">
+                                <span>Khảo sát &amp; Góp ý</span>
+                                <span class="irm-feedback-badge">R6</span>
+                            </MudButton>
+                        </ActivatorContent>
+                        <ChildContent>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.OpenInNew"
+                                         OnClick="OpenFeedbackSurveyHtmlAsync">
+                                Mở phiếu khảo sát trực tuyến (HTML)
+                            </MudMenuItem>
+                            <MudMenuItem Icon="@Icons.Material.Outlined.Download"
+                                         Href="/PHIEU-KHAO-SAT-GOP-Y.xlsx"
+                                         Target="_blank">
+                                Tải phiếu khảo sát Excel (.xlsx)
+                            </MudMenuItem>
+                            <MudDivider />
+                            <MudMenuItem Icon="@Icons.Material.Outlined.HelpOutline"
+                                         OnClick="ReplayFeedbackSpotlightAsync">
+                                Xem lại hướng dẫn vị trí góp ý
+                            </MudMenuItem>
+                        </ChildContent>
+                    </MudMenu>
+
                     <!-- Table Density Toggle Button -->
                     <MudTooltip Text="@(_compactDensity ? "Mật độ bảng: Gọn (Nhấn để chuyển sang Thoáng)" : "Mật độ bảng: Thoáng (Nhấn để chuyển sang Gọn)")">
                         <MudIconButton Icon="@(_compactDensity ? Icons.Material.Outlined.ViewHeadline : Icons.Material.Outlined.ViewAgenda)"
@@ -240,6 +276,7 @@
                 var density = await JS.InvokeAsync<string>("irmInterop.getDensity");
                 _compactDensity = string.Equals(density, "compact", StringComparison.OrdinalIgnoreCase);
                 await JS.InvokeVoidAsync("irmInterop.registerShortcutHandler", _dotNetRef);
+                await JS.InvokeVoidAsync("irmInterop.initFeedbackSpotlight", false);
             }
             catch (JSException ex)
             {
@@ -273,6 +310,31 @@
     }
 
     private Task ToggleTheme() => Theme.ToggleAsync();
+
+    private async Task OpenFeedbackSurveyHtmlAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("irmInterop.dismissFeedbackSpotlight");
+            await JS.InvokeVoidAsync("open", "/PHIEU-KHAO-SAT-GOP-Y.html", "_blank");
+        }
+        catch (JSException ex)
+        {
+            Logger.LogWarning(ex, "Unable to open feedback survey page");
+        }
+    }
+
+    private async Task ReplayFeedbackSpotlightAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("irmInterop.initFeedbackSpotlight", true);
+        }
+        catch (JSException ex)
+        {
+            Logger.LogWarning(ex, "Unable to replay feedback spotlight");
+        }
+    }
 
     public void Dispose()
     {

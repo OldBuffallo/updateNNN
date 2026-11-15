@@ -90,4 +90,55 @@ public class DeliverySampleWorkbookTests
         Assert.Equal(10, secondPreview.Count());
         Assert.All(secondPreview, row => Assert.Equal("unchanged", row.Status));
     }
+
+    [Fact]
+    public void FeedbackSurveyWorkbook_HasThreeSheetsValidationAndCountIfFormulas()
+    {
+        var bytes = DeliveryWorkbooks.CreateFeedbackSurveyWorkbook();
+        Assert.NotEmpty(bytes);
+
+        using var ms = new MemoryStream(bytes);
+        using var wb = new XLWorkbook(ms);
+        Assert.Equal(3, wb.Worksheets.Count);
+        Assert.Equal("Tổng hợp & Thông tin", wb.Worksheet(1).Name);
+        Assert.Equal("Chi tiết khảo sát", wb.Worksheet(2).Name);
+        Assert.Equal("Đề xuất cột Excel thực tế", wb.Worksheet(3).Name);
+
+        var summary = wb.Worksheet("Tổng hợp & Thông tin");
+        var formulas = summary.CellsUsed(c => c.HasFormula).Select(c => c.FormulaA1).ToList();
+        Assert.Contains(formulas, f => f.Contains("COUNTIF", StringComparison.OrdinalIgnoreCase) && f.Contains("'Chi tiết khảo sát'!$E$2:$E$23", StringComparison.Ordinal));
+
+        var detail = wb.Worksheet("Chi tiết khảo sát");
+        Assert.Equal(23, detail.LastRowUsed()!.RowNumber());
+        Assert.NotEmpty(detail.DataValidations);
+        var dvValues = string.Join(";", detail.DataValidations.Select(d => d.Value));
+        Assert.Contains("Đạt yêu cầu", dvValues);
+        Assert.Contains("Cần chỉnh sửa nhỏ", dvValues);
+        Assert.Contains("Không đạt / Lỗi", dvValues);
+    }
+
+    [Fact]
+    public void StaticFeedbackAssets_AndMainLayoutTrigger_ArePresentOffline()
+    {
+        var repoIrmDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+        var htmlPath = Path.Combine(repoIrmDir, "IRM", "wwwroot", "PHIEU-KHAO-SAT-GOP-Y.html");
+        var xlsxPath = Path.Combine(repoIrmDir, "IRM", "wwwroot", "PHIEU-KHAO-SAT-GOP-Y.xlsx");
+        var mainLayoutPath = Path.Combine(repoIrmDir, "IRM", "Components", "Shared", "MainLayout.razor");
+
+        Assert.True(File.Exists(htmlPath), $"Missing {htmlPath}");
+        Assert.True(File.Exists(xlsxPath), $"Missing {xlsxPath}");
+        Assert.True(File.Exists(mainLayoutPath), $"Missing {mainLayoutPath}");
+
+        var html = File.ReadAllText(htmlPath);
+        Assert.DoesNotContain("https://", html, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("http://", html, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("PHIẾU KHẢO SÁT", html);
+        Assert.Contains("irm_r6_feedback_v1", html);
+
+        var mainLayout = File.ReadAllText(mainLayoutPath);
+        Assert.Contains("id=\"btnCustomerFeedback\"", mainLayout);
+        Assert.Contains("irmInterop.initFeedbackSpotlight", mainLayout);
+        Assert.Contains("/PHIEU-KHAO-SAT-GOP-Y.html", mainLayout);
+        Assert.Contains("/PHIEU-KHAO-SAT-GOP-Y.xlsx", mainLayout);
+    }
 }
