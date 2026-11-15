@@ -141,4 +141,38 @@ public class DeliverySampleWorkbookTests
         Assert.Contains("/PHIEU-KHAO-SAT-GOP-Y.html", mainLayout);
         Assert.Contains("/PHIEU-KHAO-SAT-GOP-Y.xlsx", mainLayout);
     }
+
+    [Fact]
+    public void ReleaseReadinessR6_Sha256TableMatchesDeliveryInventory()
+    {
+        var repoIrmDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+        var readinessPath = Path.Combine(repoIrmDir, "docs", "RELEASE-READINESS-R6.md");
+        var inventoryPath = Path.Combine(repoIrmDir, "docs", "DELIVERY-INVENTORY.json");
+
+        var readinessText = File.ReadAllText(readinessPath);
+        using var invDoc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(inventoryPath));
+        var r6Hashes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var el in invDoc.RootElement.GetProperty("files").EnumerateArray())
+        {
+            var relPath = el.GetProperty("path").GetString() ?? "";
+            const string prefix = "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/";
+            if (relPath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                r6Hashes[relPath[prefix.Length..]] = el.GetProperty("sha256").GetString() ?? "";
+            }
+        }
+
+        var regex = new System.Text.RegularExpressions.Regex(@"^\|\s*`([^`]+)`\s*\|\s*[\d\.]+\s*\|\s*`([0-9A-Fa-f]{64})`\s*\|", System.Text.RegularExpressions.RegexOptions.Multiline);
+        var matches = regex.Matches(readinessText);
+        Assert.Equal(10, matches.Count);
+
+        foreach (System.Text.RegularExpressions.Match m in matches)
+        {
+            var fileName = m.Groups[1].Value;
+            var docSha = m.Groups[2].Value;
+            Assert.True(r6Hashes.TryGetValue(fileName, out var invSha), $"Missing {fileName} in DELIVERY-INVENTORY.json");
+            Assert.Equal(invSha, docSha);
+        }
+    }
 }
