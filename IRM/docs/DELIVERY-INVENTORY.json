@@ -981,8 +981,8 @@
                   {
                       "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
                       "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
-                      "bytes": 2058,
-                      "sha256": "CE3383F9E8003A78068D258E059683BCA0FD810059EE38F611D9D437DD416A8A"
+                      "bytes": 2696,
+                      "sha256": "60549CC1FEC46B83C7498B182A59100D788493857A54CA650E34BF8BB5BB43E7"
                   },
                   {
                       "originalPath": "IRM/docs/INSTALLATION-v1.0.2.md",
@@ -1012,7 +1012,7 @@
                       "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
                       "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
                       "bytes": 678,
-                      "sha256": "B9C4F604BDD4D0778290080B866C6E830FE0636F931ADA105B596798CEADD2D2"
+                      "sha256": "BBAC04BF3EF54C9097E81AB1C39AC121638A2D6B3D4B707E1CB2163CA987EC39"
                   },
                   {
                       "originalPath": "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/windows-stage/SOURCE-REVISION.json",
@@ -1023,8 +1023,8 @@
                   {
                       "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/VERIFICATION.json",
                       "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/VERIFICATION.json",
-                      "bytes": 932,
-                      "sha256": "40E3BCB2C5DF1E2E05ACE28F3A0D5A02C19B91F0CCC7B743A7440009159033C7"
+                      "bytes": 2551,
+                      "sha256": "E78C37BB813C6E233D0D69B27E4841D46BE05D6812F89F72BEC19F6E8100A715"
                   }
               ]
 }
