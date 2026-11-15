@@ -1,48 +1,30 @@
-# Quản lý source và bàn giao IRM
+# Bố cục thư mục bàn giao (`BAN-GIAO/`)
 
-Cập nhật ngày 15/11/2026 (Asia/Bangkok). Git root là workspace `NNN/`, nhánh `develop`; solution nâng cấp nằm trong `IRM/`, còn `immigration-reportmanager-master/` là source WPF cũ ngang cấp. Các gói cài đặt nằm trong `BAN-GIAO/` ở workspace root và được Git bỏ qua. Các đường dẫn `../BAN-GIAO/` bên dưới được tính từ thư mục solution nâng cấp.
+Tất cả gói cài đặt, dữ liệu mẫu kiểm thử và tài liệu bàn giao được tập trung tại thư mục `BAN-GIAO/` ở gốc workspace (thư mục này được `.gitignore` loại trừ khỏi Git để không lưu trữ các tệp nhị phân dung lượng lớn).
 
-## Thư mục chung
+## Cấu trúc chuẩn
 
-| Vị trí trong BAN-GIAO | Nội dung |
-|---|---|
-| `01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/` | Bộ cài R5 hiện hành duy nhất ngày 15/11/2026 giao diện Landing Page (9 tệp, đã gồm `HUONG-DAN-CAI-DAT.html` và `HUONG-DAN-CAI-DAT.md`), build từ commit `b42a277894b963d3a38ccc50ac924d0756f0a741` (chưa ký số). |
-| `02-LUU-TRU/` | R2, R3, R4 (`v1.0.2-DARK-R4-UNSIGNED-TEST/` chuyển nguyên vẹn vào ngày 15/11/2026), thư mục bàn giao 28/09/2026, các gói ZIP/RAR cũ và ZIP source ban đầu. |
-| `03-DU-LIEU-TEST/2026-11-10/` | File `IRM-MAU-IMPORT-TEST-DA-SUA.xlsx` đã sửa 10 mã quốc tịch để khớp danh mục mặc định. |
-| `04-CHO-NGHIEM-THU/` | Vùng build mới (`20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/` giữ lại `SOURCE-REVISION.json`, `stage-SHA256SUMS.txt` và `.exe.sha256` sau khi dọn `windows-stage/` và bản EXE trùng). |
-| `05-HO-TRO/` | Mã tạo workbook, preview, kết quả Windows Sandbox và tệp hỗ trợ kiểm tra. |
+- `BAN-GIAO/01-HIEN-HANH/`: Chỉ chứa gói bàn giao mới nhất đang hiệu lực.
+  - Hiện hành: `v1.0.2-R6-UNSIGNED-TEST/`
+    - `IRM-v1.0.2-windows-x64-offline-setup-R6.exe` (`790.854.254` byte, SHA-256: `2D6BA7B6E2FFEB8E6CE411C473965556F2FCEFADCEE5F77F3F2FDBD77CECF585`, commit nguồn: `706f74e44e3b97b1c50d6e3c116d4f969eb5389c`)
+    - `IRM-v1.0.2-windows-x64-offline-setup-R6.exe.sha256`
+    - `IRM-MAU-IMPORT-TEST-DA-SUA.xlsx` (10 hồ sơ mẫu chuẩn hóa 3 chữ cái + Nhóm nghề `Kỹ thuật`, nạp đạt 10/10 trên DB cài mới R6)
+    - `PHIEU-KHAO-SAT-GOP-Y.html` (Phiếu khảo sát & góp ý tương tác offline, xuất CSV/JSON, in PDF)
+    - `PHIEU-KHAO-SAT-GOP-Y.xlsx` (Phiếu khảo sát & góp ý Excel 3 sheet có Data Validation & công thức tổng hợp)
+    - `HUONG-DAN-CAI-DAT.html` & `HUONG-DAN-CAI-DAT.md`
+    - `DOC-TRUOC-KHI-CAI.txt`, `SHA256SUMS.txt`, `SOURCE-REVISION.json`, `VERIFICATION.json`
+- `BAN-GIAO/02-LUU-TRU/`: Lưu trữ nguyên vẹn các gói đã phát hành trước đó (không sửa đổi hoặc đổi nhãn):
+  - `v1.0.2-R5-UNSIGNED-TEST/` (SHA-256 EXE: `C10A1915646381331DB3481BCA0D2F546CAF3B54440721830DC38A8FB9125D45`, commit `b42a277894b963d3a38ccc50ac924d0756f0a741`)
+  - `v1.0.2-DARK-R4-UNSIGNED-TEST/`
+  - `v1.0.2-R2/`, `v1.0.2-R3/`
+- `BAN-GIAO/03-DU-LIEU-TEST/`: Chứa các bộ dữ liệu Excel mẫu theo mốc ngày:
+  - `2026-11-15/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx` (chuẩn hóa cho R6)
+  - `2026-11-10/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx` (bản lưu cũ)
+- `BAN-GIAO/04-CHO-NGHIEM-THU/`: Lưu biên bản build candidate (`20261115-v1.0.2-R6-UNSIGNED-TEST/`, `20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/`).
+- `BAN-GIAO/05-HO-TRO/`: Lưu các công cụ và dữ liệu đối chiếu hỗ trợ trước đây.
 
-Mở `../BAN-GIAO/README.md` để tìm gói cần dùng. `DELIVERY-INVENTORY.json` ghi đường dẫn cũ/mới, kích thước và SHA-256 (hiện `170` tệp); bản sao nằm tại `../BAN-GIAO/DANH-MUC-TEP.json`.
+## Quy tắc bảo toàn
 
-Đã tập trung và xác minh 160 tệp. Khi tổ chức lại, workbook đã sửa đang mở trong Excel nên không thể di chuyển trực tiếp: bản sao cùng SHA-256 đã được đặt tại `03-DU-LIEU-TEST/2026-11-10/`. Trường `pendingOriginalRemoval` trong danh mục ghi bản trùng còn giữ tại `../outputs/irm-import-fixed-20261110/`. Chờ đóng workbook trước khi chuyển bản trùng vào lưu trữ; không tự tắt Excel hoặc bỏ thay đổi của người dùng. Thao tác xóa bản trùng đã bị xét duyệt tự động từ chối với thông báo `blocked by policy`.
-
-## Phân biệt bản đã giao và source
-
-R4 giữ payload ứng dụng cũ từ R3. Nó không chứa đợt tách kiến trúc hoặc bản sửa validation quốc tịch vừa commit. Không có bằng chứng về Git commit chính xác dùng để build R4; không tự gán commit mới cho EXE này.
-
-File Excel mẫu cũ vẫn được giữ trong các gói gốc để bảo toàn checksum. Khi thử import với danh mục mặc định, dùng file đã sửa ở `03-DU-LIEU-TEST/2026-11-10/`. Ba hồ sơ giả có quốc tịch Đức, Pháp và Canada đã đổi sang Úc, Anh và Hoa Kỳ; các ô ngoài quốc tịch được giữ nguyên. Đây là sửa dữ liệu test, không phải nâng cấp EXE trên máy khách.
-
-Đối chiếu database cũ sau đó xác nhận bộ mã cũ khác bộ seed mặc định mới: USA/KOR/JPN/CHN... và D cho Đức. Vì vậy file DA-SUA chỉ là dữ liệu thử cho seed mới, không phải chuẩn sửa dữ liệu nghiệp vụ kế thừa. Khi làm việc với database cũ, lấy danh mục thật làm chuẩn và đọc [hướng dẫn import](HUONG-DAN-IMPORT-EXCEL.md).
-
-Bổ sung hướng dẫn HTML tự chứa tại `03-DU-LIEU-TEST/2026-11-10/HUONG-DAN-IMPORT-EXCEL.html`; danh mục tệp hiện gồm 160 tệp đã tập trung và hướng dẫn mới này. Bản Markdown nguồn và bản HTML tương ứng được quản lý trong `IRM/docs/`. Không thay workbook hoặc gói cài đặt trong lần đối chiếu database này.
-
-## Kết thúc mỗi lần sửa source
-
-1. Kiểm tra `git status` và giữ nguyên thay đổi không liên quan.
-2. Chạy build/test phù hợp; ghi rõ test SQL bị bỏ qua khi thiếu `IRM_TEST_SQLSERVER`.
-3. Rà soát staged diff; commit đủ source, test, cấu hình và tài liệu liên quan. Không commit credentials, database, log hoặc bộ cài.
-4. Báo mã commit và kết quả kiểm tra; không để phần sửa đã hoàn thành ở trạng thái chưa commit. Chỉ push khi người dùng yêu cầu.
-
-## Tạo gói mới
-
-Sau khi commit và Git tree sạch, chạy `deploy/windows/build-windows-installer.ps1` từ thư mục solution nâng cấp `IRM/`. Output mặc định là `../BAN-GIAO/04-CHO-NGHIEM-THU/<timestamp>-v1.0.2/`. Có thể truyền `-OutputDirectory` cho môi trường build riêng; bản bàn giao cuối cùng vẫn phải chuyển vào thư mục chung.
-
-Script đóng gói ghi commit vào `SOURCE-REVISION.json` trước khi tạo checksum. Giữ các giới hạn ký số/nghiệm thu hiện có; không tự chạy cài đặt lên máy đang dùng để kiểm tra việc dọn thư mục. Không ghi đè bộ cài hoặc cập nhật checksum của gói đã giao để biến nó thành bản mới.
-
-Khi bàn giao revision mới, ghi đúng phiên bản/revision, commit nguồn, SHA-256, ngày build, kết quả nghiệm thu và các giới hạn còn lại. Cập nhật README và danh mục tệp trong thư mục chung; giữ bản trước ở `02-LUU-TRU/`.
-
-## Kiểm tra ngày 10/11/2026
-
-Build Release không lỗi/cảnh báo. Bộ test có 117 ca đạt và 1 ca SQL Server bị bỏ qua do chưa cấu hình kết nối test. Kiểm tra bộ cài PowerShell có 46 assertion đạt ở x64 và 47 ở x86. Đợt dọn thư mục này không build lại hoặc triển khai bộ cài lên máy khách.
-
-Lần build kiểm tra lại sau khi chuẩn hóa khoảng trắng vẫn đạt, nhưng Windows Application Control chặn nạp `IRM.Tests.dll` (`0x800711C7`), khiến runner không tìm được test và lệnh test thất bại. Kết quả 117 đạt / 1 bỏ qua ở trên thuộc lần chạy trước trong cùng phiên; không coi lần bị chặn là test đã đạt. Không thay chính sách bảo mật Windows để chạy test.
+1. Không bao giờ ghi đè hoặc gán lại nhãn commit mới cho bộ cài cũ đã bàn giao.
+2. Khi phát hành bản mới, di chuyển nguyên vẹn gói cũ từ `01-HIEN-HANH/` sang `02-LUU-TRU/` trước khi đặt gói mới vào `01-HIEN-HANH/`.
+3. Mọi tệp trong gói hiện hành phải có mã băm khớp với `SHA256SUMS.txt` và `IRM/docs/DELIVERY-INVENTORY.json`.

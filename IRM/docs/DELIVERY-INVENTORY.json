@@ -1,11 +1,11 @@
-{
+﻿{
     "organizedOn":  "2026-11-10",
     "timeZone":  "Asia/Bangkok",
     "deliveryRoot":  "../BAN-GIAO",
     "sourceHeadAtOrganization":  "65d129dc6d03965fcb750220c0a1a4ecbbd180af",
     "installerSourceCommit":  null,
     "installerSourceNote":  "The existing R4 installer predates the committed refactor. Its original source commit was not recorded; do not label the installer with the new source commit.",
-    "fileCount":  170,
+    "fileCount":  183,
     "moveCount":  14,
     "verifiedBy":  "Atomic same-volume moves; SHA-256 and byte length verified at the consolidated paths. Original release checksum files are preserved.",
     "pendingOriginalRemoval":  [
@@ -973,64 +973,142 @@
                       "sha256":  "520ABF196A09CACED7236BC9D4081ADDA41C74CBFC29523B3B8040E3079A23F7"
                   },
                   {
-                      "originalPath": "IRM/docs/HUONG-DAN-IMPORT-EXCEL.html",
-                      "path": "03-DU-LIEU-TEST/2026-11-10/HUONG-DAN-IMPORT-EXCEL.html",
-                      "bytes": 24810,
-                      "sha256": "5BEF799C2D55426C692A8B008237BC80A9A1ECB7552AF2B5968038D00E9DB631"
+                      "originalPath":  "IRM/docs/HUONG-DAN-IMPORT-EXCEL.html",
+                      "path":  "03-DU-LIEU-TEST/2026-11-10/HUONG-DAN-IMPORT-EXCEL.html",
+                      "bytes":  24810,
+                      "sha256":  "5BEF799C2D55426C692A8B008237BC80A9A1ECB7552AF2B5968038D00E9DB631"
                   },
                   {
-                      "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
-                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
-                      "bytes": 2764,
-                      "sha256": "1EF6EADE027181AE9F7DC7ABDEAAA01F637F1135E500A5EA0D8B180AAD6581EA"
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "bytes":  2764,
+                      "sha256":  "1EF6EADE027181AE9F7DC7ABDEAAA01F637F1135E500A5EA0D8B180AAD6581EA"
                   },
                   {
-                      "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
-                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
-                      "bytes": 23568,
-                      "sha256": "7F66EB8F0F7E6BE92C893AA400E1819ED7526FB3F63D3B411040CDF7DC81681C"
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "bytes":  23568,
+                      "sha256":  "7F66EB8F0F7E6BE92C893AA400E1819ED7526FB3F63D3B411040CDF7DC81681C"
                   },
                   {
-                      "originalPath": "IRM/docs/INSTALLATION-v1.0.2.md",
-                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.md",
-                      "bytes": 8660,
-                      "sha256": "60A96D5DDB0DFC16E6C522880CB6819564571C75F33CED3895668C6B619CB7FE"
+                      "originalPath":  "IRM/docs/INSTALLATION-v1.0.2.md",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.md",
+                      "bytes":  8660,
+                      "sha256":  "60A96D5DDB0DFC16E6C522880CB6819564571C75F33CED3895668C6B619CB7FE"
                   },
                   {
-                      "originalPath": "BAN-GIAO/03-DU-LIEU-TEST/2026-11-10/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
-                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
-                      "bytes": 7696,
-                      "sha256": "5DC0518B9FA3086253B4BC7372D849C5A987409B858368E477084567DFBEE3CA"
+                      "originalPath":  "BAN-GIAO/03-DU-LIEU-TEST/2026-11-10/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "bytes":  7696,
+                      "sha256":  "5DC0518B9FA3086253B4BC7372D849C5A987409B858368E477084567DFBEE3CA"
                   },
                   {
-                      "originalPath": "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe",
-                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe",
-                      "bytes": 790828274,
-                      "sha256": "C10A1915646381331DB3481BCA0D2F546CAF3B54440721830DC38A8FB9125D45"
+                      "originalPath":  "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe",
+                      "bytes":  790828274,
+                      "sha256":  "C10A1915646381331DB3481BCA0D2F546CAF3B54440721830DC38A8FB9125D45"
                   },
                   {
-                      "originalPath": "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe.sha256",
-                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe.sha256",
-                      "bytes": 111,
-                      "sha256": "53EC6CFD8076F8DC69816A09965B0D0CD14E820EDE9CA4615625A22DC668B180"
+                      "originalPath":  "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe.sha256",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe.sha256",
+                      "bytes":  111,
+                      "sha256":  "53EC6CFD8076F8DC69816A09965B0D0CD14E820EDE9CA4615625A22DC668B180"
                   },
                   {
-                      "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
-                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
-                      "bytes": 768,
-                      "sha256": "19535BC86896F7C6D54E545B69BC841C167DA7DD761C164F03E7E4D5028D3419"
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "bytes":  768,
+                      "sha256":  "19535BC86896F7C6D54E545B69BC841C167DA7DD761C164F03E7E4D5028D3419"
                   },
                   {
-                      "originalPath": "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/windows-stage/SOURCE-REVISION.json",
-                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SOURCE-REVISION.json",
-                      "bytes": 142,
-                      "sha256": "630B54AA579ED0BCCE3A43C141513D7AC7E83C9CE2AEE49495A5A8E8AC69AAD2"
+                      "originalPath":  "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/windows-stage/SOURCE-REVISION.json",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/SOURCE-REVISION.json",
+                      "bytes":  142,
+                      "sha256":  "630B54AA579ED0BCCE3A43C141513D7AC7E83C9CE2AEE49495A5A8E8AC69AAD2"
                   },
                   {
-                      "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/VERIFICATION.json",
-                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/VERIFICATION.json",
-                      "bytes": 2551,
-                      "sha256": "E78C37BB813C6E233D0D69B27E4841D46BE05D6812F89F72BEC19F6E8100A715"
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/VERIFICATION.json",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/VERIFICATION.json",
+                      "bytes":  2551,
+                      "sha256":  "E78C37BB813C6E233D0D69B27E4841D46BE05D6812F89F72BEC19F6E8100A715"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "bytes":  2012,
+                      "sha256":  "D36FC4787C650D5FE1CF9CBF39393F3498BB9D89C90C11E466466C96319AAE62"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "bytes":  20291,
+                      "sha256":  "CCC62183087687FE5C6369F023AEC09588C1D88F543662064155DD96FE230B65"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.md",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.md",
+                      "bytes":  9614,
+                      "sha256":  "F5D884A975F0123A15B899F2AC36DD702C1B7F7C2EE0E3299FAC0376CADA369D"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "bytes":  10467,
+                      "sha256":  "0FD45444DD8183B0A96531ABD52EA87C2EF0F332FF14F9CBC0ED206DBCF28BFF"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R6.exe",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R6.exe",
+                      "bytes":  790854254,
+                      "sha256":  "2D6BA7B6E2FFEB8E6CE411C473965556F2FCEFADCEE5F77F3F2FDBD77CECF585"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R6.exe.sha256",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R6.exe.sha256",
+                      "bytes":  111,
+                      "sha256":  "79465BC2360FA8227AB4F29557DF6C273DD2E6A54E815A626CDFB6A39779D9F0"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/PHIEU-KHAO-SAT-GOP-Y.html",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/PHIEU-KHAO-SAT-GOP-Y.html",
+                      "bytes":  29259,
+                      "sha256":  "8C4788A799A941D30B2C7A10E57052A100588CB8C5C81CCDD3B8DF2FB07DDFEF"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/PHIEU-KHAO-SAT-GOP-Y.xlsx",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/PHIEU-KHAO-SAT-GOP-Y.xlsx",
+                      "bytes":  13811,
+                      "sha256":  "EEAB46A8356B7DC20C3094818FD97F892FF63A2CF7F57E610FBC708BF21CBEE8"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "bytes":  954,
+                      "sha256":  "4A7F4527916CA90768B2218EBC8F8FF6E84D91CCFB2CD2666ED7DC8C2D81328D"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/SOURCE-REVISION.json",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/SOURCE-REVISION.json",
+                      "bytes":  142,
+                      "sha256":  "2E3F43879D00468DA3BC866C8B4C16E2A1AED31B400BFDF10A899E87B4665D5E"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/VERIFICATION.json",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/VERIFICATION.json",
+                      "bytes":  1386,
+                      "sha256":  "64E16282F0471AFF48FD85C0FDFD3D28F6431130D57F60C2A2344D3DBD68F10F"
+                  },
+                  {
+                      "originalPath":  "03-DU-LIEU-TEST/2026-11-15/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "path":  "03-DU-LIEU-TEST/2026-11-15/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "bytes":  10467,
+                      "sha256":  "0FD45444DD8183B0A96531ABD52EA87C2EF0F332FF14F9CBC0ED206DBCF28BFF"
+                  },
+                  {
+                      "originalPath":  "03-DU-LIEU-TEST/2026-11-15/README.md",
+                      "path":  "03-DU-LIEU-TEST/2026-11-15/README.md",
+                      "bytes":  808,
+                      "sha256":  "69A9E9805EC2F4F4C8419A7E2DC07905D3C290AE3B9BA70BC6F1F90A35BB3BA1"
                   }
               ]
 }
