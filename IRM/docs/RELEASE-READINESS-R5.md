@@ -29,17 +29,17 @@ Version ứng dụng `1.0.2`, revision `R5`; artifact `IRM-v1.0.2-windows-x64-of
 
 ## Candidate và gói bàn giao R5 Landing Page (15/11/2026)
 
-- Candidate gốc: `BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/`.
-- Thư mục bàn giao hiện hành: `BAN-GIAO/01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/`.
+- Thư mục truy vết candidate: `BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/` (giữ lại `SOURCE-REVISION.json`, `stage-SHA256SUMS.txt` và `.exe.sha256` sau khi dọn `windows-stage/` và EXE trùng).
+- Thư mục bàn giao hiện hành (duy nhất trong `01-HIEN-HANH/`): `BAN-GIAO/01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/` (9 tệp, đã bổ sung `HUONG-DAN-CAI-DAT.html` tự chứa và cập nhật `SHA256SUMS.txt`).
 - EXE: `IRM-v1.0.2-windows-x64-offline-setup-R5.exe` — `790828274` byte.
 - Source commit: `b42a277894b963d3a38ccc50ac924d0756f0a741`, `dirty=false` trong `SOURCE-REVISION.json` (`builtAtUtc`: `2026-11-15T05:44:47.2609258Z`).
 - SHA-256 EXE: `C10A1915646381331DB3481BCA0D2F546CAF3B54440721830DC38A8FB9125D45` (khớp sidecar `.sha256` và `SHA256SUMS.txt`).
-- Trạng thái ký: `NotSigned` (dựng với `-AllowUnsigned`; giữ nguyên gói R4 cũ ở `01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/`).
+- Trạng thái ký: `NotSigned` (dựng với `-AllowUnsigned`; gói R4 cũ đã chuyển nguyên vẹn vào lưu trữ tại `02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/`).
 
-## Mốc candidate R5 trước đó (14/11/2026 — UI mint/emerald)
+## Mốc candidate R5 trước đó (14/11/2026 — UI mint/emerald, đã dọn)
 
-- Thư mục: `BAN-GIAO/04-CHO-NGHIEM-THU/20261114-v1.0.2-R5-UNSIGNED-TEST/`.
-- EXE: `IRM-v1.0.2-windows-x64-offline-setup-R5.exe` — `790825037` byte.
+- Đã dọn thư mục build trung gian `BAN-GIAO/04-CHO-NGHIEM-THU/20261114-v1.0.2-R5-UNSIGNED-TEST/` (và `20261111-183841-705-v1.0.2`) để giải phóng dung lượng.
+- EXE cũ (đã thay thế bởi bản 15/11): `IRM-v1.0.2-windows-x64-offline-setup-R5.exe` — `790825037` byte.
 - Source commit: `a58a2adfd75099afa41f939e78fe3a5b0a74013b`, `dirty=false`.
 - SHA-256: `D3C28EB488C0C7E5A434D1CBD954A51586B9814221DFFBAD4DA080763810D4B4` (`NotSigned`).
 
@@ -63,7 +63,7 @@ Sau reboot, Windows tự cập nhật client Sandbox lên `0.8.114.0`. Máy ảo
 
 - Giữ checkout `develop` theo yêu cầu workspace; không thay đổi worker/Admin/schema/WPF.
 - Đọc ảnh `logo-cand.png` và `police-3d.png` qua `MemoryStream` + clone `Bitmap` để không giữ khóa tệp trong `$PayloadRoot`.
-- Giữ nguyên gói R4 tại `BAN-GIAO/01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/` và candidate 14/11 tại `04-CHO-NGHIEM-THU/`; đưa bản R5 Landing Page vào `04-CHO-NGHIEM-THU/` và hoàn thiện bản giao tại `01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/`.
+- Chuyển nguyên vẹn gói R4 vào lưu trữ tại `BAN-GIAO/02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/`, dọn các bản build thử trung gian/trùng lặp trong `04-CHO-NGHIEM-THU/`, chỉ giữ duy nhất `BAN-GIAO/01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/` làm gói bàn giao hiện hành (đã kèm `HUONG-DAN-CAI-DAT.html`).
 - Thiếu chứng thư Code Signing nên gói vẫn gắn nhãn `UNSIGNED-TEST`, lưu ý SmartScreen khi chạy trên máy khách.
 
 ## Công việc tiếp theo (nếu phát hành chính thức có ký số)

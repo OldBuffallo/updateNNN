@@ -6,14 +6,13 @@ Cập nhật ngày 15/11/2026 (Asia/Bangkok). Git root là workspace `NNN/`, nh�
 
 | Vị trí trong BAN-GIAO | Nội dung |
 |---|---|
-| `01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/` | Bộ cài R5 ngày 15/11/2026 giao diện Landing Page, build từ commit `b42a277894b963d3a38ccc50ac924d0756f0a741` (chưa ký số). |
-| `01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/` | Bộ cài R4 ngày 03/11/2026, giữ nguyên EXE, hướng dẫn và checksum đã có. |
-| `02-LUU-TRU/` | R2, R3, thư mục bàn giao 28/09/2026, các gói ZIP/RAR cũ và ZIP source ban đầu. |
+| `01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/` | Bộ cài R5 hiện hành duy nhất ngày 15/11/2026 giao diện Landing Page (9 tệp, đã gồm `HUONG-DAN-CAI-DAT.html` và `HUONG-DAN-CAI-DAT.md`), build từ commit `b42a277894b963d3a38ccc50ac924d0756f0a741` (chưa ký số). |
+| `02-LUU-TRU/` | R2, R3, R4 (`v1.0.2-DARK-R4-UNSIGNED-TEST/` chuyển nguyên vẹn vào ngày 15/11/2026), thư mục bàn giao 28/09/2026, các gói ZIP/RAR cũ và ZIP source ban đầu. |
 | `03-DU-LIEU-TEST/2026-11-10/` | File `IRM-MAU-IMPORT-TEST-DA-SUA.xlsx` đã sửa 10 mã quốc tịch để khớp danh mục mặc định. |
-| `04-CHO-NGHIEM-THU/` | Các bản build mới, mỗi lần một thư mục timestamp và phiên bản riêng. |
-| `05-HO-TRO/` | Mã tạo workbook, preview và tệp hỗ trợ kiểm tra trước đây. |
+| `04-CHO-NGHIEM-THU/` | Vùng build mới (`20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/` giữ lại `SOURCE-REVISION.json`, `stage-SHA256SUMS.txt` và `.exe.sha256` sau khi dọn `windows-stage/` và bản EXE trùng). |
+| `05-HO-TRO/` | Mã tạo workbook, preview, kết quả Windows Sandbox và tệp hỗ trợ kiểm tra. |
 
-Mở `../BAN-GIAO/README.md` để tìm gói cần dùng. `DELIVERY-INVENTORY.json` ghi đường dẫn cũ/mới, kích thước và SHA-256; bản sao nằm tại `../BAN-GIAO/DANH-MUC-TEP.json`.
+Mở `../BAN-GIAO/README.md` để tìm gói cần dùng. `DELIVERY-INVENTORY.json` ghi đường dẫn cũ/mới, kích thước và SHA-256 (hiện `170` tệp); bản sao nằm tại `../BAN-GIAO/DANH-MUC-TEP.json`.
 
 Đã tập trung và xác minh 160 tệp. Khi tổ chức lại, workbook đã sửa đang mở trong Excel nên không thể di chuyển trực tiếp: bản sao cùng SHA-256 đã được đặt tại `03-DU-LIEU-TEST/2026-11-10/`. Trường `pendingOriginalRemoval` trong danh mục ghi bản trùng còn giữ tại `../outputs/irm-import-fixed-20261110/`. Chờ đóng workbook trước khi chuyển bản trùng vào lưu trữ; không tự tắt Excel hoặc bỏ thay đổi của người dùng. Thao tác xóa bản trùng đã bị xét duyệt tự động từ chối với thông báo `blocked by policy`.
 

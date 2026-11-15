@@ -5,7 +5,7 @@
     "sourceHeadAtOrganization":  "65d129dc6d03965fcb750220c0a1a4ecbbd180af",
     "installerSourceCommit":  null,
     "installerSourceNote":  "The existing R4 installer predates the committed refactor. Its original source commit was not recorded; do not label the installer with the new source commit.",
-    "fileCount":  169,
+    "fileCount":  170,
     "moveCount":  14,
     "verifiedBy":  "Atomic same-volume moves; SHA-256 and byte length verified at the consolidated paths. Original release checksum files are preserved.",
     "pendingOriginalRemoval":  [
@@ -14,49 +14,49 @@
     "files":  [
                   {
                       "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
-                      "path":  "01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
                       "bytes":  803,
                       "sha256":  "72729653BE2F8AD4A399E3B1D1B730A90975DA80D4FBF1E5930CF35C4D8817CB"
                   },
                   {
                       "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
-                      "path":  "01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
                       "bytes":  13535,
                       "sha256":  "171F41F39E373814B135BF7EC9F7DA61773534EF1FCECD5E85C5C7FF834BB963"
                   },
                   {
                       "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.txt",
-                      "path":  "01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.txt",
                       "bytes":  12251,
                       "sha256":  "37E0A8386D8007093838EFC0A67785E43A37EFAF4740651B96A3E46457C0D34C"
                   },
                   {
                       "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST.xlsx",
-                      "path":  "01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST.xlsx",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST.xlsx",
                       "bytes":  7703,
                       "sha256":  "EC0E39DCC64F297F0E18EAED0830B927521C284E02250BB7ACFD31CE455C9FB7"
                   },
                   {
                       "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R4-DARK-UNSIGNED-TEST.exe",
-                      "path":  "01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R4-DARK-UNSIGNED-TEST.exe",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R4-DARK-UNSIGNED-TEST.exe",
                       "bytes":  789648104,
                       "sha256":  "5B591C720C4E99D6FDDA647C3955F87AB16806825B699F8F9B1399DC1C0B0BD3"
                   },
                   {
                       "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R4-DARK-UNSIGNED-TEST.exe.sha256",
-                      "path":  "01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R4-DARK-UNSIGNED-TEST.exe.sha256",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R4-DARK-UNSIGNED-TEST.exe.sha256",
                       "bytes":  130,
                       "sha256":  "0DD768E2DEC38FC917DBA9D51EE0DD0F52A38E1AAB1A337140A49CA5457FAD50"
                   },
                   {
                       "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/SHA256SUMS.txt",
-                      "path":  "01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/SHA256SUMS.txt",
                       "bytes":  715,
                       "sha256":  "21E248709F987369C121343E90EF71FBAF70ECFAA6EE225698A0B56B009879FE"
                   },
                   {
                       "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/VERIFICATION.json",
-                      "path":  "01-HIEN-HANH/v1.0.2-DARK-R4-UNSIGNED-TEST/VERIFICATION.json",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/VERIFICATION.json",
                       "bytes":  687,
                       "sha256":  "3A7658E392B4CD891AE027BFF58418891C54CF60BF6B9952F75F1933C1F64BC8"
                   },
@@ -981,8 +981,14 @@
                   {
                       "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
                       "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
-                      "bytes": 2696,
-                      "sha256": "60549CC1FEC46B83C7498B182A59100D788493857A54CA650E34BF8BB5BB43E7"
+                      "bytes": 2764,
+                      "sha256": "1EF6EADE027181AE9F7DC7ABDEAAA01F637F1135E500A5EA0D8B180AAD6581EA"
+                  },
+                  {
+                      "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "bytes": 23568,
+                      "sha256": "7F66EB8F0F7E6BE92C893AA400E1819ED7526FB3F63D3B411040CDF7DC81681C"
                   },
                   {
                       "originalPath": "IRM/docs/INSTALLATION-v1.0.2.md",
@@ -1011,8 +1017,8 @@
                   {
                       "originalPath": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
                       "path": "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
-                      "bytes": 678,
-                      "sha256": "BBAC04BF3EF54C9097E81AB1C39AC121638A2D6B3D4B707E1CB2163CA987EC39"
+                      "bytes": 768,
+                      "sha256": "19535BC86896F7C6D54E545B69BC841C167DA7DD761C164F03E7E4D5028D3419"
                   },
                   {
                       "originalPath": "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/windows-stage/SOURCE-REVISION.json",
