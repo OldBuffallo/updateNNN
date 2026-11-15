@@ -3,17 +3,17 @@
 ## Hai hình thức bàn giao
 
 1. **Online/VPS:** IRM chạy bằng Docker Compose phía sau HTTPS. Quy trình triển khai nằm tại `deploy/deploy-vps.ps1`.
-2. **Offline/Windows R5:** tên artifact là `IRM-v1.0.2-windows-x64-offline-setup-R5.exe`. Gói chứa ứng dụng .NET self-contained, SQL Server 2022 Express Core và CU27; máy cài không cần Internet nếu đã có .NET Framework 4.7.2 trở lên cho SQL Server. Kiểm tra biên bản, trạng thái ký số và checksum đi kèm để phân biệt candidate thử với bản được phép bàn giao chính thức.
+2. **Offline/Windows R6:** tên artifact là `IRM-v1.0.2-windows-x64-offline-setup-R6.exe`. Gói chứa ứng dụng .NET self-contained, SQL Server 2022 Express Core và CU27; máy cài không cần Internet nếu đã có .NET Framework 4.7.2 trở lên cho SQL Server. Kiểm tra biên bản, trạng thái ký số và checksum đi kèm để phân biệt candidate thử với bản được phép bàn giao chính thức.
 
 ## Cài offline trên Windows
 
-Bộ cài R5 dùng giao diện đồng bộ màn hình đăng nhập (Landing Page) của ứng dụng: bố cục 2 cột với nền xanh olive vát khối đa giác (`#C2D67C → #9AB55C → #6D8446`), Công an hiệu ở phần đầu, nhân vật 3D Công an Nhân dân đứng trên bệ ở cột phải, khung bảng kiểm tra/biểu mẫu sáng rõ ở cột trái và nút chính màu cam (`#EA580C`). Bảng quét, hộp thông báo và báo cáo môi trường HTML dùng chung bảng màu olive sáng; bản in dùng nền trắng. Theme chỉ áp dụng cho bộ cài; không đổi theme Windows. Hộp thoại bảo mật của Windows do hệ điều hành hiển thị. Điều kiện Windows, RAM, SQL và hành vi nâng cấp giữ nguyên. Gói R4 cũ vẫn giữ nội dung và checksum cũ.
+Bộ cài R6 dùng giao diện đồng bộ màn hình đăng nhập (Landing Page) của ứng dụng: bố cục 2 cột với nền xanh olive vát khối đa giác (`#C2D67C → #9AB55C → #6D8446`), Công an hiệu ở phần đầu, nhân vật 3D Công an Nhân dân đứng trên bệ ở cột phải, khung bảng kiểm tra/biểu mẫu sáng rõ ở cột trái và nút chính màu cam (`#EA580C`). Bảng quét, hộp thông báo và báo cáo môi trường HTML dùng chung bảng màu olive sáng; bản in dùng nền trắng. Theme chỉ áp dụng cho bộ cài; không đổi theme Windows. Hộp thoại bảo mật của Windows do hệ điều hành hiển thị. Điều kiện Windows, RAM, SQL và hành vi nâng cấp giữ nguyên. Gói R4/R5 cũ vẫn giữ nội dung và checksum cũ.
 
 > Bộ cài bàn giao chính thức phải có chữ ký Authenticode từ chứng thư Code Signing tin cậy. Không bàn giao artifact được tạo với `-AllowUnsigned`, vì Windows SmartScreen hoặc chính sách doanh nghiệp có thể chặn hoàn toàn.
 
 Yêu cầu tối thiểu: Windows 10 phiên bản 1607 x64 trở lên (build tối thiểu 14393, bao gồm Windows 11) hoặc Windows Server 2016 x64 trở lên (build tối thiểu 14393; bộ cài giao diện cần Desktop Experience), đã có .NET Framework 4.7.2 trở lên, 2 CPU logic từ 2 GHz, 2 GB RAM khả dụng, 10 GB ổ đĩa trống và Windows Defender đang hoạt động để quét tệp tải lên.
 
-1. Sao chép file `IRM-v1.0.2-windows-x64-offline-setup-R5.exe` và checksum đi kèm vào máy cần cài; xác minh SHA-256 trước khi chạy.
+1. Sao chép file `IRM-v1.0.2-windows-x64-offline-setup-R6.exe` và checksum đi kèm vào máy cần cài; xác minh SHA-256 trước khi chạy.
 2. Nhấp đúp file và chọn **Yes** khi Windows hỏi quyền Administrator.
 3. Ở **Bước 1**, nhấn **Quét môi trường**. Trình cài đặt hiển thị báo cáo tickbox và lưu bản HTML tại `C:\ProgramData\IRM\logs`.
 4. Nếu thiếu SQL Server/CU27, báo cáo ghi **Sẽ cài bổ sung**. Các thành phần này được lấy ngay trong bộ cài, không tải Internet.
@@ -38,6 +38,8 @@ Sau khi cài:
 - Đăng nhập bằng tài khoản đã tạo trong bộ cài.
 - Kiểm tra `http://localhost:5050/health/ready` trả về trạng thái `ready`.
 - Chạy `C:\ProgramData\IRM\tools\backup.ps1`, sau đó xác nhận có tệp backup mới.
+- **Kiểm thử nhanh Import Excel mẫu R6 (`IRM-MAU-IMPORT-TEST-DA-SUA.xlsx`):** Vào mục **Import Excel**, ở Bước 1 chọn Công ty **CÔNG TY MẪU - HÃY ĐỔI TÊN** và Nhóm nghề **Kỹ thuật**, tải lên tệp `IRM-MAU-IMPORT-TEST-DA-SUA.xlsx` đi kèm trong thư mục bàn giao — hệ thống tự động ghép đủ 19 cột và nạp thành công 10/10 hồ sơ mẫu (gồm cả mã quốc tịch 3 chữ cái, số định danh có số `0` đầu và hồ sơ diện `Thân nhân`).
+- **Gửi phản hồi nghiệm thu (`Khảo sát & Góp ý`):** Ngay lần đầu mở ứng dụng Web, hiệu ứng spotlight trên thanh tiêu đề sẽ chỉ dẫn nút **Khảo sát & Góp ý (R6)**. Khách hàng có thể bấm nút này để mở trực tiếp phiếu khảo sát HTML hoặc tải phiếu Excel (`PHIEU-KHAO-SAT-GOP-Y.html` / `PHIEU-KHAO-SAT-GOP-Y.xlsx`, cũng có sẵn ngay trong thư mục bàn giao).
 
 ## Gỡ cài đặt
 
