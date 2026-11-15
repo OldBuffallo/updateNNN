@@ -5,6 +5,13 @@ using IRM.Infrastructure;
 using IRM.Infrastructure.Maintenance;
 using IRM.Services;
 
+var exportIdx = Array.FindIndex(args, a => a.Equals("--export-delivery-workbooks", StringComparison.OrdinalIgnoreCase));
+if (exportIdx >= 0 && exportIdx + 1 < args.Length)
+{
+    IRM.Infrastructure.Excel.DeliveryWorkbooks.WriteAll(args[exportIdx + 1]);
+    return;
+}
+
 var bootstrapOnly = args.Any(x => x.Equals("--bootstrap", StringComparison.OrdinalIgnoreCase));
 var provisionDatabase = args.Any(x => x.Equals("--provision-database", StringComparison.OrdinalIgnoreCase));
 var backupOnly = args.Any(x => x.Equals("--backup", StringComparison.OrdinalIgnoreCase));
