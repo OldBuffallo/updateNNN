@@ -9,7 +9,7 @@ namespace IRM.Tests;
 public sealed class ImportExportFeatureTddTests
 {
     [Fact]
-    public async Task ExecuteImportAsync_RejectsMissingCompanyBeforeSaving()
+    public async Task ExecuteImportAsync_AllowsNullCompanyForPassportOnlyRow()
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
@@ -25,7 +25,7 @@ public sealed class ImportExportFeatureTddTests
                 {
                     StaffName = "No Company Test",
                     Passport = "NO-COMPANY-001",
-                    IDCompany = 0,
+                    IDCompany = null,
                     IDCareer = 1,
                     Nationality = "USA"
                 }
@@ -34,17 +34,14 @@ public sealed class ImportExportFeatureTddTests
 
         var result = await service.ExecuteImportAsync(rows, [], companyId: 0, "missing-company.xlsx", "admin");
 
-        Assert.False(result.Success);
-        Assert.Equal(0, result.AddedCount);
-        Assert.Equal(1, result.ErrorCount);
-        Assert.Contains(result.Errors, error => error.Contains("Công ty", StringComparison.OrdinalIgnoreCase));
-        Assert.DoesNotContain(db.Context.Employees, employee => employee.Passport == "NO-COMPANY-001");
-        Assert.Empty(db.Context.ImportHistories);
-        Assert.Empty(db.Context.ImportBackups);
+        Assert.True(result.Success);
+        Assert.Equal(1, result.AddedCount);
+        var saved = await db.Context.Employees.SingleAsync(employee => employee.Passport == "NO-COMPANY-001");
+        Assert.Null(saved.IDCompany);
     }
 
     [Fact]
-    public async Task GeneratePreviewAsync_RejectsRowsWhenNoDefaultCompanyIsSelected()
+    public async Task GeneratePreviewAsync_WarnsInsteadOfRejectingWhenNoDefaultCompanyIsSelected()
     {
         await using var db = new TestDatabase();
         await db.InitializeAsync(seedBaseline: true);
@@ -65,8 +62,9 @@ public sealed class ImportExportFeatureTddTests
         var rows = await service.GeneratePreviewAsync(stream, mappings, companyId: 0);
 
         var row = Assert.Single(rows);
-        Assert.Equal("error", row.Status);
-        Assert.Contains("Chưa chọn công ty", row.ErrorMessage);
+        Assert.Equal("new", row.Status);
+        Assert.Null(row.ResolvedCompanyId);
+        Assert.Contains(row.Warnings, w => w.Contains("Chưa gán công ty"));
     }
 
     [Fact]
@@ -89,9 +87,8 @@ public sealed class ImportExportFeatureTddTests
         var rows = await service.GeneratePreviewAsync(stream, mappings, companyId: 0);
 
         var row = Assert.Single(rows);
-        // Company selection is independent of row validity; missing required fields are errors.
-        Assert.Equal("error", row.Status);
-        Assert.Contains("giới tính", row.ErrorMessage);
+        Assert.Equal("new", row.Status);
+        Assert.Contains(row.Warnings, w => w.Contains("giới tính", StringComparison.OrdinalIgnoreCase));
         Assert.Equal(1, row.ResolvedCompanyId);
         Assert.Equal("Default Test Company", row.CompanyDisplay);
     }

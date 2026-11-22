@@ -34,6 +34,10 @@ public sealed class InspectionApplicationService(IInspectionStore store, IServic
     public async Task<int> AddSubjectAsync(int inspectionId, FamilyVisitInput personInput, InspectionSubjectDto subject, CancellationToken cancellationToken = default)
     {
         await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.Inspector);
+        if (string.IsNullOrWhiteSpace(personInput.FullName))
+            throw new ArgumentException("Họ tên đối tượng kiểm tra là bắt buộc.");
+        if ((subject.ResultCode is "VIOLATION" or "VERIFY") && string.IsNullOrWhiteSpace(subject.ViolationDetails))
+            throw new ArgumentException("Chi tiết vi phạm / nội dung xác minh là bắt buộc khi chọn Vi phạm hoặc Xác minh.");
         var subjectData = ToEntity(subject);
         var result = await _store.AddSubjectAsync(inspectionId, personInput, subjectData, cancellationToken);
         DtoMapper.CopyToDto(subjectData, subject);

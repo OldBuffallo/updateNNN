@@ -91,39 +91,34 @@ public class ImportGuidanceRenderingTests
     }
 
     [Fact]
-    public async Task Mapping_WarnsWhenRequiredCoreFieldsAreMissing_AndShowsSuccessWhenAllNineMapped()
+    public async Task Mapping_WarnsWhenPassportIsMissing_AndShowsSuccessWhenPassportMapped()
     {
         var page = new Import();
         GuidanceRender.Set(page, "_currentStep", 2);
         GuidanceRender.Set(page, "_columnMappings", new List<ColumnMapping>
         {
-            new() { ExcelColumnIndex = 0, ExcelColumnName = "Hộ chiếu", SystemField = "Passport" }
+            new() { ExcelColumnIndex = 0, ExcelColumnName = "Họ tên", SystemField = "StaffName" }
         });
 
         var partialHtml = WebUtility.HtmlDecode(await GuidanceRender.Render<ImportMappingSection>(new() { ["Page"] = page }));
         Assert.Contains("Cảnh báo trường bắt buộc", partialHtml);
-        Assert.Contains("8/9", partialHtml);
-        Assert.Contains("Họ tên", partialHtml);
-        Assert.Contains("Quốc tịch", partialHtml);
+        Assert.Contains("1/1", partialHtml);
+        Assert.Contains("Số hộ chiếu", partialHtml);
 
-        var allNineMappings = IRM.Application.Features.ImportExport.ImportMapping.RequiredCoreFields
-            .Select((field, index) => new ColumnMapping
-            {
-                ExcelColumnIndex = index,
-                ExcelColumnName = field,
-                SystemField = field
-            })
-            .ToList();
-        GuidanceRender.Set(page, "_columnMappings", allNineMappings);
+        var passportMapped = new List<ColumnMapping>
+        {
+            new() { ExcelColumnIndex = 0, ExcelColumnName = "Số hộ chiếu", SystemField = "Passport" }
+        };
+        GuidanceRender.Set(page, "_columnMappings", passportMapped);
 
         var completeHtml = WebUtility.HtmlDecode(await GuidanceRender.Render<ImportMappingSection>(new() { ["Page"] = page }));
         Assert.Contains("Đã ghép đủ", completeHtml);
-        Assert.Contains("9/9", completeHtml);
+        Assert.Contains("1/1", completeHtml);
         Assert.DoesNotContain("Cảnh báo trường bắt buộc", completeHtml);
     }
 
     [Fact]
-    public async Task UploadSection_WithFileAndMissingCareerGroup_RendersInlineErrorAndWarning()
+    public async Task UploadSection_WithFileAndMissingCareerGroup_AllowsOptionalCareerGroup()
     {
         var page = new Import();
         GuidanceRender.Set(page, "_currentStep", 1);
@@ -131,12 +126,12 @@ public class ImportGuidanceRenderingTests
         GuidanceRender.Set(page, "_careerGroupId", 0);
 
         var html = WebUtility.HtmlDecode(await GuidanceRender.Render<ImportUploadSection>(new() { ["Page"] = page }));
-        Assert.Contains("Bắt buộc chọn nhóm nghề trước khi tiếp tục", html);
-        Assert.Contains("Cảnh báo trường bắt buộc", html);
+        Assert.Contains("Nhóm nghề (tùy chọn)", html);
+        Assert.DoesNotContain("Bắt buộc chọn nhóm nghề trước khi tiếp tục", html);
     }
 
     [Fact]
-    public async Task ManualEntry_SaveWithMissingRequiredFields_BlocksSaveAndMarksSubmitted()
+    public async Task ManualEntry_SaveWithMissingPassport_BlocksSaveAndMarksSubmitted()
     {
         var snackbar = DispatchProxy.Create<ISnackbar, VietnameseUiTextTests.SnackbarProxy>();
         var empSvc = DispatchProxy.Create<IRM.Application.Features.Employees.IEmployeeService, VietnameseUiTextTests.NoopEmployeeService>();
@@ -155,8 +150,7 @@ public class ImportGuidanceRenderingTests
         Assert.False(((VietnameseUiTextTests.NoopEmployeeService)(object)empSvc).CreateCalled);
         Assert.True((bool)typeof(Import).GetField("_manualSubmitted", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(page)!);
         var msg = Assert.Single(((VietnameseUiTextTests.SnackbarProxy)(object)snackbar).Messages);
-        Assert.Contains("Quốc tịch", msg);
-        Assert.Contains("Địa chỉ", msg);
+        Assert.Contains("Số hộ chiếu", msg);
     }
 
     [Fact]
@@ -168,7 +162,7 @@ public class ImportGuidanceRenderingTests
 
         var importRazor = File.ReadAllText(Path.Combine(directory!.FullName, "IRM", "IRM", "Features", "ImportExport", "Import.razor"));
         Assert.Contains("_manualSubmitted", importRazor);
-        Assert.Contains("Bắt buộc nhập địa chỉ tạm trú", importRazor);
+        Assert.Contains("Bắt buộc nhập số hộ chiếu", importRazor);
         Assert.DoesNotContain("Disabled=\"@(string.IsNullOrWhiteSpace(_mf.StaffName) || _mf.IDCompany == 0)\"", importRazor);
     }
 }

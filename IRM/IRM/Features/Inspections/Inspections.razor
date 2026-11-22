@@ -444,6 +444,11 @@ else
             Snackbar.Add("Vui lòng nhập họ tên đối tượng.", Severity.Warning);
             return;
         }
+        if ((_subject.ResultCode is "VIOLATION" or "VERIFY") && string.IsNullOrWhiteSpace(_subject.ViolationDetails))
+        {
+            Snackbar.Add("Vui lòng nhập chi tiết vi phạm / nội dung cần xác minh.", Severity.Warning);
+            return;
+        }
 
         try
         {

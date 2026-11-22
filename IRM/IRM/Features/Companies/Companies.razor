@@ -383,8 +383,8 @@
                         <MudPaper Class="pa-4 mb-3" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
                             <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">Thêm địa điểm hoạt động cho doanh nghiệp</MudText>
                             <MudGrid>
-                                <MudItem xs="12" sm="4"><MudTextField @bind-Value="_site.Name" Label="Tên địa điểm / Nhà xưởng" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
-                                <MudItem xs="12" sm="4"><MudTextField @bind-Value="_site.AddressLine" Label="Địa chỉ cụ thể" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="4"><MudTextField @bind-Value="_site.Name" Label="Tên địa điểm / Nhà xưởng *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="4"><MudTextField @bind-Value="_site.AddressLine" Label="Địa chỉ cụ thể *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                                 <MudItem xs="12" sm="4">
                                     <MudSelect T="int" @bind-Value="_site.AdministrativeUnitId" Label="Địa bàn xã/phường" Variant="Variant.Outlined" Margin="Margin.Dense">
                                         @foreach (var unit in _units)
@@ -412,8 +412,8 @@
                         <MudPaper Class="pa-3" Elevation="0" Style="border: 1px dashed var(--border); border-radius: 12px;">
                             <MudText Typo="Typo.caption" Class="font-weight-bold text-muted mb-2">THÊM NHANH DANH MỤC KHU / CỤM KINH TẾ</MudText>
                             <MudGrid>
-                                <MudItem xs="12" sm="3"><MudTextField @bind-Value="_newZone.Code" Label="Mã khu" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
-                                <MudItem xs="12" sm="4"><MudTextField @bind-Value="_newZone.Name" Label="Tên khu / cụm kinh tế" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="3"><MudTextField @bind-Value="_newZone.Code" Label="Mã khu *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
+                                <MudItem xs="12" sm="4"><MudTextField @bind-Value="_newZone.Name" Label="Tên khu / cụm kinh tế *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" /></MudItem>
                                 <MudItem xs="12" sm="3">
                                     <MudSelect T="string" @bind-Value="_newZone.TypeCode" Label="Loại hình" Variant="Variant.Outlined" Margin="Margin.Dense">
                                         <MudSelectItem Value="@("INDUSTRIAL_PARK")">Khu công nghiệp (KCN)</MudSelectItem>

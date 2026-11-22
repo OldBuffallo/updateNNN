@@ -156,13 +156,9 @@ public static class ImportMapping
         else
         {
             var normalizedGender = LegacyImportRules.RemoveDiacritics(genderRaw).ToUpperInvariant();
-            if (normalizedGender is "NAM")
-                genderValue = Gender.Male;
-            else if (normalizedGender is "NU")
-                genderValue = Gender.Female;
-            else
+            genderValue = (Gender)LegacyImportRules.ParseGender(genderRaw);
+            if (normalizedGender is not ("NAM" or "NU"))
             {
-                genderValue = (Gender)LegacyImportRules.ParseGender(genderRaw);
                 warnings.Add($"Giới tính '{genderRaw}' không theo chuẩn Nam/Nữ — tạm ghi nhận là {genderValue.ToDisplay()}");
             }
         }

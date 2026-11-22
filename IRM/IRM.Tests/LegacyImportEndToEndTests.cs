@@ -27,35 +27,36 @@ public class LegacyImportEndToEndTests
             [new() { NationalityCode = "CHN", NationalityName = "Trung Quốc" }], Careers(), 1,
             investor ? new HashSet<string> { "TEST-001" } : new HashSet<string>(), ["Hải Châu"]);
 
-    [Theory]
-    [InlineData("StaffName", "Lỗi đọc tên nhân viên tại dòng 9")]
-    [InlineData("Passport", "Lỗi đọc số hộ chiếu tại dòng 9")]
-    [InlineData("Gender", "Lỗi đọc giới tính tại dòng 9")]
-    [InlineData("Birthday", "Lỗi đọc ngày sinh nhật tại dòng 9")]
-    [InlineData("Nationality", "Lỗi đọc quốc tịch tại dòng 9")]
-    [InlineData("Address", "Lỗi đọc địa chỉ tại dòng 9")]
-    [InlineData("Career", "Lỗi đọc tên nghề nghiệp tại dòng 9")]
-    [InlineData("VisaNumber", "Lỗi đọc số visa tại dòng 9")]
-    [InlineData("TemporaryStay", "Lỗi đọc thời hạn tạm trú tại dòng 9")]
-    public void MissingCoreField_IsAnExplicitRowError(string field, string message)
+    [Fact]
+    public void MissingPassport_IsAnExplicitRowError_WhileOtherBlankFieldsEmitWarnings()
     {
-        var row = ValidRow(); row[field] = " ";
-        Assert.Equal(message, Assert.Throws<ImportRowException>(() => Parse(row)).Message);
+        var missingPassport = ValidRow(); missingPassport["Passport"] = " ";
+        Assert.Contains("Thiếu số hộ chiếu tại dòng 9", Assert.Throws<ImportRowException>(() => Parse(missingPassport)).Message);
+
+        foreach (var optionalField in new[] { "StaffName", "Gender", "Birthday", "Nationality", "Address", "Career", "VisaNumber", "TemporaryStay" })
+        {
+            var row = ValidRow(); row[optionalField] = " ";
+            if (optionalField is "VisaNumber" or "TemporaryStay") row["SettlementResults"] = "";
+            var parsed = ImportMapping.ParseRowWithWarnings(row, 1,
+                [new() { NationalityCode = "CHN", NationalityName = "Trung Quốc" }], Careers(), 1,
+                new HashSet<string>(), ["Hải Châu"]);
+            Assert.Empty(parsed.Errors);
+            Assert.NotNull(parsed.Employee);
+            Assert.NotEmpty(parsed.Warnings);
+        }
     }
 
     [Theory]
-    [InlineData("Birthday", "2026-06-03", "Lỗi đọc ngày sinh nhật tại dòng 9")]
-    [InlineData("TemporaryStay", "31/02/2028", "Lỗi đọc thời hạn tạm trú tại dòng 9")]
-    [InlineData("Nationality", "UNKNOWN", "Quốc tịch UNKNOWN chưa có trong dữ liệu. Vui lòng thêm quốc tịch tại dòng 9")]
-    [InlineData("Address", "12 Lê Duẩn", "Địa chỉ không có phường/ xã trong lưu trữ. Vui lòng kiểm tra lại tại dòng 9")]
-    [InlineData("Career", "Không có", "Nghề nghiệp chưa có trong dữ liệu. Vui lòng thêm nghề nghiệp tại dòng 9")]
-    [InlineData("SettlementResults", "abc", "Sai định dạng kết quả giải quyết tại dòng 9")]
-    [InlineData("SettlementResults", "DN1 03/06/2026-30/05/2028", "Thời hạn tạm trú nhập vào và kết quả giải quyết là khác nhau tại dòng 9")]
-    [InlineData("SettlementResults", "DN2 03/06/2026-29/05/2028", "Thẻ tạm trú nhập vào và kết quả giải quyết là khác nhau tại dòng 9")]
-    public void InvalidCoreField_IsRejected(string field, string value, string message)
+    [InlineData("TemporaryStay", "31/02/2028", "Lỗi đọc thời hạn tạm trú")]
+    [InlineData("Nationality", "UNKNOWN", "Quốc tịch UNKNOWN chưa có trong dữ liệu")]
+    [InlineData("Career", "Không có", "Nghề nghiệp 'Không có' chưa có trong dữ liệu")]
+    [InlineData("SettlementResults", "abc", "Sai định dạng kết quả giải quyết")]
+    [InlineData("SettlementResults", "DN1 03/06/2026-30/05/2028", "Thời hạn tạm trú nhập vào và kết quả giải quyết là khác nhau")]
+    [InlineData("SettlementResults", "DN2 03/06/2026-29/05/2028", "Thẻ tạm trú nhập vào và kết quả giải quyết là khác nhau")]
+    public void InvalidCoreField_IsRejected(string field, string value, string expectedSubstring)
     {
         var row = ValidRow(); row[field] = value;
-        Assert.Equal(message, Assert.Throws<ImportRowException>(() => Parse(row)).Message);
+        Assert.Contains(expectedSubstring, Assert.Throws<ImportRowException>(() => Parse(row)).Message);
     }
 
     [Theory]
@@ -144,9 +145,9 @@ public class LegacyImportEndToEndTests
         Assert.Equal(3, preview.Count);
         Assert.Equal("new", preview[0].Status);
         Assert.Equal("error", preview[1].Status);
-        Assert.Equal("Lỗi đọc tên nhân viên tại dòng 10", preview[1].ErrorMessage);
+        Assert.Contains("Thiếu số hộ chiếu tại dòng 10", preview[1].ErrorMessage);
         Assert.Equal("error", preview[2].Status);
-        Assert.Contains("Nghề nghiệp chưa có", preview[2].ErrorMessage);
+        Assert.Contains("Nghề nghiệp 'Không có' chưa có", preview[2].ErrorMessage);
         Assert.Equal(11, preview[2].RowNumber);
     }
 }

@@ -28,19 +28,14 @@ public class LegacyGoldenWorkbookTests
         Add("GOLD-07", "GP-123", 1, "GP-123", "TTT: DN1 03/06/2026-29/05/2028", 2);
         Add("GOLD-08", "GP-123", 1, "GP-123", "DN1 03/06/2026-29/05/2028", 3);
         (string Field, string Error)[] missing = [
-            ("StaffName","Lỗi đọc tên nhân viên"), ("Passport","Lỗi đọc số hộ chiếu"),
-            ("Gender","Lỗi đọc giới tính"), ("Birthday","Lỗi đọc ngày sinh nhật"),
-            ("Nationality","Lỗi đọc quốc tịch"), ("Address","Lỗi đọc địa chỉ"),
-            ("Career","Lỗi đọc tên nghề nghiệp"), ("VisaNumber","Lỗi đọc số visa"),
-            ("TemporaryStay","Lỗi đọc thời hạn tạm trú")];
+            ("Passport", "Thiếu số hộ chiếu")];
         foreach (var item in missing) {
             var row = LegacyImportEndToEndTests.ValidRow(); row["Passport"] = "ERR-" + list.Count;
             row[item.Field] = ""; list.Add(new(row,0,"",0,item.Error));
         }
         (string Field, string Value, string Error)[] invalid = [
-            ("Nationality","UNKNOWN","Quốc tịch UNKNOWN chưa có trong dữ liệu. Vui lòng thêm quốc tịch"),
-            ("Address","12 Lê Duẩn","Địa chỉ không có phường/ xã trong lưu trữ. Vui lòng kiểm tra lại"),
-            ("Career","Không có","Nghề nghiệp chưa có trong dữ liệu. Vui lòng thêm nghề nghiệp"),
+            ("Nationality","UNKNOWN","Quốc tịch UNKNOWN chưa có trong dữ liệu"),
+            ("Career","Không có","Nghề nghiệp 'Không có' chưa có trong dữ liệu"),
             ("SettlementResults","abc","Sai định dạng kết quả giải quyết"),
             ("SettlementResults","DN1 03/06/2026-30/05/2028","Thời hạn tạm trú nhập vào và kết quả giải quyết là khác nhau"),
             ("SettlementResults","DN2 03/06/2026-29/05/2028","Thẻ tạm trú nhập vào và kết quả giải quyết là khác nhau")];
@@ -89,7 +84,7 @@ public class LegacyGoldenWorkbookTests
         }
         var result = await store.ExecuteImportAsync(preview,[],1,"golden.xlsx");
         Assert.True(result.Success, string.Join(";",result.Errors));
-        Assert.Equal(12, result.AddedCount); Assert.Equal(15, result.ErrorCount);
+        Assert.Equal(12, result.AddedCount); Assert.Equal(6, result.ErrorCount);
         db.ChangeTracker.Clear();
         foreach (var item in cases.Where(c => c.Error == null)) {
             var saved = await db.Employees.SingleAsync(e => e.Passport == item.Row["Passport"]);

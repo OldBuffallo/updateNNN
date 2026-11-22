@@ -14,10 +14,10 @@ public class ImportFieldHelpTests
     }
 
     [Fact]
-    public void Catalog_RequiredFieldsAreExactlyNine()
+    public void Catalog_RequiredFieldIsPassportOnly()
     {
-        string[] required = ["StaffName", "Passport", "Gender", "Birthday", "Nationality", "Address", "Career", "VisaNumber", "TemporaryStay"];
-        Assert.Equal(required.OrderBy(key => key), ImportFieldHelpCatalog.All.Values
+        string[] required = ["Passport"];
+        Assert.Equal(required, ImportFieldHelpCatalog.All.Values
             .Where(entry => entry.IsRequired).Select(entry => entry.Key).OrderBy(key => key));
     }
 

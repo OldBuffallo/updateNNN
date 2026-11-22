@@ -66,8 +66,7 @@ public class ImportPreparationTests
         Assert.Contains("Tra cứu 35 trường", html);
         Assert.Contains("ô trống", html);
         Assert.Contains("cập nhật", html);
-        foreach (var name in new[] { "Họ tên", "Số hộ chiếu", "Giới tính", "Ngày sinh", "Quốc tịch", "Địa chỉ", "Nghề nghiệp", "Số Visa", "Hạn tạm trú" })
-            Assert.Contains(name, html);
+        Assert.Contains("Số hộ chiếu", html);
         Assert.DoesNotContain("type=\"file\"", html);
         foreach (var anchor in new[] { "prepare-download", "prepare-fields", "prepare-next" })
             Assert.Contains($"data-import-tour=\"{anchor}\"", html);
