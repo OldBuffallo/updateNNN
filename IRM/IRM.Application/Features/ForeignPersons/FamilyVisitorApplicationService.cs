@@ -86,8 +86,8 @@ public sealed class FamilyVisitorApplicationService(IForeignerRegistryStore stor
     public async Task<int> SaveUnifiedProfileAsync(UnifiedForeignPersonInput input, CancellationToken cancellationToken = default)
     {
         await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
-        if (string.IsNullOrWhiteSpace(input.FullName))
-            throw new ArgumentException("Họ tên người nước ngoài là bắt buộc.");
+        if (string.IsNullOrWhiteSpace(input.PassportNumber))
+            throw new ArgumentException("Số hộ chiếu là bắt buộc.");
         return await _store.SaveUnifiedProfileAsync(input, cancellationToken);
     }
 

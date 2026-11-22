@@ -72,15 +72,7 @@ public partial class Import : ComponentBase, IFeaturePage
     internal IReadOnlyList<string> GetMissingManualEntryFields()
     {
         var missing = new List<string>();
-        if (string.IsNullOrWhiteSpace(_mf.StaffName)) missing.Add("Họ tên");
-        if (!_mf.Birthday.HasValue) missing.Add("Ngày sinh");
-        if (string.IsNullOrWhiteSpace(_mf.Nationality)) missing.Add("Quốc tịch");
         if (string.IsNullOrWhiteSpace(_mf.Passport)) missing.Add("Số hộ chiếu");
-        if (_mf.IDCompany == 0) missing.Add("Công ty");
-        if (_mf.IDCareer is null or <= 0) missing.Add("Nghề nghiệp");
-        if (string.IsNullOrWhiteSpace(_mf.VisaNumber)) missing.Add("Số Visa");
-        if (string.IsNullOrWhiteSpace(_mf.Address)) missing.Add("Địa chỉ");
-        if (!_mf.TemporaryStay.HasValue) missing.Add("Hạn tạm trú");
         return missing;
     }
 

@@ -365,7 +365,7 @@ else
             <MudTabPanel Text="1. Thông tin chung & Cư trú" Icon="@Icons.Material.Outlined.Person">
                 <MudGrid Spacing="2" Class="pt-4">
                     <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="_form.FullName" Label="Họ và tên đầy đủ *" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        <MudTextField @bind-Value="_form.FullName" Label="Họ và tên đầy đủ" Variant="Variant.Outlined" Margin="Margin.Dense" />
                     </MudItem>
                     <MudItem xs="6" sm="3">
                         <MudSelect T="int" @bind-Value="_form.Gender" Label="Giới tính" Variant="Variant.Outlined" Margin="Margin.Dense">
@@ -378,7 +378,7 @@ else
                     </MudItem>
 
                     <MudItem xs="12" sm="4">
-                        <MudSelect T="string" @bind-Value="_form.NationalityCode" Label="Quốc tịch *" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true">
+                        <MudSelect T="string" @bind-Value="_form.NationalityCode" Label="Quốc tịch" Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true">
                             @if (!string.IsNullOrWhiteSpace(_form.NationalityCode) && !_nationalities.Any(n => string.Equals(n.NationalityCode, _form.NationalityCode, StringComparison.OrdinalIgnoreCase)))
                             {
                                 <MudSelectItem T="string" Value="@_form.NationalityCode">@_form.NationalityCode (Dữ liệu cũ)</MudSelectItem>
@@ -390,7 +390,9 @@ else
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" sm="4">
-                        <MudTextField @bind-Value="_form.PassportNumber" Label="Số hộ chiếu" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        <MudTextField @bind-Value="_form.PassportNumber" Label="Số hộ chiếu *" Required="true" RequiredError="Bắt buộc nhập số hộ chiếu"
+                                      Error="@(_profileSubmitted && string.IsNullOrWhiteSpace(_form.PassportNumber))" ErrorText="Bắt buộc nhập số hộ chiếu"
+                                      Variant="Variant.Outlined" Margin="Margin.Dense" />
                     </MudItem>
                     <MudItem xs="12" sm="4">
                         <MudSelect T="int?" @bind-Value="_form.AdministrativeUnitId" Label="Địa bàn xã/phường tạm trú" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
@@ -430,7 +432,7 @@ else
                     </MudItem>
                     <MudItem xs="12" sm="6">
                         <MudAutocomplete T="CompanyDto"
-                                         Label="Công ty làm việc *"
+                                         Label="Công ty làm việc"
                                          Value="_dialogCompany"
                                          ValueChanged="OnDialogCompanyChanged"
                                          SearchFunc="SearchCompanyAsync"
@@ -522,10 +524,10 @@ else
                         <MudCheckBox T="bool" @bind-Value="_form.HasFamilyVisitProfile" Color="Color.Tertiary" Label="Kích hoạt thông tin Thăm thân tại Việt Nam cho hồ sơ này" />
                     </MudItem>
                     <MudItem xs="12" sm="5">
-                        <MudTextField @bind-Value="_form.RelativeName" Label="Họ và tên thân nhân bảo lãnh *" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        <MudTextField @bind-Value="_form.RelativeName" Label="Họ và tên thân nhân bảo lãnh" Variant="Variant.Outlined" Margin="Margin.Dense" />
                     </MudItem>
                     <MudItem xs="6" sm="3">
-                        <MudTextField @bind-Value="_form.Relationship" Label="Mối quan hệ (Vợ/chồng, con, cha mẹ...) *" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        <MudTextField @bind-Value="_form.Relationship" Label="Mối quan hệ (Vợ/chồng, con, cha mẹ...)" Variant="Variant.Outlined" Margin="Margin.Dense" />
                     </MudItem>
                     <MudItem xs="6" sm="4">
                         <MudSelect T="string" @bind-Value="_form.RelativeTypeCode" Label="Phân loại thân nhân" Variant="Variant.Outlined" Margin="Margin.Dense">
@@ -900,11 +902,20 @@ else
         _profileDialogVisible = true;
     }
 
+    private bool _profileSubmitted;
+
     private async Task SaveUnifiedProfileAsync()
     {
+        _profileSubmitted = true;
+        if (string.IsNullOrWhiteSpace(_form.PassportNumber))
+        {
+            Snackbar.Add("Vui lòng nhập Số hộ chiếu (trường bắt buộc duy nhất).", Severity.Warning);
+            return;
+        }
         try
         {
             await Registry.SaveUnifiedProfileAsync(_form);
+            _profileSubmitted = false;
             _profileDialogVisible = false;
             await Load();
             Snackbar.Add(_isEditingProfile ? "Đã cập nhật hồ sơ người nước ngoài." : "Đã tạo mới hồ sơ người nước ngoài.", Severity.Success);

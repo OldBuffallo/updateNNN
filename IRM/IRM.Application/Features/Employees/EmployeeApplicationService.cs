@@ -39,6 +39,8 @@ public sealed class EmployeeApplicationService(IEmployeeStore store, IServiceAut
     public async Task CreateAsync(EmployeeDto employee)
     {
         await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
+        if (string.IsNullOrWhiteSpace(employee.Passport))
+            throw new ArgumentException("Số hộ chiếu là bắt buộc.");
         var employeeData = ToEntity(employee);
         await _store.CreateAsync(employeeData);
         DtoMapper.CopyToDto(employeeData, employee);
@@ -47,6 +49,8 @@ public sealed class EmployeeApplicationService(IEmployeeStore store, IServiceAut
     public async Task UpdateAsync(EmployeeDto employee)
     {
         await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
+        if (string.IsNullOrWhiteSpace(employee.Passport))
+            throw new ArgumentException("Số hộ chiếu là bắt buộc.");
         var employeeData = ToEntity(employee);
         await _store.UpdateAsync(employeeData);
         DtoMapper.CopyToDto(employeeData, employee);

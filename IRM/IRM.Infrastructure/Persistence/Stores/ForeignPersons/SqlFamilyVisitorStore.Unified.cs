@@ -300,8 +300,9 @@ public sealed partial class SqlFamilyVisitorStore
         if (_guard is not null)
             await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
 
-        if (string.IsNullOrWhiteSpace(input.FullName))
-            throw new ArgumentException("Họ tên người nước ngoài là bắt buộc.");
+        if (string.IsNullOrWhiteSpace(input.PassportNumber))
+            throw new ArgumentException("Số hộ chiếu là bắt buộc.");
+        var safeFullName = (input.FullName ?? "").Trim();
 
         var activeNationalities = await _db.Nationality.AsNoTracking()
             .Where(n => n.Delete_flag == 0)
@@ -330,28 +331,14 @@ public sealed partial class SqlFamilyVisitorStore
             }
         }
 
-        if (input.HasWorkProfile)
+        if (input.HasWorkProfile && (!input.CareerId.HasValue || input.CareerId.Value <= 0))
         {
-            if (!input.CompanyId.HasValue || input.CompanyId.Value <= 0)
-                throw new ArgumentException("Vui lòng chọn Công ty làm việc cho diện Lao động.");
-            if (!input.CareerId.HasValue || input.CareerId.Value <= 0)
-            {
-                var defaultCareerId = await _db.Careers.AsNoTracking()
-                    .OrderBy(c => c.IDCareer)
-                    .Select(c => (int?)c.IDCareer)
-                    .FirstOrDefaultAsync(cancellationToken);
-                if (!defaultCareerId.HasValue)
-                    throw new ArgumentException("Vui lòng chọn Nghề nghiệp cho diện Lao động.");
+            var defaultCareerId = await _db.Careers.AsNoTracking()
+                .OrderBy(c => c.IDCareer)
+                .Select(c => (int?)c.IDCareer)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (defaultCareerId.HasValue)
                 input.CareerId = defaultCareerId.Value;
-            }
-        }
-
-        if (input.HasFamilyVisitProfile)
-        {
-            if (string.IsNullOrWhiteSpace(input.RelativeName))
-                throw new ArgumentException("Vui lòng nhập Họ tên thân nhân bảo lãnh cho diện Thăm thân.");
-            if (string.IsNullOrWhiteSpace(input.Relationship))
-                throw new ArgumentException("Vui lòng nhập Mối quan hệ cho diện Thăm thân.");
         }
 
         var strategy = _db.Database.CreateExecutionStrategy();
@@ -383,13 +370,13 @@ public sealed partial class SqlFamilyVisitorStore
             {
                 person = new ForeignPerson
                 {
-                    FullName = input.FullName.Trim(),
+                    FullName = safeFullName,
                     Gender = input.Gender,
                     Birthday = input.Birthday,
                     NationalityCode = resolvedNationality,
                     PassportNumber = normalizedPassport,
                     PassportSearchKey = passportKey,
-                    IsDataIncomplete = passportKey is null,
+                    IsDataIncomplete = string.IsNullOrWhiteSpace(safeFullName) || passportKey is null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -398,19 +385,19 @@ public sealed partial class SqlFamilyVisitorStore
             }
             else
             {
-                person.FullName = input.FullName.Trim();
+                person.FullName = safeFullName;
                 person.Gender = input.Gender;
                 person.Birthday = input.Birthday;
                 person.NationalityCode = resolvedNationality;
                 person.PassportNumber = normalizedPassport;
                 person.PassportSearchKey = passportKey;
-                person.IsDataIncomplete = passportKey is null;
+                person.IsDataIncomplete = string.IsNullOrWhiteSpace(safeFullName) || passportKey is null;
                 person.UpdatedAt = DateTime.UtcNow;
                 await _db.SaveChangesAsync(cancellationToken);
             }
 
             // 1. Diện Lao động (Employee + StayCase WORK)
-            if (input.HasWorkProfile && input.CompanyId.HasValue && input.CareerId.HasValue)
+            if (input.HasWorkProfile)
             {
                 Employee? emp = null;
                 if (input.EmployeeId.HasValue && input.EmployeeId.Value > 0)
@@ -437,14 +424,14 @@ public sealed partial class SqlFamilyVisitorStore
                     WorkingStatus = 0
                 };
 
-                emp.StaffName = input.FullName.Trim();
+                emp.StaffName = safeFullName;
                 emp.Gender = input.Gender == 1 ? Gender.Male : Gender.Female;
                 emp.Birthday = input.Birthday;
                 emp.Nationality = resolvedNationality;
                 emp.Passport = normalizedPassport ?? input.PassportNumber;
                 emp.Address = input.ResidenceAddress;
-                emp.IDCompany = input.CompanyId.Value;
-                emp.IDCareer = input.CareerId.Value;
+                emp.IDCompany = input.CompanyId is > 0 ? input.CompanyId : null;
+                emp.IDCareer = input.CareerId is > 0 ? input.CareerId : null;
                 emp.WorkPermit = input.WorkPermit;
                 emp.WorkPermitNumber = input.WorkPermitNumber;
                 emp.TemporaryStay = input.TemporaryStay ?? input.DocumentValidTo;
@@ -534,7 +521,7 @@ public sealed partial class SqlFamilyVisitorStore
                     Hidden_flag = 0
                 };
 
-                stu.FullName = input.FullName.Trim();
+                stu.FullName = safeFullName;
                 stu.Gender = input.Gender == 1 ? Gender.Male : Gender.Female;
                 stu.Birthday = input.Birthday;
                 stu.Nationality = resolvedNationality;
