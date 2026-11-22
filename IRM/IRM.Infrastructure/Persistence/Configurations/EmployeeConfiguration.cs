@@ -17,7 +17,9 @@ internal sealed class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             e.HasIndex(emp => emp.FamilyVisit).HasDatabaseName("IX_Employees_FamilyVisit");
             e.HasOne(emp => emp.Company)
                 .WithMany(c => c.Employees)
-                .HasForeignKey(emp => emp.IDCompany);
+                .HasForeignKey(emp => emp.IDCompany)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
             e.HasOne(emp => emp.Career)
                 .WithMany()
                 .HasForeignKey(emp => emp.IDCareer);

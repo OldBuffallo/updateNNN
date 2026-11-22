@@ -9,7 +9,7 @@ public sealed class ImportHistoryDto
     public long Id { get; set; }
     public string SessionId { get; set; } = "";       // VD: "IMP-2026-016"
     public string FileName { get; set; } = "";
-    public int CompanyId { get; set; }
+    public int? CompanyId { get; set; }
     public string? CompanyName { get; set; }
     public int TotalRows { get; set; }
     public int AddedRows { get; set; }

@@ -62,7 +62,7 @@ public partial class SqlImportStore
                                 if (emp != null)
                                 {
                                     await _db.Entry(emp).ReloadAsync();
-                                    affected.Add(emp.IDCompany);
+                                    if (emp.IDCompany.HasValue) affected.Add(emp.IDCompany.Value);
                                     var versioned = !string.IsNullOrEmpty(backup.OldData) &&
                                         JsonSerializer.Deserialize<JsonElement>(backup.OldData).TryGetProperty("Versioned", out var version) && version.GetBoolean();
                                     if (versioned) _db.Employees.Remove(emp);
@@ -78,7 +78,7 @@ public partial class SqlImportStore
                             await _db.Entry(previous).ReloadAsync();
                             var saved = JsonSerializer.Deserialize<JsonElement>(backup.OldData!);
                             previous.Hidden_flag = saved.GetProperty("Hidden_flag").GetInt32();
-                            affected.Add(previous.IDCompany);
+                            if (previous.IDCompany.HasValue) affected.Add(previous.IDCompany.Value);
                             await _db.SaveChangesAsync();
                         }
                         else if (backup.ActionType == "UPDATE" && !string.IsNullOrEmpty(backup.OldData))
@@ -87,7 +87,7 @@ public partial class SqlImportStore
                             var emp = await _db.Employees.FindAsync(backup.EntityId);
                             if (emp != null)
                             {
-                                affected.Add(emp.IDCompany);
+                                if (emp.IDCompany.HasValue) affected.Add(emp.IDCompany.Value);
                                 var oldData = JsonSerializer.Deserialize<JsonElement>(backup.OldData);
                                 if (oldData.TryGetProperty("StaffName", out var name))
                                     emp.StaffName = name.GetString() ?? "";

@@ -175,7 +175,7 @@ public partial class SqlImportStore
 
         var importedPassports = allRows.Select(r => r.GetValueOrDefault("Passport", "").Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var importedCompanies = previewRows.Where(r => r.ResolvedCompanyId > 0).Select(r => r.ResolvedCompanyId!.Value).Distinct().ToList();
-        if (previewRows.Count > 0 && await _db.Employees.AnyAsync(e => importedCompanies.Contains(e.IDCompany) && e.Hidden_flag == 0 &&
+        if (previewRows.Count > 0 && importedCompanies.Count > 0 && await _db.Employees.AnyAsync(e => e.IDCompany.HasValue && importedCompanies.Contains(e.IDCompany.Value) && e.Hidden_flag == 0 &&
             e.TemporaryStay >= DateTime.Today && e.Passport != null && !importedPassports.Contains(e.Passport)))
             previewRows[0].Warnings.Add("Nhân viên còn hạn tạm trú nhưng không được cập nhật trong file");
         return previewRows;

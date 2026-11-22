@@ -232,7 +232,7 @@ namespace IRM.Data.Migrations
                     b.Property<int?>("IDCareer")
                         .HasColumnType("int");
 
-                    b.Property<int>("IDCompany")
+                    b.Property<int?>("IDCompany")
                         .HasColumnType("int");
 
                     b.Property<int>("IDUser")
@@ -900,7 +900,7 @@ namespace IRM.Data.Migrations
                     b.Property<int?>("IDCareer")
                         .HasColumnType("int");
 
-                    b.Property<int>("IDCompany")
+                    b.Property<int?>("IDCompany")
                         .HasColumnType("int");
 
                     b.Property<int>("IDUser")
@@ -1201,7 +1201,7 @@ namespace IRM.Data.Migrations
                     b.Property<int>("AddedRows")
                         .HasColumnType("int");
 
-                    b.Property<int>("CompanyId")
+                    b.Property<int?>("CompanyId")
                         .HasColumnType("int");
 
                     b.Property<string>("CompanyName")
@@ -2103,8 +2103,7 @@ namespace IRM.Data.Migrations
                     b.HasOne("IRM.Data.Models.Company", "Company")
                         .WithMany("Employees")
                         .HasForeignKey("IDCompany")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("IRM.Data.Models.NationalityEntity", "NationalityNav")
                         .WithMany()

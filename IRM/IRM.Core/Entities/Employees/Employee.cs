@@ -24,7 +24,7 @@ public class Employee
     public int SettlementResults { get; set; }
     public string? SettlementResultsString { get; set; }
     public int IDUser { get; set; }
-    public int IDCompany { get; set; }
+    public int? IDCompany { get; set; }
     public DateTime? DateCreated { get; set; }
     public DateTime? CardCreationDate { get; set; }
     public int WorkingStatus { get; set; }
