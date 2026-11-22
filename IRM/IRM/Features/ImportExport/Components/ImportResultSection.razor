@@ -37,14 +37,19 @@
 
             @if (Page._importResult.Errors.Any())
             {
+                var visibleErrors = _showAllErrors ? Page._importResult.Errors : Page._importResult.Errors.Take(20).ToList();
                 <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4 text-left" data-import-tour="result-errors">
-                    @foreach (var err in Page._importResult.Errors.Take(5))
+                    <div class="mb-1"><strong>Chi tiết lỗi (@Page._importResult.Errors.Count):</strong></div>
+                    @foreach (var err in visibleErrors)
                     {
-                        <div>@err</div>
+                        <div style="white-space: pre-line;">@err</div>
                     }
-                    @if (Page._importResult.Errors.Count > 5)
+                    @if (Page._importResult.Errors.Count > 20)
                     {
-                        <div>... và @(Page._importResult.Errors.Count - 5) lỗi khác</div>
+                        <MudButton Variant="Variant.Text" Color="Color.Inherit" Size="Size.Small" Class="mt-1 pa-0"
+                                   OnClick="@(() => _showAllErrors = !_showAllErrors)">
+                            @(_showAllErrors ? "Thu gọn danh sách lỗi" : $"Xem tất cả {Page._importResult.Errors.Count} lỗi")
+                        </MudButton>
                     }
                 </MudAlert>
             }
@@ -74,3 +79,7 @@
             </MudStack>
         </MudPaper>
     }
+
+@code {
+    private bool _showAllErrors;
+}

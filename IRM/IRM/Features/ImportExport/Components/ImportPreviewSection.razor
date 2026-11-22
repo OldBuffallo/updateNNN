@@ -6,12 +6,23 @@
     {
         <MudCheckBox T="bool" Value="Page._allowCreateCompanies" ValueChanged="Page.ToggleCompanyCreationAsync"
                      Disabled="Page._isProcessing" Label="Cho phép tạo công ty chưa có từ cột Công ty" />
-        <MudAlert Severity="Severity.Info" Class="mb-3" data-import-tour="preview-summary">
-            Tổng: @Page._previewRows.Count dòng · @(Page._previewRows.Count(r => r.Status == "new")) mới · @(Page._previewRows.Count(r => r.Status == "changed")) trùng · @(Page._previewRows.Count(r => r.Status == "error")) lỗi
+        var newCount = Page._previewRows.Count(r => r.Status == "new");
+        var changedCount = Page._previewRows.Count(r => r.Status == "changed");
+        var unchangedCount = Page._previewRows.Count(r => r.Status == "unchanged");
+        var errorCount = Page._previewRows.Count(r => r.Status == "error");
+        var warningRowCount = Page._previewRows.Count(r => r.Warnings.Count > 0);
+        var summarySeverity = errorCount > 0 ? Severity.Error : warningRowCount > 0 ? Severity.Warning : Severity.Success;
+        <MudAlert Severity="@summarySeverity" Class="mb-3" data-import-tour="preview-summary">
+            Tổng: <strong>@Page._previewRows.Count</strong> dòng ·
+            <strong>@newCount</strong> mới ·
+            <strong>@changedCount</strong> cập nhật ·
+            <strong>@unchangedCount</strong> không đổi ·
+            <strong>@warningRowCount cảnh báo</strong> ·
+            <strong>@errorCount lỗi</strong>
         </MudAlert>
 
-        <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px; max-height: 400px; overflow-y: auto;" data-import-tour="preview-table">
-            <thead><tr><th>Dòng</th><th>TT</th><th>Họ tên</th><th>Quốc tịch</th><th>Hộ chiếu</th><th>Công ty</th><th>Nghề nghiệp</th><th>GPLĐ</th><th>Xử lý</th></tr></thead>
+        <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px; max-height: 460px; overflow-y: auto;" data-import-tour="preview-table">
+            <thead><tr><th>Dòng</th><th>TT</th><th>Họ tên &amp; Cảnh báo</th><th>Quốc tịch</th><th>Hộ chiếu</th><th>Công ty</th><th>Nghề nghiệp</th><th>GPLĐ</th><th>Xử lý / Lỗi</th></tr></thead>
             <tbody>
                 @foreach (var row in Page._previewRows)
                 {
@@ -19,7 +30,7 @@
                     {
                         "changed" => "background: var(--mud-palette-warning-hover);",
                         "error" => "background: var(--mud-palette-error-hover);",
-                        _ => ""
+                        _ => row.Warnings.Count > 0 ? "background: rgba(255, 193, 7, 0.06);" : ""
                     };
                     var chipColor = row.Status switch
                     {
@@ -31,16 +42,27 @@
                     var chipLabel = row.Status switch
                     {
                         "new" => "Mới",
-                        "unchanged" => "Thông tin đã có sẵn",
-                        "changed" => "Nhân viên có thay đổi",
+                        "unchanged" => "Đã có sẵn",
+                        "changed" => "Có thay đổi",
                         _ => "Lỗi"
                     };
                     <tr style="@rowBg">
                         <td>@row.RowNumber</td>
                         <td><MudChip T="string" Size="Size.Small" Color="@chipColor">@chipLabel</MudChip></td>
-                        <td>@row.StaffName
-                            @foreach (var warning in row.Warnings)
-                            { <MudText Typo="Typo.caption" Color="Color.Warning">@warning</MudText> }
+                        <td>
+                            <div>@(string.IsNullOrWhiteSpace(row.StaffName) ? "(Chưa có tên)" : row.StaffName)</div>
+                            @if (row.Warnings.Count > 0)
+                            {
+                                <div class="mt-1 d-flex flex-column gap-1" data-import-row-warnings="@row.RowNumber">
+                                    @foreach (var warning in row.Warnings)
+                                    {
+                                        <div class="d-flex align-center gap-1" style="color: var(--mud-palette-warning-darken); font-size: 0.78rem;">
+                                            <MudIcon Icon="@Icons.Material.Outlined.WarningAmber" Size="Size.Small" Color="Color.Warning" />
+                                            <span>@warning</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
                         </td>
                         <td>@row.NationalityDisplay</td>
                         <td><code>@row.Passport</code></td>
@@ -76,7 +98,7 @@
                             }
                             else if (row.Status == "error")
                             {
-                                <MudText Typo="Typo.caption" Color="Color.Error">@row.ErrorMessage</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Error" Style="white-space: pre-line;">@row.ErrorMessage</MudText>
                             }
                             else
                             {
