@@ -5,11 +5,10 @@ namespace IRM.Application.Features.ImportExport;
 
 public static class ImportMapping
 {
-    /// <summary>9 trường bắt buộc của hồ sơ nhân viên khi import từ Excel (khớp WPF cũ).</summary>
+    /// <summary>Trường bắt buộc duy nhất của hồ sơ nhân viên khi import từ Excel: Số hộ chiếu.</summary>
     public static readonly IReadOnlyList<string> RequiredCoreFields =
     [
-        "StaffName", "Passport", "Gender", "Birthday", "Nationality",
-        "Address", "Career", "VisaNumber", "TemporaryStay"
+        "Passport"
     ];
 
     /// <summary>Trả về danh sách (Key, Label) các trường bắt buộc chưa được ghép cột.</summary>
@@ -120,95 +119,250 @@ public static class ImportMapping
     }
 
     public static Employee ParseRowToEmployee(
-        Dictionary<string, string> rowData, int companyId,
+        Dictionary<string, string> rowData, int? companyId,
         List<NationalityEntity> nationalities, List<Career> careers,
-        int careerGroupId, ISet<string> investorPassports, IReadOnlyCollection<string> wards)
+        int? careerGroupId, ISet<string> investorPassports, IReadOnlyCollection<string> wards)
+    {
+        var parsed = ParseRowWithWarnings(rowData, companyId, nationalities, careers, careerGroupId, investorPassports, wards);
+        if (parsed.Errors.Count > 0 || parsed.Employee is null)
+            throw new ImportRowException(string.Join("; ", parsed.Errors));
+        return parsed.Employee;
+    }
+
+    public static ParseRowResult ParseRowWithWarnings(
+        Dictionary<string, string> rowData, int? companyId,
+        List<NationalityEntity> nationalities, List<Career> careers,
+        int? careerGroupId, ISet<string> investorPassports, IReadOnlyCollection<string> wards)
     {
         var row = rowData.GetValueOrDefault("__RowNumber", "?");
+        var errors = new List<string>();
+        var warnings = new List<string>();
         string Value(string key) => rowData.GetValueOrDefault(key, "").Trim();
-        ImportRowException Error(string text) => new($"{text} tại dòng {row}");
-        string Required(string key, string label)
+
+        var passport = Value("Passport");
+        if (passport.Length == 0)
+            errors.Add($"Thiếu số hộ chiếu tại dòng {row}");
+
+        var name = Value("StaffName");
+        if (name.Length == 0)
+            warnings.Add("Thiếu họ tên");
+
+        var genderRaw = Value("Gender");
+        Gender genderValue = Gender.Male;
+        if (genderRaw.Length == 0)
         {
-            var value = Value(key);
-            if (value.Length == 0) throw Error($"Lỗi đọc {label}");
-            return value;
+            warnings.Add("Thiếu giới tính (tạm để Nam)");
         }
-        var name = Required("StaffName", "tên nhân viên");
-        var passport = Required("Passport", "số hộ chiếu");
-        var gender = Required("Gender", "giới tính");
-        if (!LegacyImportRules.TryParseLegacyDate(Value("Birthday"), out var birthday)) throw Error("Lỗi đọc ngày sinh nhật");
-        var nationality = Required("Nationality", "quốc tịch");
-        var address = Required("Address", "địa chỉ");
-        var career = Required("Career", "tên nghề nghiệp");
-        var visa = Required("VisaNumber", "số visa");
-        if (!LegacyImportRules.TryParseLegacyDate(Value("TemporaryStay"), out var stay)) throw Error("Lỗi đọc thời hạn tạm trú");
-        string? nationalityCode;
-        try { nationalityCode = ResolveNationalityCode(nationality, nationalities); }
-        catch (InvalidOperationException) { throw Error($"Quốc tịch {nationality} chưa có trong dữ liệu. Vui lòng thêm quốc tịch"); }
-        if (!LegacyImportRules.AddressEndsWithWard(address, wards)) throw Error("Địa chỉ không có phường/ xã trong lưu trữ. Vui lòng kiểm tra lại");
+        else
+        {
+            var normalizedGender = LegacyImportRules.RemoveDiacritics(genderRaw).ToUpperInvariant();
+            if (normalizedGender is "NAM")
+                genderValue = Gender.Male;
+            else if (normalizedGender is "NU")
+                genderValue = Gender.Female;
+            else
+            {
+                genderValue = (Gender)LegacyImportRules.ParseGender(genderRaw);
+                warnings.Add($"Giới tính '{genderRaw}' không theo chuẩn Nam/Nữ — tạm ghi nhận là {genderValue.ToDisplay()}");
+            }
+        }
+
+        DateTime? birthday = null;
+        var birthdayRaw = Value("Birthday");
+        if (birthdayRaw.Length == 0)
+        {
+            warnings.Add("Thiếu ngày sinh");
+        }
+        else
+        {
+            try { birthday = ParseNullableImportDate(birthdayRaw); }
+            catch (InvalidOperationException) { errors.Add($"Lỗi đọc ngày sinh nhật '{birthdayRaw}' tại dòng {row}"); }
+        }
+
+        string? nationalityCode = null;
+        var nationalityRaw = Value("Nationality");
+        if (nationalityRaw.Length == 0)
+        {
+            warnings.Add("Thiếu quốc tịch");
+        }
+        else
+        {
+            try { nationalityCode = ResolveNationalityCode(nationalityRaw, nationalities); }
+            catch (InvalidOperationException) { errors.Add($"Quốc tịch {nationalityRaw} chưa có trong dữ liệu tại dòng {row}"); }
+        }
+
+        string? address = null;
+        var addressRaw = Value("Address");
+        if (addressRaw.Length == 0)
+        {
+            warnings.Add("Thiếu địa chỉ");
+        }
+        else
+        {
+            address = addressRaw;
+            if (wards.Count > 0 && !LegacyImportRules.AddressEndsWithWard(addressRaw, wards))
+                warnings.Add("Địa chỉ chưa khớp tên phường/xã trong danh mục");
+        }
+
         var combinedPermit = Value("WorkPermit");
         var separatePermit = Value("WorkPermitNumber");
-        // A separate number is an explicit IRM extension; absence keeps WPF blank semantics.
         if (combinedPermit.Length == 0 && separatePermit.Length > 0) combinedPermit = separatePermit;
-        var (permit, number) = LegacyImportRules.ParseWorkPermit(combinedPermit, investorPassports.Contains(passport));
+        var (permit, number) = LegacyImportRules.ParseWorkPermit(combinedPermit, passport.Length > 0 && investorPassports.Contains(passport));
         if (separatePermit.Length > 0 && (permit is not (1 or 4) || number != separatePermit))
-            throw Error("Cột GPLĐ và Số GPLĐ không thống nhất");
-        var careerId = LegacyImportRules.FindCareerId(career, careerGroupId, careers);
-        if (!careerId.HasValue && permit == LegacyImportRules.WorkPermitOther &&
-            LegacyImportRules.RemoveDiacritics(career).Equals("THAN NHAN", StringComparison.OrdinalIgnoreCase))
+            errors.Add($"Cột GPLĐ và Số GPLĐ không thống nhất tại dòng {row}");
+        if (combinedPermit.Length > 0 && permit is (1 or 4))
         {
-            careerId = careers.Where(c => c.Delete_flag == 0 && LegacyImportRules.IsRelativeCareer(c))
-                .OrderBy(c => c.IDCareer)
-                .Select(c => (int?)c.IDCareer)
-                .FirstOrDefault();
+            var lowerPermit = LegacyImportRules.RemoveDiacritics(combinedPermit).ToLowerInvariant();
+            if (lowerPermit is "chua co" or "da co" or "khong" or "co" or "1" or "2")
+                warnings.Add($"Cột GPLĐ '{combinedPermit}' có dạng trạng thái chữ — hệ thống đang lưu thành số GPLĐ, hãy kiểm tra lại");
         }
-        if (!careerId.HasValue) throw Error("Nghề nghiệp chưa có trong dữ liệu. Vui lòng thêm nghề nghiệp");
-        if (LegacyImportRules.IsRelativeCareer(careers.First(c => c.IDCareer == careerId))) { permit = 6; number = ""; }
+
+        int? careerId = null;
+        var careerRaw = Value("Career");
+        if (careerRaw.Length == 0)
+        {
+            warnings.Add("Thiếu nghề nghiệp");
+        }
+        else
+        {
+            if (careerGroupId is > 0)
+                careerId = LegacyImportRules.FindCareerId(careerRaw, careerGroupId.Value, careers);
+            if (!careerId.HasValue)
+            {
+                careerId = careers
+                    .Where(c => c.Delete_flag == 0 && string.Equals(c.CareerName.Trim(), careerRaw, StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(c => c.IDCareer)
+                    .Select(c => (int?)c.IDCareer)
+                    .FirstOrDefault();
+                if (careerId.HasValue && careerGroupId is > 0)
+                    warnings.Add($"Nghề nghiệp '{careerRaw}' thuộc nhóm nghề khác — đã tự động ánh xạ");
+            }
+            if (!careerId.HasValue && permit == LegacyImportRules.WorkPermitOther &&
+                LegacyImportRules.RemoveDiacritics(careerRaw).Equals("THAN NHAN", StringComparison.OrdinalIgnoreCase))
+            {
+                careerId = careers.Where(c => c.Delete_flag == 0 && LegacyImportRules.IsRelativeCareer(c))
+                    .OrderBy(c => c.IDCareer)
+                    .Select(c => (int?)c.IDCareer)
+                    .FirstOrDefault();
+            }
+            if (!careerId.HasValue)
+                errors.Add($"Nghề nghiệp '{careerRaw}' chưa có trong dữ liệu tại dòng {row}");
+        }
+
+        if (careerId.HasValue && LegacyImportRules.IsRelativeCareer(careers.First(c => c.IDCareer == careerId)))
+        {
+            permit = 6;
+            number = "";
+        }
         else if (permit == 6)
         {
             var relative = careers.Where(c => c.Delete_flag == 0 && LegacyImportRules.IsRelativeCareer(c)).OrderBy(c => c.IDCareer).FirstOrDefault();
             if (relative != null) careerId = relative.IDCareer;
         }
-        var settlement = LegacyImportRules.ParseSettlement(Value("SettlementResults"), visa, stay);
-        if (settlement.Error != null) throw Error(settlement.Error);
-        DateTime? cardDate = settlement.CardCreationDate;
-        if (Value("CardCreationDate").Length > 0)
+
+        string? visa = null;
+        var visaRaw = Value("VisaNumber");
+        if (visaRaw.Length == 0) warnings.Add("Thiếu số visa");
+        else visa = visaRaw;
+
+        DateTime? stay = null;
+        var stayRaw = Value("TemporaryStay");
+        if (stayRaw.Length == 0)
         {
-            if (!LegacyImportRules.TryParseLegacyDate(Value("CardCreationDate"), out var explicitDate)) throw Error("Lỗi đọc ngày cấp thẻ");
-            if (cardDate.HasValue && cardDate.Value != explicitDate) throw Error("Ngày cấp thẻ và kết quả giải quyết là khác nhau");
-            cardDate = explicitDate;
+            warnings.Add("Thiếu hạn tạm trú");
         }
-        var emp = new Employee {
-            StaffName = name, Passport = passport, Gender = (Gender)LegacyImportRules.ParseGender(gender),
-            Birthday = birthday, Nationality = nationalityCode, Address = address, IDCareer = careerId,
-            WorkPermit = (WorkPermitType)permit, WorkPermitNumber = number, VisaNumber = visa,
-            VisaSymbol = Value("VisaSymbol"), TemporaryStay = stay, Note = Value("Note"),
-            SettlementResults = settlement.Result, SettlementResultsString = settlement.Text, CardCreationDate = cardDate,
-            IDCompany = companyId, IDUser = 1, Hidden_flag = 0, WorkingStatus = 0
-        };
-        // Thăm thân
-        if (rowData.TryGetValue("FamilyVisit", out var fv))
-            emp.FamilyVisit = fv.ToLower() switch { "có" or "co" or "1" or "yes" or "x" => 1, _ => 0 };
-        if (rowData.TryGetValue("FamilyVisitRelativeName", out var frn))
-            emp.FamilyVisitRelativeName = frn;
-        if (rowData.TryGetValue("FamilyVisitRelationship", out var frl))
-            emp.FamilyVisitRelationship = frl;
-        if (rowData.TryGetValue("FamilyVisitRelativeIdCard", out var frid))
-            emp.FamilyVisitRelativeIdCard = frid;
+        else
+        {
+            try { stay = ParseNullableImportDate(stayRaw); }
+            catch (InvalidOperationException) { errors.Add($"Lỗi đọc thời hạn tạm trú '{stayRaw}' tại dòng {row}"); }
+        }
+
+        var settlementRaw = Value("SettlementResults");
+        var settlement = settlementRaw.Length > 0 && stay.HasValue && visa != null
+            ? LegacyImportRules.ParseSettlement(settlementRaw, visa, stay.Value)
+            : new LegacyImportRules.SettlementParse(3, settlementRaw.Length > 0 ? settlementRaw : " ", null, null);
+        if (settlement.Error != null) errors.Add($"{settlement.Error} tại dòng {row}");
+
+        DateTime? cardDate = settlement.CardCreationDate;
+        var cardDateRaw = Value("CardCreationDate");
+        if (cardDateRaw.Length > 0)
+        {
+            try
+            {
+                var explicitDate = ParseNullableImportDate(cardDateRaw);
+                if (cardDate.HasValue && explicitDate.HasValue && cardDate.Value != explicitDate.Value)
+                    errors.Add($"Ngày cấp thẻ và kết quả giải quyết là khác nhau tại dòng {row}");
+                cardDate = explicitDate;
+            }
+            catch (InvalidOperationException) { errors.Add($"Lỗi đọc ngày cấp thẻ '{cardDateRaw}' tại dòng {row}"); }
+        }
+
+        DateTime? fvStart = null;
         if (rowData.TryGetValue("FamilyVisitStartDate", out var fsd) && !string.IsNullOrWhiteSpace(fsd))
         {
-            try { emp.FamilyVisitStartDate = ParseNullableImportDate(fsd); }
-            catch (InvalidOperationException) { throw Error("Lỗi đọc ngày bắt đầu thăm thân"); }
+            try { fvStart = ParseNullableImportDate(fsd); }
+            catch (InvalidOperationException) { errors.Add($"Lỗi đọc ngày bắt đầu thăm thân tại dòng {row}"); }
         }
+        DateTime? fvEnd = null;
         if (rowData.TryGetValue("FamilyVisitEndDate", out var fed) && !string.IsNullOrWhiteSpace(fed))
         {
-            try { emp.FamilyVisitEndDate = ParseNullableImportDate(fed); }
-            catch (InvalidOperationException) { throw Error("Lỗi đọc hạn thăm thân"); }
+            try { fvEnd = ParseNullableImportDate(fed); }
+            catch (InvalidOperationException) { errors.Add($"Lỗi đọc hạn thăm thân tại dòng {row}"); }
         }
-        if (rowData.TryGetValue("FamilyVisitNote", out var fnote))
-            emp.FamilyVisitNote = fnote;
+        if (fvStart.HasValue && fvEnd.HasValue && fvEnd.Value < fvStart.Value)
+            errors.Add($"Hạn thăm thân nhỏ hơn ngày bắt đầu tại dòng {row}");
 
-        return emp;
+        var familyVisitFlag = 0;
+        if (rowData.TryGetValue("FamilyVisit", out var fv) && !string.IsNullOrWhiteSpace(fv))
+        {
+            var fvTrim = fv.Trim();
+            var fvLower = fvTrim.ToLowerInvariant();
+            if (fvLower is "có" or "co" or "1" or "yes" or "x")
+                familyVisitFlag = 1;
+            else if (fvLower is "không" or "khong" or "0" or "no")
+                familyVisitFlag = 0;
+            else
+            {
+                familyVisitFlag = 0;
+                warnings.Add($"Cột Thăm thân '{fvTrim}' không theo chuẩn Có/Không — tạm ghi nhận là Không");
+            }
+        }
+
+        if (errors.Count > 0)
+            return new ParseRowResult(null, errors, warnings);
+
+        var emp = new Employee
+        {
+            StaffName = name,
+            Passport = passport,
+            Gender = genderValue,
+            Birthday = birthday,
+            Nationality = nationalityCode,
+            Address = address,
+            IDCareer = careerId,
+            WorkPermit = (WorkPermitType)permit,
+            WorkPermitNumber = number,
+            VisaNumber = visa,
+            VisaSymbol = Value("VisaSymbol"),
+            TemporaryStay = stay,
+            Note = Value("Note"),
+            SettlementResults = settlement.Result,
+            SettlementResultsString = settlement.Text,
+            CardCreationDate = cardDate,
+            IDCompany = companyId is > 0 ? companyId : null,
+            IDUser = 1,
+            Hidden_flag = 0,
+            WorkingStatus = 0,
+            FamilyVisit = familyVisitFlag,
+            FamilyVisitRelativeName = rowData.GetValueOrDefault("FamilyVisitRelativeName"),
+            FamilyVisitRelationship = rowData.GetValueOrDefault("FamilyVisitRelationship"),
+            FamilyVisitRelativeIdCard = rowData.GetValueOrDefault("FamilyVisitRelativeIdCard"),
+            FamilyVisitStartDate = fvStart,
+            FamilyVisitEndDate = fvEnd,
+            FamilyVisitNote = rowData.GetValueOrDefault("FamilyVisitNote")
+        };
+
+        return new ParseRowResult(emp, errors, warnings);
     }
 
     public static string? ResolveNationalityCode(string? value, IReadOnlyCollection<NationalityEntity> nationalities) =>
