@@ -1,0 +1,374 @@
+﻿<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hướng dẫn cài đặt và nâng cấp IRM v1.0.2 — R6</title>
+  <style>
+    :root {
+      --bg: #eef5dc;
+      --surface: #ffffff;
+      --surface-soft: #f7fae9;
+      --olive-dark: #16240b;
+      --olive-primary: #3f5223;
+      --olive-muted: #4d6136;
+      --olive-border: #c5d6a7;
+      --accent: #ea580c;
+      --accent-soft: #fff7ed;
+      --accent-border: #fdba74;
+      --code-bg: #f3f7e8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--olive-dark);
+      font: 15.5px/1.65 "Segoe UI", Arial, sans-serif;
+    }
+    main {
+      max-width: 960px;
+      margin: 28px auto;
+      padding: 36px 40px;
+      background: var(--surface);
+      border-top: 6px solid var(--olive-primary);
+      border-radius: 8px;
+      box-shadow: 0 8px 28px rgba(22, 36, 11, 0.08);
+    }
+    .doc-kicker {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-size: 26px;
+      line-height: 1.3;
+      color: var(--olive-dark);
+      margin: 0 0 8px;
+    }
+    .meta {
+      color: var(--olive-muted);
+      margin: 0 0 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--olive-border);
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin: 18px 0 24px;
+    }
+    .meta-card {
+      background: var(--surface-soft);
+      border: 1px solid var(--olive-border);
+      border-radius: 6px;
+      padding: 12px 14px;
+    }
+    .meta-card strong {
+      display: block;
+      font-size: 12px;
+      color: var(--olive-muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .meta-card span, .meta-card code {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--olive-dark);
+      word-break: break-all;
+    }
+    .callout {
+      padding: 14px 16px;
+      border-radius: 6px;
+      margin: 16px 0;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      border-top: 1px solid var(--accent-border);
+      border-right: 1px solid var(--accent-border);
+      border-bottom: 1px solid var(--accent-border);
+    }
+    .callout.info {
+      border-left-color: var(--olive-primary);
+      background: var(--surface-soft);
+      border-color: var(--olive-border);
+    }
+    .callout strong { color: var(--olive-dark); }
+    h2 {
+      font-size: 19px;
+      color: var(--olive-primary);
+      margin: 30px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--olive-border);
+      break-after: avoid;
+    }
+    p { margin: 10px 0; overflow-wrap: anywhere; }
+    ul, ol { margin: 8px 0 14px; padding-left: 22px; }
+    li { margin: 6px 0; }
+    code, pre {
+      font-family: Consolas, "Cascadia Mono", monospace;
+      background: var(--code-bg);
+      border: 1px solid var(--olive-border);
+      border-radius: 4px;
+    }
+    code { padding: 1px 6px; font-size: 0.92em; word-break: break-all; }
+    pre {
+      padding: 12px 14px;
+      overflow-x: auto;
+      font-size: 13.5px;
+      line-height: 1.5;
+      margin: 10px 0 14px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px;
+      font-size: 14.5px;
+    }
+    th, td {
+      border: 1px solid var(--olive-border);
+      padding: 9px 11px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--olive-primary);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    tr:nth-child(even) td { background: var(--surface-soft); }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+    .badge-ok { background: #dcfce7; color: #166534; }
+    .badge-warn { background: #fef3c7; color: #92400e; }
+    .badge-err { background: #ffe4e6; color: #9f1239; }
+    @media (max-width: 640px) {
+      main { margin: 0; padding: 20px; border-radius: 0; }
+      h1 { font-size: 22px; }
+    }
+    @media print {
+      body { background: #ffffff; font-size: 10.5pt; color: #000000; }
+      main { max-width: none; margin: 0; padding: 0; border: 0; box-shadow: none; }
+      .doc-kicker { background: #3f5223; color: #ffffff; }
+      h2 { break-after: avoid; color: #16240b; }
+      p, li, tr { orphans: 3; widows: 3; }
+      pre, .callout, .meta-card { break-inside: avoid; }
+      @page { size: A4; margin: 16mm; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <span class="doc-kicker">Tài liệu bàn giao triển khai — Bản R6</span>
+  <h1>HƯỚNG DẪN CÀI ĐẶT VÀ NÂNG CẤP IRM v1.0.2 (BẢN R6 — QUY TẮC WPF &amp; KHẢO SÁT NGHIỆM THU)</h1>
+  <p class="meta">Phần mềm quản lý người nước ngoài • Bản cài đặt Windows 64-bit Offline • Ngày cập nhật: 15/11/2026</p>
+
+  <div class="meta-grid">
+    <div class="meta-card">
+      <strong>Tệp cài đặt chính</strong>
+      <code>IRM-v1.0.2-windows-x64-offline-setup-R6.exe</code>
+    </div>
+    <div class="meta-card">
+      <strong>Trạng thái ký &amp; Gói</strong>
+      <span>790.854.254 byte (~754 MiB) • NotSigned (UNSIGNED-TEST)</span>
+    </div>
+    <div class="meta-card">
+      <strong>Truy vết mã nguồn</strong>
+      <code>706f74e44e3b97b1c50d6e3c116d4f969eb5389c</code>
+    </div>
+    <div class="meta-card">
+      <strong>Kiểm tra toàn vẹn SHA-256</strong>
+      <code>2D6BA7B6E2FFEB8E6CE411C473965556F2FCEFADCEE5F77F3F2FDBD77CECF585</code>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Lưu ý quan trọng về chữ ký số (Windows SmartScreen):</strong>
+    Gói hiện tại được đóng gói với nhãn <code>UNSIGNED-TEST</code> (chưa ký số Authenticode). Khi mở tệp trên Windows, hộp thoại <em>Windows protected your PC</em> (SmartScreen) có thể xuất hiện. Hãy đối chiếu SHA-256 ở Mục 10 trước; nếu khớp và được đơn vị cho phép thử nghiệm, nhấn <strong>More info</strong> &rarr; <strong>Run anyway</strong> (hoặc liên hệ bộ phận CNTT để ký số chứng thư nội bộ trước khi triển khai diện rộng).
+  </div>
+
+  <h2>1. GÓI CÀI ĐẶT VÀ CÁC TỆP ĐI KÈM TRONG BẢN R6</h2>
+  <p>Chạy đúng tệp cài đặt chính trong thư mục bàn giao hiện hành (<code>BAN-GIAO/01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/</code>):</p>
+  <pre>IRM-v1.0.2-windows-x64-offline-setup-R6.exe</pre>
+  <p>Gói cài đặt đã đóng gói sẵn ứng dụng <strong>IRM (.NET 8 self-contained)</strong>, <strong>Microsoft SQL Server 2022 Express Core</strong> và bản cập nhật <strong>CU27 (16.0.4295.3)</strong>. Máy cài không cần kết nối Internet và không cần cài riêng .NET 8 cho ứng dụng IRM.</p>
+  <p>Phiên bản <strong>R6</strong> kế thừa giao diện bộ cài Olive/Cam của R5 và tích hợp đầy đủ các cập nhật nghiệp vụ mới nhất: chuẩn hóa <strong>34 mã quốc tịch 3 chữ cái</strong> theo phần mềm WPF cũ (<code>CHN</code>, <code>KOR</code>, <code>JPN</code>, <code>USA</code>...), tự động nhận diện nghề <code>Thân nhân</code> khi <code>GPLĐ = Khác</code>, hiển thị <strong>cảnh báo viền đỏ + chữ báo lỗi trực tiếp dưới mọi ô bắt buộc (*)</strong>, kèm <strong>hiệu ứng spotlight chỉ dẫn nút Khảo sát &amp; Góp ý</strong> ngay trên thanh tiêu đề ứng dụng.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Tệp trong thư mục bàn giao R6 (11 tệp)</th>
+        <th>Mục đích sử dụng</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>IRM-v1.0.2-windows-x64-offline-setup-R6.exe</code></td>
+        <td>Bộ cài đặt Windows 64-bit offline hoàn chỉnh bản R6.</td>
+      </tr>
+      <tr>
+        <td><code>IRM-v1.0.2-windows-x64-offline-setup-R6.exe.sha256</code></td>
+        <td>Checksum SHA-256 riêng cho tệp EXE để đối chiếu nhanh.</td>
+      </tr>
+      <tr>
+        <td><code>IRM-MAU-IMPORT-TEST-DA-SUA.xlsx</code></td>
+        <td>File Excel mẫu 10 hồ sơ chuẩn hóa theo danh mục mặc định R6 (nạp đạt 10/10 hồ sơ ngay lần đầu, xem Mục 7).</td>
+      </tr>
+      <tr>
+        <td><code>PHIEU-KHAO-SAT-GOP-Y.html</code></td>
+        <td>Phiếu khảo sát &amp; góp ý tương tác offline (tự lưu nháp, xuất CSV/JSON, in PDF A4).</td>
+      </tr>
+      <tr>
+        <td><code>PHIEU-KHAO-SAT-GOP-Y.xlsx</code></td>
+        <td>Phiếu khảo sát &amp; góp ý định dạng Excel 3 sheet có menu thả xuống (Data Validation) và công thức tự tổng hợp.</td>
+      </tr>
+      <tr>
+        <td><code>HUONG-DAN-CAI-DAT.html</code> / <code>HUONG-DAN-CAI-DAT.md</code></td>
+        <td>Tài liệu hướng dẫn cài đặt, nâng cấp, kiểm thử mẫu Excel, gửi khảo sát và xử lý sự cố.</td>
+      </tr>
+      <tr>
+        <td><code>DOC-TRUOC-KHI-CAI.txt</code></td>
+        <td>Tóm tắt nhanh thông tin bản build R6, SHA-256 và phạm vi kiểm chứng.</td>
+      </tr>
+      <tr>
+        <td><code>SHA256SUMS.txt</code></td>
+        <td>Bảng SHA-256 cho toàn bộ các tệp trong thư mục bàn giao R6.</td>
+      </tr>
+      <tr>
+        <td><code>SOURCE-REVISION.json</code> &amp; <code>VERIFICATION.json</code></td>
+        <td>Biên bản truy vết commit nguồn và kết quả kiểm chứng tự động.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2. YÊU CẦU MÁY CHỦ CÀI ĐẶT</h2>
+  <ul>
+    <li><strong>Hệ điều hành 64-bit (x64):</strong> Windows 10 phiên bản 1607 (build 14393) trở lên (bao gồm Windows 11 x64), hoặc Windows Server 2016 x64 trở lên (cần có Desktop Experience cho giao diện cài đặt).</li>
+    <li><strong>.NET Framework 4.7.2 trở lên</strong> (giá trị Registry <code>Release &ge; 461808</code>) đã được cài sẵn để phục vụ SQL Server 2022 Express.</li>
+    <li><strong>Quyền hạn:</strong> Tài khoản Windows đang đăng nhập có quyền <strong>Administrator</strong>.</li>
+    <li><strong>Phần cứng tối thiểu:</strong> Tối thiểu 2 CPU logic tốc độ từ 2 GHz; tối thiểu <strong>2 GB RAM</strong> đang khả dụng; tối thiểu <strong>10 GB</strong> dung lượng trống trên ổ chứa <code>ProgramData</code> và còn ít nhất 4 GB trống sau khi cài đặt xong.</li>
+    <li><strong>Bảo mật &amp; Quét tệp:</strong> <strong>Windows Defender</strong> đang bật (<code>AntivirusEnabled = true</code>) để ứng dụng quét tệp tải lên.</li>
+    <li><strong>Cổng mạng:</strong> <code>14331</code> (SQL Server), <code>5050</code> (HTTP loopback nội bộ) và <code>5443</code> (HTTPS cho mạng LAN).</li>
+  </ul>
+
+  <h2>3. THÔNG SỐ HỆ THỐNG VÀ LƯU Ý NẾU MÁY ĐÃ CÓ IRM</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Hạng mục</th>
+        <th>Giá trị cố định do bộ cài cấu hình</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Thư mục gốc cài đặt &amp; dữ liệu</td>
+        <td><code>C:\ProgramData\IRM</code> (<code>app</code>, <code>data</code>, <code>backups</code>, <code>logs</code>, <code>tools</code>)</td>
+      </tr>
+      <tr>
+        <td>Dịch vụ Windows</td>
+        <td><code>IRM</code> (chạy tự động dưới tài khoản <code>NT AUTHORITY\LocalService</code>)</td>
+      </tr>
+      <tr>
+        <td>SQL Server Instance &amp; Database</td>
+        <td>Instance <code>IRMEXPRESS</code> (dịch vụ <code>MSSQL$IRMEXPRESS</code>), cổng TCP <code>14331</code>, Database <code>IRM</code></td>
+      </tr>
+      <tr>
+        <td>Địa chỉ truy cập tại máy chủ</td>
+        <td><code>http://localhost:5050</code> (kiểm tra trạng thái: <code>http://localhost:5050/health/ready</code>)</td>
+      </tr>
+      <tr>
+        <td>Địa chỉ truy cập qua LAN (nếu bật)</td>
+        <td><code>https://TEN-MAY-CHU:5443</code> (Firewall mở TCP <code>5443</code> cho profile <code>Domain, Private</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <strong>Nếu máy đã cài IRM trước đó (Nâng cấp):</strong> Hãy sao lưu dữ liệu trước khi nâng cấp bằng PowerShell (quyền Administrator):
+    <pre>Set-Location 'C:\ProgramData\IRM\app'
+&amp; 'C:\ProgramData\IRM\tools\backup.ps1'</pre>
+    Khi nâng cấp, <strong>database nghiệp vụ hiện có được giữ nguyên</strong> (hệ thống tự động đồng bộ mã quốc tịch mặc định cũ 2 chữ cái sang 3 chữ cái và bổ sung nhóm nghề <code>Khác &rarr; Thân nhân</code> nếu thiếu).
+  </div>
+
+  <h2>4. MỞ BỘ CÀI VÀ QUÉT MÔI TRƯỜNG — BƯỚC 1/3</h2>
+  <ol>
+    <li>Sao chép toàn bộ thư mục <code>v1.0.2-R6-UNSIGNED-TEST</code> vào ổ đĩa trên máy cần cài.</li>
+    <li>Nhấp đúp <code>IRM-v1.0.2-windows-x64-offline-setup-R6.exe</code>, chọn <strong>Yes</strong> khi hộp thoại UAC yêu cầu quyền Administrator.</li>
+    <li>Trình cài đặt hiển thị <strong>BƯỚC 1/3 — QUÉT VÀ LẬP BÁO CÁO MÔI TRƯỜNG</strong> và tự động quét điều kiện máy + kiểm tra toàn vẹn checksum.</li>
+    <li>Khi toàn bộ hạng mục bắt buộc đạt điều kiện (<span class="badge badge-ok">Đạt</span> hoặc <span class="badge badge-warn">Sẽ cài bổ sung</span> cho SQL Server), nhấn <strong>Tiếp tục cài đặt</strong>.</li>
+  </ol>
+
+  <h2>5. THIẾT LẬP TÀI KHOẢN VÀ CÀI ĐẶT — BƯỚC 2/3</h2>
+  <ol>
+    <li><strong>Tên tài khoản quản trị:</strong> mặc định gợi ý là <code>admin</code>.</li>
+    <li><strong>Mật khẩu &amp; Nhập lại mật khẩu:</strong> tự đặt mật khẩu mới dài tối thiểu 12 ký tự.</li>
+    <li>Chọn tùy chọn LAN (nếu cần) và tích chọn đồng ý điều khoản sử dụng Microsoft SQL Server Express.</li>
+    <li>Nhấn <strong>Cài đặt IRM</strong> (hoặc <strong>Nâng cấp IRM</strong>) và chờ hoàn tất (10–20 phút).</li>
+  </ol>
+
+  <h2>6. HOÀN TẤT, ĐĂNG NHẬP VÀ HIỆU ỨNG CHỈ DẪN GÓP Ý — BƯỚC 3/3</h2>
+  <ol>
+    <li>Khi chuyển sang <strong>BƯỚC 3/3 — HOÀN TẤT</strong>, nhấn <strong>Mở IRM</strong> hoặc mở shortcut <strong>IRM</strong> trên Desktop (<code>http://localhost:5050</code>).</li>
+    <li>Đăng nhập bằng tài khoản quản trị vừa tạo.</li>
+    <li><strong>Hiệu ứng chỉ dẫn vị trí Feedback ngay lần đầu mở ứng dụng:</strong> Ngay sau khi đăng nhập, hệ thống tự động làm nổi bật nút <strong>Khảo sát &amp; Góp ý (R6)</strong> trên thanh công cụ phía trên kèm khung hướng dẫn spotlight. Bạn có thể nhấn vào nút này bất kỳ lúc nào để mở trực tiếp phiếu khảo sát HTML hoặc tải phiếu khảo sát Excel.</li>
+  </ol>
+
+  <h2>7. KIỂM THỬ FILE EXCEL MẪU (<code>IRM-MAU-IMPORT-TEST-DA-SUA.xlsx</code>) &amp; PHIẾU KHẢO SÁT</h2>
+  <p><strong>A. Cách nạp thử thành công 10/10 hồ sơ mẫu trên bản cài mới R6:</strong></p>
+  <ol>
+    <li>Mở menu <strong>Import Excel</strong> trên thanh điều hướng bên trái.</li>
+    <li>Tại <strong>Bước 1 (Chọn nguồn dữ liệu)</strong>:
+      <ul>
+        <li>Chọn Công ty: <code>CÔNG TY MẪU - HÃY ĐỔI TÊN</code></li>
+        <li>Chọn Nhóm nghề: <code>Kỹ thuật</code></li>
+      </ul>
+    </li>
+    <li>Tải lên tệp <code>IRM-MAU-IMPORT-TEST-DA-SUA.xlsx</code> trong thư mục bàn giao R6.</li>
+    <li>Tại <strong>Bước 2 (Ghép cột)</strong>: toàn bộ 19 cột tự động khớp chính xác; nhấn <strong>Tiếp tục</strong>.</li>
+    <li>Tại <strong>Bước 3 (Xem trước &amp; Kiểm tra)</strong>: cả 10 hồ sơ (<code>IRMTEST26001</code> &rarr; <code>IRMTEST26010</code>) đều hiển thị trạng thái <strong>Mới (Hợp lệ)</strong> — bao gồm 9 hồ sơ <code>Kỹ sư</code>, 1 hồ sơ <code>Thân nhân</code> (<code>GPLĐ = Khác</code> tự động gắn nghề <code>Thân nhân</code>), giữ nguyên các số định danh bắt đầu bằng <code>000000...</code>. Nhấn <strong>Thực hiện Import</strong> để lưu 10/10 hồ sơ.</li>
+    <li>Nếu tải lại đúng tệp này lần thứ 2, hệ thống tự động nhận diện <strong>10/10 dòng trùng (Giữ nguyên)</strong>; có thể thử tính năng <strong>Hoàn tác (Rollback)</strong> ngay tại lịch sử Import.</li>
+  </ol>
+  <p><strong>B. Cách điền và gửi lại Phiếu Khảo Sát &amp; Góp Ý Nghiệm Thu:</strong></p>
+  <ul>
+    <li><strong>Cách 1 (Khuyên dùng — Bản tương tác HTML):</strong> Nhấn nút <strong>Khảo sát &amp; Góp ý (R6)</strong> trên thanh tiêu đề Web (hoặc mở trực tiếp tệp <code>PHIEU-KHAO-SAT-GOP-Y.html</code> trong thư mục bàn giao). Chọn mức đánh giá cho 22 hạng mục, ghi nhận ý kiến hoặc đề xuất cột Excel thực tế, sau đó nhấn <strong>Xuất CSV (Mở bằng Excel)</strong> hoặc <strong>In / Lưu PDF</strong> để gửi lại.</li>
+    <li><strong>Cách 2 (Bản bảng tính Excel):</strong> Mở tệp <code>PHIEU-KHAO-SAT-GOP-Y.xlsx</code>, chọn mức đánh giá từ danh sách thả xuống tại sheet <em>Chi tiết khảo sát</em> (sheet <em>Tổng hợp &amp; Thông tin</em> sẽ tự động thống kê số lượng) và lưu tệp gửi lại.</li>
+  </ul>
+
+  <h2>8. DỮ LIỆU, SAO LƯU, PHỤC HỒI VÀ MÃ KHÔI PHỤC</h2>
+  <ul>
+    <li><strong>Thư mục cài đặt &amp; cấu hình:</strong> <code>C:\ProgramData\IRM</code> (<code>app\</code>, <code>data\</code>, <code>logs\</code>).</li>
+    <li><strong>Thư mục sao lưu:</strong> <code>C:\ProgramData\IRM\backups</code> (tác vụ tự động <code>IRM-DailyBackup</code> lúc 02:00 hằng ngày).</li>
+    <li><strong>Thư mục công cụ quản trị:</strong> <code>C:\ProgramData\IRM\tools</code> (<code>backup.ps1</code>, <code>restore.ps1</code>, <code>repair.ps1</code>, <code>uninstall.ps1</code>).</li>
+    <li><strong>Tệp mã khôi phục database:</strong> <code>C:\ProgramData\IRM\MA-KHOI-PHUC.txt</code>.</li>
+  </ul>
+
+  <h2>9. XỬ LÝ SỰ CỐ THƯỜNG GẶP</h2>
+  <ul>
+    <li><strong>A. Cảnh báo chưa ký số (SmartScreen):</strong> Đối chiếu SHA-256 ở Mục 10 trước khi chọn <strong>More info &rarr; Run anyway</strong>.</li>
+    <li><strong>B. Báo lỗi dòng khi Import file Excel riêng của đơn vị:</strong> Kiểm tra (1) đã chọn Công ty và Nhóm nghề ở Bước 1, (2) cột Quốc tịch dùng mã 3 chữ cái (<code>CHN</code>, <code>KOR</code>, <code>JPN</code>, <code>USA</code>...) hoặc tên tiếng Việt có trong Danh mục, (3) cột Địa chỉ kết thúc bằng tên Phường/Xã đã khai báo trong Danh mục (bản cài mới có sẵn <code>Phường Hồng Gai</code>, <code>Phường Bãi Cháy</code>, <code>Phường Cẩm Trung</code> — hãy thêm phường/xã của địa phương tại mục <strong>Danh mục</strong> trước khi import).</li>
+  </ul>
+
+  <h2>10. ĐỐI CHIẾU SHA-256 KHI NHẬN BÀN GIAO</h2>
+  <p>Mở PowerShell ngay tại thư mục nhận bàn giao <code>v1.0.2-R6-UNSIGNED-TEST</code> và chạy lệnh đối chiếu toàn bộ tệp bằng <code>SHA256SUMS.txt</code>:</p>
+  <pre>Get-FileHash -Algorithm SHA256 -LiteralPath '.\IRM-v1.0.2-windows-x64-offline-setup-R6.exe'
+
+# Kiểm tra đồng loạt theo SHA256SUMS.txt:
+Get-Content .\SHA256SUMS.txt | ForEach-Object {
+    if ($_ -match '^([A-Fa-f0-9]{64})\s{2}(.+)$') {
+        $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $matches[2]).Hash
+        [pscustomobject]@{ File = $matches[2]; Match = ($actual -eq $matches[1].ToUpperInvariant()) }
+    }
+}</pre>
+</main>
+</body>
+</html>
+

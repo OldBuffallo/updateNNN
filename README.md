@@ -1,176 +1,34 @@
-# Immigration Report Manager v0.1.1 (IRM)
+# IRM — source cũ, dự án nâng cấp và bàn giao
 
-Hệ thống quản lý người nước ngoài với web Blazor và WPF chạy song song trên cùng database. v0.1.1 là bản hotfix giao diện trên nền schema additive v0.1.0, không thay đổi cột của các bảng legacy.
+Workspace này dùng **một Git repository tại `NNN/`**, giữ lịch sử và nhánh `develop` hiện có.
 
-> **Deployment status:** demo/staging `v0.1.1` từ tag `v0.1.1`, commit `7f0bb51`, deployment `dep_K7mcqFSJCIRJaFsE`, đang chạy tại `https://irm.180.93.103.206.nip.io`; customer production chưa được phê duyệt. Xem [báo cáo hotfix v0.1.1](docs/IRM-v0.1.1-hotfix-report.md) và [báo cáo triển khai v0.1.0](docs/IRM-v0.1.0-implementation-report.md).
+| Thư mục | Mục đích | Điểm bắt đầu |
+|---|---|---|
+| `immigration-reportmanager-master/` | Dự án WPF cũ, nguồn tham chiếu database và nghiệp vụ kế thừa | `ReportManager.sln` |
+| `IRM/` | Ứng dụng web nâng cấp, chia theo tính năng; source, test, deploy và tài liệu | [IRM/README.md](IRM/README.md), `IRM/IRM.sln` |
+| `BAN-GIAO/` | Bộ cài, tài liệu và dữ liệu test; không đưa vào Git | [BAN-GIAO/README.md](BAN-GIAO/README.md) |
 
-## 📌 Trạng thái dự án
+## Làm việc với bản nâng cấp
 
-| Giai đoạn | Tên | Trạng thái |
-|:---:|:---|:---:|
-| GĐ1 | Khảo sát Hệ thống Cũ | ✅ Done |
-| GĐ2 | Thiết kế Giải pháp | ✅ Done |
-| GĐ3 | Demo Khách hàng | ✅ Done |
-| GĐ4 | Chỉnh sửa theo Yêu cầu | ✅ Dev/Test complete |
-| GĐ5 | Deploy Test Server Thật | ✅ Demo/staging verified |
-| GĐ6 | Kiểm tra & Sửa lỗi | 🔄 17 automated tests pass; UAT pending |
-| GĐ7 | Bàn giao & Hướng dẫn | 📋 Todo |
+Từ thư mục này, chuyển vào solution root rồi chạy:
 
-> Xem chi tiết tại [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md).
-
-## Demo trực tiếp
-
-**[Xem demo IRM v0.1.1 tại đây →](https://irm.180.93.103.206.nip.io/)**
-
-> Đây là môi trường demo/staging, không phải production của khách hàng.
-
-## Tính năng chính
-
-| Tính năng | Mô tả |
-|---|---|
-| 📊 Dashboard | KPI cards, biểu đồ quốc tịch/GPLĐ/hết hạn, bảng cảnh báo |
-| 🏢 Quản lý Công ty | Danh sách, thêm/sửa, lọc theo lĩnh vực |
-| 👥 Quản lý NLĐ | Theo dõi lao động nước ngoài, hộ chiếu, visa, thăm thân |
-| 🎓 Quản lý Du học sinh | Theo dõi du học sinh, trường học, visa, học bổng |
-| 📤 Import Excel | Wizard 4 bước: upload → ghép cột → xem trước → kết quả |
-| 🔍 Tìm kiếm toàn cục | Tìm theo tên, hộ chiếu, công ty, quốc tịch |
-| 📝 Báo cáo tùy chỉnh | Chọn cột, điều kiện lọc, nhóm, xuất Excel/PDF |
-| ⚙️ Quản trị | Tài khoản, danh mục, nhật ký hệ thống, lịch sử import |
-| 👨‍👩‍👧 Thăm thân | Hồ sơ người và thân nhân, sponsor công ty/người lao động |
-| 🏠 Lưu trú | CSLT, doanh nghiệp thuê, người ở và lịch sử địa chỉ |
-| ✅ Kiểm tra | Đợt kiểm tra, snapshot kết quả, lookback |
-| 📍 Thống kê địa bàn | As-of, distinct người, khu vực, giấy tờ/định danh |
-
-## Tech Stack
-
-| Thành phần | Công nghệ |
-|---|---|
-| **Backend** | ASP.NET Core 8 (.NET 8) |
-| **Frontend** | Blazor Server (Interactive Server-Side Rendering) |
-| **UI Framework** | MudBlazor v9.3 (Material Design) |
-| **ORM** | Entity Framework Core 8.0 |
-| **Database** | SQL Server 2014+ (production) / SQLite (development/demo) |
-| **Excel** | ClosedXML 0.104.2 |
-| **Deploy** | Windows Service / Docker / GitHub Pages (demo) |
-
-## Cấu trúc dự án
-
-```
-immigration-reportmanager-master/
-├── IRM/                        # Web app Blazor Server (.NET 8)
-│   ├── Components/
-│   │   ├── Pages/              # 8 trang: Dashboard, Companies, Employees,
-│   │   │                       #          Students, Import, Search, Reports, Admin
-│   │   └── Layout/             # MainLayout, NavMenu
-│   ├── Data/
-│   │   ├── Models/             # 14 entity models
-│   │   ├── IrmDbContext.cs     # DbContext (19 DbSets)
-│   │   └── DatabaseSeeder.cs   # Seed data mẫu
-│   ├── Services/               # 11 services: Import, Export, Dashboard,
-│   │                           #              Search, Auth, Audit, Catalog...
-│   ├── wwwroot/                # Static files
-│   ├── appsettings.json        # Cấu hình DB + Port
-│   └── Program.cs              # Entry point + DB initialization
-├── deploy/                     # Scripts triển khai
-│   ├── build-package.ps1       # Đóng gói USB cho deploy
-│   ├── install.ps1             # Cài đặt 1-click (8 bước)
-│   ├── quick-install.ps1       # Cài đặt nhanh (auto-detect SQL)
-│   ├── uninstall.ps1           # Gỡ bỏ
-│   ├── backup-old-server.ps1   # Backup DB máy cũ
-│   └── sql/                    # SQL migration scripts
-├── mockup-demo/                # Demo tĩnh HTML/CSS/JS (GitHub Pages)
-├── docs/                       # Tài liệu dự án theo giai đoạn
-├── Dockerfile                  # Docker deploy (Render cloud)
-├── .github/workflows/          # GitHub Actions → GitHub Pages
-├── CONTRIBUTING.md             # Hướng dẫn đóng góp
-├── deploy-guide.md             # Hướng dẫn deploy production
-├── DEPLOYMENT.md               # Hướng dẫn triển khai chi tiết
-├── PROJECT_MANAGEMENT.md       # Quản lý dự án 7 giai đoạn
-└── demo.md                     # Mô tả tính năng demo
+```powershell
+Set-Location IRM
+dotnet restore IRM.sln
+dotnet build IRM.sln -c Release
+dotnet test IRM.Tests/IRM.Tests.csproj -c Release -- RunConfiguration.TreatNoTestsAsError=true
 ```
 
-## Yêu cầu phát triển
+Git dùng chung cho source cũ và mới, chạy được từ workspace root hoặc thư mục con. Mọi thay đổi source hoàn tất phải được kiểm tra và commit đầy đủ; chỉ push khi được yêu cầu.
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- SQL Server 2014+ (hoặc để trống để dùng SQLite)
-- IDE: Visual Studio 2022 / VS Code / Rider
+Database SQL Server, các hợp đồng tương thích và nghiệp vụ kế thừa được giữ nguyên. Bản web sử dụng `IRM.Core`, `IRM.Application`, `IRM.Infrastructure` và Web host `IRM`; mã tính năng nằm trong các thư mục `Features`. Không tạo database hoặc chạy migration production chỉ để kiểm tra việc sắp xếp thư mục.
 
-## Chạy locally
+## Build và bàn giao
 
-```bash
-cd IRM
-dotnet run
-# Mở http://localhost:5050
-```
+Docker dùng context thư mục nâng cấp: `docker build -t irm:check ./IRM`. Workflow GitHub vẫn nằm ở `.github/`, các bước build/test chạy từ `IRM/`. Demo và Excel experiment nằm trong `IRM/reference/`.
 
-> Nếu không cấu hình SQL Server, app sẽ tự chuyển sang SQLite với data mẫu.
+Chạy script đóng gói Windows từ `IRM/`; source phải được commit và Git tree sạch. Gói mới có commit nguồn trong `SOURCE-REVISION.json` và được lưu riêng trong `BAN-GIAO/04-CHO-NGHIEM-THU/`.
 
-## Build & Publish
+Bộ cài R4 đã giao được giữ nguyên, không chứa các thay đổi source được commit sau đó. Dùng workbook đã sửa trong `BAN-GIAO/03-DU-LIEU-TEST/2026-11-10/` khi thử import với danh mục mặc định.
 
-```bash
-# Framework-dependent (nhẹ, cần .NET Runtime trên server)
-cd IRM
-dotnet publish -c Release -o ./publish
-
-# Self-contained (không cần .NET Runtime, nặng hơn)
-cd IRM
-dotnet publish -c Release --self-contained -r win-x64 -o ./publish
-```
-
-## Deploy production
-
-Xem hướng dẫn chi tiết:
-- [deploy-guide.md](deploy-guide.md) — Quy trình triển khai 6 bước
-- [DEPLOYMENT.md](DEPLOYMENT.md) — Cấu hình server, database, troubleshooting
-
-**Tóm tắt nhanh:**
-
-```bash
-# Trên máy dev: đóng gói
-.\deploy\build-package.ps1 -Zip
-
-# Trên máy chủ: cài đặt 1-click
-.\quick-install.ps1 -SqlInstance ".\SQLEXPRESS"
-```
-
-Yêu cầu server: RAM ≥ 2GB · Disk ≥ 200MB · CPU ≥ 2 nhân
-
-## Database
-
-### Bảng cũ (giữ nguyên từ hệ thống WPF)
-
-`Accounts`, `Companies`, `Employees`, `Fields`, `Careers`, `CareerGroups`, `Nationality`, `Investment`, `PhoneNumbers`, `Emails`, `Districts`, `Wards`, `Attach`
-
-### Bảng mở rộng có trước baseline v0.1.0
-
-`AuditLogs`, `ImportHistories`, `ImportBackups`, `ColumnMappingTemplates`, `Students`, `ArchivedEmployees`
-
-### Bảng additive của v0.1.0
-
-`SchemaVersions`, `ForeignPersons`, `ForeignPersonSourceLinks`, `StayCases`, `FamilyVisitDetails`, `AdministrativeUnits`, `ResidencePeriods`, `ImmigrationDocuments`, `ElectronicIdentities`, `CompanyProfiles`, `CompanySites`, `EconomicZones`, `SiteZoneMemberships`, `AccommodationsV010`, `CompanyAccommodationAgreements`, `CompanyRepresentatives`, `StoredFiles`, `CompanyLegalDocuments`, `InspectionsV010`, `InspectionSubjects`, `WebCredentials`, `WebRoleAssignments`, `LegacyChangeEvents`, `MigrationIssues`
-
-> **Lưu ý:** IRM v0.1.0 chạy song song với phần mềm desktop cũ, dùng chung database. Migration v0.1.0 chỉ thêm bảng mới; ứng dụng không tự ALTER schema lúc khởi động.
-
-## Tài liệu liên quan
-
-| Tài liệu | Nội dung |
-|---|---|
-| [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md) | Quản lý 7 giai đoạn, tasks, GitHub Issues |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Quy trình làm việc, branching, code review |
-| [deploy-guide.md](deploy-guide.md) | Hướng dẫn triển khai production |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Cấu hình server chi tiết |
-| [demo.md](demo.md) | Mô tả demo cho khách hàng |
-| [docs/IRM-v0.1.0-database-architecture-report.md](docs/IRM-v0.1.0-database-architecture-report.md) | ERD tổng thể/theo miền và catalog 43 bảng |
-| [docs/](docs/) | Tài liệu từng giai đoạn dự án |
-
-## Thành viên
-
-| Vai trò | Người phụ trách |
-|---|---|
-| Project Lead | — |
-| Dev A | Backend, DB, Import/Export, Deploy |
-| Dev B | Frontend, UI/UX, Dashboard, Reports |
-
----
-
-*IRM v0.1.1 — quản lý người nước ngoài theo dữ liệu hợp nhất và lịch sử hiệu lực.*
+Chi tiết: [kiến trúc](IRM/docs/ARCHITECTURE.md), [bàn giao](IRM/docs/DELIVERY-LAYOUT.md), [thiết kế sắp xếp workspace](IRM/docs/superpowers/specs/2026-11-10-workspace-layout-design.md).

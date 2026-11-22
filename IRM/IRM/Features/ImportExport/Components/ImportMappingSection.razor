@@ -1,0 +1,102 @@
+@namespace IRM.Components.Pages
+@inherits IRM.Components.Shared.FeatureSection<Import>
+@using IRM.Features.ImportExport.Help
+
+@* Step 2: Column Mapping *@
+    @if (Page._currentStep == 2)
+    {
+        <MudAlert Severity="Severity.Info" Class="mb-3">
+            <strong>@Page._uploadedFileName</strong> — @Page._sheetInfo
+        </MudAlert>
+
+        @if (Page.MissingRequiredMappings.Any())
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mb-3" data-import-warning="missing-required-fields">
+                <strong>Cảnh báo trường bắt buộc:</strong> Còn thiếu <strong>@Page.MissingRequiredMappings.Count/@IRM.Application.Features.ImportExport.ImportMapping.RequiredCoreFields.Count</strong> trường bắt buộc chưa được ghép cột:
+                <strong>@string.Join(", ", Page.MissingRequiredMappings.Select(m => m.Label))</strong>.
+                Nếu tiếp tục, các dòng thiếu trường bắt buộc sẽ báo lỗi ở bước Xem trước.
+            </MudAlert>
+        }
+        else if (Page._columnMappings.Any())
+        {
+            <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true" Class="mb-3" data-import-warning="all-required-mapped">
+                Đã ghép đủ <strong>@IRM.Application.Features.ImportExport.ImportMapping.RequiredCoreFields.Count/@IRM.Application.Features.ImportExport.ImportMapping.RequiredCoreFields.Count</strong> trường bắt buộc.
+            </MudAlert>
+        }
+
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.HelpOutline" Class="mb-3"
+                   OnClick="@(() => Page.ShowFieldHelpAsync(null))" data-import-tour="field-lookup">Tra cứu 35 trường</MudButton>
+        <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px;" data-import-tour="mapping">
+            <thead><tr><th>Cột Excel</th><th></th><th>Trường hệ thống</th><th>Trạng thái</th></tr></thead>
+            <tbody>
+                @foreach (var m in Page._columnMappings)
+                {
+                    <tr style="@(m.SystemField == "skip" ? "background: var(--mud-palette-warning-hover);" : "")">
+                        <td><strong>Cột @((char)('A' + m.ExcelColumnIndex)): "@m.ExcelColumnName"</strong></td>
+                        <td>→</td>
+                        <td>
+                            <MudSelect T="string" Value="@m.SystemField" Variant="Variant.Outlined"
+                                       Dense="true" Margin="Margin.Dense"
+                                       ValueChanged="@(val => Page.OnMappingChanged(m, val))">
+                                @foreach (var (key, label) in SystemFields.All)
+                                {
+                                    <MudSelectItem Value="@key">@(Import.IsRequiredSystemField(key) ? $"{label} * (Bắt buộc)" : label)</MudSelectItem>
+                                }
+                            </MudSelect>
+                            @if (ImportFieldHelpCatalog.Get(m.SystemField) is { } help)
+                            {
+                                <div class="import-mapping-help">
+                                    <MudIconButton Icon="@Icons.Material.Outlined.HelpOutline" Size="Size.Small"
+                                                   aria-label="@($"Hướng dẫn {help.Label}")"
+                                                   OnClick="@(() => Page.ShowFieldHelpAsync(help.Key))" />
+                                    <MudText Typo="Typo.caption">@help.Summary</MudText>
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            @if (m.SystemField == "skip")
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Warning">Bỏ qua</MudChip>
+                            }
+                            else if (m.IsAutoMapped)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Success">Tự động</MudChip>
+                            }
+                            else
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Info">Thủ công</MudChip>
+                            }
+                            @if (Import.IsRequiredSystemField(m.SystemField))
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Outlined" Class="ml-1">Bắt buộc</MudChip>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+
+
+
+        <MudAlert Severity="Severity.Success" Dense="true" Class="mb-3">
+            @(Page._columnMappings.Count(m => m.SystemField != "skip"))/@Page._columnMappings.Count cột đã ghép ·
+            <MudCheckBox T="bool" @bind-Value="Page._saveTemplate" Dense="true" Label="Lưu template" Class="d-inline" />
+        </MudAlert>
+
+        @if (Page._saveTemplate)
+        {
+            <MudTextField @bind-Value="Page._templateName" Label="Tên template" Variant="Variant.Outlined"
+                          Margin="Margin.Dense" Class="mb-3"
+                          Placeholder="VD: Template Samsung" />
+        }
+
+        <MudStack Row="true" Justify="Justify.Center" Spacing="3">
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Page._currentStep = 1)" StartIcon="@Icons.Material.Outlined.ArrowBack" data-import-tour-control="true">Quay lại</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+                       OnClick="Page.GoToStep3" EndIcon="@Icons.Material.Outlined.ArrowForward" data-import-tour="go-preview"
+                       Disabled="@Page._isProcessing">
+                @if (Page._isProcessing) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                Tiếp tục
+            </MudButton>
+        </MudStack>
+    }

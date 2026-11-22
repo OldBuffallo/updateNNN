@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hướng dẫn import Excel IRM — giữ đúng database cũ</title><style>body{margin:0;background:#f3f5f8;color:#202b3c;font:16px/1.65 "Segoe UI",Arial,sans-serif}main{max-width:1080px;margin:32px auto;padding:32px 40px;background:white;border:1px solid #dbe2eb;border-radius:12px}h1{font-size:30px;line-height:1.3;color:#16365b}h2{margin-top:2em;padding-top:.4em;border-top:1px solid #dbe2eb;color:#16365b}h3{color:#24547b}a{color:#155aa0}table{border-collapse:collapse;width:100%;margin:20px 0;font-size:15px}th,td{border:1px solid #ccd6e1;padding:9px 12px;text-align:left;vertical-align:top}th{background:#eaf0f7}tr:nth-child(even){background:#f8fafc}code{font-family:Consolas,monospace;background:#edf1f6;padding:1px 4px;border-radius:3px;overflow-wrap:anywhere}li{margin:.4em 0}.toc{padding:12px 24px;background:#f3f7fc;border:1px solid #d7e4f2;border-radius:8px}.toctitle{font-weight:700}.toc ul{padding-left:22px}h2,h3{scroll-margin-top:20px}@media(max-width:720px){main{margin:0;padding:18px;border:0;border-radius:0}h1{font-size:25px}table{font-size:13px}th,td{padding:5px;overflow-wrap:anywhere}}@media print{body{background:white}main{border:0;margin:0;padding:0;max-width:none}.toc{break-after:page}h2,h3{break-after:avoid}tr{break-inside:avoid}a{color:inherit}}</style></head><body><main>
+<div class="toc"><span class="toctitle">Mục lục</span><ul>
+<li><a href="#1-ieu-phai-xac-nhan-truoc-khi-import">1. Điều phải xác nhận trước khi import</a></li>
+<li><a href="#2-chuan-bi-tai-khoan-cong-ty-va-danh-muc">2. Chuẩn bị tài khoản, công ty và danh mục</a></li>
+<li><a href="#3-chuan-bi-cau-truc-file-excel">3. Chuẩn bị cấu trúc file Excel</a></li>
+<li><a href="#4-thao-tac-bon-buoc-trong-ung-dung">4. Thao tác bốn bước trong ứng dụng</a><ul>
+<li><a href="#buoc-1-upload-file">Bước 1 — Upload file</a></li>
+<li><a href="#buoc-2-ghep-cot">Bước 2 — Ghép cột</a></li>
+<li><a href="#buoc-3-xem-truoc-va-xu-ly-trung">Bước 3 — Xem trước và xử lý trùng</a></li>
+<li><a href="#buoc-4-ket-qua-va-oi-chieu-ho-so">Bước 4 — Kết quả và đối chiếu hồ sơ</a></li>
+</ul>
+</li>
+<li><a href="#5-quan-ly-danh-muc-bang-tinh-nang-ang-co">5. Quản lý danh mục bằng tính năng đang có</a></li>
+<li><a href="#6-lich-su-va-hoan-tac">6. Lịch sử và hoàn tác</a></li>
+<li><a href="#7-tra-loi-theo-trieu-chung">7. Tra lỗi theo triệu chứng</a></li>
+<li><a href="#8-ket-qua-kiem-tra-va-pham-vi-xac-nhan">8. Kết quả kiểm tra và phạm vi xác nhận</a></li>
+</ul>
+</div>
+
+<h1 id="huong-dan-import-excel-va-giu-ung-du-lieu-nghiep-vu-cu">Hướng dẫn import Excel và giữ đúng dữ liệu nghiệp vụ cũ</h1>
+<p>Cập nhật: 10/11/2026. Áp dụng cho màn hình <strong>Import dữ liệu từ Excel</strong> của IRM v1.0.2. Tài liệu phân biệt bộ cài R4 đã giao, source nâng cấp hiện tại và danh mục trong database cũ; cùng nhãn phiên bản không có nghĩa ba phần này đã đồng nhất dữ liệu.</p>
+<h2 id="1-ieu-phai-xac-nhan-truoc-khi-import">1. Điều phải xác nhận trước khi import</h2>
+<p><strong>Danh mục của database nghiệp vụ đang sử dụng là chuẩn. Không tự đổi mã quốc tịch sang một bộ mã khác chỉ để import thành công.</strong></p>
+<p>Kiểm tra chỉ đọc trên máy phát triển cho thấy database cũ <code>ReportManagerDB</code> có 88 quốc tịch, 87 đang hoạt động; các database mới tên <code>IRM</code> đang có bộ 14 mã mặc định khác. Chưa truy cập database của máy khách để xác nhận danh mục tại đó.</p>
+<table>
+<thead>
+<tr>
+<th>Quốc tịch</th>
+<th>Mã đang có trong database cũ đã kiểm tra</th>
+<th>Mã mặc định trong database IRM mới</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mỹ</td>
+<td>USA</td>
+<td>US</td>
+</tr>
+<tr>
+<td>Hàn Quốc</td>
+<td>KOR</td>
+<td>KR</td>
+</tr>
+<tr>
+<td>Nhật Bản</td>
+<td>JPN</td>
+<td>JP</td>
+</tr>
+<tr>
+<td>Trung Quốc</td>
+<td>CHN</td>
+<td>CN</td>
+</tr>
+<tr>
+<td>Anh</td>
+<td>GBR</td>
+<td>GB</td>
+</tr>
+<tr>
+<td>Úc</td>
+<td>AUS</td>
+<td>AU</td>
+</tr>
+<tr>
+<td>Ấn Độ</td>
+<td>IND</td>
+<td>IN</td>
+</tr>
+<tr>
+<td>Đức</td>
+<td>D</td>
+<td>Chưa có</td>
+</tr>
+<tr>
+<td>Pháp</td>
+<td>FRA</td>
+<td>Chưa có</td>
+</tr>
+<tr>
+<td>Canada</td>
+<td>CAN</td>
+<td>Chưa có</td>
+</tr>
+</tbody>
+</table>
+<p>Database cũ có cả mã một ký tự như <code>D</code>, hai ký tự như <code>AO</code>, <code>CI</code>, <code>KE</code>, và nhiều mã ba ký tự. Không áp điều kiện “tất cả mã phải có hai/ba ký tự”. Giữ nguyên mã, ID, trạng thái hoạt động và các hồ sơ đang tham chiếu đến chúng.</p>
+<p>Trong file gốc <code>IRM-MAU-IMPORT-TEST.xlsx</code>, 9/10 mã quốc tịch khớp danh mục cũ đã kiểm tra. Riêng ô <strong>D6</strong> ghi <code>DEU</code>, trong khi database cũ dùng <code>D</code> cho Đức. Việc đối chiếu này chỉ xác nhận quốc tịch; các trường nghề nghiệp và quy tắc bắt buộc vẫn phải kiểm tra riêng.</p>
+<p>File <code>IRM-MAU-IMPORT-TEST-DA-SUA.xlsx</code> trước đây chỉ được sửa để thử với <strong>database IRM mới có 14 mã mặc định</strong>. File đó đã đổi ba quốc tịch mẫu sang quốc gia khác vì danh mục mặc định thiếu mã. Nó không phải file chuẩn để kế thừa database cũ và không được dùng làm quy tắc sửa dữ liệu thật.</p>
+<h2 id="2-chuan-bi-tai-khoan-cong-ty-va-danh-muc">2. Chuẩn bị tài khoản, công ty và danh mục</h2>
+<ol>
+<li>Đăng nhập bằng tài khoản có quyền nhập dữ liệu (<code>ADMIN</code> hoặc <code>DATA_EDITOR</code>). Hoàn tác yêu cầu <code>ADMIN</code>.</li>
+<li>Mở <strong>Doanh nghiệp</strong>, kiểm tra công ty cần nhập đã tồn tại và đang hoạt động. Nếu chỉ có một công ty, hệ thống có thể chọn sẵn; vẫn phải kiểm tra tên.</li>
+<li>Nhờ người quản trị mở <strong>Quản trị → Quốc tịch</strong> và <strong>Ngành nghề</strong> để đối chiếu mã/tên thực tế trong database ứng dụng đang kết nối. Không lấy bộ mã mặc định của một database mới làm chuẩn cho database cũ.</li>
+<li>Nếu danh mục đích thiếu mã cũ hợp lệ, ghi nhận chênh lệch để xử lý việc kế thừa/đồng bộ danh mục. Đổi quốc tịch của người trong file là thay đổi nghiệp vụ, không phải cách sửa lỗi danh mục.</li>
+<li>Với dữ liệu thật, thử một nhóm nhỏ và kiểm tra hồ sơ sau khi nhập trước khi nhập số lượng lớn. Dữ liệu test nên dùng công ty/môi trường thử riêng.</li>
+</ol>
+<p><strong>Kiểm tra nghề nghiệp:</strong> database cũ yêu cầu <code>Employees.IDCareer</code> có giá trị. File mẫu có các tên <code>Kỹ sư</code>, <code>Kỹ thuật viên</code>, <code>Nhà đầu tư</code> chưa khớp tên nghề trong database cũ đã kiểm tra. Tên <code>Quản lý</code> xuất hiện nhiều hơn một lần. Vì vậy cần chọn/đối chiếu đúng nghề nghiệp, không chấp nhận ô nghề nghiệp trống hoặc tự chọn một tên gần giống.</p>
+<h2 id="3-chuan-bi-cau-truc-file-excel">3. Chuẩn bị cấu trúc file Excel</h2>
+<ul>
+<li>Dùng <strong>Excel Workbook <code>.xlsx</code></strong>. Nếu đang dùng <code>.xls</code>, vào <strong>Save As → Excel Workbook (.xlsx)</strong>; đổi đuôi tên file không chuyển được định dạng. Giao diện hiện có nhận cả hai đuôi, nhưng lần kiểm tra này chỉ xác nhận <code>.xlsx</code>.</li>
+<li>Đặt sheet dữ liệu làm <strong>sheet đầu tiên</strong>. Ứng dụng đọc sheet đầu, không tự tìm sheet theo tên “Mẫu Import”.</li>
+<li>Hàng đầu tiên là tiêu đề cột; dữ liệu bắt đầu từ hàng tiếp theo. Không đặt tên báo cáo, logo hoặc dòng giải thích phía trên tiêu đề.</li>
+<li>Mỗi người một dòng. Không gộp ô trong vùng dữ liệu và không chèn một dòng hoàn toàn trống giữa danh sách: bộ đọc hiện tại dừng khi gặp dòng trống.</li>
+<li>Để hộ chiếu, số visa, số GPLĐ và CCCD/CMND ở kiểu <strong>Text</strong> để giữ số 0 đầu và tránh ký hiệu khoa học.</li>
+<li>Ngày nên là ô Date thực của Excel, hiển thị ngày/tháng/năm. Nếu phải dùng văn bản, ưu tiên dạng rõ ràng <code>yyyy-MM-dd</code>; đối chiếu lại ngày sau khi nhập.</li>
+<li>Không lặp một hộ chiếu trong cùng file. Giữ cách viết hộ chiếu thống nhất với dữ liệu đang có.</li>
+</ul>
+<p>Các cột cơ bản:</p>
+<table>
+<thead>
+<tr>
+<th>Cột Excel</th>
+<th>Ghép với trường hệ thống</th>
+<th>Nội dung cần kiểm tra</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Họ tên</td>
+<td>Họ tên</td>
+<td>Có giá trị, đúng người</td>
+</tr>
+<tr>
+<td>Giới tính</td>
+<td>Giới tính</td>
+<td>Nam/Nữ</td>
+</tr>
+<tr>
+<td>Ngày sinh</td>
+<td>Ngày sinh</td>
+<td>Ngày hợp lệ, không nhầm tháng/ngày</td>
+</tr>
+<tr>
+<td>Quốc tịch</td>
+<td>Quốc tịch</td>
+<td>Mã thực tế đang hoạt động trong database cũ/đích đã thống nhất</td>
+</tr>
+<tr>
+<td>Số hộ chiếu</td>
+<td>Số hộ chiếu</td>
+<td>Giữ nguyên chuỗi mã; dùng để nhận diện trùng</td>
+</tr>
+<tr>
+<td>Địa chỉ</td>
+<td>Địa chỉ</td>
+<td>Đầy đủ, đúng địa bàn theo hồ sơ</td>
+</tr>
+<tr>
+<td>Nghề nghiệp</td>
+<td>Nghề nghiệp/Chức danh</td>
+<td>Khớp danh mục; kiểm tra trường hợp trùng tên</td>
+</tr>
+<tr>
+<td>GPLĐ</td>
+<td>GPLĐ</td>
+<td>Dùng đúng giá trị ở bảng bên dưới</td>
+</tr>
+<tr>
+<td>Số GPLĐ</td>
+<td>Số GPLĐ</td>
+<td>Có khi hồ sơ thuộc trường hợp đã có GPLĐ</td>
+</tr>
+<tr>
+<td>Số Visa</td>
+<td>Số Visa</td>
+<td>Giá trị đúng hồ sơ</td>
+</tr>
+<tr>
+<td>Ký hiệu Visa</td>
+<td>Ký hiệu Visa</td>
+<td>Ghép riêng nếu file có cột này</td>
+</tr>
+<tr>
+<td>Hạn tạm trú</td>
+<td>Hạn tạm trú</td>
+<td>Ngày hợp lệ</td>
+</tr>
+<tr>
+<td>Ghi chú</td>
+<td>Ghi chú</td>
+<td>Không nhầm với ghi chú thăm thân</td>
+</tr>
+<tr>
+<td>Thăm thân</td>
+<td>Thăm thân (Có/Không)</td>
+<td>Có hoặc Không</td>
+</tr>
+<tr>
+<td>Tên người thân</td>
+<td>Tên người thân</td>
+<td>Điền theo hồ sơ nếu có thăm thân</td>
+</tr>
+<tr>
+<td>Quan hệ</td>
+<td>Quan hệ người thân</td>
+<td>Vợ/Chồng, Con… theo hồ sơ</td>
+</tr>
+<tr>
+<td>CMND người thân</td>
+<td>CMND/CCCD người thân</td>
+<td>Kiểu Text</td>
+</tr>
+<tr>
+<td>Ngày bắt đầu thăm thân</td>
+<td>Ngày bắt đầu thăm thân</td>
+<td>Ngày hợp lệ</td>
+</tr>
+<tr>
+<td>Hạn thăm thân</td>
+<td>Hạn thăm thân</td>
+<td>Ngày hợp lệ</td>
+</tr>
+<tr>
+<td>Ghi chú thăm thân</td>
+<td>Ghi chú thăm thân</td>
+<td>Cần kiểm tra và ghép thủ công nếu bị Bỏ qua</td>
+</tr>
+</tbody>
+</table>
+<p>Giá trị GPLĐ được bộ đọc nhận diện:</p>
+<table>
+<thead>
+<tr>
+<th>Nội dung nên ghi trong file</th>
+<th>Ý nghĩa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Đã có GPLĐ</td>
+<td>Người lao động đã có giấy phép</td>
+</tr>
+<tr>
+<td>Chưa có</td>
+<td>Người lao động chưa có giấy phép</td>
+</tr>
+<tr>
+<td>Miễn GPLĐ</td>
+<td>Người lao động miễn giấy phép</td>
+</tr>
+<tr>
+<td>Nhà đầu tư miễn</td>
+<td>Nhà đầu tư miễn giấy phép</td>
+</tr>
+<tr>
+<td>Nhà đầu tư có</td>
+<td>Nhà đầu tư đã có giấy phép</td>
+</tr>
+<tr>
+<td>Nhà đầu tư chưa</td>
+<td>Nhà đầu tư chưa có giấy phép</td>
+</tr>
+</tbody>
+</table>
+<p>Giá trị lạ không được bộ đọc báo lỗi đầy đủ và có thể rơi về giá trị mặc định. Luôn đối chiếu cột GPLĐ tại bước xem trước.</p>
+<p>Theo form WPF cũ, họ tên, ngày sinh, quốc tịch, hộ chiếu, địa chỉ, số visa và hạn tạm trú là các trường bắt buộc; trường hợp đã có GPLĐ còn cần số GPLĐ. Form cũ cũng kiểm tra địa bàn/phường xã. Màn hình import hiện tại chưa thực thi đầy đủ tất cả điều kiện này: “xem trước không báo lỗi” không thay thế kiểm tra nghiệp vụ.</p>
+<h2 id="4-thao-tac-bon-buoc-trong-ung-dung">4. Thao tác bốn bước trong ứng dụng</h2>
+<h3 id="buoc-1-upload-file">Bước 1 — Upload file</h3>
+<ol>
+<li>Mở <strong>Import dữ liệu từ Excel</strong> (<code>/import</code>).</li>
+<li>Chọn công ty trong ô <strong>Công ty mặc định (dùng khi file không có cột Công ty)</strong>. File mẫu 10 người đang kiểm tra không có cột Công ty, nên cần một công ty mặc định đúng.</li>
+<li>Chọn <strong>— Không dùng template —</strong> ở lần đầu để tự kiểm tra các cột.</li>
+<li>Nhấn <strong>Chọn file Excel</strong>, chọn đúng file <code>.xlsx</code>.</li>
+<li>Kiểm tra thông báo tên file, tên sheet và số dòng. File mẫu phải có 10 dòng dữ liệu.</li>
+<li>Nhấn <strong>Tiếp tục</strong>.</li>
+</ol>
+<p>Nếu file có cột Công ty/CQ bảo lãnh, hệ thống có thể tìm công ty theo từng dòng. Cần đối chiếu cột Công ty ở bước xem trước vì cơ chế tìm hiện tại có cả so khớp gần theo chuỗi tên; tên gần giống nhau có thể gây chọn nhầm.</p>
+<h3 id="buoc-2-ghep-cot">Bước 2 — Ghép cột</h3>
+<ol>
+<li>Đọc từng hàng <strong>Cột Excel → Trường hệ thống</strong>. Tự động nhận diện là gợi ý, không phải xác nhận dữ liệu đã đúng.</li>
+<li>Ghép đúng ít nhất các trường nghiệp vụ cần nhập và hộ chiếu để nhận diện trùng.</li>
+<li>Mỗi trường hệ thống chỉ nên nhận từ một cột Excel. Chọn <strong>— Bỏ qua —</strong> cho cột không cần nhập.</li>
+<li>Kiểm tra riêng <strong>Ghi chú thăm thân</strong>. Thử nghiệm với DLL R4 cho thấy cột này bị tự động đặt là Bỏ qua; chọn lại thủ công thành <strong>Ghi chú thăm thân</strong> nếu muốn lưu.</li>
+<li>Nếu sẽ dùng lại đúng cấu trúc file, chọn <strong>Lưu template</strong> và đặt tên dễ nhận biết, ví dụ “Lao động – danh mục DB cũ”. Template chỉ lưu cách ghép cột; nó không sửa mã quốc tịch, tạo nghề nghiệp hay bảo đảm dữ liệu hợp lệ.</li>
+<li>Nhấn <strong>Tiếp tục</strong>.</li>
+</ol>
+<h3 id="buoc-3-xem-truoc-va-xu-ly-trung">Bước 3 — Xem trước và xử lý trùng</h3>
+<ol>
+<li>Đối chiếu tổng số dòng với Excel. Dòng 1 trên màn hình là người đầu tiên; nếu tiêu đề ở hàng 1 Excel thì người đó nằm ở hàng 2 Excel.</li>
+<li>Kiểm tra họ tên, quốc tịch, hộ chiếu, công ty, nghề nghiệp và GPLĐ. Với ngày sinh/hạn tạm trú, kiểm tra thêm sau khi nhập hoặc qua file đối chiếu vì bảng xem trước không hiển thị toàn bộ trường.</li>
+<li>Dòng <strong>Mới</strong> dự kiến được thêm mới; dòng <strong>Trùng</strong> đã có hộ chiếu trong database; dòng <strong>Lỗi</strong> cần sửa trước khi tiếp tục.</li>
+<li>Với dòng trùng, chọn <strong>Bỏ qua</strong> nếu không chủ ý cập nhật. Hiện tại lựa chọn mặc định của giao diện là <strong>Cập nhật</strong>.</li>
+<li>Khi chọn Cập nhật, bộ xử lý ghi đè nhiều trường của hồ sơ, không chỉ cột ghi chú. Ô trống hoặc cột thiếu có thể làm mất giá trị cũ ở một số trường. Chỉ cập nhật bằng file đầy đủ đã đối chiếu.</li>
+<li>Nếu không khớp danh mục, sửa bản sao file theo mã đã được xác nhận hoặc xử lý danh mục trước, tải lại và kiểm tra lại. R4 cũ có thể vẫn hiện Mới dù mã quốc tịch không tồn tại; chỉ đến lúc lưu mới báo lỗi database.</li>
+<li>Nhấn <strong>Bắt đầu Import</strong> sau khi các dòng cần ghi đã được kiểm tra.</li>
+</ol>
+<p>Các bước upload, ghép cột và xem trước chưa ghi hồ sơ người lao động vào database. Tuy nhiên, nếu chọn Lưu template thì template được lưu khi chuyển sang xem trước.</p>
+<h3 id="buoc-4-ket-qua-va-oi-chieu-ho-so">Bước 4 — Kết quả và đối chiếu hồ sơ</h3>
+<ol>
+<li>Đọc trạng thái <strong>Import hoàn tất!</strong> hoặc <strong>Import thất bại!</strong>, mã phiên và các số <strong>Thêm mới/Cập nhật/Lỗi/Bỏ qua</strong>.</li>
+<li>Nếu hoàn tất nhưng có dòng lỗi hoặc bỏ qua, những dòng đó chưa được nhập. Không chỉ nhìn dấu thành công để kết luận đã đủ dữ liệu.</li>
+<li>Nếu thất bại do lỗi SQL và có thông báo toàn bộ giao dịch đã hoàn tác, dữ liệu của phiên đó không được lưu. Hai phép thử file lỗi trong lần kiểm tra này đều còn 0 hồ sơ sau rollback.</li>
+<li>Nhấn <strong>Xem danh sách NLĐ</strong>, tìm theo hộ chiếu và kiểm tra chi tiết hồ sơ. Với dữ liệu thử, tìm tiền tố <code>IRMTEST26</code>.</li>
+<li>Mở <strong>Lịch sử Import</strong>, đối chiếu đúng tên file, công ty, mã phiên, số lượng và trạng thái <strong>Đã lưu</strong>.</li>
+</ol>
+<p>Trên database thử mới với danh mục mặc định R4, file DA-SUA đã nhập 10 hồ sơ, 0 cập nhật, 0 lỗi. Đây là kết quả cho danh mục mặc định, không phải xác nhận file đó phù hợp database cũ.</p>
+<h2 id="5-quan-ly-danh-muc-bang-tinh-nang-ang-co">5. Quản lý danh mục bằng tính năng đang có</h2>
+<p>Mở <strong>Quản trị → Quốc tịch</strong> (<code>/admin/nationalities</code>) bằng tài khoản quản trị. Hiện có các thao tác Thêm, Sửa và Xóa.</p>
+<ul>
+<li>Xem mã và tên đang có trước khi chuẩn bị Excel.</li>
+<li>Khi bổ sung một quốc tịch thực sự thiếu, dùng mã nghiệp vụ đã thống nhất với database cũ; kiểm tra trùng mã và tên trước khi lưu.</li>
+<li>Với mã đã có hồ sơ tham chiếu, giữ nguyên mã và ID; sửa tên khi có yêu cầu nghiệp vụ hợp lệ. Việc đổi khóa mã cần quy trình riêng, không sửa trực tiếp để chữa lỗi import.</li>
+<li>Xóa là thao tác ẩn bằng <code>Delete_flag</code>; quốc tịch bị ẩn không thuộc danh mục hoạt động để import.</li>
+<li>Nếu một tên có nhiều mã, ví dụ <code>AO</code>/<code>AUT</code>, dùng đúng mã đang được hồ sơ cũ sử dụng; không tự gộp hai bản ghi chỉ vì trùng tên.</li>
+</ul>
+<p>Chức năng thêm/sửa danh mục hiện có không đồng nghĩa ứng dụng đã có quy trình chuyển toàn bộ database cũ sang database IRM mới. Hai việc này cần được quản lý riêng.</p>
+<h2 id="6-lich-su-va-hoan-tac">6. Lịch sử và hoàn tác</h2>
+<p>Mở <strong>Lịch sử Import</strong>, tìm đúng phiên và dùng <strong>Hoàn tác</strong> bằng tài khoản ADMIN. Bản ghi thêm mới được đánh dấu ẩn; các bản cập nhật được xử lý từ dữ liệu backup của phiên. Kiểm tra lại hồ sơ và trạng thái <strong>Đã hoàn tác</strong> sau thao tác.</p>
+<p>Các giới hạn đã xác định trong mã và kiểm tra trước đây: rollback bản cập nhật chưa khôi phục đầy đủ một số giá trị vốn là NULL; mã phiên import có độ phân giải theo giây, nên hai phiên đồng thời có thể trùng mã. Do đó chưa dùng lời hứa “hoàn tác bất cứ lúc nào” để thay thế backup và nghiệm thu trước khi nhập dữ liệu nghiệp vụ hàng loạt. Tránh chạy nhiều phiên xác nhận cùng lúc và giữ bản dữ liệu trước cập nhật.</p>
+<h2 id="7-tra-loi-theo-trieu-chung">7. Tra lỗi theo triệu chứng</h2>
+<table>
+<thead>
+<tr>
+<th>Triệu chứng</th>
+<th>Cần kiểm tra và xử lý</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FK_Employees_Nationality_Nationality</code></td>
+<td>Mã trong dòng Excel không có ở <code>Nationality</code> của đúng database đích. Đối chiếu danh mục cũ/đích, không mặc định đổi USA thành US.</td>
+</tr>
+<tr>
+<td>Lỗi ở Dòng 1 với USA</td>
+<td>Ảnh lỗi trước đây phù hợp database đích đang có US thay cho USA; kiểm tra lại database kết nối và việc kế thừa danh mục.</td>
+</tr>
+<tr>
+<td>Lỗi DEU khi dùng danh mục cũ đã kiểm tra</td>
+<td>Database cũ dùng D cho Đức; trong bản sao file mẫu, đối chiếu ô D6.</td>
+</tr>
+<tr>
+<td>Lỗi IDCareer hoặc nghề nghiệp trống</td>
+<td>Nghề chưa khớp danh mục, tên bị trùng hoặc chưa chọn đúng nghề. Database cũ yêu cầu IDCareer có giá trị.</td>
+</tr>
+<tr>
+<td>Chưa có/chưa chọn công ty</td>
+<td>Tạo hoặc chọn đúng công ty đang hoạt động trước khi tiếp tục.</td>
+</tr>
+<tr>
+<td>Không đọc được file</td>
+<td>Dùng Save As thành .xlsx, không đổi đuôi; kiểm tra file không hỏng hoặc có mật khẩu.</td>
+</tr>
+<tr>
+<td>Số dòng bị thiếu</td>
+<td>Kiểm tra sheet đầu, vị trí tiêu đề, dòng trắng giữa dữ liệu và các dòng thiếu họ tên.</td>
+</tr>
+<tr>
+<td>Ghi chú thăm thân không lưu</td>
+<td>Ghép lại cột này thủ công thay vì để Bỏ qua.</td>
+</tr>
+<tr>
+<td>Hộ chiếu hiện Trùng</td>
+<td>Xem hồ sơ hiện có; chọn Bỏ qua hoặc Cập nhật theo chủ ý nghiệp vụ.</td>
+</tr>
+<tr>
+<td>Không có quyền import/hoàn tác</td>
+<td>Kiểm tra vai trò tài khoản; hoàn tác cần ADMIN.</td>
+</tr>
+<tr>
+<td>Lỗi ngày/thông tin ngày bị trống</td>
+<td>Sử dụng ô Date hoặc văn bản ngày rõ ràng; kiểm tra lại ngày sau nhập.</td>
+</tr>
+</tbody>
+</table>
+<p>Khi cần hỗ trợ, ghi lại: tên file và bản sao file đang dùng; bộ cài/commit đang chạy; bước bị lỗi; toàn bộ thông báo; mã phiên; tên database đích và danh sách mã quốc tịch liên quan. Không gửi mật khẩu kết nối. Database khách hàng chưa được truy cập trong lần kiểm tra này, nên nếu khách vẫn lỗi với file khác cần đối chiếu dữ liệu tại đúng máy đó.</p>
+<h2 id="8-ket-qua-kiem-tra-va-pham-vi-xac-nhan">8. Kết quả kiểm tra và phạm vi xác nhận</h2>
+<p>Đã dùng đúng DLL R4 đã bàn giao để đọc hai file <code>.xlsx</code> và chạy import trong SQLite in-memory tách biệt. Không ghi vào ba database SQL Server được đối chiếu bằng SELECT.</p>
+<table>
+<thead>
+<tr>
+<th>Dữ liệu thử</th>
+<th>Danh mục quốc tịch trong database thử</th>
+<th>Kết quả</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File gốc</td>
+<td>14 mã mặc định R4</td>
+<td>Lỗi dòng dữ liệu 1; 0 hồ sơ lưu</td>
+</tr>
+<tr>
+<td>File DA-SUA</td>
+<td>14 mã mặc định R4</td>
+<td>10 hồ sơ lưu</td>
+</tr>
+<tr>
+<td>File gốc</td>
+<td>87 mã hoạt động lấy từ DB cũ</td>
+<td>Chỉ DEU không khớp; lỗi dòng dữ liệu 5; 0 hồ sơ lưu</td>
+</tr>
+<tr>
+<td>Dữ liệu file gốc, thay DEU bằng D trong bộ kiểm tra</td>
+<td>87 mã hoạt động lấy từ DB cũ</td>
+<td>Qua kiểm tra quốc tịch và lưu 10 hồ sơ trong model thử</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Giới hạn:</strong> phép thử cuối chỉ kiểm chứng danh mục quốc tịch với model thử của R4, không tái tạo toàn bộ schema và ràng buộc database cũ. Nó không xác nhận file đã đáp ứng IDCareer, địa bàn, mọi quy tắc WPF hoặc nghiệm thu trực tiếp trên SQL Server của khách.</p>
+<p>Source nâng cấp hiện đã có validation quốc tịch dựa trên danh mục đang hoạt động, không khóa độ dài mã ở hai ký tự. Bộ cài R4 chưa chứa bản sửa source đó. Việc hoàn thiện kiểm tra nghiệp vụ cũ, hỗ trợ sửa tại bước xem trước và quản lý danh mục có kiểm soát là phần nâng cấp cần chốt riêng trước khi triển khai.</p>
+</main></body></html>

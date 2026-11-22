@@ -19,6 +19,9 @@ jobs:
   build-and-release:
     name: Build Artifacts & Publish Release
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: IRM
 
     steps:
       - name: Checkout Code
@@ -52,5 +55,5 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            IRM-win-x64.zip
-            IRM-linux-x64.zip
+            IRM/IRM-win-x64.zip
+            IRM/IRM-linux-x64.zip

@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup Giao Diện — Cảnh Báo Trường Bắt Buộc & Mã Quốc Tịch 3 Chữ Cái (IRM)</title>
+  <style>
+    :root {
+      --bg: #f4f5fa;
+      --surface: #ffffff;
+      --border: #d9dce3;
+      --text: #2f2b3d;
+      --muted: #6d697a;
+      --primary: #7367f0;
+      --primary-soft: rgba(115, 103, 240, 0.12);
+      --error: #dc2626;
+      --error-bg: #fef2f2;
+      --error-border: #fca5a5;
+      --warning: #b45309;
+      --warning-bg: #fffbeb;
+      --warning-border: #fcd34d;
+      --info: #0369a1;
+      --info-bg: #f0f9ff;
+      --info-border: #bae6fd;
+      --success: #15803d;
+      --success-bg: #f0fdf4;
+      --success-border: #bbf7d0;
+      --radius: 10px;
+      --shadow: 0 4px 18px rgba(47, 43, 61, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    header.topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .topbar p {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    nav.quick-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    nav.quick-links a {
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-soft);
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(115, 103, 240, 0.25);
+    }
+
+    nav.quick-links a:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 24px auto 60px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .summary-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .summary-item strong {
+      display: block;
+      font-size: 13px;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .summary-item span {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    section.screen-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .screen-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, #fafaff 0%, #ffffff 100%);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .screen-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      margin-right: 8px;
+    }
+
+    .screen-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .screen-files {
+      font-family: Consolas, Monaco, monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .screen-body {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* MudAlert styles */
+    .mud-alert {
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border: 1px solid transparent;
+    }
+
+    .mud-alert-icon {
+      font-weight: 800;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .mud-alert.warning {
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
+      color: #78350f;
+    }
+
+    .mud-alert.error {
+      background: var(--error-bg);
+      border-color: var(--error-border);
+      color: #991b1b;
+    }
+
+    .mud-alert.info {
+      background: var(--info-bg);
+      border-color: var(--info-border);
+      color: #075985;
+    }
+
+    .mud-alert.success {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: #166534;
+    }
+
+    /* Grid & Fields */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .col-12 { grid-column: span 12; }
+    .col-8 { grid-column: span 8; }
+    .col-6 { grid-column: span 6; }
+    .col-5 { grid-column: span 5; }
+    .col-4 { grid-column: span 4; }
+    .col-3 { grid-column: span 3; }
+    .col-2 { grid-column: span 2; }
+
+    @media (max-width: 820px) {
+      .col-8, .col-6, .col-5, .col-4, .col-3, .col-2 {
+        grid-column: span 12;
+      }
+    }
+
+    .mud-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mud-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .mud-label .req-star {
+      color: var(--error);
+      font-weight: 800;
+    }
+
+    .mud-label .new-pill {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .mud-input {
+      height: 38px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 0 11px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .mud-input.placeholder {
+      color: #9ca3af;
+    }
+
+    .mud-field.has-error .mud-label {
+      color: var(--error);
+    }
+
+    .mud-field.has-error .mud-input {
+      border-color: var(--error);
+      background: #fffafa;
+      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12);
+    }
+
+    .mud-error-text {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--error);
+    }
+
+    .mud-helper-text {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: default;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-success {
+      background: #16a34a;
+      color: #fff;
+    }
+
+    .btn-outlined {
+      background: #fff;
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn-text {
+      background: transparent;
+      color: var(--muted);
+    }
+
+    /* Tables */
+    table.mud-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table.mud-table th {
+      background: #f8f9fc;
+      text-align: left;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    table.mud-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #eef0f5;
+      vertical-align: middle;
+    }
+
+    tr.row-warn {
+      background: #fffbeb;
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .chip-code {
+      font-family: Consolas, Monaco, monospace;
+      background: #eef2ff;
+      color: #3730a3;
+      border-color: #c7d2fe;
+    }
+
+    .chip-req {
+      background: #fef2f2;
+      color: #dc2626;
+      border-color: #fca5a5;
+    }
+
+    .chip-ok {
+      background: #f0fdf4;
+      color: #15803d;
+      border-color: #86efac;
+    }
+
+    .chip-skip {
+      background: #fffbeb;
+      color: #b45309;
+      border-color: #fcd34d;
+    }
+
+    .subbox {
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #fcfcfd;
+    }
+
+    .subbox-title {
+      font-size: 13px;
+      font-weight: 800;
+      margin: 0 0 10px;
+      color: var(--text);
+    }
+
+    .dialog-frame {
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .dialog-title {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 800;
+      font-size: 15px;
+      background: #f8fafc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dialog-content {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .dialog-actions {
+      padding: 12px 18px;
+      border-top: 1px solid var(--border);
+      background: #f8fafc;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Mockup Giao Diện — Cảnh Báo Trường Bắt Buộc &amp; Mã Quốc Tịch 3 Chữ Cái</h1>
+      <p>Kế hoạch đối chiếu dự án WPF cũ · Áp dụng cho IRM Blazor Server (MudBlazor)</p>
+    </div>
+    <nav class="quick-links">
+      <a href="#screen-1">1. Quản trị Danh mục</a>
+      <a href="#screen-2">2. Nhập Excel (Bước 1 &amp; 2)</a>
+      <a href="#screen-3">3. Nhập Thủ Công</a>
+      <a href="#screen-4">4. Hộp thoại Nhân viên &amp; Form khác</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="summary-strip">
+      <div class="summary-item">
+        <strong>Nguyên tắc 1 · Báo đỏ ngay dưới ô (Error + ErrorText)</strong>
+        <span>Không chỉ đợi blur mới hiện RequiredError; khi bấm Lưu/Thêm hoặc bỏ trống trường bắt buộc, từng ô thiếu hiện viền đỏ + dòng cảnh báo ngay bên dưới.</span>
+      </div>
+      <div class="summary-item">
+        <strong>Nguyên tắc 2 · Đủ 9 trường bắt buộc + Công ty</strong>
+        <span>Khớp 100% dự án WPF cũ: Họ tên, Hộ chiếu, Giới tính, Ngày sinh, Quốc tịch (3 chữ cái), Địa chỉ tạm trú (Phường/Xã), Nghề nghiệp, Số Visa, Hạn tạm trú + Công ty.</span>
+      </div>
+      <div class="summary-item">
+        <strong>Nguyên tắc 3 · Mã quốc tịch chuẩn 3 chữ cái</strong>
+        <span>Hiển thị và ràng buộc 3 chữ cái viết hoa (CHN, KOR, JPN, USA...) ở Quản trị Quốc tịch, tra cứu Import Excel, Nhân viên và Du học sinh.</span>
+      </div>
+    </div>
+
+    <!-- MÀN HÌNH 1 -->
+    <section id="screen-1" class="screen-card">
+      <div class="screen-header">
+        <h2 class="screen-title">
+          <span class="screen-badge">Màn hình 1</span>
+          Quản trị → Danh mục Quốc tịch &amp; Các danh mục bắt buộc
+        </h2>
+        <span class="screen-files">AdminNationalitiesSection.razor · AdminWardsSection.razor · AdminCareersSection.razor · Admin.Catalogs.cs</span>
+      </div>
+      <div class="screen-body">
+        <div class="mud-alert warning">
+          <span class="mud-alert-icon">⚠</span>
+          <div>
+            <strong>Cảnh báo:</strong> Mã quốc tịch phải gồm đúng <strong>3 chữ cái</strong> (VD: CHN, KOR, JPN, USA). Các trường có dấu <strong>*</strong> là bắt buộc điền.
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="col-3">
+            <div class="mud-field has-error">
+              <label class="mud-label">Mã quốc tịch <span class="req-star">*</span></label>
+              <div class="mud-input">CN</div>
+              <span class="mud-error-text">Mã quốc tịch phải gồm đúng 3 chữ cái viết hoa (VD: CHN, KOR, USA).</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="mud-field has-error">
+              <label class="mud-label">Tên quốc tịch <span class="req-star">*</span></label>
+              <div class="mud-input placeholder">Nhập tên quốc tịch tiếng Việt...</div>
+              <span class="mud-error-text">Bắt buộc nhập tên quốc tịch.</span>
+            </div>
+          </div>
+          <div class="col-3" style="display:flex; align-items:center;">
+            <div class="btn-row">
+              <span class="btn btn-primary">Thêm</span>
+              <span class="btn btn-text">Hủy</span>
+            </div>
+          </div>
+        </div>
+
+        <table class="mud-table">
+          <thead>
+            <tr>
+              <th>Mã (3 chữ cái)</th>
+              <th>Tên quốc tịch</th>
+              <th style="width:140px;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="chip chip-code">CHN</span></td>
+              <td>Trung Quốc</td>
+              <td>Sửa · Xóa</td>
+            </tr>
+            <tr>
+              <td><span class="chip chip-code">KOR</span></td>
+              <td>Hàn Quốc</td>
+              <td>Sửa · Xóa</td>
+            </tr>
+            <tr>
+              <td><span class="chip chip-code">JPN</span></td>
+              <td>Nhật Bản</td>
+              <td>Sửa · Xóa</td>
+            </tr>
+            <tr>
+              <td><span class="chip chip-code">USA</span></td>
+              <td>Hoa Kỳ</td>
+              <td>Sửa · Xóa</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="subbox">
+          <p class="subbox-title">Đồng bộ cảnh báo &amp; nút tiếng Việt có dấu trên các tab Danh mục khác trong Quản trị:</p>
+          <div class="grid">
+            <div class="col-4">
+              <div class="mud-field has-error">
+                <label class="mud-label">Tên phường/xã <span class="req-star">*</span></label>
+                <div class="mud-input placeholder">(Trống)</div>
+                <span class="mud-error-text">Bắt buộc nhập tên phường/xã</span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="mud-field has-error">
+                <label class="mud-label">Tên ngành nghề <span class="req-star">*</span></label>
+                <div class="mud-input placeholder">(Trống)</div>
+                <span class="mud-error-text">Bắt buộc nhập tên ngành nghề</span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="mud-field has-error">
+                <label class="mud-label">Tên tài khoản (Username) <span class="req-star">*</span></label>
+                <div class="mud-input placeholder">(Trống)</div>
+                <span class="mud-error-text">Bắt buộc nhập tên đăng nhập · Nút: Thêm / Lưu</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MÀN HÌNH 2 -->
+    <section id="screen-2" class="screen-card">
+      <div class="screen-header">
+        <h2 class="screen-title">
+          <span class="screen-badge">Màn hình 2</span>
+          Nhập Excel — Bước 1 (Cấu hình đọc) &amp; Bước 2 (Ghép cột bắt buộc)
+        </h2>
+        <span class="screen-files">ImportUploadSection.razor · ImportMappingSection.razor · Import.razor.cs</span>
+      </div>
+      <div class="screen-body">
+        <div class="subbox">
+          <p class="subbox-title">Bước 1 · Chọn file Excel &amp; thông số bắt buộc</p>
+          <div class="mud-alert success" style="margin-bottom:12px;">
+            <span class="mud-alert-icon">✓</span>
+            <div>Đã chọn: <strong>Du_lieu_nhan_vien_2026.xlsx</strong> — Sheet: Danh sách — 25 dòng — 12 cột</div>
+          </div>
+          <div class="grid" style="margin-bottom:12px;">
+            <div class="col-6">
+              <div class="mud-field has-error">
+                <label class="mud-label">Công ty mặc định (hoặc bật tạo mới) <span class="req-star">*</span></label>
+                <div class="mud-input placeholder">— Chưa chọn công ty mặc định — ▾</div>
+                <span class="mud-error-text">Chưa chọn Công ty mặc định (nếu file không có cột Công ty).</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="mud-field has-error">
+                <label class="mud-label">Nhóm nghề <span class="req-star">* (bắt buộc)</span></label>
+                <div class="mud-input placeholder">— Chưa chọn nhóm nghề — ▾</div>
+                <span class="mud-error-text">Bắt buộc chọn nhóm nghề trước khi tiếp tục.</span>
+              </div>
+            </div>
+          </div>
+          <div class="mud-alert warning">
+            <span class="mud-alert-icon">⚠</span>
+            <div><strong>Cảnh báo trường bắt buộc:</strong> Vui lòng chọn <strong>Nhóm nghề</strong> trước khi tiếp tục sang bước ghép cột.</div>
+          </div>
+        </div>
+
+        <div class="subbox">
+          <p class="subbox-title">Bước 2 · Ghép cột Excel → Trường hệ thống (kiểm tra đủ 9 trường cốt lõi)</p>
+          <div class="mud-alert warning" style="margin-bottom:12px;">
+            <span class="mud-alert-icon">⚠</span>
+            <div>
+              <strong>Cảnh báo trường bắt buộc:</strong> Còn thiếu <strong>2/9</strong> trường bắt buộc chưa được ghép cột:
+              <strong>Quốc tịch, Địa chỉ tạm trú</strong>. Vui lòng ghép đủ trước khi sang bước Xem trước (hoặc bấm Tiếp tục sẽ báo chặn/cảnh báo).
+            </div>
+          </div>
+
+          <table class="mud-table">
+            <thead>
+              <tr>
+                <th>Cột Excel</th>
+                <th>→</th>
+                <th>Trường hệ thống</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Cột A: "Họ và tên"</strong></td>
+                <td>→</td>
+                <td>
+                  <div class="mud-input">Họ tên <span style="color:#dc2626; font-weight:700;">* (Bắt buộc)</span> ▾</div>
+                </td>
+                <td>
+                  <span class="chip chip-ok">Tự động</span>
+                  <span class="chip chip-req">Bắt buộc</span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Cột D: "Nationality"</strong></td>
+                <td>→</td>
+                <td>
+                  <div class="mud-input">Quốc tịch <span style="color:#dc2626; font-weight:700;">* (Bắt buộc)</span> ▾</div>
+                  <span class="mud-helper-text">Mã 3 chữ cái trong danh mục (VD: CHN, KOR, USA) hoặc tên quốc tịch tiếng Việt.</span>
+                </td>
+                <td>
+                  <span class="chip chip-ok">Tự động</span>
+                  <span class="chip chip-req">Bắt buộc</span>
+                </td>
+              </tr>
+              <tr class="row-warn">
+                <td><strong>Cột F: "Nơi ở hiện nay"</strong></td>
+                <td>→</td>
+                <td>
+                  <div class="mud-field has-error">
+                    <div class="mud-input">— Bỏ qua — ▾</div>
+                    <span class="mud-error-text">Gợi ý: Trường bắt buộc "Địa chỉ tạm trú *" hiện chưa được ghép cột nào.</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="chip chip-skip">Bỏ qua</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- MÀN HÌNH 3 -->
+    <section id="screen-3" class="screen-card">
+      <div class="screen-header">
+        <h2 class="screen-title">
+          <span class="screen-badge">Màn hình 3</span>
+          Nhập Thủ Công — Thêm Nhân Viên Trực Tiếp (Hiển Thị Lỗi Ngay Từng Ô)
+        </h2>
+        <span class="screen-files">Import.razor · Import.razor.cs</span>
+      </div>
+      <div class="screen-body">
+        <div class="mud-alert info">
+          <span class="mud-alert-icon">ℹ</span>
+          <div>Trạng thái minh họa ngay sau khi người dùng bấm nút <strong>"Thêm nhân viên"</strong> mà còn bỏ trống các trường có dấu <strong>*</strong>: toàn bộ ô bắt buộc bị thiếu sẽ bật viền đỏ và hiện lỗi trực tiếp dưới ô.</div>
+        </div>
+
+        <div class="grid">
+          <div class="col-6">
+            <div class="mud-field">
+              <label class="mud-label">Họ tên <span class="req-star">*</span></label>
+              <div class="mud-input">NGUYỄN VĂN AN</div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="mud-field">
+              <label class="mud-label">Giới tính <span class="req-star">*</span></label>
+              <div class="mud-input">Nam ▾</div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="mud-field has-error">
+              <label class="mud-label">Ngày sinh <span class="req-star">*</span></label>
+              <div class="mud-input placeholder">dd/MM/yyyy</div>
+              <span class="mud-error-text">Bắt buộc nhập ngày sinh</span>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="mud-field has-error">
+              <label class="mud-label">Quốc tịch <span class="req-star">*</span></label>
+              <div class="mud-input placeholder">— Chọn quốc tịch (3 chữ cái) — ▾</div>
+              <span class="mud-error-text">Bắt buộc chọn quốc tịch</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="mud-field">
+              <label class="mud-label">Số hộ chiếu <span class="req-star">*</span></label>
+              <div class="mud-input">E12345678</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="mud-field has-error">
+              <label class="mud-label">Công ty <span class="req-star">*</span></label>
+              <div class="mud-input placeholder">— Chọn công ty — ▾</div>
+              <span class="mud-error-text">Bắt buộc chọn công ty</span>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="mud-field has-error">
+              <label class="mud-label">Nghề nghiệp <span class="req-star">*</span></label>
+              <div class="mud-input placeholder">— Chọn nghề nghiệp — ▾</div>
+              <span class="mud-error-text">Bắt buộc chọn nghề nghiệp</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="mud-field has-error">
+              <label class="mud-label">Số Visa <span class="req-star">*</span></label>
+              <div class="mud-input placeholder">(Trống)</div>
+              <span class="mud-error-text">Bắt buộc nhập số Visa</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="mud-field has-error">
+              <label class="mud-label">Hạn tạm trú <span class="req-star">*</span></label>
+              <div class="mud-input placeholder">dd/MM/yyyy</div>
+              <span class="mud-error-text">Bắt buộc nhập hạn tạm trú</span>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="mud-field has-error">
+              <label class="mud-label">Địa chỉ tạm trú <span class="req-star">*</span></label>
+              <div class="mud-input placeholder">VD: 12 Lê Duẩn, Hải Châu</div>
+              <span class="mud-error-text">Bắt buộc nhập địa chỉ tạm trú (nên kết thúc bằng tên Phường/Xã trong danh mục)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mud-alert warning">
+          <span class="mud-alert-icon">⚠</span>
+          <div>
+            <strong>Cảnh báo các trường bắt buộc chưa nhập (*):</strong> Ngày sinh, Quốc tịch, Công ty, Nghề nghiệp, Số Visa, Địa chỉ, Hạn tạm trú. (Nút <strong>Thêm nhân viên</strong> giữ nguyên cho bấm để hệ thống bật viền đỏ ở đúng các ô còn thiếu và báo SnackBar tổng hợp).
+          </div>
+        </div>
+
+        <div class="btn-row" style="justify-content:center;">
+          <span class="btn btn-outlined">Xóa form</span>
+          <span class="btn btn-success">Thêm nhân viên</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MÀN HÌNH 4 -->
+    <section id="screen-4" class="screen-card">
+      <div class="screen-header">
+        <h2 class="screen-title">
+          <span class="screen-badge">Màn hình 4</span>
+          Hộp thoại Thêm/Sửa Nhân Viên (Bổ sung ô Địa chỉ * &amp; Cảnh báo từng ô)
+        </h2>
+        <span class="screen-files">Employees.razor · Companies.razor · Students.razor</span>
+      </div>
+      <div class="screen-body">
+        <div class="dialog-frame">
+          <div class="dialog-title">
+            <span>Thêm nhân viên</span>
+            <span style="font-size:12px; color:#64748b;">Đủ 9 trường bắt buộc + Công ty *</span>
+          </div>
+          <div class="dialog-content">
+            <div class="grid">
+              <div class="col-6">
+                <div class="mud-field has-error">
+                  <label class="mud-label">Họ tên <span class="req-star">*</span></label>
+                  <div class="mud-input placeholder">(Trống)</div>
+                  <span class="mud-error-text">Bắt buộc nhập họ tên</span>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="mud-field">
+                  <label class="mud-label">Giới tính <span class="req-star">*</span></label>
+                  <div class="mud-input">Nam ▾</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="mud-field has-error">
+                  <label class="mud-label">Ngày sinh <span class="req-star">*</span></label>
+                  <div class="mud-input placeholder">dd/MM/yyyy</div>
+                  <span class="mud-error-text">Bắt buộc nhập ngày sinh</span>
+                </div>
+              </div>
+
+              <div class="col-4">
+                <div class="mud-field has-error">
+                  <label class="mud-label">Quốc tịch <span class="req-star">*</span></label>
+                  <div class="mud-input placeholder">— Chọn quốc tịch — ▾</div>
+                  <span class="mud-error-text">Bắt buộc chọn quốc tịch</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="mud-field has-error">
+                  <label class="mud-label">Số hộ chiếu <span class="req-star">*</span></label>
+                  <div class="mud-input placeholder">(Trống)</div>
+                  <span class="mud-error-text">Bắt buộc nhập số hộ chiếu</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="mud-field has-error">
+                  <label class="mud-label">Công ty <span class="req-star">*</span></label>
+                  <div class="mud-input placeholder">— Chọn công ty — ▾</div>
+                  <span class="mud-error-text">Bắt buộc chọn công ty</span>
+                </div>
+              </div>
+
+              <div class="col-4">
+                <div class="mud-field has-error">
+                  <label class="mud-label">Nghề nghiệp <span class="req-star">*</span></label>
+                  <div class="mud-input placeholder">— Chọn nghề nghiệp — ▾</div>
+                  <span class="mud-error-text">Bắt buộc chọn nghề nghiệp</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="mud-field has-error">
+                  <label class="mud-label">Hạn tạm trú <span class="req-star">*</span></label>
+                  <div class="mud-input placeholder">dd/MM/yyyy</div>
+                  <span class="mud-error-text">Bắt buộc nhập hạn tạm trú</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="mud-field has-error">
+                  <label class="mud-label">Số Visa <span class="req-star">*</span></label>
+                  <div class="mud-input placeholder">(Trống)</div>
+                  <span class="mud-error-text">Bắt buộc nhập số Visa</span>
+                </div>
+              </div>
+
+              <div class="col-8">
+                <div class="mud-field has-error">
+                  <label class="mud-label">Địa chỉ tạm trú <span class="req-star">*</span> <span class="new-pill">Bổ sung mới vào Dialog</span></label>
+                  <div class="mud-input placeholder">VD: 12 Lê Duẩn, Hải Châu</div>
+                  <span class="mud-error-text">Bắt buộc nhập địa chỉ tạm trú</span>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="mud-field">
+                  <label class="mud-label">Ký hiệu Visa</label>
+                  <div class="mud-input placeholder">VD: DN1, LĐ2...</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mud-alert warning">
+              <span class="mud-alert-icon">⚠</span>
+              <div><strong>Cảnh báo các trường bắt buộc chưa nhập (*):</strong> Họ tên, Ngày sinh, Quốc tịch, Số hộ chiếu, Công ty, Nghề nghiệp, Địa chỉ, Hạn tạm trú, Số Visa.</div>
+            </div>
+          </div>
+          <div class="dialog-actions">
+            <span class="btn btn-text">Hủy</span>
+            <span class="btn btn-primary">Thêm</span>
+          </div>
+        </div>
+
+        <div class="subbox">
+          <p class="subbox-title">Đồng bộ thêm ở Công ty (Companies.razor) &amp; Du học sinh (Students.razor):</p>
+          <div class="grid">
+            <div class="col-4">
+              <div class="mud-field has-error">
+                <label class="mud-label">Tên công ty <span class="req-star">*</span></label>
+                <div class="mud-input placeholder">(Trống)</div>
+                <span class="mud-error-text">Bắt buộc nhập tên công ty</span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="mud-field has-error">
+                <label class="mud-label">Họ tên (Du học sinh) <span class="req-star">*</span></label>
+                <div class="mud-input placeholder">(Trống)</div>
+                <span class="mud-error-text">Bắt buộc nhập họ tên du học sinh</span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="mud-field has-error">
+                <label class="mud-label">Trường <span class="req-star">*</span></label>
+                <div class="mud-input placeholder">(Trống)</div>
+                <span class="mud-error-text">Bắt buộc nhập tên trường</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,26 @@
+@namespace IRM.Components.Pages
+@inherits IRM.Components.Shared.FeatureSection<Admin>
+
+<MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
+                <thead><tr><th>Thời gian</th><th>Session</th><th>File</th><th>Công ty</th><th>+Moi</th><th>~Cap nhat</th><th>Loi</th><th>Trạng thái</th><th>User</th></tr></thead>
+                <tbody>
+                    @foreach (var item in Page._importHistory)
+                    {
+                        <tr>
+                            <td>@item.Time</td>
+                            <td>@item.SessionId</td>
+                            <td>@item.FileName</td>
+                            <td>@item.Company</td>
+                            <td>@item.Added</td>
+                            <td>@item.Updated</td>
+                            <td>@item.Errors</td>
+                            <td>@item.Status</td>
+                            <td>@item.User</td>
+                        </tr>
+                    }
+                    @if (!Page._importHistory.Any())
+                    {
+                        <tr><td colspan="9" style="text-align:center;color:#94a3b8;">Chua co lich su import</td></tr>
+                    }
+                </tbody>
+            </MudSimpleTable>

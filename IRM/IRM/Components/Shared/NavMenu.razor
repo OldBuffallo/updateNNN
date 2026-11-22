@@ -1,0 +1,176 @@
+@namespace IRM.Components.Layout
+@using Microsoft.AspNetCore.Components.Routing
+
+<MudNavMenu Class="irm-nav-menu" Rounded="true" Margin="Margin.Dense" Color="Color.Primary">
+    <!-- ════════════ TỔNG QUAN ════════════ -->
+    <div class="nav-group-header">
+        <span class="nav-section-label">TỔNG QUAN</span>
+    </div>
+
+    <MudNavLink Href="/"
+                Match="NavLinkMatch.All"
+                Icon="@Icons.Material.Outlined.Dashboard"
+                Class="irm-nav-link"
+                ActiveClass="active">
+        <span>Bảng điều khiển</span>
+    </MudNavLink>
+
+    <!-- ════════════ QUẢN LÝ DỮ LIỆU ════════════ -->
+    <div class="nav-group-header">
+        <span class="nav-section-label">HỒ SƠ & DỮ LIỆU</span>
+    </div>
+
+    <MudNavLink Href="/foreign-persons"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Outlined.Badge"
+                Class="irm-nav-link"
+                ActiveClass="active">
+        <span>Hồ sơ Người nước ngoài</span>
+    </MudNavLink>
+
+    <MudNavLink Href="/companies"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Outlined.Business"
+                Class="irm-nav-link"
+                ActiveClass="active">
+        <span>Doanh nghiệp</span>
+    </MudNavLink>
+
+    <MudNavLink Href="/accommodations"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Outlined.Domain"
+                Class="irm-nav-link"
+                ActiveClass="active">
+        <span>Cơ sở lưu trú</span>
+    </MudNavLink>
+
+    <!-- ════════════ GIÁM SÁT & KIỂM TRA ════════════ -->
+    <div class="nav-group-header">
+        <span class="nav-section-label">GIÁM SÁT & KIỂM TRA</span>
+    </div>
+
+    <MudNavLink Href="/inspections"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Outlined.FactCheck"
+                Class="irm-nav-link"
+                ActiveClass="active">
+        <span>Đợt kiểm tra NNN</span>
+    </MudNavLink>
+
+    <!-- ════════════ BÁO CÁO & THỐNG KÊ ════════════ -->
+    <div class="nav-group-header">
+        <span class="nav-section-label">BÁO CÁO & THỐNG KÊ</span>
+    </div>
+
+    <MudNavLink Href="/search"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Outlined.Search"
+                Class="irm-nav-link"
+                ActiveClass="active">
+        <div class="d-flex align-center justify-space-between w-100">
+            <span>Tra cứu toàn cục</span>
+            <span class="nav-key-hint">Ctrl+K</span>
+        </div>
+    </MudNavLink>
+
+    <MudNavLink Href="/reports"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Outlined.Description"
+                Class="irm-nav-link"
+                ActiveClass="active">
+        <span>Báo cáo định kỳ</span>
+    </MudNavLink>
+
+    <MudNavLink Href="/statistics"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Outlined.Analytics"
+                Class="irm-nav-link"
+                ActiveClass="active">
+        <span>Thống kê 54 địa bàn</span>
+    </MudNavLink>
+
+    <MudNavLink Href="/import"
+                Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Outlined.UploadFile"
+                Class="irm-nav-link"
+                ActiveClass="active">
+        <span>Nhập dữ liệu Excel</span>
+    </MudNavLink>
+
+    <!-- ════════════ HỆ THỐNG ════════════ -->
+    <AuthorizeView Roles="ADMIN" Context="adminCtx">
+        <!-- ──── DANH MỤC (collapsible) ──── -->
+        <div class="nav-group-header">
+            <span class="nav-section-label">DANH MỤC</span>
+        </div>
+
+        <MudNavGroup Title="Danh mục hệ thống"
+                     Icon="@Icons.Material.Outlined.FolderOpen"
+                     Class="irm-nav-link"
+                     Expanded="false">
+            <MudNavLink Href="/admin/nationalities"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Outlined.Public"
+                        Class="irm-nav-link"
+                        ActiveClass="active">
+                <span>Quốc tịch</span>
+            </MudNavLink>
+            <MudNavLink Href="/admin/districts"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Outlined.Map"
+                        Class="irm-nav-link"
+                        ActiveClass="active">
+                <span>Quận / Huyện</span>
+            </MudNavLink>
+            <MudNavLink Href="/admin/wards"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Outlined.Place"
+                        Class="irm-nav-link"
+                        ActiveClass="active">
+                <span>Phường / Xã</span>
+            </MudNavLink>
+            <MudNavLink Href="/admin/fields"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Outlined.Category"
+                        Class="irm-nav-link"
+                        ActiveClass="active">
+                <span>Lĩnh vực</span>
+            </MudNavLink>
+            <MudNavLink Href="/admin/careers"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Outlined.WorkOutline"
+                        Class="irm-nav-link"
+                        ActiveClass="active">
+                <span>Ngành nghề</span>
+            </MudNavLink>
+            <MudNavLink Href="/admin/admin-units"
+                        Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Outlined.AccountBalance"
+                        Class="irm-nav-link"
+                        ActiveClass="active">
+                <span>Địa bàn hành chính</span>
+            </MudNavLink>
+        </MudNavGroup>
+
+        <!-- ──── QUẢN TRỊ ──── -->
+        <div class="nav-group-header">
+            <span class="nav-section-label">HỆ THỐNG</span>
+        </div>
+
+        <MudNavLink Href="/admin"
+                    Match="NavLinkMatch.All"
+                    Icon="@Icons.Material.Outlined.Settings"
+                    Class="irm-nav-link"
+                    ActiveClass="active">
+            <span>Quản trị hệ thống</span>
+        </MudNavLink>
+
+        <MudNavLink Href="/admin/legacy-sync"
+                    Match="NavLinkMatch.All"
+                    Icon="@Icons.Material.Outlined.Storage"
+                    Class="irm-nav-link"
+                    ActiveClass="active">
+            <span>Đồng bộ DB cũ</span>
+        </MudNavLink>
+    </AuthorizeView>
+</MudNavMenu>

@@ -1,0 +1,1114 @@
+﻿{
+    "organizedOn":  "2026-11-10",
+    "timeZone":  "Asia/Bangkok",
+    "deliveryRoot":  "../BAN-GIAO",
+    "sourceHeadAtOrganization":  "65d129dc6d03965fcb750220c0a1a4ecbbd180af",
+    "installerSourceCommit":  null,
+    "installerSourceNote":  "The existing R4 installer predates the committed refactor. Its original source commit was not recorded; do not label the installer with the new source commit.",
+    "fileCount":  183,
+    "moveCount":  14,
+    "verifiedBy":  "Atomic same-volume moves; SHA-256 and byte length verified at the consolidated paths. Original release checksum files are preserved.",
+    "pendingOriginalRemoval":  [
+                                   "outputs\\irm-import-fixed-20261110\\IRM-MAU-IMPORT-TEST-DA-SUA.xlsx"
+                               ],
+    "files":  [
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "bytes":  803,
+                      "sha256":  "72729653BE2F8AD4A399E3B1D1B730A90975DA80D4FBF1E5930CF35C4D8817CB"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "bytes":  13535,
+                      "sha256":  "171F41F39E373814B135BF7EC9F7DA61773534EF1FCECD5E85C5C7FF834BB963"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.txt",
+                      "bytes":  12251,
+                      "sha256":  "37E0A8386D8007093838EFC0A67785E43A37EFAF4740651B96A3E46457C0D34C"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST.xlsx",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST.xlsx",
+                      "bytes":  7703,
+                      "sha256":  "EC0E39DCC64F297F0E18EAED0830B927521C284E02250BB7ACFD31CE455C9FB7"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R4-DARK-UNSIGNED-TEST.exe",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R4-DARK-UNSIGNED-TEST.exe",
+                      "bytes":  789648104,
+                      "sha256":  "5B591C720C4E99D6FDDA647C3955F87AB16806825B699F8F9B1399DC1C0B0BD3"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R4-DARK-UNSIGNED-TEST.exe.sha256",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R4-DARK-UNSIGNED-TEST.exe.sha256",
+                      "bytes":  130,
+                      "sha256":  "0DD768E2DEC38FC917DBA9D51EE0DD0F52A38E1AAB1A337140A49CA5457FAD50"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "bytes":  715,
+                      "sha256":  "21E248709F987369C121343E90EF71FBAF70ECFAA6EE225698A0B56B009879FE"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-DARK-R4-UNSIGNED-TEST/VERIFICATION.json",
+                      "path":  "02-LUU-TRU/v1.0.2-DARK-R4-UNSIGNED-TEST/VERIFICATION.json",
+                      "bytes":  687,
+                      "sha256":  "3A7658E392B4CD891AE027BFF58418891C54CF60BF6B9952F75F1933C1F64BC8"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO-IRM-v1.0.2_2026-09-28/00-BAT-DAU-TU-DAY.txt",
+                      "path":  "02-LUU-TRU/BAN-GIAO-IRM-v1.0.2_2026-09-28/00-BAT-DAU-TU-DAY.txt",
+                      "bytes":  817,
+                      "sha256":  "CA574C7DAE150B4FCA46D891F05A49610C496C56053A6AB3EECCE51B62BE6794"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO-IRM-v1.0.2_2026-09-28/01-CAI-DAT-OFFLINE/HUONG-DAN-CAI-DAT.txt",
+                      "path":  "02-LUU-TRU/BAN-GIAO-IRM-v1.0.2_2026-09-28/01-CAI-DAT-OFFLINE/HUONG-DAN-CAI-DAT.txt",
+                      "bytes":  1678,
+                      "sha256":  "715BBD8F2026B151EF3C709A6FFBC2EBBA3DAA9CFA718A8436F286BC5A5BA054"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO-IRM-v1.0.2_2026-09-28/02-SU-DUNG-ONLINE/HUONG-DAN-TRUY-CAP.txt",
+                      "path":  "02-LUU-TRU/BAN-GIAO-IRM-v1.0.2_2026-09-28/02-SU-DUNG-ONLINE/HUONG-DAN-TRUY-CAP.txt",
+                      "bytes":  751,
+                      "sha256":  "42A6847AB0BEA3DB2D106F036D67572E0C0C05E90DC5B257951C509025A57C7E"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO-IRM-v1.0.2_2026-09-28/03-TAI-LIEU-KY-THUAT/INSTALLATION-v1.0.2.md",
+                      "path":  "02-LUU-TRU/BAN-GIAO-IRM-v1.0.2_2026-09-28/03-TAI-LIEU-KY-THUAT/INSTALLATION-v1.0.2.md",
+                      "bytes":  2893,
+                      "sha256":  "49C133B8CB6AB3EA5043A5F6B24E63B20D89233328ED5438514FAFFDFF4467F9"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO-IRM-v1.0.2_2026-09-28/03-TAI-LIEU-KY-THUAT/release-manifest.json",
+                      "path":  "02-LUU-TRU/BAN-GIAO-IRM-v1.0.2_2026-09-28/03-TAI-LIEU-KY-THUAT/release-manifest.json",
+                      "bytes":  1306,
+                      "sha256":  "425D52F9927849A977446B7E167DCE11CB2788D3F5ED2E430F71FC5CFB765010"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO-IRM-v1.0.2_2026-09-28/03-TAI-LIEU-KY-THUAT/THONG-TIN-PHIEN-BAN.txt",
+                      "path":  "02-LUU-TRU/BAN-GIAO-IRM-v1.0.2_2026-09-28/03-TAI-LIEU-KY-THUAT/THONG-TIN-PHIEN-BAN.txt",
+                      "bytes":  1024,
+                      "sha256":  "D31F8A819B09FD792BB36019D897FBB8C67EF28E4E12CEDFB0521F2A8CB18609"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO-IRM-v1.0.2_2026-09-28/SHA256SUMS.txt",
+                      "path":  "02-LUU-TRU/BAN-GIAO-IRM-v1.0.2_2026-09-28/SHA256SUMS.txt",
+                      "bytes":  891,
+                      "sha256":  "F3A3EBDC7AC418EC79257AABD600E9989AF6E2E9F14523D531D54C6E09AFDBF7"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/demo.zip",
+                      "path":  "02-LUU-TRU/goi-nen/demo.zip",
+                      "bytes":  17190,
+                      "sha256":  "436CBBF9D526930F86E89C569082D6333E82FEC0D5C3CD777875ED80D6C2B2D9"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/file cài bài giao.rar",
+                      "path":  "02-LUU-TRU/goi-nen/file cài bài giao.rar",
+                      "bytes":  789424670,
+                      "sha256":  "F6577C1E9E0C37CE747642A25C2E178819511AEF29AD139C5F6325852D5D8142"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/IRM-production-deploy.zip",
+                      "path":  "02-LUU-TRU/goi-nen/IRM-production-deploy.zip",
+                      "bytes":  56396911,
+                      "sha256":  "D7AA3905060A9B0B4B428CCB654808AF16642954629AFBE88E632E46EA0BF238"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/IRM-v1.0.2-ubuntu-installer.zip",
+                      "path":  "02-LUU-TRU/goi-nen/IRM-v1.0.2-ubuntu-installer.zip",
+                      "bytes":  102177121,
+                      "sha256":  "093063E130DABC3841AE0C72FE0F1392A786EB2D650100EC40504AE30815C066"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/IRM-v2.0-deploy.zip",
+                      "path":  "02-LUU-TRU/goi-nen/IRM-v2.0-deploy.zip",
+                      "bytes":  24720539,
+                      "sha256":  "1B562457ED95932628219F3F176A7FDE8CF0CD30E7D6F03B5F80B45A4A243EA8"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master.zip",
+                      "path":  "02-LUU-TRU/ma-nguon-goc/immigration-reportmanager-master.zip",
+                      "bytes":  12989445,
+                      "sha256":  "0B1116A882B659CE122BCF64B57D71B95A668490DD4F37C64BC9717815102814"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-ENV-R3-UNSIGNED-TEST/bàn giao phần mềm quản lý người nước ngoài.rar",
+                      "path":  "02-LUU-TRU/v1.0.2-ENV-R3-UNSIGNED-TEST/bàn giao phần mềm quản lý người nước ngoài.rar",
+                      "bytes":  789429569,
+                      "sha256":  "F4C45ED1478994906FE4E8E6CFE879B6D7847E76BAB6A8C99824161189BBD318"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-ENV-R3-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "path":  "02-LUU-TRU/v1.0.2-ENV-R3-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "bytes":  13382,
+                      "sha256":  "7ED537E24891318027EB03FA123FD518DF9B36125CFF21FE43E03929F0CD568B"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-ENV-R3-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-ENV-R3-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.txt",
+                      "bytes":  12098,
+                      "sha256":  "B112AC9D405A37CFC691A007747CAB4621E1608E8283E1F1C4EBDE4B380650DA"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-ENV-R3-UNSIGNED-TEST/HUONG-DAN-TEST.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-ENV-R3-UNSIGNED-TEST/HUONG-DAN-TEST.txt",
+                      "bytes":  833,
+                      "sha256":  "370DFA8EC6C985EF087E67552D8E368EE8086A3F98540AA3BB6429F70B5A3BC5"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-ENV-R3-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST.xlsx",
+                      "path":  "02-LUU-TRU/v1.0.2-ENV-R3-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST.xlsx",
+                      "bytes":  7703,
+                      "sha256":  "EC0E39DCC64F297F0E18EAED0830B927521C284E02250BB7ACFD31CE455C9FB7"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-ENV-R3-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R3-ENV-UNSIGNED-TEST.exe",
+                      "path":  "02-LUU-TRU/v1.0.2-ENV-R3-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R3-ENV-UNSIGNED-TEST.exe",
+                      "bytes":  789417762,
+                      "sha256":  "99333703656CADC5917BB93254744BB56BA91E20CD36C6810A4174333F749351"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-ENV-R3-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R3-ENV-UNSIGNED-TEST.exe.sha256",
+                      "path":  "02-LUU-TRU/v1.0.2-ENV-R3-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R3-ENV-UNSIGNED-TEST.exe.sha256",
+                      "bytes":  129,
+                      "sha256":  "67CBE9167BC7C3F750F5A7C985E0669F2CAC7A471104BC3D95219839E7F01BB1"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-ENV-R3-UNSIGNED-TEST/VERIFICATION.json",
+                      "path":  "02-LUU-TRU/v1.0.2-ENV-R3-UNSIGNED-TEST/VERIFICATION.json",
+                      "bytes":  449,
+                      "sha256":  "EF177D4CED791F26FE7A201A7287B7B1F007DD49488C1C06BE644824C9C79D88"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-UNSIGNED-TEST-r2/IRM-v1.0.2-windows-x64-offline-setup-R2-UNSIGNED-TEST.exe",
+                      "path":  "02-LUU-TRU/v1.0.2-UNSIGNED-TEST-r2/IRM-v1.0.2-windows-x64-offline-setup-R2-UNSIGNED-TEST.exe",
+                      "bytes":  789424062,
+                      "sha256":  "3045BC13AFE295ABA8D159D8FFDC2699AA0BA4AD652DDE544147DE463BC0E029"
+                  },
+                  {
+                      "originalPath":  "immigration-reportmanager-master/build-output/v1.0.2-UNSIGNED-TEST-r2/IRM-v1.0.2-windows-x64-offline-setup-R2-UNSIGNED-TEST.exe.sha256",
+                      "path":  "02-LUU-TRU/v1.0.2-UNSIGNED-TEST-r2/IRM-v1.0.2-windows-x64-offline-setup-R2-UNSIGNED-TEST.exe.sha256",
+                      "bytes":  124,
+                      "sha256":  "CFE1164D5D68BDB3A3C8B6C96926C660FAE97CEDAA5EAF97B653E3CE267320FE"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-fixed-20261110/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "path":  "03-DU-LIEU-TEST/2026-11-10/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "bytes":  7696,
+                      "sha256":  "5DC0518B9FA3086253B4BC7372D849C5A987409B858368E477084567DFBEE3CA"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-fixed-20261110/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx.inspect.ndjson",
+                      "path":  "05-HO-TRO/irm-import-fixed-20261110/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx.inspect.ndjson",
+                      "bytes":  66543,
+                      "sha256":  "5D8E63C4CECE5A20D8ACDB055A4771305C7B72772DF22F45052CFCA480FDB81B"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/build_irm_import_test.mjs",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/build_irm_import_test.mjs",
+                      "bytes":  9785,
+                      "sha256":  "D7BF0924404FAB977C559C057415D7B3775CA38E507729A7FC08962E5DA27932"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/IRM_Mau_Import_Test.xlsx",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/IRM_Mau_Import_Test.xlsx",
+                      "bytes":  7623,
+                      "sha256":  "BCD71475ED969610C5B4A8C8AA08B3FD272C48B6BC70058680A4AC07FEA1DEFF"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/IRM_Mau_Import_Test.xlsx.inspect.ndjson",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/IRM_Mau_Import_Test.xlsx.inspect.ndjson",
+                      "bytes":  139085,
+                      "sha256":  "E05D94431DC3230898025CEF31C73B746844C511C0D42A762FB846288CFDD3F0"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/outputs/irm-import-test-20260929/IRM_Mau_Import_Test.xlsx",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/outputs/irm-import-test-20260929/IRM_Mau_Import_Test.xlsx",
+                      "bytes":  7625,
+                      "sha256":  "E49E9B5F7E798C40B20FB6D3C1BA4630C7736D9966239DE70616FB57D357AC09"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/outputs/irm-import-test-20260929/IRM_Mau_Import_Test.xlsx.inspect.ndjson",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/outputs/irm-import-test-20260929/IRM_Mau_Import_Test.xlsx.inspect.ndjson",
+                      "bytes":  139085,
+                      "sha256":  "549D3E58585BC77EC58ADD5F3DACCE037153BFD2F7324412C876C0AF616E262C"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/outputs/irm-import-test-20260929/preview_data.png",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/outputs/irm-import-test-20260929/preview_data.png",
+                      "bytes":  96836,
+                      "sha256":  "4D4F8D4E07511710C619087686C1CF653A683D55E93728ECF4EDDA5C10F7CF00"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/outputs/irm-import-test-20260929/preview_guide.png",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/outputs/irm-import-test-20260929/preview_guide.png",
+                      "bytes":  146758,
+                      "sha256":  "81EEB9D444866203591C60FA91B1CECD35575CF3B48C86E3147212722D078B2E"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/preview_data.png",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/preview_data.png",
+                      "bytes":  96836,
+                      "sha256":  "4D4F8D4E07511710C619087686C1CF653A683D55E93728ECF4EDDA5C10F7CF00"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/preview_guide.png",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/preview_guide.png",
+                      "bytes":  146758,
+                      "sha256":  "81EEB9D444866203591C60FA91B1CECD35575CF3B48C86E3147212722D078B2E"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/appsettings.Development.json",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/appsettings.Development.json",
+                      "bytes":  292,
+                      "sha256":  "B4823AFB066B0CE2C672D52148FECD77040B95965F46DEA9FB5722F305B70B97"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/appsettings.json",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/appsettings.json",
+                      "bytes":  449,
+                      "sha256":  "ECCDE9F69F3AEFD97D64A6819AC3C796F24849C42210B1462F7C1E87B334CADE"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/appsettings.Production.json",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/appsettings.Production.json",
+                      "bytes":  443,
+                      "sha256":  "488D694F8E6B997EC3B27AD8E0C51F80037F8E9FAE261F30D7DAF430A7F7BCB5"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Azure.Core.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Azure.Core.dll",
+                      "bytes":  423456,
+                      "sha256":  "619CDA55095BB19F09382C0A07BC16517473CB0ECF224DAE7E52537D778AB022"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Azure.Identity.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Azure.Identity.dll",
+                      "bytes":  350768,
+                      "sha256":  "4C2BABB3CEBDE608691D611F5C037CF73E833FE60505FF8D233175B3379BCDDC"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/ClosedXML.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/ClosedXML.dll",
+                      "bytes":  1622528,
+                      "sha256":  "EE486CD320CD25DE70E9C210B437F4038FB6BF6EFEF411FD118F99D5C9A14806"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/ClosedXML.Parser.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/ClosedXML.Parser.dll",
+                      "bytes":  188416,
+                      "sha256":  "D63C63B69EE1EEF7DCBA04084B36564BF2D3FC7897C63365D4AEA1659D3980F8"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/DocumentFormat.OpenXml.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/DocumentFormat.OpenXml.dll",
+                      "bytes":  6349424,
+                      "sha256":  "5A0C237A7467DDE85BCE402D124B7A07777531607837EB59EE62A9A79905FF43"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/DocumentFormat.OpenXml.Framework.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/DocumentFormat.OpenXml.Framework.dll",
+                      "bytes":  471152,
+                      "sha256":  "DDAE1F34E78971A731193E459C3AED54314F93A54D51C2457E12CCC169BF5663"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/ExcelNumberFormat.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/ExcelNumberFormat.dll",
+                      "bytes":  30720,
+                      "sha256":  "D7C45B8E4E1027831E2FC8CDF941FAF51D28A66FEACFCAAA737DA73262E7B507"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/IRM.deps.json",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/IRM.deps.json",
+                      "bytes":  92551,
+                      "sha256":  "4A66361CA28B08460BE72C93BA5DFE62E80D83DD5651C96358CA5C6D5302746F"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/IRM.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/IRM.dll",
+                      "bytes":  1662464,
+                      "sha256":  "115BC7B24ADB023F349985783E46F41341FC8C685C87D4635196FA352EC4D822"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/IRM.exe",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/IRM.exe",
+                      "bytes":  151552,
+                      "sha256":  "4933FF7A11032CCC5504BD74DFBBE87A93BC2D25D109501B07F4FBAE66BFD5E2"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/IRM.runtimeconfig.json",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/IRM.runtimeconfig.json",
+                      "bytes":  485,
+                      "sha256":  "06AEEEDB647D4B90BC21D9664520D619C4CE4FBCAA0D35D0E84E699CCE6D1DBF"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/IRM.staticwebassets.runtime.json",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/IRM.staticwebassets.runtime.json",
+                      "bytes":  1346,
+                      "sha256":  "15C624433CF2A9BF61AF92B167BF2C87688C8D2C8F96D7BC25F7B0E8DD4908F1"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.AspNetCore.Authorization.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.AspNetCore.Authorization.dll",
+                      "bytes":  51496,
+                      "sha256":  "39BBC61A63C0209245965FCA4C78C1D6781219349354C05B128742C7D2232F24"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.AspNetCore.Components.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.AspNetCore.Components.dll",
+                      "bytes":  334096,
+                      "sha256":  "B22E39031A6DE2698CC2322F55136F5D079C805CBC9555324E3FAFC01A4D4CF7"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Forms.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Forms.dll",
+                      "bytes":  45840,
+                      "sha256":  "D3870913148B39281E25746DB7E670FB76B1C5BA531ACAB1BB00B1D599634E08"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Web.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.AspNetCore.Components.Web.dll",
+                      "bytes":  174352,
+                      "sha256":  "F9E210D44F96395646436A36BCBC7EC13B184F2DBE06383414AAA0313D209019"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.AspNetCore.Metadata.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.AspNetCore.Metadata.dll",
+                      "bytes":  16160,
+                      "sha256":  "751DAF714E8D3550BE5B5D2C04B143B74DAF410335456A0133AA8E0C27CB9CF2"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Bcl.AsyncInterfaces.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Bcl.AsyncInterfaces.dll",
+                      "bytes":  14720,
+                      "sha256":  "11C0E8FC6419910ACE4F55DDD2330F1373704F996C32AE4336C3F11D589D2C34"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Data.SqlClient.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Data.SqlClient.dll",
+                      "bytes":  276128,
+                      "sha256":  "0B8BDA81D16FECFACFC73893F367241B00FBDDC3B63F76B74CC6012375436B45"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll",
+                      "bytes":  34616,
+                      "sha256":  "2F6FE3A60CD9883FD70017ED8301D9956D95872548D2ACF20BDA742054263516"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.dll",
+                      "bytes":  2535224,
+                      "sha256":  "DB60046B988757405992523FB207DD36A51A43D993E0500BECD04AD5E99EFC92"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.Relational.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.Relational.dll",
+                      "bytes":  1995616,
+                      "sha256":  "2B1C20AB918EE94F6CC19F2F5E0FF9D95B6C32636E30B62DD6B7656D8EDEFF5D"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.SqlServer.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.SqlServer.dll",
+                      "bytes":  548664,
+                      "sha256":  "C1ED6F3606989832E27AE384E3DC5B0D8B6DED02C6CA2718005D449ED17C3A7F"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Caching.Memory.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Caching.Memory.dll",
+                      "bytes":  45832,
+                      "sha256":  "A6BC869C530A2ED7573575DD61E40F0A1079EF6074251AFE9701F927C5355CA8"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Binder.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Binder.dll",
+                      "bytes":  42784,
+                      "sha256":  "BEAC12F7BBA4E22CDA2ACD9DDFE944A4ED56ABEC414E084EDD147BD5DAD3C032"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Configuration.FileExtensions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Configuration.FileExtensions.dll",
+                      "bytes":  27936,
+                      "sha256":  "ACF5896D0F34FA1A43295797584B3805C24743CE25EE87538EEEC83B012BBF4F"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Json.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Json.dll",
+                      "bytes":  26920,
+                      "sha256":  "15E1262880F263806A2808D750688739662323B20CCD9835222FFF8C30899A4A"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Configuration.UserSecrets.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Configuration.UserSecrets.dll",
+                      "bytes":  25384,
+                      "sha256":  "206CAD6A76676E1FE74E12CEA23D92AA7AE3EB06217315617F6F267AF1383E58"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+                      "bytes":  63768,
+                      "sha256":  "67FA4325000DB017DC0C35829B416F024F042D24EFB868BCF17A895EE6500A93"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.dll",
+                      "bytes":  92952,
+                      "sha256":  "158761CE778E799949F3A3060C461B1055BB35F1F5A65EFF0E42397849F09ECD"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Diagnostics.Abstractions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Diagnostics.Abstractions.dll",
+                      "bytes":  30480,
+                      "sha256":  "9864DBCFDBFE395BBD64DEEC7568FDAF0CBC3850F0CD8F53E7359189BD158082"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Diagnostics.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Diagnostics.dll",
+                      "bytes":  35592,
+                      "sha256":  "31E08B4E0018EE136D65DFCCA8F655A1A74CF8841E6029044C99B2E75D5F59F0"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Hosting.Abstractions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Hosting.Abstractions.dll",
+                      "bytes":  51472,
+                      "sha256":  "27F074952005F74BA37FC62756690255E5F743FF3F7426FCDEB65A0D6EC9FF77"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Hosting.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Hosting.dll",
+                      "bytes":  72488,
+                      "sha256":  "22CE5576ADEC386F12CC92DE15B38C85405995B4B0E6F610A00C918A72433F62"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Hosting.Systemd.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Hosting.Systemd.dll",
+                      "bytes":  25248,
+                      "sha256":  "8452B6B513467A2112C921EDFAD1AB22A6BBC3F86F121954F71FC5D80A72A530"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Hosting.WindowsServices.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Hosting.WindowsServices.dll",
+                      "bytes":  29872,
+                      "sha256":  "FF86F44F29D91DF5A23CED211F19D20833E689EAE30B2CFE023DAD191494FBA2"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Localization.Abstractions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Localization.Abstractions.dll",
+                      "bytes":  19752,
+                      "sha256":  "C869A4D9FEDCC371115D432E8292D17BD3A9239E38876DEA25B3630151736996"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Localization.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Localization.dll",
+                      "bytes":  32040,
+                      "sha256":  "E77EEA6E512DAF8B22B6B2344DA7F4441BB4339D1545556B2146155DDB51E787"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll",
+                      "bytes":  65320,
+                      "sha256":  "45C22524218541717E4A0ADE36847C1CDA4921F5945B4975A1C78DDFE023D0B1"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.Configuration.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.Configuration.dll",
+                      "bytes":  27912,
+                      "sha256":  "372DCB44F6F9243346CB82DB99BB01F27A0F3C8019902481BD45D65C311A732D"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.Console.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.Console.dll",
+                      "bytes":  71464,
+                      "sha256":  "D42DA097BB5EF92A3EB9889726E5C231BB5D0D4CA7CA7132ED944514D52BEC01"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.Debug.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.Debug.dll",
+                      "bytes":  20248,
+                      "sha256":  "3B1DC1ADA5BFEB19FE4BA5225DB9C9950DCA250FB2DAAAC259B537C5D0894A65"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.dll",
+                      "bytes":  50976,
+                      "sha256":  "B2CFBA2E05EE89A91E9BC9CF112468A5F4FA05D1A77EA81C131EA656F3D133C2"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.EventLog.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.EventLog.dll",
+                      "bytes":  25760,
+                      "sha256":  "4913C4D4D3837176BCB830A8A76402873ADA8C35050A3A93B29BE092EFDDB335"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.EventSource.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Logging.EventSource.dll",
+                      "bytes":  34568,
+                      "sha256":  "2C043EA968ECAEFD7B935255A8DB84D5666FB28A791C67D3555A611BC0C8B83C"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Options.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Extensions.Options.dll",
+                      "bytes":  64776,
+                      "sha256":  "5E01894CBC0661BACB8CA8F485A40D5EE4E02F28FEF58007668A0276431B4693"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Identity.Client.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Identity.Client.dll",
+                      "bytes":  1046576,
+                      "sha256":  "181623347707574F8D3577FD1857F2E30182C310B29866EDB8C3BCC4266D6013"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Identity.Client.Extensions.Msal.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Identity.Client.Extensions.Msal.dll",
+                      "bytes":  66592,
+                      "sha256":  "C6FFB3B19D6EE6F9C4E430B28FEB009BE5F91714F6175C74C6BA8409B5634F4F"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.Abstractions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.Abstractions.dll",
+                      "bytes":  18968,
+                      "sha256":  "F4694D23F05CC0263ABBCB536D132E243BC9C175AE642387FA98652B880A4BE0"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.JsonWebTokens.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.JsonWebTokens.dll",
+                      "bytes":  112576,
+                      "sha256":  "58277455122589B39C20E94F403FCA7D3ABCF5488BD9D8702AC75D03770F49F8"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.Logging.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.Logging.dll",
+                      "bytes":  36792,
+                      "sha256":  "5DE12F537FA96EC3D47E1DABCF348807DA1400F0E0F5654C4B6903310D691C9A"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.dll",
+                      "bytes":  39864,
+                      "sha256":  "AC1F9879B7077A6FA9893DAB92CD7AF7B20F2F761A983941D2D184912B826908"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll",
+                      "bytes":  114104,
+                      "sha256":  "034F43FEC9CA10FF7D29640B2DA7DD218850585827EDAABD9737FAE4AF582520"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.Tokens.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.IdentityModel.Tokens.dll",
+                      "bytes":  993312,
+                      "sha256":  "929DD15F4A58930F21EC9EB95600775348EE63A059F6547A748607EDE7521A4C"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.JSInterop.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.JSInterop.dll",
+                      "bytes":  66336,
+                      "sha256":  "8F0C3BDB5F20D9611933AF992DD7F1BE2545CDBB26750A57751DB5D47E068354"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.SqlServer.Server.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.SqlServer.Server.dll",
+                      "bytes":  23976,
+                      "sha256":  "A9DCA1B42BC875F966B78B2C0880E62B838F0ED6567166D7F1F07AE4B76EC4BF"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Win32.SystemEvents.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/Microsoft.Win32.SystemEvents.dll",
+                      "bytes":  26224,
+                      "sha256":  "CA495BF6C86B7F092D624928101985A941532D149DCD8ACFEA170F8A53BE8850"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/MudBlazor.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/MudBlazor.dll",
+                      "bytes":  10161664,
+                      "sha256":  "E05EF5F3CC5F7BD431B625ED889EE889B379992E71094F8DD59E1401724C8517"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/RBush.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/RBush.dll",
+                      "bytes":  34304,
+                      "sha256":  "BEC6872C8B012C7940D1E13CE4B2B8287DFA7EADF330339016F52935F39C3302"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/unix/lib/net6.0/Microsoft.Data.SqlClient.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/unix/lib/net6.0/Microsoft.Data.SqlClient.dll",
+                      "bytes":  1561208,
+                      "sha256":  "4E7F65622F34F4D9DD1908BC2B9269D0934B1B5F0B671609C6E0F0801F375288"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/unix/lib/net6.0/System.Drawing.Common.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/unix/lib/net6.0/System.Drawing.Common.dll",
+                      "bytes":  427112,
+                      "sha256":  "89EA595CCB1FD1384480C1E30BD487C92AF5D06D3B06F295323EFF601ACD9019"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/Microsoft.Data.SqlClient.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/Microsoft.Data.SqlClient.dll",
+                      "bytes":  1645176,
+                      "sha256":  "DB6EBCCF33FDF12EDD30BCB2A211515D2EECA7EE69BBBD8C137E6C2BCFCABE58"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/Microsoft.Win32.SystemEvents.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/Microsoft.Win32.SystemEvents.dll",
+                      "bytes":  53352,
+                      "sha256":  "142CCE4ED8AC9DA22D69C38A6F22738ABFB22090DC9313E8B58E6F91978E89AF"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Drawing.Common.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Drawing.Common.dll",
+                      "bytes":  454248,
+                      "sha256":  "4D3001697DF50CCA54F32ED2DBBD1F3F415B48D5D756B1BF9500A43AE9B68DA0"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Runtime.Caching.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Runtime.Caching.dll",
+                      "bytes":  91240,
+                      "sha256":  "2CA88A05EA536C3B9507F52378AAA69B2E67DD3C4DAD2FA36426245818F6CC77"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Security.Cryptography.ProtectedData.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Security.Cryptography.ProtectedData.dll",
+                      "bytes":  33904,
+                      "sha256":  "104CDC6D20406A144ABD373ED297EF803217C15012A0F22CACF6C676421D53EE"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Windows.Extensions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Windows.Extensions.dll",
+                      "bytes":  43112,
+                      "sha256":  "E72863F75A5ADB5697158F16B00369AD3A95710235647626675A5C070F10ECD9"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net8.0/System.Diagnostics.EventLog.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net8.0/System.Diagnostics.EventLog.dll",
+                      "bytes":  172704,
+                      "sha256":  "8343020E3752DC8FAE7598816570AA30B041F835412A76DAC7F65B229ED9532B"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net8.0/System.ServiceProcess.ServiceController.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win/lib/net8.0/System.ServiceProcess.ServiceController.dll",
+                      "bytes":  87728,
+                      "sha256":  "46328AD334942A6F2B0FD331EE632F06C51EEFB2A7BA18FFE264513847E9C3BD"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win-arm/native/Microsoft.Data.SqlClient.SNI.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win-arm/native/Microsoft.Data.SqlClient.SNI.dll",
+                      "bytes":  440368,
+                      "sha256":  "040F5F4E955DAB5E5C47DA53CBCC61AF20C6621E198104F1959AA847C99F56D7"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win-arm64/native/Microsoft.Data.SqlClient.SNI.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win-arm64/native/Microsoft.Data.SqlClient.SNI.dll",
+                      "bytes":  549936,
+                      "sha256":  "F85BDD8AC148B89E42851C4A808FB3C94338FB520F72CD9F6F61168799C8F86F"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win-x64/native/Microsoft.Data.SqlClient.SNI.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win-x64/native/Microsoft.Data.SqlClient.SNI.dll",
+                      "bytes":  564784,
+                      "sha256":  "04F90F27EF907154649722BEF5A026E33E1FFB4E79D279C22B06CB7E90B45A22"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win-x86/native/Microsoft.Data.SqlClient.SNI.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/runtimes/win-x86/native/Microsoft.Data.SqlClient.SNI.dll",
+                      "bytes":  475680,
+                      "sha256":  "E86B856F3327DCBBA2205FB041B98FF738B56B439B4159942D12D2128FE5CB2D"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/SixLabors.Fonts.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/SixLabors.Fonts.dll",
+                      "bytes":  1135616,
+                      "sha256":  "E1E2F107E7C78FB859F1B23383107A125ACD8B3A7470140850DAA6F6F6C45D9F"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.ClientModel.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.ClientModel.dll",
+                      "bytes":  28608,
+                      "sha256":  "A06523028979F420ABC209BE62A06B3038289932A9942B1AD3CEE52AF2CDBC0A"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Configuration.ConfigurationManager.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Configuration.ConfigurationManager.dll",
+                      "bytes":  396424,
+                      "sha256":  "D274BDD71F75F5005FCAEC028921F71D89CB6D622022D74D2E07897A3A1D141A"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Diagnostics.EventLog.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Diagnostics.EventLog.dll",
+                      "bytes":  51992,
+                      "sha256":  "3F8064E2499F13A8948AD2DA0C6040D12683A9A90AAAB786DBD6B653F17AC9CC"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Drawing.Common.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Drawing.Common.dll",
+                      "bytes":  175216,
+                      "sha256":  "98D07E6B1E7D3641A8608A360B3DC273FE8A0F78926B6E1E5F679A7A074D491F"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.IdentityModel.Tokens.Jwt.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.IdentityModel.Tokens.Jwt.dll",
+                      "bytes":  77344,
+                      "sha256":  "177D4C2D2A5891EF834C46990AA76B81ED7A198F70D78229F7374C0706BA0166"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.IO.Packaging.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.IO.Packaging.dll",
+                      "bytes":  142136,
+                      "sha256":  "12DDC8BFF279FAD856551A74894DC52B80FA437D5D2B32722E70AE6899217B7C"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Memory.Data.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Memory.Data.dll",
+                      "bytes":  21368,
+                      "sha256":  "293CA5D86358FB2CE00DA02C63EEFCB344689FC0C636B61C97C3F1B15A80AA51"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Runtime.Caching.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Runtime.Caching.dll",
+                      "bytes":  89200,
+                      "sha256":  "77C77CE3B1FC7D098765AF31F19195522E2C675F63248B699F64441D299F3EAD"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Security.Cryptography.ProtectedData.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Security.Cryptography.ProtectedData.dll",
+                      "bytes":  20592,
+                      "sha256":  "D186453EEBBA21E19A90E4FEA16C11C3DF59ED9610201C5A3C6D636B9864D840"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Security.Permissions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Security.Permissions.dll",
+                      "bytes":  104048,
+                      "sha256":  "62068C0F6BFFB0EB4EC1C6A45A16784CAEE7565F6C5404D8342089F4FF4B3712"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.ServiceProcess.ServiceController.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.ServiceProcess.ServiceController.dll",
+                      "bytes":  33440,
+                      "sha256":  "F6F48669A0138EEF60D87B7653CD281932034368A28928BCDB080C4AA20C9617"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Windows.Extensions.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/System.Windows.Extensions.dll",
+                      "bytes":  25712,
+                      "sha256":  "810E8767D02D70AF173BC33CC1048FF31A7DF015FD46CF423A309CC89C50DC69"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/validate_irm_import.deps.json",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/validate_irm_import.deps.json",
+                      "bytes":  72980,
+                      "sha256":  "0F622647C62EEE5A46CDE498919AFCD099EAC6C8B8199E6348114A88FE96FF43"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/validate_irm_import.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/validate_irm_import.dll",
+                      "bytes":  9728,
+                      "sha256":  "70993841C2975EA82080E99796209C78272A60CF3FD6E23B679EC2C21E2E004A"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/validate_irm_import.exe",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/validate_irm_import.exe",
+                      "bytes":  151552,
+                      "sha256":  "2B7CF0A3D41151C6B17F8905DE24687A3378540736BD3DB1EF1016E10D64773A"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/validate_irm_import.pdb",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/validate_irm_import.pdb",
+                      "bytes":  23000,
+                      "sha256":  "2154463744A796E1E957D4F9EDEBD8A287AD8742F44FCE26DCB7FEFFCF7C422D"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/validate_irm_import.runtimeconfig.json",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/bin/Debug/net8.0/validate_irm_import.runtimeconfig.json",
+                      "bytes":  452,
+                      "sha256":  "72EBD91A0FF778E9DBC2B122AA764004F300284D1AA76EC5172EB0A00FAD3F0D"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/.NETCoreApp,Version=v8.0.AssemblyAttributes.cs",
+                      "bytes":  198,
+                      "sha256":  "F7A5D9789C863625E139FF99E1113A503830F6B85A88F6129916DF83AC76B49E"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/apphost.exe",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/apphost.exe",
+                      "bytes":  151552,
+                      "sha256":  "2B7CF0A3D41151C6B17F8905DE24687A3378540736BD3DB1EF1016E10D64773A"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/ref/validate_irm_import.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/ref/validate_irm_import.dll",
+                      "bytes":  5632,
+                      "sha256":  "6A9088AC8369AB22F5C59012647DCCADE82D4B10F509A02543E7324B6562D1A5"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/refint/validate_irm_import.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/refint/validate_irm_import.dll",
+                      "bytes":  5632,
+                      "sha256":  "6A9088AC8369AB22F5C59012647DCCADE82D4B10F509A02543E7324B6562D1A5"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate.97E490F2.Up2Date",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate.97E490F2.Up2Date",
+                      "bytes":  0,
+                      "sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.AssemblyInfo.cs",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.AssemblyInfo.cs",
+                      "bytes":  990,
+                      "sha256":  "F74B8C3F070C6549092B2ADED2FCADAC2EAE79F3290A0515D6260F8C107BB8C6"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.AssemblyInfoInputs.cache",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.AssemblyInfoInputs.cache",
+                      "bytes":  66,
+                      "sha256":  "06B4E3E3755312AEF93660DFAFD1055EA52966B1E6530417098EBEA9A9CA53AF"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.assets.cache",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.assets.cache",
+                      "bytes":  62764,
+                      "sha256":  "6527D3E6E461D228211C0989C4A5F21120D899CFECE0DBB70D6C60F667A3B031"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.csproj.AssemblyReference.cache",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.csproj.AssemblyReference.cache",
+                      "bytes":  23757,
+                      "sha256":  "71D3998D7CBCD5431538DB6A71F4B29980C00F173088F0424ABFF5682483F63B"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.csproj.CoreCompileInputs.cache",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.csproj.CoreCompileInputs.cache",
+                      "bytes":  66,
+                      "sha256":  "1BBB7A5DDFB103F3BD87605C39B1ABEB92EA78DF1AADD1E9F27E16CAF9BC748E"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.csproj.FileListAbsolute.txt",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.csproj.FileListAbsolute.txt",
+                      "bytes":  15077,
+                      "sha256":  "93848BF44655D2F3DB99D5982E6191222A08E88A37BCF3750E95701DFC60E72D"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.dll",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.dll",
+                      "bytes":  9728,
+                      "sha256":  "70993841C2975EA82080E99796209C78272A60CF3FD6E23B679EC2C21E2E004A"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.GeneratedMSBuildEditorConfig.editorconfig",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.GeneratedMSBuildEditorConfig.editorconfig",
+                      "bytes":  645,
+                      "sha256":  "094E8EA2C4EC500B62DAB009DB2D310F5CCD09AE40DDDEDC91503F3D46D3C280"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.genruntimeconfig.cache",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.genruntimeconfig.cache",
+                      "bytes":  66,
+                      "sha256":  "4389F02299880E96C9C8DB22E0DE36EE852C7FAD6158830A5570064F12C79A9C"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.GlobalUsings.g.cs",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.GlobalUsings.g.cs",
+                      "bytes":  295,
+                      "sha256":  "F3F134E9E825E3E7268090F58B1AF2BDA2DE513F61A09C56F48B9B8D08612ABC"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.pdb",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/Debug/net8.0/validate_irm_import.pdb",
+                      "bytes":  23000,
+                      "sha256":  "2154463744A796E1E957D4F9EDEBD8A287AD8742F44FCE26DCB7FEFFCF7C422D"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/project.assets.json",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/project.assets.json",
+                      "bytes":  202006,
+                      "sha256":  "8BCFAC41A535AEE26BEE0F83D12F288EE34FA1CD9414E28002EB61C422D9B3FA"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/project.nuget.cache",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/project.nuget.cache",
+                      "bytes":  13859,
+                      "sha256":  "B78FF9AB86C0B560BF997C329DCD9045F285E4543CE6C26CFE5FBC9ADB5792EE"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/validate_irm_import.csproj.nuget.dgspec.json",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/validate_irm_import.csproj.nuget.dgspec.json",
+                      "bytes":  6933,
+                      "sha256":  "36EC5A002D396B4FB4054E6F3217FBF1DCA5BA7196CF9E2F0DBAB7623F2AF632"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/validate_irm_import.csproj.nuget.g.props",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/validate_irm_import.csproj.nuget.g.props",
+                      "bytes":  2037,
+                      "sha256":  "F02F3C9555CDCE0F94B34FEC8F90DA3C1EB4C0ECEBE1140F3266A22699D7D7EB"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/obj/validate_irm_import.csproj.nuget.g.targets",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/obj/validate_irm_import.csproj.nuget.g.targets",
+                      "bytes":  1895,
+                      "sha256":  "8BE077EFCFCD04A268ECD2B92D64763AE7445D366575ACD155CF96A562750A39"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/Program.cs",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/Program.cs",
+                      "bytes":  1563,
+                      "sha256":  "A9C8990295EFC4495D1FBC4231738EF4ECBB74972873F79A2BFFA48805CC5D26"
+                  },
+                  {
+                      "originalPath":  "outputs/irm-import-test-20260929/validate_irm_import/validate_irm_import.csproj",
+                      "path":  "05-HO-TRO/irm-import-test-20260929/validate_irm_import/validate_irm_import.csproj",
+                      "bytes":  358,
+                      "sha256":  "9FF0A9033D92DA6640C844C696805591618BE0848BBAAE3BD9D468DBBAA0581F"
+                  },
+                  {
+                      "originalPath":  "build-output/remove_docx_trailing_page.py",
+                      "path":  "05-HO-TRO/workspace-build-output/remove_docx_trailing_page.py",
+                      "bytes":  311,
+                      "sha256":  "520ABF196A09CACED7236BC9D4081ADDA41C74CBFC29523B3B8040E3079A23F7"
+                  },
+                  {
+                      "originalPath":  "IRM/docs/HUONG-DAN-IMPORT-EXCEL.html",
+                      "path":  "03-DU-LIEU-TEST/2026-11-10/HUONG-DAN-IMPORT-EXCEL.html",
+                      "bytes":  24810,
+                      "sha256":  "5BEF799C2D55426C692A8B008237BC80A9A1ECB7552AF2B5968038D00E9DB631"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "bytes":  2764,
+                      "sha256":  "1EF6EADE027181AE9F7DC7ABDEAAA01F637F1135E500A5EA0D8B180AAD6581EA"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "bytes":  23568,
+                      "sha256":  "7F66EB8F0F7E6BE92C893AA400E1819ED7526FB3F63D3B411040CDF7DC81681C"
+                  },
+                  {
+                      "originalPath":  "IRM/docs/INSTALLATION-v1.0.2.md",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.md",
+                      "bytes":  8660,
+                      "sha256":  "60A96D5DDB0DFC16E6C522880CB6819564571C75F33CED3895668C6B619CB7FE"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO/03-DU-LIEU-TEST/2026-11-10/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "bytes":  7696,
+                      "sha256":  "5DC0518B9FA3086253B4BC7372D849C5A987409B858368E477084567DFBEE3CA"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe",
+                      "bytes":  790828274,
+                      "sha256":  "C10A1915646381331DB3481BCA0D2F546CAF3B54440721830DC38A8FB9125D45"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe.sha256",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R5.exe.sha256",
+                      "bytes":  111,
+                      "sha256":  "53EC6CFD8076F8DC69816A09965B0D0CD14E820EDE9CA4615625A22DC668B180"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "bytes":  768,
+                      "sha256":  "19535BC86896F7C6D54E545B69BC841C167DA7DD761C164F03E7E4D5028D3419"
+                  },
+                  {
+                      "originalPath":  "BAN-GIAO/04-CHO-NGHIEM-THU/20261115-v1.0.2-R5-LANDING-UNSIGNED-TEST/windows-stage/SOURCE-REVISION.json",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/SOURCE-REVISION.json",
+                      "bytes":  142,
+                      "sha256":  "630B54AA579ED0BCCE3A43C141513D7AC7E83C9CE2AEE49495A5A8E8AC69AAD2"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R5-UNSIGNED-TEST/VERIFICATION.json",
+                      "path":  "02-LUU-TRU/v1.0.2-R5-UNSIGNED-TEST/VERIFICATION.json",
+                      "bytes":  2551,
+                      "sha256":  "E78C37BB813C6E233D0D69B27E4841D46BE05D6812F89F72BEC19F6E8100A715"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/DOC-TRUOC-KHI-CAI.txt",
+                      "bytes":  2012,
+                      "sha256":  "D36FC4787C650D5FE1CF9CBF39393F3498BB9D89C90C11E466466C96319AAE62"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.html",
+                      "bytes":  20291,
+                      "sha256":  "CCC62183087687FE5C6369F023AEC09588C1D88F543662064155DD96FE230B65"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.md",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/HUONG-DAN-CAI-DAT.md",
+                      "bytes":  9614,
+                      "sha256":  "F5D884A975F0123A15B899F2AC36DD702C1B7F7C2EE0E3299FAC0376CADA369D"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "bytes":  10467,
+                      "sha256":  "0FD45444DD8183B0A96531ABD52EA87C2EF0F332FF14F9CBC0ED206DBCF28BFF"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R6.exe",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R6.exe",
+                      "bytes":  790854254,
+                      "sha256":  "2D6BA7B6E2FFEB8E6CE411C473965556F2FCEFADCEE5F77F3F2FDBD77CECF585"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R6.exe.sha256",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/IRM-v1.0.2-windows-x64-offline-setup-R6.exe.sha256",
+                      "bytes":  111,
+                      "sha256":  "79465BC2360FA8227AB4F29557DF6C273DD2E6A54E815A626CDFB6A39779D9F0"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/PHIEU-KHAO-SAT-GOP-Y.html",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/PHIEU-KHAO-SAT-GOP-Y.html",
+                      "bytes":  29259,
+                      "sha256":  "8C4788A799A941D30B2C7A10E57052A100588CB8C5C81CCDD3B8DF2FB07DDFEF"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/PHIEU-KHAO-SAT-GOP-Y.xlsx",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/PHIEU-KHAO-SAT-GOP-Y.xlsx",
+                      "bytes":  13811,
+                      "sha256":  "EEAB46A8356B7DC20C3094818FD97F892FF63A2CF7F57E610FBC708BF21CBEE8"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/SHA256SUMS.txt",
+                      "bytes":  954,
+                      "sha256":  "4A7F4527916CA90768B2218EBC8F8FF6E84D91CCFB2CD2666ED7DC8C2D81328D"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/SOURCE-REVISION.json",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/SOURCE-REVISION.json",
+                      "bytes":  142,
+                      "sha256":  "2E3F43879D00468DA3BC866C8B4C16E2A1AED31B400BFDF10A899E87B4665D5E"
+                  },
+                  {
+                      "originalPath":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/VERIFICATION.json",
+                      "path":  "01-HIEN-HANH/v1.0.2-R6-UNSIGNED-TEST/VERIFICATION.json",
+                      "bytes":  1386,
+                      "sha256":  "64E16282F0471AFF48FD85C0FDFD3D28F6431130D57F60C2A2344D3DBD68F10F"
+                  },
+                  {
+                      "originalPath":  "03-DU-LIEU-TEST/2026-11-15/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "path":  "03-DU-LIEU-TEST/2026-11-15/IRM-MAU-IMPORT-TEST-DA-SUA.xlsx",
+                      "bytes":  10467,
+                      "sha256":  "0FD45444DD8183B0A96531ABD52EA87C2EF0F332FF14F9CBC0ED206DBCF28BFF"
+                  },
+                  {
+                      "originalPath":  "03-DU-LIEU-TEST/2026-11-15/README.md",
+                      "path":  "03-DU-LIEU-TEST/2026-11-15/README.md",
+                      "bytes":  808,
+                      "sha256":  "69A9E9805EC2F4F4C8419A7E2DC07905D3C290AE3B9BA70BC6F1F90A35BB3BA1"
+                  }
+              ]
+}

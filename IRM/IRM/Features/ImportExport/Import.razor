@@ -1,0 +1,253 @@
+@namespace IRM.Components.Pages
+@page "/import"
+@using IRM.Services
+@using IRM.Data.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@implements IAsyncDisposable
+
+<PageTitle>Import Excel — IRM v1.0.2</PageTitle>
+<div id="@_tourRootId">
+<span data-import-tour="notice" role="status" aria-live="polite"></span>
+
+<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4" Wrap="Wrap.Wrap">
+    <MudStack Spacing="0">
+        <MudText Typo="Typo.h5" Style="font-weight: 800;">Nhập hồ sơ từ Excel</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">Tải mẫu, điền thông tin và kiểm tra hồ sơ trước khi lưu.</MudText>
+    </MudStack>
+    <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap">
+        @if (!_manualMode)
+        {
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.HelpOutline"
+                       Disabled="_isProcessing" OnClick="StartImportTourAsync" data-import-tour-control="true">
+                Hướng dẫn từng bước
+            </MudButton>
+        }
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.History"
+                   Color="Color.Default" OnClick="@(() => _showHistory = !_showHistory)" data-import-tour-control="true">
+            @(_showHistory ? "Ẩn lịch sử" : "Lịch sử Import")
+        </MudButton>
+        @if (_currentStep > 0 || _manualMode)
+        {
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Download"
+                       Color="Color.Primary" OnClick="DownloadSampleFile" Disabled="_isDownloadingSample">
+                Tải lại file mẫu
+            </MudButton>
+        }
+        <MudButton Variant="@(_manualMode ? Variant.Filled : Variant.Outlined)"
+                   StartIcon="@Icons.Material.Outlined.Edit"
+                   Color="Color.Success" OnClick="@(() => _manualMode = !_manualMode)" data-import-tour-control="true">
+            @(_manualMode ? "Chuyển Import Excel" : "Nhập thủ công")
+        </MudButton>
+    </MudStack>
+</MudStack>
+
+@* ── Import History Panel ── *@
+@if (_showHistory)
+{
+    <MudPaper Elevation="0" Class="pa-4 mb-4 rounded-lg border-solid border" Style="border-width: 1px;">
+        <MudText Typo="Typo.subtitle1" Style="font-weight: 700;" Class="mb-3">Lịch sử phiên Import</MudText>
+        @if (_importHistory.Any())
+        {
+            <MudSimpleTable Dense="true" Hover="true">
+                <thead>
+                    <tr>
+                        <th>Mã phiên</th><th>Thời gian</th><th>File</th><th>Công ty</th>
+                        <th>Thêm</th><th>Cập nhật</th><th>Lỗi</th><th>Trạng thái</th><th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in _importHistory)
+                    {
+                        <tr>
+                            <td><MudText Typo="Typo.body2" Style="font-family: monospace; font-size: 11px;">@s.SessionId</MudText></td>
+                            <td>@s.Time</td>
+                            <td Style="font-weight: 600;">@s.FileName</td>
+                            <td>@s.Company</td>
+                            <td><MudText Color="Color.Success" Style="font-weight: 700;">+@s.Added</MudText></td>
+                            <td><MudText Color="Color.Warning" Style="font-weight: 700;">@s.Updated</MudText></td>
+                            <td><MudText Color="Color.Error" Style="font-weight: 700;">@s.Errors</MudText></td>
+                            <td>
+                                @{
+                                    var (statusLabel, statusColor) = s.Status switch
+                                    {
+                                        "committed" => ("Đã lưu", Color.Success),
+                                        "rolledback" => ("↩ Đã hoàn tác", Color.Secondary),
+                                        _ => ("Nháp", Color.Info)
+                                    };
+                                }
+                                <MudChip T="string" Size="Size.Small" Color="@statusColor" Variant="Variant.Filled">@statusLabel</MudChip>
+                            </td>
+                            <td>
+                                <MudStack Row="true" Spacing="1">
+                                    @if (s.Status == "committed")
+                                    {
+                                        <MudButton Variant="Variant.Text" Size="Size.Small" Color="Color.Error"
+                                                   StartIcon="@Icons.Material.Outlined.Undo"
+                                                   OnClick="@(() => RollbackSession(s.SessionId))">Hoàn tác</MudButton>
+                                    }
+                                </MudStack>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+        else
+        {
+            <MudText Typo="Typo.body2" Color="Color.Secondary">Chưa có phiên import nào.</MudText>
+        }
+    </MudPaper>
+}
+
+@* ── MANUAL ENTRY FORM ── *@
+@if (_manualMode)
+{
+    <MudPaper Elevation="0" Class="pa-6 mb-4 rounded-xl border-solid border" Style="border-width: 1px;">
+        <MudText Typo="Typo.h6" Style="font-weight: 800;" Class="mb-1">Nhập thủ công — Thêm nhân viên trực tiếp</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">Điền thông tin bên dưới để thêm nhân viên mà không cần file Excel</MudText>
+
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6">
+                <MudTextField T="string" Label="Họ tên *" @bind-Value="_mf.StaffName" Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập họ tên"
+                              HelperText="Bắt buộc — Nhập đầy đủ họ và tên"
+                              Error="@(_manualSubmitted && string.IsNullOrWhiteSpace(_mf.StaffName))" ErrorText="Bắt buộc nhập họ tên" />
+            </MudItem>
+            <MudItem xs="6" md="3">
+                <MudSelect T="Gender" Label="Giới tính *" @bind-Value="_mf.Gender" Variant="Variant.Outlined" Required="true">
+                    <MudSelectItem Value="Gender.Male">Nam</MudSelectItem>
+                    <MudSelectItem Value="Gender.Female">Nữ</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6" md="3">
+                <MudDatePicker Label="Ngày sinh *" @bind-Date="_mf.Birthday" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" Required="true" RequiredError="Bắt buộc nhập ngày sinh"
+                               Error="@(_manualSubmitted && !_mf.Birthday.HasValue)" ErrorText="Bắt buộc nhập ngày sinh" />
+            </MudItem>
+
+            <MudItem xs="6" md="4">
+                <MudSelect T="string" Label="Quốc tịch *" @bind-Value="_mf.Nationality" Variant="Variant.Outlined" Clearable="true" Required="true" RequiredError="Bắt buộc chọn quốc tịch"
+                           Error="@(_manualSubmitted && string.IsNullOrWhiteSpace(_mf.Nationality))" ErrorText="Bắt buộc chọn quốc tịch">
+                    @foreach (var n in _mfNationalities)
+                    {
+                        <MudSelectItem Value="@n.NationalityCode">@n.NationalityName (@n.NationalityCode)</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6" md="4">
+                <MudTextField T="string" Label="Số hộ chiếu *" @bind-Value="_mf.Passport" Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập số hộ chiếu"
+                              HelperText="Bắt buộc — Dùng để kiểm tra trùng lặp"
+                              Error="@(_manualSubmitted && string.IsNullOrWhiteSpace(_mf.Passport))" ErrorText="Bắt buộc nhập số hộ chiếu" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudAutocomplete T="CompanyDto" Label="Công ty *" Value="_mfCompany" ValueChanged="v => { _mfCompany = v; _mf.IDCompany = v?.IDCompany ?? 0; }"
+                                 SearchFunc="SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")" Variant="Variant.Outlined" ResetValueOnEmptyText="true"
+                                 Required="true" RequiredError="Bắt buộc chọn công ty"
+                                 Error="@(_manualSubmitted && _mf.IDCompany <= 0)" ErrorText="Bắt buộc chọn công ty" />
+            </MudItem>
+
+            <MudItem xs="6" md="4">
+                <MudSelect T="int?" Label="Nghề nghiệp *" @bind-Value="_mf.IDCareer" Variant="Variant.Outlined" Clearable="true" Required="true" RequiredError="Bắt buộc chọn nghề nghiệp"
+                           Error="@(_manualSubmitted && _mf.IDCareer is null or <= 0)" ErrorText="Bắt buộc chọn nghề nghiệp">
+                    @foreach (var c in _mfCareers)
+                    {
+                        <MudSelectItem T="int?" Value="@((int?)c.IDCareer)">@c.CareerName</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6" md="4"><MudSelect T="WorkPermitType" Label="GPLĐ" @bind-Value="_mf.WorkPermit" Variant="Variant.Outlined"><MudSelectItem Value="WorkPermitType.WorkerExempt">Miễn GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.WorkerHasPermit">Đã có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.WorkerNoPermit">Chưa có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.InvestorExempt">NĐT miễn GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.InvestorHasPermit">NĐT đã có GPLĐ</MudSelectItem><MudSelectItem Value="WorkPermitType.InvestorNoPermit">NĐT chưa có GPLĐ</MudSelectItem></MudSelect></MudItem>
+            <MudItem xs="6" md="4">
+                <MudDatePicker Label="Hạn tạm trú *" @bind-Date="_mf.TemporaryStay" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" Required="true" RequiredError="Bắt buộc nhập hạn tạm trú"
+                               HelperText="Bắt buộc — Cảnh báo hết hạn"
+                               Error="@(_manualSubmitted && !_mf.TemporaryStay.HasValue)" ErrorText="Bắt buộc nhập hạn tạm trú" />
+            </MudItem>
+
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Số GPLĐ" @bind-Value="_mf.WorkPermitNumber" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="6" md="4">
+                <MudTextField T="string" Label="Số Visa *" @bind-Value="_mf.VisaNumber" Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập số Visa"
+                              Error="@(_manualSubmitted && string.IsNullOrWhiteSpace(_mf.VisaNumber))" ErrorText="Bắt buộc nhập số Visa" />
+            </MudItem>
+            <MudItem xs="6" md="4"><MudTextField T="string" Label="Ký hiệu Visa" @bind-Value="_mf.VisaSymbol" Variant="Variant.Outlined" /></MudItem>
+            <MudItem xs="12" md="4">
+                <MudTextField T="string" Label="Địa chỉ *" @bind-Value="_mf.Address" Variant="Variant.Outlined" Required="true" RequiredError="Bắt buộc nhập địa chỉ tạm trú"
+                              Error="@(_manualSubmitted && string.IsNullOrWhiteSpace(_mf.Address))" ErrorText="Bắt buộc nhập địa chỉ tạm trú" />
+            </MudItem>
+
+            <MudItem xs="12"><MudTextField T="string" Label="Ghi chú" @bind-Value="_mf.Note" Variant="Variant.Outlined" Lines="2" /></MudItem>
+
+            @* Thăm thân *@
+            <MudItem xs="12"><MudDivider Class="my-1" /><MudText Typo="Typo.subtitle2" Style="font-weight:700;">Thông tin thăm thân (tùy chọn)</MudText></MudItem>
+            <MudItem xs="6" md="3"><MudSelect T="int" Label="Thăm thân" @bind-Value="_mf.FamilyVisit" Variant="Variant.Outlined"><MudSelectItem Value="0">Không</MudSelectItem><MudSelectItem Value="1">Có</MudSelectItem></MudSelect></MudItem>
+            @if (_mf.FamilyVisit == 1)
+            {
+                <MudItem xs="6" md="3"><MudTextField T="string" Label="Tên người thân" @bind-Value="_mf.FamilyVisitRelativeName" Variant="Variant.Outlined" /></MudItem>
+                <MudItem xs="6" md="3"><MudSelect T="string" Label="Quan hệ" @bind-Value="_mf.FamilyVisitRelationship" Variant="Variant.Outlined"><MudSelectItem Value="@("Vợ/Chồng")">Vợ/Chồng</MudSelectItem><MudSelectItem Value="@("Con")">Con</MudSelectItem><MudSelectItem Value="@("Cha/Mẹ")">Cha/Mẹ</MudSelectItem><MudSelectItem Value="@("Anh/Chị/Em")">Anh/Chị/Em</MudSelectItem></MudSelect></MudItem>
+                <MudItem xs="6" md="3"><MudTextField T="string" Label="CMND/CCCD người thân" @bind-Value="_mf.FamilyVisitRelativeIdCard" Variant="Variant.Outlined" /></MudItem>
+                <MudItem xs="6" md="3"><MudDatePicker Label="Ngày bắt đầu TT" @bind-Date="_mf.FamilyVisitStartDate" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+                <MudItem xs="6" md="3"><MudDatePicker Label="Hạn thăm thân" @bind-Date="_mf.FamilyVisitEndDate" Variant="Variant.Outlined" DateFormat="dd/MM/yyyy" /></MudItem>
+            }
+        </MudGrid>
+
+        @{
+            var missingManual = GetMissingManualEntryFields();
+        }
+        @if (missingManual.Any())
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-3" data-import-warning="manual-missing-required">
+                <strong>Cảnh báo các trường bắt buộc chưa nhập (*):</strong> @string.Join(", ", missingManual).
+            </MudAlert>
+        }
+
+        <MudStack Row="true" Justify="Justify.Center" Spacing="3" Class="mt-4">
+            <MudButton Variant="Variant.Outlined" OnClick="ResetManualForm" StartIcon="@Icons.Material.Outlined.Clear">Xóa form</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large"
+                       StartIcon="@Icons.Material.Outlined.PersonAdd"
+                       OnClick="SaveManualEntryAsync">
+                Thêm nhân viên
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
+@* ── Wizard Steps (Excel Import Mode) ── *@
+@if (!_manualMode)
+{
+<nav class="irm-import-progress mb-4" aria-label="Tiến trình nhập hồ sơ từ Excel">
+        @for (int i = 1; i <= 4; i++)
+        {
+            var step = i;
+            var labels = new[] { "Chuẩn bị file", "Nạp file Excel", "Xem trước", "Kết quả" };
+            <div class="irm-import-progress-step" aria-current="@(step == VisibleStep ? "step" : null)">
+                <MudAvatar Size="Size.Medium"
+                           Color="@(step < VisibleStep ? Color.Success : step == VisibleStep ? Color.Primary : Color.Default)"
+                           Variant="@(step <= VisibleStep ? Variant.Filled : Variant.Outlined)">
+                    @(step < VisibleStep ? "✓" : step.ToString())
+                </MudAvatar>
+                <MudText Typo="Typo.caption" Style="@($"font-weight: {(step == VisibleStep ? "700" : "500")}; color: {(step == VisibleStep ? "var(--mud-palette-primary)" : "inherit")};")">
+                    @labels[step - 1]
+                </MudText>
+            </div>
+        }
+</nav>
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <ImportPreparationSection Page="this" />
+    <ImportUploadSection Page="this" />
+
+    <ImportMappingSection Page="this" />
+
+    <ImportPreviewSection Page="this" />
+
+    <ImportResultSection Page="this" />
+
+</MudContainer>
+}
+
+@if (_isProcessing)
+{
+    <MudOverlay Visible="true" DarkBackground="true" ZIndex="9999">
+        <MudStack AlignItems="AlignItems.Center" Spacing="3">
+            <MudProgressCircular Size="Size.Large" Indeterminate="true" Color="Color.Primary" />
+            <MudText Typo="Typo.h6" Style="color: white; font-weight: 700;">@_processingMessage</MudText>
+        </MudStack>
+    </MudOverlay>
+}
+</div>

@@ -1,0 +1,22 @@
+**/.git
+**/.vs
+**/bin
+**/obj
+**/node_modules
+**/*.user
+**/*.suo
+deploy/
+reference/
+*.zip
+*.bak
+*.md
+
+# Local state, delivery media and reference applications are not build inputs.
+.local-run/
+build-output/
+deploy-package/
+data-protection-keys/
+**/data-protection-keys/
+**/*.db
+**/*.db-shm
+**/*.db-wal

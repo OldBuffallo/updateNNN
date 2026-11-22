@@ -1,0 +1,729 @@
+<html>
+<head>
+<title>IRM v1.0.2 — Cài đặt</title>
+<HTA:APPLICATION
+    ID="IRMInstaller"
+    APPLICATIONNAME="IRM Installer"
+    BORDER="none"
+    BORDERSTYLE="none"
+    CAPTION="no"
+    ICON="app\IRM.exe"
+    INNERBORDER="no"
+    MAXIMIZEBUTTON="no"
+    MINIMIZEBUTTON="yes"
+    NAVIGABLE="no"
+    SCROLL="no"
+    SCROLLFLAT="yes"
+    SELECTION="no"
+    SHOWINTASKBAR="yes"
+    SINGLEINSTANCE="yes"
+    SYSMENU="yes"
+    WINDOWSTATE="normal"
+/>
+<meta http-equiv="x-ua-compatible" content="ie=11">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #0f1923 0%, #1a2a3a 50%, #0d2137 100%);
+    color: #e0e8f0;
+    width: 820px; height: 620px;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* Title bar */
+.titlebar {
+    background: rgba(0,0,0,0.4);
+    height: 36px; display: flex; align-items: center;
+    padding: 0 12px; cursor: default;
+}
+.titlebar-icon { font-size: 16px; margin-right: 8px; }
+.titlebar-text { font-size: 12px; color: #8899aa; flex: 1; }
+.titlebar-close {
+    width: 36px; height: 36px; text-align: center; line-height: 36px;
+    color: #889; cursor: pointer; font-size: 14px; border: none; background: none;
+}
+.titlebar-close:hover { background: #c42b1c; color: #fff; }
+
+/* Main container */
+.container { padding: 0 40px; height: 584px; display: flex; flex-direction: column; }
+
+/* Header */
+.header { text-align: center; padding: 24px 0 16px; }
+.header h1 {
+    font-size: 26px; font-weight: 300; color: #fff;
+    letter-spacing: 1px;
+}
+.header h1 span { color: #4fc3f7; font-weight: 600; }
+.header .subtitle { font-size: 13px; color: #6a8090; margin-top: 4px; }
+
+/* Steps indicator */
+.steps-bar {
+    display: flex; justify-content: center; gap: 8px;
+    padding: 12px 0 20px; align-items: center;
+}
+.step-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(79,195,247,0.1); border: 2px solid #2a4a5a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #4a6a7a;
+    transition: all 0.4s;
+}
+.step-dot.active { background: #4fc3f7; border-color: #4fc3f7; color: #0a1520; }
+.step-dot.done { background: #4caf50; border-color: #4caf50; color: #fff; }
+.step-line { width: 60px; height: 2px; background: #2a4a5a; transition: background 0.4s; }
+.step-line.done { background: #4caf50; }
+.step-label { font-size: 10px; color: #5a7a8a; margin-top: 2px; text-align: center; }
+
+/* Content area */
+.content { flex: 1; overflow-y: auto; padding-right: 4px; }
+
+/* Pages */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Welcome */
+.welcome-icon { text-align: center; font-size: 64px; margin: 10px 0; }
+.welcome-text { text-align: center; font-size: 15px; color: #a0b8c8; line-height: 1.8; }
+.welcome-features {
+    display: flex; gap: 12px; margin-top: 20px; justify-content: center; flex-wrap: wrap;
+}
+.feature-card {
+    background: rgba(79,195,247,0.06); border: 1px solid rgba(79,195,247,0.15);
+    border-radius: 10px; padding: 14px 18px; width: 220px; text-align: center;
+}
+.feature-card .icon { font-size: 24px; margin-bottom: 6px; }
+.feature-card .title { font-size: 13px; font-weight: 600; color: #4fc3f7; }
+.feature-card .desc { font-size: 11px; color: #7a98a8; margin-top: 4px; }
+
+/* Scan results */
+.scan-category {
+    margin-bottom: 16px;
+}
+.scan-category-title {
+    font-size: 12px; font-weight: 700; color: #4fc3f7;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+    padding-bottom: 4px; border-bottom: 1px solid rgba(79,195,247,0.2);
+}
+.check-row {
+    display: flex; align-items: center; padding: 6px 12px;
+    border-radius: 6px; margin-bottom: 3px;
+    background: rgba(255,255,255,0.03);
+}
+.check-row:hover { background: rgba(255,255,255,0.06); }
+.check-icon { width: 24px; font-size: 16px; text-align: center; margin-right: 10px; }
+.check-icon.pass { color: #4caf50; }
+.check-icon.fail { color: #f44336; }
+.check-icon.warn { color: #ff9800; }
+.check-icon.spin { color: #4fc3f7; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.check-name { flex: 1; font-size: 13px; }
+.check-detail { font-size: 11px; color: #6a8a9a; text-align: right; max-width: 280px; }
+
+/* Summary box */
+.summary-box {
+    margin-top: 16px; padding: 16px; border-radius: 10px; text-align: center;
+}
+.summary-box.pass { background: rgba(76,175,80,0.12); border: 1px solid rgba(76,175,80,0.3); }
+.summary-box.fail { background: rgba(244,67,54,0.12); border: 1px solid rgba(244,67,54,0.3); }
+.summary-box .big { font-size: 18px; font-weight: 700; }
+.summary-box.pass .big { color: #4caf50; }
+.summary-box.fail .big { color: #f44336; }
+.summary-box .sub { font-size: 12px; color: #8a9aaa; margin-top: 4px; }
+
+/* Progress */
+.progress-section { margin-bottom: 14px; }
+.progress-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.progress-bar-bg {
+    height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;
+}
+.progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #4fc3f7, #4caf50);
+    border-radius: 4px; transition: width 0.5s ease; width: 0%;
+}
+.progress-status { font-size: 11px; color: #6a8a9a; margin-top: 4px; }
+
+/* Install log */
+.install-log {
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(79,195,247,0.15);
+    border-radius: 8px; padding: 12px; font-family: 'Consolas', monospace;
+    font-size: 11px; color: #6a9ab0; height: 180px; overflow-y: auto;
+    line-height: 1.6;
+}
+.log-ok { color: #4caf50; }
+.log-warn { color: #ff9800; }
+.log-err { color: #f44336; }
+.log-info { color: #4fc3f7; }
+
+/* Complete */
+.complete-icon { text-align: center; font-size: 72px; margin: 16px 0; }
+.complete-title { text-align: center; font-size: 22px; font-weight: 600; color: #4caf50; }
+.complete-info {
+    background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.2);
+    border-radius: 10px; padding: 16px; margin: 16px 0; text-align: center;
+}
+.complete-url { font-size: 18px; font-weight: 700; color: #4fc3f7; }
+.complete-url-label { font-size: 11px; color: #6a8a9a; margin-top: 2px; }
+
+/* Buttons */
+.btn-row { padding: 16px 0; display: flex; justify-content: flex-end; gap: 10px; }
+.btn {
+    padding: 10px 28px; border-radius: 6px; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.2s;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #4fc3f7, #0288d1);
+    color: #fff; box-shadow: 0 2px 8px rgba(79,195,247,0.3);
+}
+.btn-primary:hover { box-shadow: 0 4px 16px rgba(79,195,247,0.5); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-secondary {
+    background: rgba(255,255,255,0.08); color: #a0b8c8;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.12); }
+.btn-success {
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    color: #fff; box-shadow: 0 2px 8px rgba(76,175,80,0.3);
+}
+.btn-danger { background: rgba(244,67,54,0.15); color: #f44336; border: 1px solid rgba(244,67,54,0.3); }
+</style>
+
+<script language="VBScript">
+' ── VBScript helpers cho HTA (chạy PowerShell, di chuyển cửa sổ) ──
+
+Dim WshShell
+Set WshShell = CreateObject("WScript.Shell")
+Dim FSO
+Set FSO = CreateObject("Scripting.FileSystemObject")
+
+Sub Window_OnLoad()
+    ' Center window
+    Dim sw, sh
+    sw = window.screen.width
+    sh = window.screen.height
+    window.resizeTo 820, 620
+    window.moveTo (sw - 820) / 2, (sh - 620) / 2
+End Sub
+
+Function GetScriptDir()
+    GetScriptDir = FSO.GetParentFolderName(document.location.pathname)
+End Function
+
+Function RunPowerShell(scriptContent)
+    Dim tempFile, cmd
+    tempFile = FSO.GetSpecialFolder(2) & "\irm_install_" & Timer & ".ps1"
+    
+    Dim f
+    Set f = FSO.CreateTextFile(tempFile, True, True)
+    f.Write scriptContent
+    f.Close
+    
+    cmd = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File """ & tempFile & """"
+    RunPowerShell = WshShell.Run(cmd, 0, True)
+End Function
+
+Function RunPSAndCapture(psCommand)
+    Dim tempOut, cmd, result
+    tempOut = FSO.GetSpecialFolder(2) & "\irm_out_" & Timer & ".txt"
+    
+    cmd = "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command """ & _
+          Replace(psCommand, """", "\""") & " | Out-File -FilePath '" & tempOut & "' -Encoding UTF8"""
+    
+    WshShell.Run cmd, 0, True
+    
+    If FSO.FileExists(tempOut) Then
+        Dim f
+        Set f = FSO.OpenTextFile(tempOut, 1, False, -1)
+        If Not f.AtEndOfStream Then
+            result = f.ReadAll
+        End If
+        f.Close
+        FSO.DeleteFile tempOut
+    End If
+    
+    RunPSAndCapture = result
+End Function
+
+Sub CloseApp()
+    window.close
+End Sub
+</script>
+
+<script language="JScript">
+// ── JavaScript UI Logic ──
+
+var currentPage = 0;
+var scanResults = {};
+var installDir = 'C:\\IRM';
+var scriptDir = '';
+
+function init() {
+    try { scriptDir = GetScriptDir(); } catch(e) { scriptDir = '.'; }
+    showPage(0);
+}
+
+function showPage(idx) {
+    currentPage = idx;
+    var pages = document.getElementsByClassName('page');
+    for (var i = 0; i < pages.length; i++) {
+        pages[i].className = pages[i].className.replace(' active', '');
+    }
+    document.getElementById('page' + idx).className += ' active';
+    updateStepDots(idx);
+}
+
+function updateStepDots(activeIdx) {
+    var dots = document.getElementsByClassName('step-dot');
+    var lines = document.getElementsByClassName('step-line');
+    for (var i = 0; i < dots.length; i++) {
+        dots[i].className = 'step-dot';
+        if (i < activeIdx) dots[i].className += ' done';
+        else if (i === activeIdx) dots[i].className += ' active';
+    }
+    for (var j = 0; j < lines.length; j++) {
+        lines[j].className = 'step-line';
+        if (j < activeIdx) lines[j].className += ' done';
+    }
+}
+
+// ═══════════════════════════════════════
+// STEP 1: Environment Scan
+// ═══════════════════════════════════════
+function startScan() {
+    showPage(1);
+    document.getElementById('btnNext1').disabled = true;
+    
+    var checks = [
+        { id: 'chkAdmin', name: 'Quyền Administrator', cmd: '([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)' },
+        { id: 'chkOS', name: 'Hệ điều hành Windows', cmd: '(Get-CimInstance Win32_OperatingSystem).Caption' },
+        { id: 'chkArch', name: 'Kiến trúc 64-bit', cmd: '(Get-CimInstance Win32_OperatingSystem).OSArchitecture' },
+        { id: 'chkCPU', name: 'CPU (≥ 2 cores)', cmd: '(Get-CimInstance Win32_Processor | Select -First 1).NumberOfCores' },
+        { id: 'chkRAM', name: 'RAM (≥ 2 GB)', cmd: '[math]::Round((Get-CimInstance Win32_OperatingSystem).TotalVisibleMemorySize/1MB,1)' },
+        { id: 'chkDisk', name: 'Ổ đĩa C: (≥ 10 GB)', cmd: '[math]::Round((Get-CimInstance Win32_LogicalDisk -Filter "DeviceID=''C:''").FreeSpace/1GB,1)' },
+        { id: 'chkSQL', name: 'SQL Server Express', cmd: 'if(Get-Service "MSSQL`$SQLEXPRESS" -EA SilentlyContinue){"INSTALLED"}else{"NOT_FOUND"}' },
+        { id: 'chkPort', name: 'Cổng 5050', cmd: 'if(Get-NetTCPConnection -LocalPort 5050 -EA SilentlyContinue){"IN_USE"}else{"FREE"}' },
+        { id: 'chkDefender', name: 'Windows Defender', cmd: 'try{(Get-MpComputerStatus).AntivirusEnabled}catch{"UNKNOWN"}' }
+    ];
+    
+    var idx = 0;
+    function runNext() {
+        if (idx >= checks.length) {
+            finishScan();
+            return;
+        }
+        var check = checks[idx];
+        setCheckStatus(check.id, 'spin', 'Đang kiểm tra...');
+        
+        setTimeout(function() {
+            var result = '';
+            try { result = RunPSAndCapture(check.cmd); } catch(e) { result = 'ERROR'; }
+            result = (result || '').replace(/[\r\n]/g, '').trim();
+            
+            scanResults[check.id] = result;
+            evaluateCheck(check, result);
+            idx++;
+            runNext();
+        }, 200);
+    }
+    runNext();
+}
+
+function evaluateCheck(check, result) {
+    switch(check.id) {
+        case 'chkAdmin':
+            setCheckStatus(check.id, result === 'True' ? 'pass' : 'fail', result === 'True' ? 'Có quyền Admin' : 'KHÔNG CÓ QUYỀN ADMIN');
+            break;
+        case 'chkOS':
+            setCheckStatus(check.id, result.indexOf('Windows') >= 0 ? 'pass' : 'fail', result);
+            break;
+        case 'chkArch':
+            setCheckStatus(check.id, result.indexOf('64') >= 0 ? 'pass' : 'fail', result);
+            break;
+        case 'chkCPU':
+            var cores = parseInt(result) || 0;
+            setCheckStatus(check.id, cores >= 2 ? 'pass' : 'fail', cores + ' cores');
+            break;
+        case 'chkRAM':
+            var ram = parseFloat(result) || 0;
+            setCheckStatus(check.id, ram >= 2 ? 'pass' : 'fail', ram + ' GB');
+            break;
+        case 'chkDisk':
+            var disk = parseFloat(result) || 0;
+            setCheckStatus(check.id, disk >= 10 ? 'pass' : 'fail', disk + ' GB trống');
+            break;
+        case 'chkSQL':
+            if (result === 'INSTALLED') {
+                setCheckStatus(check.id, 'pass', 'Đã cài đặt');
+            } else {
+                setCheckStatus(check.id, 'warn', 'Chưa cài — sẽ cài ở bước 2');
+            }
+            break;
+        case 'chkPort':
+            setCheckStatus(check.id, result === 'FREE' ? 'pass' : 'warn', result === 'FREE' ? 'Đang trống' : 'Đang sử dụng');
+            break;
+        case 'chkDefender':
+            setCheckStatus(check.id, result === 'True' ? 'pass' : 'warn', result === 'True' ? 'Đang hoạt động' : 'Không xác định');
+            break;
+    }
+}
+
+function setCheckStatus(id, status, detail) {
+    var row = document.getElementById(id);
+    if (!row) return;
+    var icon = row.getElementsByClassName('check-icon')[0];
+    var detailEl = row.getElementsByClassName('check-detail')[0];
+    
+    icon.className = 'check-icon ' + status;
+    switch(status) {
+        case 'pass': icon.innerHTML = '&#10004;'; break;
+        case 'fail': icon.innerHTML = '&#10008;'; break;
+        case 'warn': icon.innerHTML = '&#9888;'; break;
+        case 'spin': icon.innerHTML = '&#8635;'; break;
+    }
+    detailEl.innerHTML = detail;
+}
+
+function finishScan() {
+    // Determine if critical checks pass
+    var criticals = ['chkAdmin', 'chkOS', 'chkArch', 'chkCPU', 'chkRAM', 'chkDisk'];
+    var passCount = 0;
+    for (var i = 0; i < criticals.length; i++) {
+        var row = document.getElementById(criticals[i]);
+        var icon = row.getElementsByClassName('check-icon')[0];
+        if (icon.className.indexOf('pass') >= 0) passCount++;
+    }
+    
+    var box = document.getElementById('scanSummary');
+    if (passCount === criticals.length) {
+        box.className = 'summary-box pass';
+        box.innerHTML = '<div class="big">&#10004; MÁY TÍNH ĐẠT YÊU CẦU</div><div class="sub">' + passCount + '/' + criticals.length + ' tiêu chí bắt buộc — Sẵn sàng cài đặt</div>';
+        document.getElementById('btnNext1').disabled = false;
+    } else {
+        box.className = 'summary-box fail';
+        box.innerHTML = '<div class="big">&#10008; CHƯA ĐẠT YÊU CẦU</div><div class="sub">' + passCount + '/' + criticals.length + ' tiêu chí — Vui lòng khắc phục</div>';
+    }
+    box.style.display = 'block';
+}
+
+// ═══════════════════════════════════════
+// STEP 2: Install prerequisites
+// ═══════════════════════════════════════
+function startInstall() {
+    showPage(2);
+    var log = document.getElementById('installLog');
+    var progress = document.getElementById('installProgress');
+    
+    document.getElementById('btnNext2').disabled = true;
+    
+    addLog('info', '═══ BẮT ĐẦU CÀI ĐẶT IRM v1.0.2 ═══');
+    setProgress(5, 'Chuẩn bị...');
+    
+    setTimeout(function() {
+        // Check SQL Server
+        var sqlResult = scanResults['chkSQL'] || '';
+        if (sqlResult !== 'INSTALLED') {
+            addLog('warn', 'SQL Server chưa cài — đang kiểm tra bộ cài...');
+            setProgress(10, 'Kiểm tra SQL Server...');
+            
+            setTimeout(function() {
+                // Try to install SQL
+                addLog('info', 'Đang cài đặt SQL Server Express (5-10 phút)...');
+                setProgress(15, 'Cài SQL Server Express...');
+                
+                var psScript = "$setup = Get-ChildItem '" + scriptDir + "\\prerequisites' -Filter '*.exe' -Recurse | Select -First 1; " +
+                    "if($setup) { $setup.FullName } else { 'NOT_FOUND' }";
+                var setupPath = '';
+                try { setupPath = RunPSAndCapture(psScript); } catch(e) {}
+                setupPath = (setupPath || '').replace(/[\r\n]/g, '').trim();
+                
+                if (setupPath === 'NOT_FOUND' || !setupPath) {
+                    addLog('warn', 'Bộ cài SQL Server không có sẵn trong thư mục prerequisites\\');
+                    addLog('info', 'Vui lòng cài SQL Server thủ công, hoặc IRM sẽ hướng dẫn khi khởi động');
+                    setProgress(30, 'Bỏ qua SQL Server...');
+                } else {
+                    addLog('info', 'Tìm thấy: ' + setupPath);
+                    addLog('info', 'Đang cài đặt... (vui lòng chờ)');
+                    // Run SQL install silently
+                    try {
+                        RunPowerShell("Start-Process '" + setupPath + "' -ArgumentList '/Q /ACTION=Install /FEATURES=SQLEngine /INSTANCENAME=SQLEXPRESS /SQLSVCSTARTUPTYPE=Automatic /SQLSYSADMINACCOUNTS=\"BUILTIN\\Administrators\" /IACCEPTSQLSERVERLICENSETERMS /TCPENABLED=0 /NPENABLED=1' -Wait");
+                        addLog('ok', 'SQL Server Express đã cài thành công!');
+                    } catch(e) {
+                        addLog('err', 'Lỗi cài SQL: ' + e.message);
+                    }
+                }
+                
+                continueAppInstall();
+            }, 500);
+        } else {
+            addLog('ok', 'SQL Server đã có sẵn');
+            setProgress(30, 'SQL Server OK');
+            continueAppInstall();
+        }
+    }, 500);
+}
+
+function continueAppInstall() {
+    setTimeout(function() {
+        // Create directories
+        addLog('info', 'Tạo thư mục cài đặt...');
+        setProgress(35, 'Tạo thư mục...');
+        RunPowerShell("@('C:\\IRM','C:\\IRM\\data','C:\\IRM\\data\\private-files','C:\\IRM\\data\\dataprotection-keys','C:\\IRM\\data\\backups') | ForEach { if(!(Test-Path $_)){New-Item -ItemType Directory $_ -Force | Out-Null} }");
+        addLog('ok', 'Thư mục C:\\IRM\\ đã tạo');
+        
+        setTimeout(function() {
+            // Stop existing service
+            addLog('info', 'Kiểm tra service cũ...');
+            setProgress(40, 'Kiểm tra service...');
+            RunPowerShell("Stop-Service 'IRM' -Force -EA SilentlyContinue");
+            
+            setTimeout(function() {
+                // Copy app files
+                addLog('info', 'Sao chép ứng dụng (~180 MB)...');
+                setProgress(45, 'Đang sao chép...');
+                RunPowerShell("Copy-Item '" + scriptDir + "\\app\\*' 'C:\\IRM\\' -Recurse -Force");
+                addLog('ok', 'Ứng dụng đã sao chép');
+                setProgress(60, 'Cấu hình...');
+                
+                setTimeout(function() {
+                    // Configure connection string
+                    addLog('info', 'Cấu hình kết nối database...');
+                    var configPS = "$p='C:\\IRM\\appsettings.json'; $j=Get-Content $p -Raw|ConvertFrom-Json; " +
+                        "if(-not $j.ConnectionStrings){$j|Add-Member -Type NoteProperty -Name ConnectionStrings -Value @{} -Force}; " +
+                        "$j.ConnectionStrings|Add-Member -Type NoteProperty -Name DefaultConnection -Value 'Server=.\\SQLEXPRESS;Database=IRM;Trusted_Connection=true;TrustServerCertificate=true;MultipleActiveResultSets=true' -Force; " +
+                        "$j.ConnectionStrings|Add-Member -Type NoteProperty -Name SqlServer -Value 'Server=.\\SQLEXPRESS;Database=IRM;Trusted_Connection=true;TrustServerCertificate=true;MultipleActiveResultSets=true' -Force; " +
+                        "$j|ConvertTo-Json -Depth 10|Set-Content $p -Encoding UTF8";
+
+                    RunPowerShell(configPS);
+                    addLog('ok', 'Kết nối: .\\SQLEXPRESS → IRM');
+                    setProgress(70, 'Tạo database...');
+                    
+                    setTimeout(function() {
+                        // Create database
+                        addLog('info', 'Tạo database IRM...');
+                        RunPowerShell("try{sqlcmd -S '.\\SQLEXPRESS' -E -Q \"IF NOT EXISTS(SELECT 1 FROM sys.databases WHERE name='IRM') CREATE DATABASE [IRM]\" -b 2>$null}catch{}");
+                        addLog('ok', 'Database đã sẵn sàng');
+                        setProgress(80, 'Đăng ký service...');
+                        
+                        setTimeout(function() {
+                            // Register Windows Service
+                            addLog('info', 'Đăng ký Windows Service...');
+                            var svcPS = "if(-not(Get-Service IRM -EA SilentlyContinue)){New-Service -Name IRM -BinaryPathName '\"C:\\IRM\\IRM.exe\"' -DisplayName 'IRM - Quản lý NNN' -Description 'Hệ thống quản lý người nước ngoài v1.0.2' -StartupType Automatic|Out-Null}; " +
+                                "Set-ItemProperty 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\IRM' -Name Environment -Value @('ASPNETCORE_ENVIRONMENT=Production','ASPNETCORE_URLS=http://+:5050;https://+:5443') -Type MultiString";
+                            RunPowerShell(svcPS);
+                            addLog('ok', 'Service IRM đã đăng ký');
+                            
+                            // Firewall
+                            addLog('info', 'Cấu hình Firewall...');
+                            RunPowerShell("if(-not(Get-NetFirewallRule -DisplayName 'IRM HTTP' -EA SilentlyContinue)){New-NetFirewallRule -DisplayName 'IRM HTTP' -Direction Inbound -Protocol TCP -LocalPort 5050 -Action Allow|Out-Null}; if(-not(Get-NetFirewallRule -DisplayName 'IRM HTTPS' -EA SilentlyContinue)){New-NetFirewallRule -DisplayName 'IRM HTTPS' -Direction Inbound -Protocol TCP -LocalPort 5443 -Action Allow|Out-Null}");
+                            addLog('ok', 'Firewall đã mở cổng 5050, 5443');
+                            setProgress(90, 'Khởi động...');
+                            
+                            setTimeout(function() {
+                                // Start service
+                                addLog('info', 'Khởi động IRM...');
+                                RunPowerShell("Start-Service IRM -EA SilentlyContinue");
+                                setProgress(95, 'Kiểm tra...');
+                                
+                                setTimeout(function() {
+                                    // Desktop shortcut
+                                    addLog('info', 'Tạo shortcut Desktop...');
+                                    RunPowerShell("$s=(New-Object -COM WScript.Shell).CreateShortcut([Environment]::GetFolderPath('CommonDesktopDirectory')+'\\IRM - Quản lý NNN.lnk'); $s.TargetPath='http://localhost:5050'; $s.Description='IRM v1.0.2'; $s.Save()");
+                                    addLog('ok', 'Shortcut đã tạo');
+                                    
+                                    setProgress(100, 'Hoàn tất!');
+                                    addLog('ok', '═══ CÀI ĐẶT HOÀN TẤT ═══');
+                                    
+                                    document.getElementById('btnNext2').disabled = false;
+                                }, 3000);
+                            }, 2000);
+                        }, 500);
+                    }, 1000);
+                }, 500);
+            }, 2000);
+        }, 500);
+    }, 500);
+}
+
+function addLog(type, msg) {
+    var log = document.getElementById('installLog');
+    var prefix = '';
+    var cls = '';
+    switch(type) {
+        case 'ok': prefix = '[OK] '; cls = 'log-ok'; break;
+        case 'warn': prefix = '[!] '; cls = 'log-warn'; break;
+        case 'err': prefix = '[ERR] '; cls = 'log-err'; break;
+        case 'info': prefix = '> '; cls = 'log-info'; break;
+    }
+    log.innerHTML += '<div class="' + cls + '">' + prefix + msg + '</div>';
+    log.scrollTop = log.scrollHeight;
+}
+
+function setProgress(pct, text) {
+    document.getElementById('installProgress').style.width = pct + '%';
+    document.getElementById('installStatus').innerHTML = text + ' (' + pct + '%)';
+}
+
+// ═══════════════════════════════════════
+// STEP 3: Complete
+// ═══════════════════════════════════════
+function showComplete() {
+    showPage(3);
+}
+
+function openBrowser() {
+    try {
+        var shell = new ActiveXObject('WScript.Shell');
+        shell.Run('http://localhost:5050');
+    } catch(e) {}
+}
+
+window.onload = init;
+</script>
+</head>
+
+<body>
+<!-- Title bar -->
+<div class="titlebar" id="titlebar">
+    <span class="titlebar-icon">🏛️</span>
+    <span class="titlebar-text">IRM v1.0.2 — Trình cài đặt</span>
+    <button class="titlebar-close" onclick="CloseApp()" title="Đóng">✕</button>
+</div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>Cài đặt <span>IRM v1.0.2</span></h1>
+        <div class="subtitle">Hệ thống Quản lý Người nước ngoài</div>
+    </div>
+
+    <!-- Steps indicator -->
+    <div class="steps-bar">
+        <div><div class="step-dot active">1</div><div class="step-label">Chào mừng</div></div>
+        <div class="step-line"></div>
+        <div><div class="step-dot">2</div><div class="step-label">Quét môi trường</div></div>
+        <div class="step-line"></div>
+        <div><div class="step-dot">3</div><div class="step-label">Cài đặt</div></div>
+        <div class="step-line"></div>
+        <div><div class="step-dot">4</div><div class="step-label">Hoàn tất</div></div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <!-- PAGE 0: Welcome -->
+        <div id="page0" class="page active">
+            <div class="welcome-icon">🏛️</div>
+            <div class="welcome-text">
+                Chào mừng bạn đến với trình cài đặt <b>IRM v1.0.2</b><br>
+                Hệ thống Quản lý Người nước ngoài dành cho cơ quan quản lý xuất nhập cảnh
+            </div>
+            <div class="welcome-features">
+                <div class="feature-card">
+                    <div class="icon">📊</div>
+                    <div class="title">Dashboard & Báo cáo</div>
+                    <div class="desc">Thống kê realtime, export Excel</div>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📥</div>
+                    <div class="title">Import Excel</div>
+                    <div class="desc">Nhập dữ liệu hàng loạt từ Excel</div>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔒</div>
+                    <div class="title">Bảo mật</div>
+                    <div class="desc">RBAC, audit log, mã hóa</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 1: Environment Scan -->
+        <div id="page1" class="page">
+            <div class="scan-category">
+                <div class="scan-category-title">💻 Phần cứng & Hệ điều hành</div>
+                <div class="check-row" id="chkAdmin"><span class="check-icon">○</span><span class="check-name">Quyền Administrator</span><span class="check-detail">Chờ kiểm tra...</span></div>
+                <div class="check-row" id="chkOS"><span class="check-icon">○</span><span class="check-name">Hệ điều hành Windows</span><span class="check-detail">Chờ kiểm tra...</span></div>
+                <div class="check-row" id="chkArch"><span class="check-icon">○</span><span class="check-name">Kiến trúc 64-bit</span><span class="check-detail">Chờ kiểm tra...</span></div>
+                <div class="check-row" id="chkCPU"><span class="check-icon">○</span><span class="check-name">CPU (≥ 2 cores)</span><span class="check-detail">Chờ kiểm tra...</span></div>
+                <div class="check-row" id="chkRAM"><span class="check-icon">○</span><span class="check-name">RAM (≥ 2 GB)</span><span class="check-detail">Chờ kiểm tra...</span></div>
+                <div class="check-row" id="chkDisk"><span class="check-icon">○</span><span class="check-name">Ổ đĩa C: (≥ 10 GB trống)</span><span class="check-detail">Chờ kiểm tra...</span></div>
+            </div>
+            <div class="scan-category">
+                <div class="scan-category-title">🗄️ Phần mềm & Dịch vụ</div>
+                <div class="check-row" id="chkSQL"><span class="check-icon">○</span><span class="check-name">SQL Server Express</span><span class="check-detail">Chờ kiểm tra...</span></div>
+                <div class="check-row" id="chkPort"><span class="check-icon">○</span><span class="check-name">Cổng 5050 (HTTP)</span><span class="check-detail">Chờ kiểm tra...</span></div>
+                <div class="check-row" id="chkDefender"><span class="check-icon">○</span><span class="check-name">Windows Defender</span><span class="check-detail">Chờ kiểm tra...</span></div>
+            </div>
+            <div id="scanSummary" class="summary-box" style="display:none;"></div>
+        </div>
+
+        <!-- PAGE 2: Installing -->
+        <div id="page2" class="page">
+            <div class="progress-section">
+                <div class="progress-title">Tiến trình cài đặt</div>
+                <div class="progress-bar-bg"><div id="installProgress" class="progress-bar-fill"></div></div>
+                <div id="installStatus" class="progress-status">Đang chuẩn bị...</div>
+            </div>
+            <div id="installLog" class="install-log"></div>
+        </div>
+
+        <!-- PAGE 3: Complete -->
+        <div id="page3" class="page">
+            <div class="complete-icon">🎉</div>
+            <div class="complete-title">Cài đặt thành công!</div>
+            <div class="complete-info">
+                <div class="complete-url-label">Truy cập trên máy này:</div>
+                <div class="complete-url">http://localhost:5050</div>
+                <br>
+                <div class="complete-url-label">Truy cập từ máy khác trong mạng LAN:</div>
+                <div class="complete-url">https://TÊN-MÁY:5443</div>
+            </div>
+            <div style="text-align:center; color:#8a9aaa; font-size:12px; line-height:1.8;">
+                ✅ IRM sẽ tự khởi động mỗi khi bật máy tính<br>
+                ✅ Shortcut đã được tạo trên Desktop<br>
+                ✅ Đăng nhập lần đầu bằng tài khoản được tạo sẵn<br>
+                📖 Xem tài liệu hướng dẫn trong thư mục cài đặt
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-row">
+        <!-- Page 0 buttons -->
+        <span id="btns0">
+            <button class="btn btn-secondary" onclick="CloseApp()">Thoát</button>
+            <button class="btn btn-primary" onclick="startScan()">Bắt đầu cài đặt →</button>
+        </span>
+        <!-- Page 1 buttons -->
+        <span id="btns1" style="display:none;">
+            <button class="btn btn-secondary" onclick="showPage(0)">← Quay lại</button>
+            <button class="btn btn-primary" id="btnNext1" onclick="startInstall()" disabled>Cài đặt →</button>
+        </span>
+        <!-- Page 2 buttons -->
+        <span id="btns2" style="display:none;">
+            <button class="btn btn-primary" id="btnNext2" onclick="showComplete()" disabled>Tiếp tục →</button>
+        </span>
+        <!-- Page 3 buttons -->
+        <span id="btns3" style="display:none;">
+            <button class="btn btn-secondary" onclick="CloseApp()">Đóng</button>
+            <button class="btn btn-success" onclick="openBrowser()">🌐 Mở IRM trong trình duyệt</button>
+        </span>
+    </div>
+</div>
+
+<script language="JScript">
+// Show/hide button groups based on page
+var origShowPage = showPage;
+showPage = function(idx) {
+    origShowPage(idx);
+    for (var i = 0; i <= 3; i++) {
+        var el = document.getElementById('btns' + i);
+        if (el) el.style.display = (i === idx) ? '' : 'none';
+    }
+};
+showPage(0);
+</script>
+</body>
+</html>

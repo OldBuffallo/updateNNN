@@ -1,0 +1,12 @@
+global using IRM.Application.Features.Accommodations;
+global using IRM.Application.Features.Administration;
+global using IRM.Application.Features.Companies;
+global using IRM.Application.Features.Documents;
+global using IRM.Application.Features.Employees;
+global using IRM.Application.Features.ForeignPersons;
+global using IRM.Application.Features.ImportExport;
+global using IRM.Application.Features.Inspections;
+global using IRM.Application.Features.Reports;
+global using IRM.Application.Features.Residence;
+global using IRM.Application.Features.Students;
+global using IRM.Application.Models;
