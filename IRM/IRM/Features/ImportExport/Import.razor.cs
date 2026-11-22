@@ -402,7 +402,7 @@ public partial class Import : ComponentBase, IFeaturePage
         try
         {
             await EmployeeSvc.CreateAsync(_mf);
-            Snackbar.Add($"Đã thêm nhân viên \"{_mf.StaffName}\" thành công!", Severity.Success);
+            Snackbar.Add($"Đã thêm nhân viên \"{IRM.Core.Rules.PersonDisplayHelper.FormatName(_mf.StaffName, _mf.Passport)}\" thành công!", Severity.Success);
             ResetManualForm();
         }
         catch (Exception ex)

@@ -35,6 +35,30 @@ public sealed class PassportOnlyManualEntryTests
     }
 
     [Fact]
+    public async Task SaveUnifiedProfileAsync_FamilyVisitEnabledWithOnlyPassport_DoesNotThrowNre()
+    {
+        await using var td = new TestDatabase();
+        await td.InitializeAsync();
+        var guard = TestSecurityContext.CreateAllowAllGuard();
+        var store = new SqlFamilyVisitorStore(td.Context, new SqlAuditStore(td.Context), guard);
+        var service = new FamilyVisitorApplicationService(store, guard);
+
+        var personId = await service.SaveUnifiedProfileAsync(new UnifiedForeignPersonInput
+        {
+            FullName = "",
+            PassportNumber = "PP-FV-01",
+            HasFamilyVisitProfile = true,
+            RelativeName = null,
+            Relationship = null
+        });
+
+        Assert.True(personId > 0);
+        var fv = await td.Context.FamilyVisitDetails.SingleAsync();
+        Assert.Equal("", fv.RelativeName);
+        Assert.Equal("", fv.Relationship);
+    }
+
+    [Fact]
     public async Task SaveUnifiedProfileAsync_BlankPassport_ThrowsArgumentException()
     {
         await using var td = new TestDatabase();

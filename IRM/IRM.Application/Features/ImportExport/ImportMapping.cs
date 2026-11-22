@@ -274,6 +274,8 @@ public static class ImportMapping
         }
 
         var settlementRaw = Value("SettlementResults");
+        if (settlementRaw.Length > 0 && (!stay.HasValue || visa == null))
+            warnings.Add("Có Kết quả giải quyết nhưng thiếu Số Visa hoặc Hạn tạm trú — không đối chiếu tự động");
         var settlement = settlementRaw.Length > 0 && stay.HasValue && visa != null
             ? LegacyImportRules.ParseSettlement(settlementRaw, visa, stay.Value)
             : new LegacyImportRules.SettlementParse(3, settlementRaw.Length > 0 ? settlementRaw : " ", null, null);

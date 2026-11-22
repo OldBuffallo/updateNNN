@@ -64,6 +64,7 @@ public partial class SqlImportStore
                 int? resolvedCompanyId = effectiveCompanyId;
                 string? companyDisplay = null;
                 string? autoCreateCompanyName = null;
+                string? companyError = null;
 
                 if (hasCompanyColumn && rowData.TryGetValue("CompanyName", out var companyName)
                     && !string.IsNullOrWhiteSpace(companyName))
@@ -83,7 +84,12 @@ public partial class SqlImportStore
                         autoCreateCompanyName = companyNameTrimmed;
                         companyDisplay = $"{companyNameTrimmed} (Tạo mới khi xác nhận import)";
                     }
-                    else throw new ImportRowException($"Công ty {companyNameTrimmed} chưa có; hãy bật cho phép tạo công ty hoặc chọn lại công ty tại dòng {rowNum}");
+                    else
+                    {
+                        resolvedCompanyId = null;
+                        companyDisplay = companyNameTrimmed;
+                        companyError = $"Công ty {companyNameTrimmed} chưa có; hãy bật cho phép tạo công ty hoặc chọn lại công ty tại dòng {rowNum}";
+                    }
                 }
                 else if (effectiveCompanyId.HasValue)
                 {
@@ -119,7 +125,9 @@ public partial class SqlImportStore
 
                 var (v010Errors, v010Warnings) = ValidateV010Extensions(preview.ExtendedFields, adminUnitCodes, rowNum);
                 preview.Warnings.AddRange(v010Warnings);
-                var allErrors = new List<string>(parsed.Errors);
+                var allErrors = new List<string>();
+                if (companyError != null) allErrors.Add(companyError);
+                allErrors.AddRange(parsed.Errors);
                 allErrors.AddRange(v010Errors);
 
                 if (allErrors.Count > 0 || parsed.Employee is null)

@@ -604,15 +604,16 @@ public sealed partial class SqlFamilyVisitorStore
 
                 fvStay.ValidFrom = (input.VisitStartDate ?? DateTime.Today).Date;
                 fvStay.ValidTo = input.VisitEndDate?.Date;
-                fvStay.SponsorCompanyId = input.SponsorCompanyId ?? input.CompanyId;
+                fvStay.SponsorCompanyId = (input.SponsorCompanyId is > 0 ? input.SponsorCompanyId : null)
+                    ?? (input.CompanyId is > 0 ? input.CompanyId : null);
                 fvStay.SponsorForeignPersonId = input.SponsorForeignPersonId;
                 fvStay.StatusCode = "ACTIVE";
                 fvStay.Note = input.Note;
                 fvStay.UpdatedAt = DateTime.UtcNow;
 
                 fvStay.FamilyVisitDetail ??= new FamilyVisitDetail { StayCase = fvStay };
-                fvStay.FamilyVisitDetail.RelativeName = input.RelativeName!.Trim();
-                fvStay.FamilyVisitDetail.Relationship = input.Relationship!.Trim();
+                fvStay.FamilyVisitDetail.RelativeName = (input.RelativeName ?? "").Trim();
+                fvStay.FamilyVisitDetail.Relationship = (input.Relationship ?? "").Trim();
                 fvStay.FamilyVisitDetail.RelativeTypeCode = string.IsNullOrWhiteSpace(input.RelativeTypeCode) ? "VIETNAMESE_CITIZEN" : input.RelativeTypeCode;
                 fvStay.FamilyVisitDetail.RelativeNationalityCode = input.RelativeNationalityCode;
                 fvStay.FamilyVisitDetail.RelativeIdNumber = input.RelativeIdNumber;

@@ -223,8 +223,9 @@ else
         <Columns>
             <TemplateColumn Title="Người nước ngoài" SortBy="x => x.FullName">
                 <CellTemplate>
-                    <div class="cell-inline" title="@context.Item.FullName">
-                        <span class="cell-primary">@context.Item.FullName</span>
+                    @{ var displayName = IRM.Core.Rules.PersonDisplayHelper.FormatName(context.Item.FullName, context.Item.PassportNumber); }
+                    <div class="cell-inline" title="@displayName">
+                        <span class="cell-primary">@displayName</span>
                         <span class="cell-secondary tabular-nums">
                             · @context.Item.GenderString@(context.Item.Birthday.HasValue ? $", {context.Item.Birthday.Value:yyyy}" : "")
                         </span>
@@ -356,7 +357,7 @@ else
     <TitleContent>
         <div class="d-flex align-center">
             <MudIcon Icon="@(_isEditingProfile ? Icons.Material.Outlined.EditNote : Icons.Material.Outlined.PersonAdd)" Color="Color.Primary" Class="mr-2" />
-            <span>@(_isEditingProfile ? $"Cập nhật hồ sơ NNN: {_form.FullName}" : "Thêm mới hồ sơ Người nước ngoài hợp nhất")</span>
+            <span>@(_isEditingProfile ? $"Cập nhật hồ sơ NNN: {IRM.Core.Rules.PersonDisplayHelper.FormatName(_form.FullName, _form.PassportNumber)}" : "Thêm mới hồ sơ Người nước ngoài hợp nhất")</span>
         </div>
     </TitleContent>
     <DialogContent>
@@ -932,7 +933,7 @@ else
         {
             await Registry.DeleteUnifiedProfileAsync(item.ForeignPersonId, item.EmployeeId, item.StudentId);
             await Load();
-            Snackbar.Add($"Đã xóa hồ sơ {item.FullName}.", Severity.Info);
+            Snackbar.Add($"Đã xóa hồ sơ {IRM.Core.Rules.PersonDisplayHelper.FormatName(item.FullName, item.PassportNumber)}.", Severity.Info);
         }
         catch (Exception ex)
         {

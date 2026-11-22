@@ -505,7 +505,7 @@
                             <Columns>
                                 <TemplateColumn Title="Họ tên người thăm thân">
                                     <CellTemplate>
-                                        <span class="cell-primary">@context.Item.FullName</span>
+                                        <span class="cell-primary">@IRM.Core.Rules.PersonDisplayHelper.FormatName(context.Item.FullName, context.Item.Passport)</span>
                                     </CellTemplate>
                                 </TemplateColumn>
                                 <TemplateColumn Title="Số hộ chiếu">

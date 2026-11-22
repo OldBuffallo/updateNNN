@@ -139,4 +139,30 @@ public sealed class PassportOnlyImportStoreTests
         Assert.Equal("changed", preview[0].Status);
         Assert.Contains(preview[0].Warnings, w => w.Contains("Ghi chú", StringComparison.OrdinalIgnoreCase));
     }
+
+    [Fact]
+    public async Task Preview_ElectronicIdentityWithBadStayValidFromAndUnknownCompanyWithBadDate_SurfaceAllErrorsInPreview()
+    {
+        await using var td = new TestDatabase();
+        await td.InitializeAsync();
+        var store = new SqlImportStore(td.Context, new SqlAuditStore(td.Context));
+        using var stream = BuildWorkbook(
+            ["Số hộ chiếu", "Định danh điện tử", "Hiệu lực diện từ", "Công ty", "Ngày sinh"],
+            ["PP-EID-ERR", "EID-001", "not-a-date", "", ""],
+            ["PP-COMP-ERR", "", "", "Công ty không tồn tại", "bad-bday"]);
+
+        var preview = await store.GeneratePreviewAsync(
+            stream,
+            Map((1, "Passport"), (2, "ElectronicIdentityNumber"), (3, "StayValidFrom"), (4, "CompanyName"), (5, "Birthday")),
+            companyId: 0,
+            new ImportReadOptions { HeaderRow = 1, StartRow = 2, CareerGroupId = 0, AllowCreateCompanies = false });
+
+        Assert.Equal(2, preview.Count);
+        Assert.Equal("error", preview[0].Status);
+        Assert.Contains("StayValidFrom", preview[0].ErrorMessage ?? "", StringComparison.OrdinalIgnoreCase);
+
+        Assert.Equal("error", preview[1].Status);
+        Assert.Contains("Công ty không tồn tại", preview[1].ErrorMessage ?? "");
+        Assert.Contains("ngày sinh", preview[1].ErrorMessage ?? "", StringComparison.OrdinalIgnoreCase);
+    }
 }

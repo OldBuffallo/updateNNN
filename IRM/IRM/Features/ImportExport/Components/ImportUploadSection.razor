@@ -44,9 +44,9 @@
 
         <MudGrid Spacing="3" Class="mt-3">
             <MudItem xs="6" data-import-tour="company">
-                <MudAutocomplete T="CompanyDto" @bind-Value="Page._selectedCompany" Label="Công ty mặc định (dùng khi file không có cột Công ty)"
+                <MudAutocomplete T="CompanyDto" @bind-Value="Page._selectedCompany" Label="Công ty mặc định (tùy chọn — dùng khi file không có cột Công ty)"
                                  SearchFunc="Page.SearchCompanyAsync" ToStringFunc="@(c => c?.CompanyName ?? "")"
-                                 Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                                 Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true" Clearable="true"
                                  ResetValueOnEmptyText="true" Immediate="true" />
             </MudItem>
             <MudItem xs="6">

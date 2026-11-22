@@ -1,2 +1,3 @@
 20260921030335_InitialSqlServerV101
 20260927120137_AddVisaSymbol
+20261122093015_MakeEmployeeCompanyNullable

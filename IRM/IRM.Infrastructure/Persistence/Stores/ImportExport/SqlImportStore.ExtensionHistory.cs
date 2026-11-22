@@ -39,6 +39,11 @@ public partial class SqlImportStore
             if (stayFrom.HasValue && stayTo.HasValue && stayTo.Value < stayFrom.Value)
                 errors.Add($"Khoảng hiệu lực diện cư trú không hợp lệ tại dòng {rowNum}");
         }
+        else if (fields.ContainsKey("ElectronicIdentityNumber") && fields.ContainsKey("StayValidFrom"))
+        {
+            try { _ = ParseNullableImportDate(fields.GetValueOrDefault("StayValidFrom")); }
+            catch (InvalidOperationException) { errors.Add($"Ngày hiệu lực định danh (StayValidFrom) không hợp lệ tại dòng {rowNum}"); }
+        }
         else if (fields.ContainsKey("StayValidFrom") || fields.ContainsKey("StayValidTo"))
         {
             warnings.Add("Có ngày hiệu lực diện cư trú nhưng thiếu cột Diện cư trú — sẽ bị bỏ qua");
@@ -234,7 +239,11 @@ public partial class SqlImportStore
         if (fields.TryGetValue("AdministrativeUnitCode", out var unitCode)
             && fields.TryGetValue("ResidenceAddress", out var residenceAddress))
         {
-            var unit = await _db.AdministrativeUnits.SingleOrDefaultAsync(item => item.Code == unitCode && !item.IsDeleted)
+            var normalizedUnitCode = unitCode.Trim().ToUpperInvariant();
+            var unit = await _db.AdministrativeUnits
+                .Where(item => !item.IsDeleted && item.Code.ToUpper() == normalizedUnitCode)
+                .OrderByDescending(item => item.ValidFrom)
+                .FirstOrDefaultAsync()
                 ?? throw new InvalidOperationException($"Không tìm thấy mã địa bàn: {unitCode}.");
             var residenceFrom = ParseImportDate(fields.GetValueOrDefault("ResidenceValidFrom"), employee.DateCreated ?? DateTime.Today);
             var residenceTo = ParseNullableImportDate(fields.GetValueOrDefault("ResidenceValidTo"));
