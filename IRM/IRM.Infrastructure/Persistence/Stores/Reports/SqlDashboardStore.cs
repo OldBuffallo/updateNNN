@@ -63,16 +63,19 @@ public class SqlDashboardStore : IDashboardStore
             && e.FamilyVisitEndDate <= in30Days);
         data.FamilyVisitExpiringCount = v010FamilyExpiringCount + legacyOnlyFamilyExpiringCount;
 
-        // Top 10 quốc tịch
-        data.NationalityStats = await _db.Employees
-            .Where(e => e.Hidden_flag == 0 && e.WorkingStatus == 0 && e.Nationality != null)
-            .Join(_db.Nationality, e => e.Nationality, n => n.NationalityCode,
-                (e, n) => new { n.NationalityName })
-            .GroupBy(x => x.NationalityName)
+        // Top 10 quốc tịch (bao gồm nhóm "Chưa rõ" cho hồ sơ thiếu quốc tịch)
+        var natMap = await _db.Nationality.AsNoTracking()
+            .ToDictionaryAsync(n => n.NationalityCode, n => n.NationalityName, StringComparer.OrdinalIgnoreCase);
+        var activeNationalities = await _db.Employees.AsNoTracking()
+            .Where(e => e.Hidden_flag == 0 && e.WorkingStatus == 0)
+            .Select(e => e.Nationality)
+            .ToListAsync();
+        data.NationalityStats = activeNationalities
+            .GroupBy(code => !string.IsNullOrWhiteSpace(code) && natMap.TryGetValue(code.Trim(), out var name) ? name : "Chưa rõ")
             .Select(g => new ChartItem { Label = g.Key, Value = g.Count() })
             .OrderByDescending(x => x.Value)
             .Take(10)
-            .ToListAsync();
+            .ToList();
 
         // Thống kê GPLĐ
         data.WorkPermitStats = await _db.Employees

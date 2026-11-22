@@ -25,7 +25,9 @@ public sealed class LegacySyncService : ILegacySyncService
                 {
                     var xml = XElement.Parse(item.AfterXml ?? "<row />");
                     var nameField = item.EntityType == "Employees" ? "StaffName" : "FullName";
-                    var person = await _registry.FindOrCreateMinimalAsync(Value(xml, nameField) ?? "Chưa xác định",
+                    var rawName = Value(xml, nameField);
+                    var resolvedName = string.IsNullOrWhiteSpace(rawName) ? "Chưa xác định" : rawName;
+                    var person = await _registry.FindOrCreateMinimalAsync(resolvedName,
                         Value(xml, "Passport"), Value(xml, "Nationality"), cancellationToken);
                     var sourceType = item.EntityType == "Employees" ? "EMPLOYEE" : "STUDENT";
                     if (!await _db.ForeignPersonSourceLinks.AnyAsync(x => x.SourceType == sourceType

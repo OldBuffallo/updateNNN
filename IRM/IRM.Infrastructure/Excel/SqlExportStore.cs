@@ -77,7 +77,7 @@ public partial class SqlExportStore : IExportStore
             .Include(e => e.Company)
             .Include(e => e.NationalityNav)
             .Include(e => e.Career)
-            .Where(e => e.WorkingStatus == 0)
+            .Where(e => e.Hidden_flag == 0 && e.WorkingStatus == 0)
             .OrderBy(e => e.StaffName);
 
         if (companyId.HasValue)
@@ -160,10 +160,19 @@ public partial class SqlExportStore : IExportStore
                 && e.TemporaryStay <= cutoff);
         }
 
-        var employees = await query
-            .OrderBy(e => e.Company!.CompanyName)
-            .ThenBy(e => e.StaffName)
-            .ToListAsync();
+        var loadedEmployees = await query.ToListAsync();
+        var employees = (groupBy switch
+        {
+            "nationality" => loadedEmployees
+                .OrderBy(e => e.NationalityNav?.NationalityName ?? e.Nationality ?? "Khác", StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(e => e.StaffName),
+            "field" => loadedEmployees
+                .OrderBy(e => e.Company?.Field?.FieldName ?? "Khác", StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(e => e.StaffName),
+            _ => loadedEmployees
+                .OrderBy(e => e.Company?.CompanyName ?? "Khác", StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(e => e.StaffName)
+        }).ToList();
 
         using var wb = new XLWorkbook();
         var ws = wb.Worksheets.Add("Báo cáo");

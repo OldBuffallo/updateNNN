@@ -205,7 +205,7 @@
                                     }
                                     else if (col.Name == "Họ tên")
                                     {
-                                        <span class="cell-primary">@GetColumnValue(emp, col.Name)</span>
+                                        <span class="cell-primary">@IRM.Core.Rules.PersonDisplayHelper.FormatName(emp.StaffName, emp.Passport)</span>
                                     }
                                     else
                                     {

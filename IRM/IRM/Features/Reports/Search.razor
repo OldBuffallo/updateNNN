@@ -85,13 +85,18 @@
             <div class="search-result-item">
                 <div class="result-type"><MudIcon Icon="@Icons.Material.Outlined.Person" Color="Color.Primary" /></div>
                 <div class="result-body">
-                    <h4>@((MarkupString)HighlightKeyword(emp.StaffName ?? "")) — @((MarkupString)HighlightKeyword(emp.NationalityNav?.NationalityName ?? emp.Nationality ?? ""))</h4>
+                    @{
+                        var displayName = IRM.Core.Rules.PersonDisplayHelper.FormatName(emp.StaffName, emp.Passport);
+                        var displayNat = emp.NationalityNav?.NationalityName ?? emp.Nationality;
+                        var metaParts = new List<string> { $"HC: {emp.Passport ?? "-"}" };
+                        if (!string.IsNullOrWhiteSpace(emp.Company?.CompanyName)) metaParts.Add(emp.Company!.CompanyName);
+                        if (!string.IsNullOrWhiteSpace(emp.Career?.CareerName)) metaParts.Add(emp.Career!.CareerName);
+                        metaParts.Add(emp.WorkPermitString);
+                        metaParts.Add($"Hạn TT: {emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "-"}");
+                    }
+                    <h4>@((MarkupString)HighlightKeyword(displayName))@if (!string.IsNullOrWhiteSpace(displayNat)) { <text> — </text>@((MarkupString)HighlightKeyword(displayNat)) }</h4>
                     <p>
-                        HC: @((MarkupString)HighlightKeyword(emp.Passport ?? "")) ·
-                        @((MarkupString)HighlightKeyword(emp.Company?.CompanyName ?? "")) ·
-                        @((MarkupString)HighlightKeyword(emp.Career?.CareerName ?? "")) ·
-                        @emp.WorkPermitString ·
-                        Hạn TT: @(emp.TemporaryStay?.ToString("dd/MM/yyyy") ?? "-")
+                        @((MarkupString)HighlightKeyword(string.Join(" · ", metaParts)))
                         @if (emp.DaysUntilExpiry.HasValue)
                         {
                             var days = emp.DaysUntilExpiry.Value;

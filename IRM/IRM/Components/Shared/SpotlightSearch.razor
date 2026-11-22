@@ -278,8 +278,8 @@
                 {
                     results.Add(new SpotlightResultItem
                     {
-                        Title = emp.StaffName,
-                        Subtitle = $"Hộ chiếu: {emp.Passport ?? "N/A"} · Công ty: {emp.Company?.CompanyName ?? "N/A"} · {emp.GenderString}",
+                        Title = IRM.Core.Rules.PersonDisplayHelper.FormatName(emp.StaffName, emp.Passport),
+                        Subtitle = $"Hộ chiếu: {emp.Passport ?? "N/A"} · Công ty: {emp.Company?.CompanyName ?? "Chưa gán"} · {emp.GenderString}",
                         Category = "Lao động",
                         Url = $"/employees",
                         Icon = Icons.Material.Outlined.Person,
@@ -298,7 +298,7 @@
                 {
                     results.Add(new SpotlightResultItem
                     {
-                        Title = fp.FullName,
+                        Title = IRM.Core.Rules.PersonDisplayHelper.FormatName(fp.FullName, fp.PassportNumber),
                         Subtitle = $"HC: {fp.PassportNumber ?? "N/A"} · QT: {fp.NationalityCode ?? "N/A"}",
                         Category = "Hồ sơ NNN",
                         Url = "/foreign-persons",

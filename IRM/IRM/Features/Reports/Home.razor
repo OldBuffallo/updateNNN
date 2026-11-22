@@ -261,7 +261,7 @@ else if (_error != null)
                             @(!string.IsNullOrEmpty(emp.StaffName) ? emp.StaffName[0].ToString().ToUpper() : "N")
                         </div>
                         <div class="alert-details">
-                            <div class="alert-name">@emp.StaffName</div>
+                            <div class="alert-name">@IRM.Core.Rules.PersonDisplayHelper.FormatName(emp.StaffName, emp.Passport)</div>
                             <div class="alert-meta">
                                 <span>@(emp.Company?.CompanyName ?? "Chưa gán công ty")</span>
                                 <span class="dot-separator">·</span>
