@@ -18,7 +18,92 @@ public partial class SqlImportStore
     // PRIVATE HELPERS
     // ══════════════════════════════════════════
 
-    private async Task<V010ImportChanges> UpsertV010ExtensionsAsync(Employee employee, Dictionary<string, string> fields, int companyId)
+    internal static (List<string> Errors, List<string> Warnings) ValidateV010Extensions(
+        Dictionary<string, string> fields, IReadOnlySet<string> activeAdminUnitCodes, int rowNum)
+    {
+        var errors = new List<string>();
+        var warnings = new List<string>();
+        if (!fields.Keys.Any(V010ImportFields.Contains)) return (errors, warnings);
+
+        if (fields.TryGetValue("StayPurposeCode", out var purposeValue))
+        {
+            var purpose = purposeValue.Trim().ToUpperInvariant();
+            if (!StayPurposeCodes.All.Contains(purpose))
+                errors.Add($"Diện cư trú không hợp lệ '{purposeValue}' tại dòng {rowNum}");
+            DateTime? stayFrom = null;
+            DateTime? stayTo = null;
+            try { stayFrom = ParseNullableImportDate(fields.GetValueOrDefault("StayValidFrom")); }
+            catch (InvalidOperationException) { errors.Add($"Ngày bắt đầu diện cư trú không hợp lệ tại dòng {rowNum}"); }
+            try { stayTo = ParseNullableImportDate(fields.GetValueOrDefault("StayValidTo")); }
+            catch (InvalidOperationException) { errors.Add($"Ngày kết thúc diện cư trú không hợp lệ tại dòng {rowNum}"); }
+            if (stayFrom.HasValue && stayTo.HasValue && stayTo.Value < stayFrom.Value)
+                errors.Add($"Khoảng hiệu lực diện cư trú không hợp lệ tại dòng {rowNum}");
+        }
+        else if (fields.ContainsKey("StayValidFrom") || fields.ContainsKey("StayValidTo"))
+        {
+            warnings.Add("Có ngày hiệu lực diện cư trú nhưng thiếu cột Diện cư trú — sẽ bị bỏ qua");
+        }
+
+        if (fields.TryGetValue("DocumentNumber", out var documentValue))
+        {
+            var numbers = SplitImportValues(documentValue);
+            var types = SplitImportValues(fields.GetValueOrDefault("DocumentTypeCode"));
+            var validToValues = SplitImportValues(fields.GetValueOrDefault("DocumentValidTo"));
+            var allowedTypes = new[] { ImmigrationDocumentTypeCodes.Visa, ImmigrationDocumentTypeCodes.VisaExtension,
+                ImmigrationDocumentTypeCodes.TemporaryResidenceCard, ImmigrationDocumentTypeCodes.VisaExemption, ImmigrationDocumentTypeCodes.Other };
+            DateTime? docFrom = null;
+            try { docFrom = ParseNullableImportDate(fields.GetValueOrDefault("DocumentValidFrom")); }
+            catch (InvalidOperationException) { errors.Add($"Ngày cấp/hiệu lực giấy tờ XNC không hợp lệ tại dòng {rowNum}"); }
+
+            for (var index = 0; index < numbers.Length; index++)
+            {
+                var type = (index < types.Length ? types[index] : ImmigrationDocumentTypeCodes.Visa).ToUpperInvariant();
+                if (!allowedTypes.Contains(type))
+                    errors.Add($"Loại giấy tờ XNC không hợp lệ '{type}' tại dòng {rowNum}");
+                if (index < validToValues.Length)
+                {
+                    try
+                    {
+                        var docTo = ParseNullableImportDate(validToValues[index]);
+                        if (docFrom.HasValue && docTo.HasValue && docTo.Value < docFrom.Value)
+                            errors.Add($"Hạn giấy tờ XNC nhỏ hơn ngày hiệu lực tại dòng {rowNum}");
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        errors.Add($"Hạn giấy tờ XNC không hợp lệ '{validToValues[index]}' tại dòng {rowNum}");
+                    }
+                }
+            }
+        }
+        else if (fields.ContainsKey("DocumentTypeCode") || fields.ContainsKey("DocumentValidFrom") || fields.ContainsKey("DocumentValidTo"))
+        {
+            warnings.Add("Có thông tin loại/ngày giấy tờ XNC nhưng thiếu Số giấy tờ — sẽ bị bỏ qua");
+        }
+
+        var hasUnit = fields.TryGetValue("AdministrativeUnitCode", out var unitCode);
+        var hasResAddr = fields.ContainsKey("ResidenceAddress");
+        if (hasUnit && hasResAddr)
+        {
+            if (!activeAdminUnitCodes.Contains(unitCode!.Trim()))
+                errors.Add($"Không tìm thấy mã địa bàn '{unitCode}' tại dòng {rowNum}");
+            DateTime? resFrom = null;
+            DateTime? resTo = null;
+            try { resFrom = ParseNullableImportDate(fields.GetValueOrDefault("ResidenceValidFrom")); }
+            catch (InvalidOperationException) { errors.Add($"Ngày bắt đầu lưu trú không hợp lệ tại dòng {rowNum}"); }
+            try { resTo = ParseNullableImportDate(fields.GetValueOrDefault("ResidenceValidTo")); }
+            catch (InvalidOperationException) { errors.Add($"Ngày kết thúc lưu trú không hợp lệ tại dòng {rowNum}"); }
+            if (resFrom.HasValue && resTo.HasValue && resTo.Value < resFrom.Value)
+                errors.Add($"Khoảng lịch sử lưu trú không hợp lệ tại dòng {rowNum}");
+        }
+        else if (hasUnit || hasResAddr || fields.ContainsKey("ResidenceValidFrom") || fields.ContainsKey("ResidenceValidTo"))
+        {
+            warnings.Add("Thiếu cặp Mã địa bàn & Địa chỉ lưu trú mở rộng — thông tin lưu trú mở rộng sẽ bị bỏ qua");
+        }
+
+        return (errors, warnings);
+    }
+
+    private async Task<V010ImportChanges> UpsertV010ExtensionsAsync(Employee employee, Dictionary<string, string> fields, int? companyId)
     {
         var changes = new V010ImportChanges();
         if (!fields.Keys.Any(V010ImportFields.Contains)) return changes;
@@ -32,18 +117,19 @@ public partial class SqlImportStore
         var passport = IRM.Core.Rules.PassportRules.NormalizePassport(employee.Passport);
         var passportKey = IRM.Core.Rules.PassportRules.SearchKey(passport);
         if (person is null && passportKey is not null)
-            person = await _db.ForeignPersons.SingleOrDefaultAsync(item => item.PassportSearchKey == passportKey && !item.IsDeleted);
+            person = await _db.ForeignPersons.FirstOrDefaultAsync(item => item.PassportSearchKey == passportKey && !item.IsDeleted);
         if (person is null)
         {
+            var staffName = (employee.StaffName ?? "").Trim();
             person = new ForeignPerson
             {
-                FullName = employee.StaffName.Trim(),
+                FullName = staffName,
                 Gender = (int)employee.Gender,
                 Birthday = employee.Birthday,
                 NationalityCode = employee.Nationality,
                 PassportNumber = passport,
                 PassportSearchKey = passportKey,
-                IsDataIncomplete = passportKey is null
+                IsDataIncomplete = string.IsNullOrWhiteSpace(staffName) || passportKey is null
             };
             _db.ForeignPersons.Add(person);
             changes.CreatedForeignPerson = true;

@@ -36,11 +36,12 @@ public partial class SqlImportStore
                     var ids = await _db.ImportBackups.Where(b => b.ImportSessionId == result.SessionId && b.EntityType == "Employee" && b.ActionType == "INSERT")
                         .Select(b => b.EntityId).ToListAsync();
                     var saved = await _db.Employees.AsNoTracking().Where(e => ids.Contains(e.IDEmployee)).ToListAsync();
-                    var companies = await _db.Companies.AsNoTracking().Where(c => saved.Select(e => e.IDCompany).Contains(c.IDCompany)).ToListAsync();
+                    var savedCompanyIds = saved.Where(e => e.IDCompany.HasValue).Select(e => e.IDCompany!.Value).Distinct().ToList();
+                    var companies = await _db.Companies.AsNoTracking().Where(c => savedCompanyIds.Contains(c.IDCompany)).ToListAsync();
                     foreach (var row in previewRows.Where(Writable))
                     {
-                        var target = row.ResolvedCompanyId is > 0 ? row.ResolvedCompanyId.Value : companyId;
-                        if (row.ExtendedFields.TryGetValue("__AutoCreateCompanyName",out var name)) target = companies.FirstOrDefault(c => c.CompanyName == name)?.IDCompany ?? target;
+                        int? target = row.ResolvedCompanyId is > 0 ? row.ResolvedCompanyId.Value : (companyId > 0 ? companyId : null);
+                        if (row.ExtendedFields.TryGetValue("__AutoCreateCompanyName", out var name)) target = companies.FirstOrDefault(c => c.CompanyName == name)?.IDCompany ?? target;
                         var employee = saved.LastOrDefault(e => e.IDCompany == target && e.Passport == row.ParsedEmployee!.Passport);
                         if (employee != null) { row.ParsedEmployee!.IDEmployee = employee.IDEmployee; row.ResolvedCompanyId = employee.IDCompany; }
                     }
@@ -58,13 +59,13 @@ public partial class SqlImportStore
                     }
                     if (result.Errors.Count > 0) { result.ErrorCount = result.Errors.Count; return; }
                     var affected = new HashSet<int>();
-                    var identities = new Dictionary<ImportPreviewRow, (int Id, int Company)>();
+                    var identities = new Dictionary<ImportPreviewRow, (int Id, int? Company)>();
                     foreach (var row in previewRows)
                     {
                         if (row.Status == "error" || row.ParsedEmployee == null)
                         { result.ErrorCount++; result.Errors.Add($"Dòng {row.RowNumber}: {row.ErrorMessage}"); continue; }
                         if (!Writable(row)) { result.SkippedCount++; continue; }
-                        var targetId = row.ResolvedCompanyId is > 0 ? row.ResolvedCompanyId.Value : companyId;
+                        int? targetId = row.ResolvedCompanyId is > 0 ? row.ResolvedCompanyId.Value : (companyId > 0 ? companyId : null);
                         if (row.ExtendedFields.TryGetValue("__AutoCreateCompanyName", out var companyName))
                         {
                             if (row.ExtendedFields.GetValueOrDefault("__AllowCreateCompany") != "true")
@@ -80,7 +81,7 @@ public partial class SqlImportStore
                             }
                             targetId = company.IDCompany;
                         }
-                        if (!await _db.Companies.AnyAsync(c => c.IDCompany == targetId && c.Delete_flag == 0))
+                        if (targetId.HasValue && !await _db.Companies.AnyAsync(c => c.IDCompany == targetId.Value && c.Delete_flag == 0))
                         { result.ErrorCount++; result.Errors.Add($"Dòng {row.RowNumber}: Công ty không tồn tại hoặc chưa được chọn."); continue; }
                         var incoming = row.ParsedEmployee;
                         var active = await _db.Employees.Where(e => e.IDCompany == targetId && e.Passport == incoming.Passport && e.Hidden_flag == 0).ToListAsync();
@@ -118,15 +119,18 @@ public partial class SqlImportStore
                             OldData = JsonSerializer.Serialize(new { V010Changes = changes, Versioned = active.Count > 0,
                                 NewFingerprint = LegacyImportRules.EmployeeFingerprint(employee) }) });
                         if (active.Count > 0) result.UpdatedCount++; else result.AddedCount++;
-                        affected.Add(targetId);
+                        if (targetId.HasValue) affected.Add(targetId.Value);
                         identities[row] = (employee.IDEmployee, targetId);
                     }
                     if (result.AddedCount == 0 && result.UpdatedCount == 0 && result.ErrorCount > 0) throw new InvalidOperationException(result.Errors[0]);
                     foreach (var id in affected) await RecomputeCompanyCountersAsync(id);
-                    var historyCompanyId = affected.Count == 1 ? affected.Single() : companyId;
+                    int? historyCompanyId = affected.Count == 1 ? affected.Single() : (companyId > 0 ? companyId : null);
+                    string? historyCompanyName = affected.Count > 1
+                        ? $"Nhiều công ty ({affected.Count})"
+                        : historyCompanyId.HasValue ? (await _db.Companies.FindAsync(historyCompanyId.Value))?.CompanyName : null;
                     _db.ImportHistories.Add(new() {
                         SessionId = result.SessionId, FileName = fileName, CompanyId = historyCompanyId,
-                        CompanyName = affected.Count > 1 ? $"Nhiều công ty ({affected.Count})" : (await _db.Companies.FindAsync(historyCompanyId))?.CompanyName,
+                        CompanyName = historyCompanyName,
                         TotalRows = result.TotalRows, AddedRows = result.AddedCount, UpdatedRows = result.UpdatedCount,
                         ErrorRows = result.ErrorCount, Status = "committed", Username = username,
                         ErrorDetails = result.Errors.Count > 0 ? JsonSerializer.Serialize(result.Errors) : null

@@ -36,18 +36,21 @@ public partial class SqlImportStore
         var nationalities = await _db.Nationality.Where(n => n.Delete_flag == 0).ToListAsync();
         var careers = await _db.Careers.Include(c => c.CareerGroup).Where(c => c.Delete_flag == 0).ToListAsync();
         var wards = await _db.Wards.Where(w => w.Delete_flag == 0).Select(w => w.WardName).ToListAsync();
+        var adminUnitCodes = (await _db.AdministrativeUnits.Where(u => !u.IsDeleted).Select(u => u.Code).ToListAsync())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var investors = await _db.Investments.AsNoTracking().ToListAsync();
         var groups = await _db.CareerGroups.Select(g => g.IDCG).ToListAsync();
         var groupId = options.CareerGroupId > 0 ? options.CareerGroupId : groups.Count == 1 ? groups[0] : 0;
         var companies = await _db.Companies.Where(c => c.Delete_flag == 0).ToListAsync();
-        var effectiveCompanyId = companyId > 0
+        int? effectiveCompanyId = companyId > 0
             ? companyId
             : companies.Count == 1
                 ? companies[0].IDCompany
-                : 0;
+                : null;
 
         // Kiểm tra xem có cột CompanyName được map không
         var hasCompanyColumn = mappings.Any(m => m.SystemField == "CompanyName");
+        var mappedFields = mappings.Select(m => m.SystemField).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         int rowNum = 0;
         foreach (var rowData in allRows)
@@ -57,8 +60,8 @@ public partial class SqlImportStore
 
             try
             {
-                // Resolve công ty theo từng dòng
-                int resolvedCompanyId = effectiveCompanyId;
+                // Resolve công ty theo từng dòng (cho phép null nếu chưa chọn công ty)
+                int? resolvedCompanyId = effectiveCompanyId;
                 string? companyDisplay = null;
                 string? autoCreateCompanyName = null;
 
@@ -76,51 +79,35 @@ public partial class SqlImportStore
                     }
                     else if (options.AllowCreateCompanies)
                     {
-                        resolvedCompanyId = 0;
+                        resolvedCompanyId = null;
                         autoCreateCompanyName = companyNameTrimmed;
                         companyDisplay = $"{companyNameTrimmed} (Tạo mới khi xác nhận import)";
                     }
                     else throw new ImportRowException($"Công ty {companyNameTrimmed} chưa có; hãy bật cho phép tạo công ty hoặc chọn lại công ty tại dòng {rowNum}");
                 }
-                else if (hasCompanyColumn)
+                else if (effectiveCompanyId.HasValue)
                 {
-                    // Có cột CompanyName nhưng ô trống → dùng công ty dropdown (nếu có)
-                    if (effectiveCompanyId > 0)
-                    {
-                        var fallbackCompany = companies.FirstOrDefault(c => c.IDCompany == effectiveCompanyId);
-                        companyDisplay = fallbackCompany?.CompanyName ?? "(Công ty mặc định)";
-                    }
-                    else
-                    {
-                        preview.Status = "error";
-                        preview.ErrorMessage = "Thiếu tên công ty (ô trống) và không chọn công ty mặc định";
-                        previewRows.Add(preview);
-                        continue;
-                    }
-                }
-                else if (effectiveCompanyId > 0)
-                {
-                    // Không có cột CompanyName → dùng dropdown (hành vi cũ)
-                    var fallbackCompany = companies.FirstOrDefault(c => c.IDCompany == effectiveCompanyId);
-                    companyDisplay = fallbackCompany?.CompanyName;
+                    var fallbackCompany = companies.FirstOrDefault(c => c.IDCompany == effectiveCompanyId.Value);
+                    companyDisplay = fallbackCompany?.CompanyName ?? "(Công ty mặc định)";
                 }
                 else
                 {
-                    preview.Status = "error";
-                    preview.ErrorMessage = "Chưa chọn công ty mặc định. Hãy tạo công ty và chọn công ty trước khi import.";
-                    previewRows.Add(preview);
-                    continue;
+                    resolvedCompanyId = null;
+                    companyDisplay = "(Chưa gán công ty)";
+                    preview.Warnings.Add("Chưa gán công ty");
                 }
 
                 preview.ResolvedCompanyId = resolvedCompanyId;
                 preview.CompanyDisplay = companyDisplay;
 
-                // Parse row data
-                if (!groups.Contains(groupId)) throw new ImportRowException($"Chưa chọn nhóm nghề hợp lệ tại dòng {rowNum}");
-                var employee = ParseRowToEmployee(rowData, resolvedCompanyId, nationalities, careers, groupId,
-                    investors.Where(i => i.IDCompany == resolvedCompanyId && i.Passport != null)
-                        .Select(i => i.Passport!.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase), wards);
-                preview.ParsedEmployee = employee;
+                var investorSet = resolvedCompanyId.HasValue
+                    ? investors.Where(i => i.IDCompany == resolvedCompanyId.Value && i.Passport != null)
+                        .Select(i => i.Passport!.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase)
+                    : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                var parsed = ParseRowWithWarnings(rowData, resolvedCompanyId, nationalities, careers, groupId > 0 ? groupId : null, investorSet, wards);
+                preview.Warnings.AddRange(parsed.Warnings);
+
                 preview.ExtendedFields = rowData
                     .Where(item => V010ImportFields.Contains(item.Key) && !string.IsNullOrWhiteSpace(item.Value))
                     .ToDictionary(item => item.Key, item => item.Value.Trim(), StringComparer.OrdinalIgnoreCase);
@@ -129,6 +116,24 @@ public partial class SqlImportStore
                     preview.ExtendedFields["__AutoCreateCompanyName"] = autoCreateCompanyName;
                     preview.ExtendedFields["__AllowCreateCompany"] = "true";
                 }
+
+                var (v010Errors, v010Warnings) = ValidateV010Extensions(preview.ExtendedFields, adminUnitCodes, rowNum);
+                preview.Warnings.AddRange(v010Warnings);
+                var allErrors = new List<string>(parsed.Errors);
+                allErrors.AddRange(v010Errors);
+
+                if (allErrors.Count > 0 || parsed.Employee is null)
+                {
+                    preview.Status = "error";
+                    preview.ErrorMessage = string.Join("\n", allErrors);
+                    preview.Passport = rowData.GetValueOrDefault("Passport", "").Trim();
+                    preview.StaffName = rowData.GetValueOrDefault("StaffName", "").Trim();
+                    previewRows.Add(preview);
+                    continue;
+                }
+
+                var employee = parsed.Employee;
+                preview.ParsedEmployee = employee;
 
                 // Set display values
                 preview.StaffName = employee.StaffName;
@@ -154,13 +159,23 @@ public partial class SqlImportStore
                     .OrderByDescending(e => e.IDEmployee).FirstOrDefaultAsync();
                 if (existing != null)
                 {
-                    PreserveUnmappedExtensions(employee, existing, mappings.Select(m => m.SystemField).ToHashSet());
-                    preview.Status = LegacyImportRules.SameAsImportedEmployee(existing, employee) &&
-                        !await HasMappedExtensionChangesAsync(existing, preview.ExtendedFields) ? "unchanged" : "changed";
+                    PreserveUnmappedExtensions(employee, existing, mappedFields);
+                    var isChanged = !(LegacyImportRules.SameAsImportedEmployee(existing, employee) &&
+                        !await HasMappedExtensionChangesAsync(existing, preview.ExtendedFields));
+                    preview.Status = isChanged ? "changed" : "unchanged";
                     preview.ExistingEmployeeId = existing.IDEmployee;
                     preview.ExistingFingerprint = LegacyImportRules.EmployeeFingerprint(existing);
+
+                    if (isChanged)
+                    {
+                        if (!string.IsNullOrWhiteSpace(existing.Note) && string.IsNullOrWhiteSpace(employee.Note))
+                            preview.Warnings.Add("Cập nhật sẽ ghi đè trống cột Ghi chú hiện có");
+                        if (!string.IsNullOrWhiteSpace(existing.SettlementResultsString) && string.IsNullOrWhiteSpace(employee.SettlementResultsString))
+                            preview.Warnings.Add("Cập nhật sẽ ghi đè trống Kết quả giải quyết hiện có");
+                    }
                 }
-                if (await _db.Employees.AnyAsync(e => e.Passport == employee.Passport && e.IDCompany != resolvedCompanyId &&
+                if (resolvedCompanyId.HasValue && await _db.Employees.AnyAsync(e => e.Passport == employee.Passport &&
+                    e.IDCompany.HasValue && e.IDCompany != resolvedCompanyId &&
                     e.Hidden_flag == 0 && e.WorkingStatus == 0))
                     preview.Warnings.Add("Nhân viên đang làm ở một công ty khác");
             }
