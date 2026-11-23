@@ -17,7 +17,7 @@ Giải pháp `IRM/IRM.sln` được chia thành 4 project sản phẩm và 1 pro
 | **`IRM.Application`** | Service Interfaces (`I*Service`), Store Abstractions (`I*Store`), Application Services (RBAC guard + DTO mapping), DTOs/Contracts, `ExcelValueNormalizer` | Chỉ tham chiếu `IRM.Core`; **không** lộ `DbContext`, `DbSet`, `IQueryable` ra bất kỳ interface nào |
 | **`IRM.Infrastructure`** | `IrmDbContext`, EF Core Configurations & Migrations, SQL Stores (`Sql*Store`), ClosedXML Excel Helpers (`ExcelReader`, `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper`, `SqlExportStore`, `SqlStatisticsExportStore`), `DatabaseSeeder`, `PrivateFileStorage`, `LegacySync` | Tham chiếu `IRM.Core`, `IRM.Application`; **không** tham chiếu `IRM` (Web) |
 | **`IRM`** | Blazor Interactive Server UI (`Components/`, `Features/`), `Program.cs`, `Hosting/` (Minimal APIs, Security, Maintenance CLI), `wwwroot/` (offline vendor assets, `irm-interop.js`, `import-tour.js`, `app-product-tour.js`) | Presentation + Composition Root |
-| **`IRM.Tests`** | xUnit (`400 passed`, `6 SQL-Server-only skipped`) + Node.js browser/JS harness (`54/54 passed`) | Kiểm thử đầy đủ các tầng |
+| **`IRM.Tests`** | xUnit (`409 passed`, `6 SQL-Server-only skipped`) + Node.js browser/JS harness (`54/54 passed`) | Kiểm thử đầy đủ các tầng |
 
 ```mermaid
 flowchart LR
@@ -127,7 +127,7 @@ flowchart LR
     - **Bước 1 dành riêng cho `ADMIN`:** `[data-app-tour="admin-system"]` (nằm trong `<AuthorizeView Roles="ADMIN">`) hướng dẫn thiết lập **Quản trị hệ thống & Danh mục** trước tiên. Người dùng không có quyền Admin sẽ tự động bỏ qua Bước 1 và bắt đầu ngay tại **Bảng điều khiển**.
     - **Thứ tự các bước tiếp theo khớp 100% thứ tự Sidebar từ trên xuống dưới:** `nav-dashboard` → `nav-foreign-persons` → `nav-companies` → `nav-accommodations` → `nav-inspections` → `nav-search` → `nav-reports` → `nav-statistics` → `nav-import` → `#btnAppUserGuide`.
   - **Chuyển chế độ Sáng/Tối (`IrmThemeController`)** & **Mật độ bảng (Thoáng/Gọn)** lưu trên `localStorage`.
-  - **Tra cứu nhanh `Ctrl+K`** (`SpotlightSearch.razor`) + **Menu Khảo sát & Góp ý** (`#btnCustomerFeedback`).
+  - **Tra cứu nhanh `Ctrl+K`** (`SpotlightSearch.razor`).
 
 ### 5.2 Bảng điều khiển (`/`)
 - **UI:** `IRM/Features/Reports/Home.razor`
@@ -229,7 +229,7 @@ flowchart LR
   5. `districts` — Danh mục Quận / Huyện.
   6. `wards` — Danh mục Phường / Xã.
   7. **`admin-units` — Địa bàn hành chính (Cấu hình thủ công + Nạp Excel):**
-     - **Dữ liệu khởi tạo:** `DatabaseSeeder` tạo sẵn bộ dữ liệu mẫu ban đầu khi DB trống; Quản trị viên có thể tự sửa/vô hiệu hóa hoặc nạp đè danh mục địa bàn của đơn vị mình qua Excel.
+     - **Dữ liệu khởi tạo:** `DatabaseSeeder.SeedCatalogsIfEmptyAsync` chỉ tạo 1 địa bàn mẫu trung tính (`DB-001`) khi bảng `AdministrativeUnits` rỗng hoàn toàn (không tự chèn lại dữ liệu mẫu địa phương khác khi khởi động lại); `LegacySyncWorker` tắt mặc định (`LegacySync:Enabled = false`). Quản trị viên có thể tự sửa/vô hiệu hóa hoặc nạp đè danh mục địa bàn của đơn vị mình qua Excel.
      - **Tự cấu hình:** Thêm / Sửa / Vô hiệu hóa (kèm `ValidFrom` chuẩn `dd/MM/yyyy`, tìm kiếm nhanh theo Mã/Tên, lọc theo Loại: Phường / Xã / Đặc khu / Tỉnh-TP); kiểm tra trùng `(Code, ValidFrom)` trả thông báo tiếng Việt rõ ràng.
      - **Nạp hàng loạt từ Excel (`.xlsx`):**
        - Nút **Tải file mẫu Excel** (`Mau-Dia-Ban-Hanh-Chinh.xlsx` — 4 cột: `Mã địa bàn`, `Tên địa bàn`, `Loại`, `Hiệu lực từ`).
@@ -247,5 +247,5 @@ Mọi thay đổi mã nguồn trên nhánh `custom/kh2` phải vượt qua toàn
 | Bộ kiểm thử | Lệnh chạy (từ `IRM/`) | Quy mô hiện tại | Phạm vi bao phủ |
 | :--- | :--- | :--- | :--- |
 | **Build Release** | `dotnet build IRM.sln -c Release` | 5 project | Biên dịch + MudBlazor Analyzer (`MUD0002`...) |
-| **.NET xUnit Suite** | `dotnet test IRM.Tests/IRM.Tests.csproj -c Release --no-build` | **400 Passed**, 0 Failed, 6 Skipped (SQL Server integration) | 52 file test: Architecture boundaries, RBAC/Auth, Passport-only rules (Schema, Manual, Import, Downstream), `ExcelValueNormalizer`, `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper` & Upsert, Statistics, Reports, Search, Inspections, Accommodations, Companies, Unified ForeignPersons, Markup guards (`AppProductTourMarkupTests`, `DynamicAdminUnitsMarkupTests`) |
+| **.NET xUnit Suite** | `dotnet test IRM.Tests/IRM.Tests.csproj -c Release --no-build` | **409 Passed**, 0 Failed, 6 Skipped (SQL Server integration) | 52 file test: Architecture boundaries, RBAC/Auth, Passport-only rules (Schema, Manual, Import, Downstream), `ExcelValueNormalizer`, `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper` & Upsert, Statistics, Reports, Search, Inspections, Accommodations, Companies, Unified ForeignPersons, Markup guards (`AppProductTourMarkupTests`, `DynamicAdminUnitsMarkupTests`) |
 | **Node.js Browser/JS Suite** | `node --test IRM.Tests/Browser/*.test.cjs` | **54/54 Passed** | 6 file test: `app-product-tour.test.cjs`, `feedback-spotlight.test.cjs`, `import-tour.test.cjs`, `responsive-table.test.cjs`, `theme-chart.test.cjs`, `theme-preference.test.cjs` |
