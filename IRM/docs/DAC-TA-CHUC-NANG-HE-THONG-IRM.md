@@ -17,7 +17,7 @@ Giải pháp `IRM/IRM.sln` được chia thành 4 project sản phẩm và 1 pro
 | **`IRM.Application`** | Service Interfaces (`I*Service`), Store Abstractions (`I*Store`), Application Services (RBAC guard + DTO mapping), DTOs/Contracts, `ExcelValueNormalizer` | Chỉ tham chiếu `IRM.Core`; **không** lộ `DbContext`, `DbSet`, `IQueryable` ra bất kỳ interface nào |
 | **`IRM.Infrastructure`** | `IrmDbContext`, EF Core Configurations & Migrations, SQL Stores (`Sql*Store`), ClosedXML Excel Helpers (`ExcelReader`, `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper`, `SqlExportStore`, `SqlStatisticsExportStore`), `DatabaseSeeder`, `PrivateFileStorage`, `LegacySync` | Tham chiếu `IRM.Core`, `IRM.Application`; **không** tham chiếu `IRM` (Web) |
 | **`IRM`** | Blazor Interactive Server UI (`Components/`, `Features/`), `Program.cs`, `Hosting/` (Minimal APIs, Security, Maintenance CLI), `wwwroot/` (offline vendor assets, `irm-interop.js`, `import-tour.js`, `app-product-tour.js`) | Presentation + Composition Root |
-| **`IRM.Tests`** | xUnit (`396 passed`, `6 SQL-Server-only skipped`) + Node.js browser/JS harness (`54/54 passed`) | Kiểm thử đầy đủ các tầng |
+| **`IRM.Tests`** | xUnit (`400 passed`, `6 SQL-Server-only skipped`) + Node.js browser/JS harness (`54/54 passed`) | Kiểm thử đầy đủ các tầng |
 
 ```mermaid
 flowchart LR
@@ -39,8 +39,10 @@ flowchart LR
 - **Bắt buộc HTTPS từ máy ngoài:** Middleware trong `Program.cs` từ chối HTTP không mã hóa nếu `RemoteIpAddress` không phải loopback (cấu hình qua `Security:RequireHttpsForRemoteClients`, mặc định `true`).
 - **Nhật ký kiểm toán (`AuditLogs`):** Ghi nhận thao tác nhạy cảm (đăng nhập, thêm/sửa/xóa, import/rollback, xuất báo cáo).
 
-### 2.2 Ma trận 5 vai trò (`IrmRoles`)
-Định nghĩa tại `IRM.Application/Abstractions/Security/IrmRoles.cs` và cưỡng chế tại tầng Application Service qua `IServiceAuthorizationGuard`:
+### 2.2 Ma trận 5 vai trò (`IrmRoles`) & Bảo vệ 2 lớp
+Định nghĩa tại `IRM.Application/Abstractions/Security/IrmRoles.cs`, được cưỡng chế đồng thời ở **2 lớp**:
+- **Lớp 1 — Cấp Route Blazor:** `IRM/Features/_Imports.razor` yêu cầu `@attribute [Authorize(Roles = IrmRoles.AnyUser)]` cho mọi trang nghiệp vụ; riêng `IRM/Features/Administration/Admin.razor` (`/admin`, `/admin/{SectionKey}`) khóa chặt `@attribute [Authorize(Roles = IrmRoles.Admin)]`.
+- **Lớp 2 — Cấp Application Service:** `IServiceAuthorizationGuard` kiểm tra vai trò trước khi gọi xuống `IRM.Infrastructure` stores.
 
 | Vai trò (`IrmRoles`) | Quyền chính |
 | :--- | :--- |
@@ -105,7 +107,7 @@ flowchart LR
 - **Chuẩn hóa định danh:** `PassportRules` loại bỏ khoảng trắng/ký tự thừa; các chuỗi không chứa chữ/số (VD `"---"`) bị coi là rỗng/không hợp lệ.
 - **Hiển thị an toàn khi thiếu Họ tên/Công ty:** `PersonDisplayHelper.FormatName(fullName, passport)` tự động fallback sang Số hộ chiếu khi chưa có họ tên; toàn bộ các màn hình downstream (Dashboard, Search, Reports, Inspections, Statistics, Export) xử lý null-safe cho `IDCompany == null` và tên trống.
 - **Nhắc nhở giao diện (3 lớp):**
-  - Banner cảnh báo đầu mọi trang (`data-passport-required-notice="true"` trong `MainLayout.razor`, có thể đóng).
+  - Banner cảnh báo đầu mọi trang (`data-passport-required-notice="true"` trong `MainLayout.razor`, có nút đóng và lưu trạng thái vào `localStorage['irm-passport-notice-dismissed']`).
   - Banner nhắc tại Bước 1 Upload Excel (`ImportUploadSection.razor`).
   - Banner nhắc đầu hộp thoại thêm/sửa hồ sơ NNN (`ForeignPersons.razor`).
 
@@ -136,7 +138,7 @@ flowchart LR
   - Các nút điều hướng nhanh tới các phân hệ nghiệp vụ.
 
 ### 5.3 Hồ sơ Người nước ngoài hợp nhất (`/foreign-persons`, `/employees`, `/students`, `/family-visitors`)
-- **UI:** `IRM/Features/ForeignPersons/ForeignPersons.razor`
+- **UI:** Cả 4 route đều trỏ về duy nhất trang hợp nhất `IRM/Features/ForeignPersons/ForeignPersons.razor` *(các file cũ `Employees.razor`, `Students.razor`, `FamilyVisitors.razor` không còn `@page` route)*.
 - **Services / Stores:**
   - `IForeignerRegistryService` → `SqlForeignerRegistryStore`
   - `IEmployeeService` → `SqlEmployeeStore`
@@ -216,9 +218,10 @@ flowchart LR
   5. **Thực thi nạp & Rollback:** Lưu lịch sử phiên (`ImportHistories`), chụp bản sao (`ImportBackups` / `ArchivedEmployees`) cho phép hoàn tác an toàn theo thứ tự ngược khi chưa có phụ thuộc mới hơn.
 
 ### 5.11 Quản trị hệ thống & Danh mục (`/admin`, `/admin/{SectionKey}`)
-- **UI:** `IRM/Features/Administration/Admin.razor`, `Admin.razor.cs`, `Admin.Accounts.cs`, `Admin.Catalogs.cs`, `Admin.Audit.cs` và 10 component con trong `Components/Admin*Section.razor`.
-- **Services / Stores:** `IAuthService` (`SqlAuthStore`), `ICatalogService` (`SqlCatalogStore` + `AdministrativeUnitExcelHelper`), `IAuditService` (`SqlAuditStore`), `ILegacySyncService`.
-- **10 phân mục con (`/admin/{SectionKey}`):**
+- **Phân quyền:** Khóa cấp route `@attribute [Authorize(Roles = IrmRoles.Admin)]` + kiểm tra vai trò tại tầng Service.
+- **UI:** `IRM/Features/Administration/Admin.razor`, `Admin.razor.cs`, `Admin.Accounts.cs`, `Admin.Catalogs.cs`, `Admin.Audit.cs` và 9 component con trong `Components/Admin*Section.razor` *(đã loại bỏ `legacy-sync` / Đồng bộ DB cũ khỏi giao diện nhánh `custom/kh2`)*.
+- **Services / Stores:** `IAuthService` (`SqlAuthStore`), `ICatalogService` (`SqlCatalogStore` + `AdministrativeUnitExcelHelper`), `IAuditService` (`SqlAuditStore`).
+- **9 phân mục con (`/admin/{SectionKey}`):**
   1. `accounts` — Quản lý tài khoản & phân quyền 5 vai trò.
   2. `fields` — Danh mục Lĩnh vực.
   3. `careers` — Danh mục Ngành nghề & Nhóm nghề.
@@ -226,14 +229,14 @@ flowchart LR
   5. `districts` — Danh mục Quận / Huyện.
   6. `wards` — Danh mục Phường / Xã.
   7. **`admin-units` — Địa bàn hành chính (Cấu hình thủ công + Nạp Excel):**
+     - **Dữ liệu khởi tạo:** `DatabaseSeeder` tạo sẵn bộ dữ liệu mẫu ban đầu khi DB trống; Quản trị viên có thể tự sửa/vô hiệu hóa hoặc nạp đè danh mục địa bàn của đơn vị mình qua Excel.
      - **Tự cấu hình:** Thêm / Sửa / Vô hiệu hóa (kèm `ValidFrom` chuẩn `dd/MM/yyyy`, tìm kiếm nhanh theo Mã/Tên, lọc theo Loại: Phường / Xã / Đặc khu / Tỉnh-TP); kiểm tra trùng `(Code, ValidFrom)` trả thông báo tiếng Việt rõ ràng.
      - **Nạp hàng loạt từ Excel (`.xlsx`):**
        - Nút **Tải file mẫu Excel** (`Mau-Dia-Ban-Hanh-Chinh.xlsx` — 4 cột: `Mã địa bàn`, `Tên địa bàn`, `Loại`, `Hiệu lực từ`).
-       - Upload `.xlsx` → **Xem trước & kiểm tra lỗi từng dòng** (thiếu Mã/Tên, trùng Mã trong file, loại không hợp lệ, ngày sai chuẩn `dd/MM/yyyy`).
-       - **Xác nhận nạp theo cơ chế Upsert an toàn:** thêm mới mã chưa có, cập nhật mã đang tồn tại, tự khôi phục mã từng bị vô hiệu hóa mà **không làm gãy khóa ngoại** của hồ sơ cư trú/doanh nghiệp/CSLT/đợt kiểm tra.
-  8. `legacy-sync` — Đồng bộ dữ liệu từ CSDL cũ (`ReportManagerDB`, tùy chọn).
-  9. `audit` — Tra cứu Nhật ký hệ thống theo tài khoản, hành động và khoảng thời gian.
-  10. `import-history` — Theo dõi lịch sử các phiên Import Excel và thực hiện Rollback.
+       - Upload `.xlsx` → **Xem trước & kiểm tra lỗi từng dòng** (thiếu Mã/Tên, trùng Mã trong file, loại không hợp lệ, ngày sai chuẩn `dd/MM/yyyy`); bảng xem trước **ưu tiên hiển thị các dòng lỗi lên đầu** và thông báo rõ nếu file vượt quá 50 dòng hiển thị.
+       - **Xác nhận nạp theo cơ chế Upsert an toàn:** ưu tiên khớp chính xác `(Code, ValidFrom)` trước rồi mới fallback theo `Code` để tránh xung đột Unique Index với bản ghi lịch sử; tự khôi phục mã từng bị vô hiệu hóa mà **không làm gãy khóa ngoại** của hồ sơ cư trú/doanh nghiệp/CSLT/đợt kiểm tra.
+  8. `audit` — Tra cứu Nhật ký hệ thống theo tài khoản, hành động và khoảng thời gian (`dd/MM/yyyy`).
+  9. `import-history` — Theo dõi lịch sử các phiên Import Excel và thực hiện Rollback.
 
 ---
 
@@ -244,5 +247,5 @@ Mọi thay đổi mã nguồn trên nhánh `custom/kh2` phải vượt qua toàn
 | Bộ kiểm thử | Lệnh chạy (từ `IRM/`) | Quy mô hiện tại | Phạm vi bao phủ |
 | :--- | :--- | :--- | :--- |
 | **Build Release** | `dotnet build IRM.sln -c Release` | 5 project | Biên dịch + MudBlazor Analyzer (`MUD0002`...) |
-| **.NET xUnit Suite** | `dotnet test IRM.Tests/IRM.Tests.csproj -c Release --no-build` | **396 Passed**, 0 Failed, 6 Skipped (SQL Server integration) | 52 file test: Architecture boundaries, RBAC/Auth, Passport-only rules (Schema, Manual, Import, Downstream), `ExcelValueNormalizer`, `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper` & Upsert, Statistics, Reports, Search, Inspections, Accommodations, Companies, Unified ForeignPersons, Markup guards (`AppProductTourMarkupTests`, `DynamicAdminUnitsMarkupTests`) |
+| **.NET xUnit Suite** | `dotnet test IRM.Tests/IRM.Tests.csproj -c Release --no-build` | **400 Passed**, 0 Failed, 6 Skipped (SQL Server integration) | 52 file test: Architecture boundaries, RBAC/Auth, Passport-only rules (Schema, Manual, Import, Downstream), `ExcelValueNormalizer`, `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper` & Upsert, Statistics, Reports, Search, Inspections, Accommodations, Companies, Unified ForeignPersons, Markup guards (`AppProductTourMarkupTests`, `DynamicAdminUnitsMarkupTests`) |
 | **Node.js Browser/JS Suite** | `node --test IRM.Tests/Browser/*.test.cjs` | **54/54 Passed** | 6 file test: `app-product-tour.test.cjs`, `feedback-spotlight.test.cjs`, `import-tour.test.cjs`, `responsive-table.test.cjs`, `theme-chart.test.cjs`, `theme-preference.test.cjs` |
