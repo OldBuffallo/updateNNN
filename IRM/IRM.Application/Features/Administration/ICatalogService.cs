@@ -1,3 +1,4 @@
+using IRM.Application.Features.Administration.Contracts;
 using IRM.Data.Models;
 using IRM.Services;
 using IRM.Application.Models;
@@ -36,4 +37,7 @@ public interface ICatalogService
     Task<AdministrativeUnitDto> CreateAdministrativeUnitAsync(AdministrativeUnitDto unit);
     Task<bool> UpdateAdministrativeUnitAsync(AdministrativeUnitDto unit);
     Task<bool> DeactivateAdministrativeUnitAsync(int id, int? successorId);
+    byte[] GenerateAdministrativeUnitTemplate();
+    Task<AdministrativeUnitImportPreview> PreviewAdministrativeUnitsExcelAsync(Stream stream, string fileName);
+    Task<AdministrativeUnitImportResult> ImportAdministrativeUnitsExcelAsync(Stream stream, string fileName);
 }

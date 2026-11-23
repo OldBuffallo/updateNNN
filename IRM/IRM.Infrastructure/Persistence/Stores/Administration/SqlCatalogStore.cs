@@ -1,3 +1,5 @@
+using IRM.Application.Features.Administration.Contracts;
+using IRM.Infrastructure.Excel;
 using IRM.Services;
 using IRM.Data;
 using IRM.Data.Models;
@@ -249,6 +251,23 @@ public class SqlCatalogStore : ICatalogStore
     public async Task<AdministrativeUnit> CreateAdministrativeUnitAsync(AdministrativeUnit unit)
     {
         await RequireCatalogEditorAsync();
+        unit.Code = (unit.Code ?? "").Trim();
+        unit.Name = (unit.Name ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(unit.Code) || string.IsNullOrWhiteSpace(unit.Name))
+        {
+            throw new InvalidOperationException("Mã và tên địa bàn không được để trống.");
+        }
+
+        var normalizedCode = unit.Code.ToUpperInvariant();
+        var validFromDate = unit.ValidFrom.Date;
+        var exists = await _db.AdministrativeUnits.AsNoTracking()
+            .AnyAsync(x => x.Code.ToUpper() == normalizedCode && x.ValidFrom == validFromDate);
+        if (exists)
+        {
+            throw new InvalidOperationException($"Địa bàn với mã '{unit.Code}' và ngày hiệu lực {validFromDate:dd/MM/yyyy} đã tồn tại.");
+        }
+
+        unit.ValidFrom = validFromDate;
         _db.AdministrativeUnits.Add(unit);
         await _db.SaveChangesAsync();
         return unit;
@@ -260,11 +279,27 @@ public class SqlCatalogStore : ICatalogStore
         var existing = await _db.AdministrativeUnits.FirstOrDefaultAsync(x => x.Id == unit.Id && !x.IsDeleted);
         if (existing == null) return false;
 
-        existing.Code = unit.Code;
-        existing.Name = unit.Name;
+        var code = (unit.Code ?? "").Trim();
+        var name = (unit.Name ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(name))
+        {
+            throw new InvalidOperationException("Mã và tên địa bàn không được để trống.");
+        }
+
+        var normalizedCode = code.ToUpperInvariant();
+        var validFromDate = unit.ValidFrom.Date;
+        var duplicate = await _db.AdministrativeUnits.AsNoTracking()
+            .AnyAsync(x => x.Id != unit.Id && x.Code.ToUpper() == normalizedCode && x.ValidFrom == validFromDate);
+        if (duplicate)
+        {
+            throw new InvalidOperationException($"Địa bàn với mã '{code}' và ngày hiệu lực {validFromDate:dd/MM/yyyy} đã tồn tại.");
+        }
+
+        existing.Code = code;
+        existing.Name = name;
         existing.TypeCode = unit.TypeCode;
         existing.ParentId = unit.ParentId;
-        existing.ValidFrom = unit.ValidFrom;
+        existing.ValidFrom = validFromDate;
         existing.ValidTo = unit.ValidTo;
         existing.LegacyDistrictId = unit.LegacyDistrictId;
         existing.LegacyWardId = unit.LegacyWardId;
@@ -292,5 +327,74 @@ public class SqlCatalogStore : ICatalogStore
 
         await _db.SaveChangesAsync();
         return true;
+    }
+
+    public byte[] GenerateAdministrativeUnitTemplate() => AdministrativeUnitExcelHelper.BuildTemplateWorkbook();
+
+    public async Task<AdministrativeUnitImportPreview> PreviewAdministrativeUnitsExcelAsync(Stream stream, string fileName)
+    {
+        await RequireCatalogEditorAsync();
+        var allExisting = await _db.AdministrativeUnits.AsNoTracking().ToListAsync();
+        return AdministrativeUnitExcelHelper.ParseWorkbook(stream, fileName, allExisting);
+    }
+
+    public async Task<AdministrativeUnitImportResult> ImportAdministrativeUnitsExcelAsync(Stream stream, string fileName)
+    {
+        await RequireCatalogEditorAsync();
+        var allExisting = await _db.AdministrativeUnits.ToListAsync();
+        var preview = AdministrativeUnitExcelHelper.ParseWorkbook(stream, fileName, allExisting);
+
+        var existingByCode = allExisting
+            .GroupBy(u => u.Code.Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(u => !u.IsDeleted).ThenByDescending(u => u.ValidFrom).First(), StringComparer.OrdinalIgnoreCase);
+
+        var result = new AdministrativeUnitImportResult();
+
+        foreach (var row in preview.Rows)
+        {
+            if (row.Action == AdministrativeUnitImportAction.Error)
+            {
+                result.SkippedErrorCount++;
+                result.Errors.Add($"Dòng {row.RowNumber}: {row.ErrorMessage}");
+                continue;
+            }
+
+            if (existingByCode.TryGetValue(row.Code, out var existing))
+            {
+                var wasInactive = existing.IsDeleted || existing.ValidTo.HasValue;
+                existing.Code = row.Code;
+                existing.Name = row.Name;
+                existing.TypeCode = row.TypeCode;
+                existing.ValidFrom = row.ValidFrom.Date;
+                existing.ValidTo = null;
+                existing.IsDeleted = false;
+
+                if (wasInactive)
+                {
+                    result.ReactivatedCount++;
+                }
+                else
+                {
+                    result.UpdatedCount++;
+                }
+            }
+            else
+            {
+                var created = new AdministrativeUnit
+                {
+                    Code = row.Code,
+                    Name = row.Name,
+                    TypeCode = row.TypeCode,
+                    ValidFrom = row.ValidFrom.Date,
+                    IsDeleted = false
+                };
+                _db.AdministrativeUnits.Add(created);
+                existingByCode[row.Code] = created;
+                result.CreatedCount++;
+            }
+        }
+
+        await _db.SaveChangesAsync();
+        return result;
     }
 }

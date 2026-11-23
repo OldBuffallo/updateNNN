@@ -1,4 +1,5 @@
 using static IRM.Application.Models.DtoMapper;
+using IRM.Application.Features.Administration.Contracts;
 using IRM.Data.Models;
 using IRM.Services;
 using IRM.Application.Abstractions;
@@ -224,5 +225,19 @@ public sealed class CatalogApplicationService(ICatalogStore store, IServiceAutho
     {
         await _guard.RequireAnyRoleAsync(IrmRoles.Admin);
         return await _store.DeactivateAdministrativeUnitAsync(id, successorId);
+    }
+
+    public byte[] GenerateAdministrativeUnitTemplate() => _store.GenerateAdministrativeUnitTemplate();
+
+    public async Task<AdministrativeUnitImportPreview> PreviewAdministrativeUnitsExcelAsync(Stream stream, string fileName)
+    {
+        await _guard.RequireAnyRoleAsync(IrmRoles.Admin);
+        return await _store.PreviewAdministrativeUnitsExcelAsync(stream, fileName);
+    }
+
+    public async Task<AdministrativeUnitImportResult> ImportAdministrativeUnitsExcelAsync(Stream stream, string fileName)
+    {
+        await _guard.RequireAnyRoleAsync(IrmRoles.Admin);
+        return await _store.ImportAdministrativeUnitsExcelAsync(stream, fileName);
     }
 }
