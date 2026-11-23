@@ -62,5 +62,44 @@ public sealed class DynamicAdminUnitsMarkupTests
         Assert.Contains("DownloadAdminUnitTemplateAsync", adminUnits, StringComparison.Ordinal);
         Assert.Contains("ConfirmImportAdminUnitsAsync", adminUnits, StringComparison.Ordinal);
         Assert.Contains("_adminUnitSearch", adminUnits, StringComparison.Ordinal);
+        Assert.Contains("OrderByDescending", adminUnits, StringComparison.Ordinal);
+        Assert.Contains("Đang hiển thị 50", adminUnits, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AdminPage_EnforcesAdminOnlyRouteAuthorizationAndRemovesLegacySyncUi()
+    {
+        var root = ResolveSolutionRoot();
+        var adminRazor = File.ReadAllText(Path.Combine(root, "IRM", "Features", "Administration", "Admin.razor"));
+        var adminCs = File.ReadAllText(Path.Combine(root, "IRM", "Features", "Administration", "Admin.razor.cs"));
+        var navMenu = File.ReadAllText(Path.Combine(root, "IRM", "Components", "Shared", "NavMenu.razor"));
+
+        Assert.Contains("@attribute [Authorize(Roles = IrmRoles.Admin)]", adminRazor, StringComparison.Ordinal);
+        Assert.DoesNotContain("legacy-sync", adminRazor, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("legacy-sync", adminCs, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("legacy-sync", navMenu, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void AuditDatePickers_UseStrictDdMmYyyyFormat_AndStatisticsRemovesBaselineNote()
+    {
+        var root = ResolveSolutionRoot();
+        var auditRazor = File.ReadAllText(Path.Combine(root, "IRM", "Features", "Administration", "Components", "AdminAuditSection.razor"));
+        var statsRazor = File.ReadAllText(Path.Combine(root, "IRM", "Features", "Reports", "Statistics.razor"));
+
+        var datePickerLines = auditRazor.Split('\n').Where(l => l.Contains("MudDatePicker", StringComparison.Ordinal)).ToList();
+        Assert.Equal(2, datePickerLines.Count);
+        Assert.All(datePickerLines, line => Assert.Contains("DateFormat=\"dd/MM/yyyy\"", line, StringComparison.Ordinal));
+
+        Assert.DoesNotContain("baseline v0.1.0", statsRazor, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void MainLayout_PersistsPassportNoticeDismissalInLocalStorage()
+    {
+        var root = ResolveSolutionRoot();
+        var mainLayout = File.ReadAllText(Path.Combine(root, "IRM", "Components", "Shared", "MainLayout.razor"));
+
+        Assert.Contains("irm-passport-notice-dismissed", mainLayout, StringComparison.Ordinal);
     }
 }

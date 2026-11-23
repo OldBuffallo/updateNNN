@@ -344,6 +344,11 @@ public class SqlCatalogStore : ICatalogStore
         var allExisting = await _db.AdministrativeUnits.ToListAsync();
         var preview = AdministrativeUnitExcelHelper.ParseWorkbook(stream, fileName, allExisting);
 
+        var existingByCodeAndDate = allExisting
+            .ToDictionary(
+                u => (Code: u.Code.Trim().ToUpperInvariant(), ValidFrom: u.ValidFrom.Date),
+                u => u);
+
         var existingByCode = allExisting
             .GroupBy(u => u.Code.Trim(), StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(u => !u.IsDeleted).ThenByDescending(u => u.ValidFrom).First(), StringComparer.OrdinalIgnoreCase);
@@ -359,13 +364,32 @@ public class SqlCatalogStore : ICatalogStore
                 continue;
             }
 
-            if (existingByCode.TryGetValue(row.Code, out var existing))
+            var targetDate = row.ValidFrom.Date;
+            var exactKey = (Code: row.Code.Trim().ToUpperInvariant(), ValidFrom: targetDate);
+            AdministrativeUnit? existing = null;
+            if (existingByCodeAndDate.TryGetValue(exactKey, out var exactMatch))
+            {
+                existing = exactMatch;
+            }
+            else if (existingByCode.TryGetValue(row.Code, out var codeMatch))
+            {
+                existing = codeMatch;
+            }
+
+            if (existing is not null)
             {
                 var wasInactive = existing.IsDeleted || existing.ValidTo.HasValue;
+                var oldKey = (Code: existing.Code.Trim().ToUpperInvariant(), ValidFrom: existing.ValidFrom.Date);
+
                 existing.Code = row.Code;
                 existing.Name = row.Name;
                 existing.TypeCode = row.TypeCode;
-                existing.ValidFrom = row.ValidFrom.Date;
+                if (oldKey != exactKey && !existingByCodeAndDate.ContainsKey(exactKey))
+                {
+                    existingByCodeAndDate.Remove(oldKey);
+                    existing.ValidFrom = targetDate;
+                    existingByCodeAndDate[exactKey] = existing;
+                }
                 existing.ValidTo = null;
                 existing.IsDeleted = false;
 
@@ -385,11 +409,12 @@ public class SqlCatalogStore : ICatalogStore
                     Code = row.Code,
                     Name = row.Name,
                     TypeCode = row.TypeCode,
-                    ValidFrom = row.ValidFrom.Date,
+                    ValidFrom = targetDate,
                     IsDeleted = false
                 };
                 _db.AdministrativeUnits.Add(created);
                 existingByCode[row.Code] = created;
+                existingByCodeAndDate[exactKey] = created;
                 result.CreatedCount++;
             }
         }

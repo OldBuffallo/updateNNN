@@ -260,7 +260,7 @@
                                   Variant="Variant.Outlined"
                                   Dense="true"
                                   ShowCloseIcon="true"
-                                  CloseIconClicked="@(() => _showPassportNotice = false)"
+                                  CloseIconClicked="DismissPassportNoticeAsync"
                                   Class="mb-3"
                                   data-passport-required-notice="true">
                             <strong>Lưu ý bắt buộc:</strong> Mọi hồ sơ Người nước ngoài (nhập tay hoặc nhập Excel) đều <strong>PHẢI có Số hộ chiếu</strong> — đây là trường định danh bắt buộc duy nhất; các thông tin khác có thể bổ sung sau.
@@ -300,6 +300,11 @@
             {
                 var density = await JS.InvokeAsync<string>("irmInterop.getDensity");
                 _compactDensity = string.Equals(density, "compact", StringComparison.OrdinalIgnoreCase);
+                var dismissed = await JS.InvokeAsync<string?>("localStorage.getItem", "irm-passport-notice-dismissed");
+                if (string.Equals(dismissed, "1", StringComparison.Ordinal))
+                {
+                    _showPassportNotice = false;
+                }
                 await JS.InvokeVoidAsync("irmInterop.registerShortcutHandler", _dotNetRef);
                 await JS.InvokeVoidAsync("irmAppTour.init", false);
             }
@@ -311,6 +316,19 @@
             }
 
             StateHasChanged();
+        }
+    }
+
+    private async Task DismissPassportNoticeAsync()
+    {
+        _showPassportNotice = false;
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "irm-passport-notice-dismissed", "1");
+        }
+        catch (JSException ex)
+        {
+            Logger.LogWarning(ex, "Unable to persist passport notice dismissal");
         }
     }
 

@@ -119,7 +119,10 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var row in Page._adminUnitImportPreview.Rows.Take(50))
+                @foreach (var row in Page._adminUnitImportPreview.Rows
+                    .OrderByDescending(r => r.Action == AdministrativeUnitImportAction.Error)
+                    .ThenBy(r => r.RowNumber)
+                    .Take(50))
                 {
                     <tr>
                         <td>@row.RowNumber</td>
@@ -145,6 +148,13 @@
                 }
             </tbody>
         </MudSimpleTable>
+
+        @if (Page._adminUnitImportPreview.Rows.Count > 50)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2 d-block">
+                Đang hiển thị 50 / @Page._adminUnitImportPreview.Rows.Count dòng đầu tiên (ưu tiên hiển thị các dòng lỗi trước).
+            </MudText>
+        }
 
         <MudStack Row="true" Spacing="2">
             <MudButton Variant="Variant.Filled"

@@ -185,7 +185,6 @@ public partial class Admin : ComponentBase, IFeaturePage
         _adminCards.Add(new("districts", Icons.Material.Outlined.Map, "Quận / Huyện", $"{_districts.Count} quận/huyện"));
         _adminCards.Add(new("wards", Icons.Material.Outlined.Place, "Phường / Xã", $"{_wards.Count} phường/xã"));
         _adminCards.Add(new("admin-units", Icons.Material.Outlined.LocationCity, "Địa bàn hành chính", $"{_adminUnits.Count} địa bàn"));
-        _adminCards.Add(new("legacy-sync", Icons.Material.Outlined.Storage, "Đồng bộ DB cũ", "Nhập từ ReportManagerDB"));
         _adminCards.Add(new("audit", Icons.Material.Outlined.ReceiptLong, "Nhật ký hệ thống", "Audit log"));
         _adminCards.Add(new("import-history", Icons.Material.Outlined.CloudUpload, "Lịch sử Import", "Lịch sử phiên import"));
     }

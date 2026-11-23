@@ -200,4 +200,57 @@ public sealed class AdministrativeUnitExcelImportTests
 
         Assert.Contains("đã tồn tại", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
+
+    [Fact]
+    public async Task SqlCatalogStore_ImportAdministrativeUnitsExcel_MatchesExactCodeAndValidFromWhenHistoricalDuplicatesExist()
+    {
+        await using var db = new TestDatabase();
+        await db.InitializeAsync();
+        var store = new SqlCatalogStore(db.Context);
+
+        // Two historical rows with same Code, different ValidFrom
+        var oldRow = await store.CreateAdministrativeUnitAsync(new AdministrativeUnit
+        {
+            Code = "HIST-01",
+            Name = "Phường Cũ 2024",
+            TypeCode = AdministrativeUnitTypeCodes.Ward,
+            ValidFrom = new DateTime(2024, 1, 1)
+        });
+        await store.DeactivateAdministrativeUnitAsync(oldRow.Id, null);
+
+        await store.CreateAdministrativeUnitAsync(new AdministrativeUnit
+        {
+            Code = "HIST-01",
+            Name = "Phường Hiện Tại 2025",
+            TypeCode = AdministrativeUnitTypeCodes.Ward,
+            ValidFrom = new DateTime(2025, 7, 1)
+        });
+
+        using var wb = new XLWorkbook();
+        var ws = wb.Worksheets.Add("DiaBan");
+        ws.Cell(1, 1).Value = "Mã địa bàn";
+        ws.Cell(1, 2).Value = "Tên địa bàn";
+        ws.Cell(1, 3).Value = "Loại";
+        ws.Cell(1, 4).Value = "Hiệu lực từ";
+
+        // Import row matching the 2024 historical ValidFrom -> must NOT collide with unique (Code, ValidFrom)
+        ws.Cell(2, 1).Value = "HIST-01";
+        ws.Cell(2, 2).Value = "Phường Khôi Phục 2024";
+        ws.Cell(2, 3).Value = "Phường";
+        ws.Cell(2, 4).Value = "01/01/2024";
+
+        using var ms = new MemoryStream();
+        wb.SaveAs(ms);
+        ms.Position = 0;
+
+        var result = await store.ImportAdministrativeUnitsExcelAsync(ms, "hist.xlsx");
+
+        Assert.Equal(1, result.ReactivatedCount);
+        Assert.Equal(0, result.SkippedErrorCount);
+
+        var reloadedOld = await db.Context.AdministrativeUnits.AsNoTracking().SingleAsync(x => x.Id == oldRow.Id);
+        Assert.Equal("Phường Khôi Phục 2024", reloadedOld.Name);
+        Assert.False(reloadedOld.IsDeleted);
+        Assert.Null(reloadedOld.ValidTo);
+    }
 }
