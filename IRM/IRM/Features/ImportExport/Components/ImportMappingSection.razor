@@ -219,7 +219,7 @@
                 @foreach (var m in Page._columnMappings)
                 {
                     <tr style="@(m.SystemField == "skip" ? "background: var(--mud-palette-warning-hover);" : "")">
-                        <td><strong>Cột @((char)('A' + m.ExcelColumnIndex)): "@m.ExcelColumnName"</strong></td>
+                        <td><strong>Cột @ExcelValueNormalizer.ToExcelColumnName(m.ExcelColumnIndex): "@m.ExcelColumnName"</strong></td>
                         <td>→</td>
                         <td>
                             <MudSelect T="string" Value="@m.SystemField" Variant="Variant.Outlined"
@@ -311,7 +311,7 @@
                     <MudSelectItem T="int?" Value="@((int?)null)">— Không chọn cột —</MudSelectItem>
                     @foreach (var h in Page._excelHeaders)
                     {
-                        <MudSelectItem T="int?" Value="@((int?)h.Index)">Cột @((char)('A' + h.Index)): "@h.HeaderName"</MudSelectItem>
+                        <MudSelectItem T="int?" Value="@((int?)h.Index)">Cột @ExcelValueNormalizer.ToExcelColumnName(h.Index): "@h.HeaderName"</MudSelectItem>
                     }
                 </MudSelect>
             </td>

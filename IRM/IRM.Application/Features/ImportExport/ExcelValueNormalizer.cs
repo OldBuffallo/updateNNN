@@ -53,6 +53,24 @@ public static partial class ExcelValueNormalizer
         ImmigrationDocumentTypeCodes.Other
     };
 
+    public static string ToExcelColumnName(int zeroBasedIndex)
+    {
+        if (zeroBasedIndex < 0)
+        {
+            return "";
+        }
+
+        var index = zeroBasedIndex;
+        var chars = new Stack<char>();
+        while (index >= 0)
+        {
+            chars.Push((char)('A' + (index % 26)));
+            index = (index / 26) - 1;
+        }
+
+        return new string(chars.ToArray());
+    }
+
     public static NormalizedCellResult Normalize(
         string systemField,
         string? rawValue,

@@ -44,7 +44,7 @@ internal static class ImportSampleWorkbook
         guide.Cell(1, 1).Value = "HƯỚNG DẪN ĐIỀN 35 TRƯỜNG IMPORT";
         guide.Cell(1, 1).Style.Font.Bold = true;
         guide.Cell(1, 1).Style.Font.FontSize = 16;
-        guide.Cell(2, 1).Value = "Nhập tại sheet Hồ sơ từ dòng 2, mỗi dòng một người; giữ nguyên tiêu đề. Chỉ dùng Nam hoặc Nữ; ngày dd/MM/yyyy, năm bốn chữ số. Số giấy tờ/mã: Text để giữ số 0 đầu. Ô trống khác với không ghép cột: một số ô trống có thể xóa/đổi dữ liệu khi cập nhật. Nếu không muốn ghép trường tùy chọn, bỏ cột đó hoặc điều chỉnh ghép cột; không bỏ chín cột bắt buộc. Ví dụ bên dưới chỉ để đọc, không phải dữ liệu sẽ import.";
+        guide.Cell(2, 1).Value = "Nhập tại sheet Hồ sơ từ dòng 2, mỗi dòng một người; giữ nguyên tiêu đề. Chỉ dùng Nam hoặc Nữ; ngày dd/MM/yyyy, năm bốn chữ số. Số giấy tờ/mã: Text để giữ số 0 đầu. Ô trống khác với không ghép cột: một số ô trống có thể xóa/đổi dữ liệu khi cập nhật. Nếu không muốn ghép trường tùy chọn, bỏ cột đó hoặc điều chỉnh ghép cột; chỉ bắt buộc duy nhất cột Số hộ chiếu (các cột khác có thể để trống và bổ sung sau). Ví dụ bên dưới chỉ để đọc, không phải dữ liệu sẽ import.";
         guide.Range(2, 1, 2, 10).Merge().Style.Alignment.WrapText = true;
         guide.Row(2).Height = 80;
         WriteHeader(guide, 3, ["Tên cột", "Yêu cầu", "Định dạng", "Ý nghĩa", "Chương trình kiểm tra", "Không ghép / ô trống", "Ví dụ có điều kiện", "Dễ nhập sai", "Cách xử lý", "Khuyến nghị"]);

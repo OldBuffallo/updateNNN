@@ -22,7 +22,9 @@ var builder = WebApplication.CreateBuilder(args);
 WebConfiguration.Configure(builder);
 var command = await MaintenanceCommands.ConfigureAsync(builder.Configuration, bootstrapOnly, provisionDatabase, backupOnly, restoreOnly);
 if (command.Handled) return;
-builder.Services.AddIrmInfrastructure(command.ConnectionString);
+builder.Services.AddIrmInfrastructure(
+    command.ConnectionString,
+    builder.Configuration.GetValue("LegacySync:Enabled", false));
 var app = builder.Build();
 await DatabaseStartup.InitializeAsync(app.Services, builder.Configuration, bootstrapOnly, provisionDatabase,
     builder.Configuration["Provisioning:AdminConnectionString"]);

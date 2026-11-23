@@ -574,6 +574,10 @@ public partial class Import : ComponentBase, IFeaturePage
         _sheetInfo = "";
         _sheetNames = new(); _sheetIndex = 0; _headerRow = 0; _startRow = 0; _endRow = null; _allowCreateCompanies = false;
         _columnMappings = new();
+        _excelHeaders = new();
+        _fieldSelections = new();
+        _convertAnalysis = null;
+        _simpleConvertMode = true;
         _previewRows = new();
         _duplicateDecisions = new();
         _importResult = null;

@@ -7,7 +7,7 @@ namespace IRM.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddIrmInfrastructure(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddIrmInfrastructure(this IServiceCollection services, string connectionString, bool enableLegacySyncWorker = false)
     {
         void ConfigureSqlServer(DbContextOptionsBuilder options) => options.UseSqlServer(connectionString, sql =>
         {
@@ -71,7 +71,10 @@ public static class DependencyInjection
         services.AddScoped<IRM.Application.Abstractions.IExcelReader, IRM.Infrastructure.Excel.ExcelReader>();
         services.AddScoped<IRM.Application.Abstractions.IExcelWorkbookConverter, IRM.Infrastructure.Excel.ExcelWorkbookConverter>();
         services.AddScoped<IRM.Application.Abstractions.IDatabaseReadiness, DatabaseReadiness>();
-        services.AddHostedService<LegacySyncWorker>();
+        if (enableLegacySyncWorker)
+        {
+            services.AddHostedService<LegacySyncWorker>();
+        }
         return services;
     }
 }

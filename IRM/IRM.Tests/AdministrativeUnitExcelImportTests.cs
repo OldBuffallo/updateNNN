@@ -1,5 +1,6 @@
 using ClosedXML.Excel;
 using IRM.Application.Features.Administration.Contracts;
+using IRM.Data;
 using IRM.Data.Models;
 using IRM.Infrastructure.Excel;
 using IRM.Services;
@@ -252,5 +253,35 @@ public sealed class AdministrativeUnitExcelImportTests
         Assert.Equal("Phường Khôi Phục 2024", reloadedOld.Name);
         Assert.False(reloadedOld.IsDeleted);
         Assert.Null(reloadedOld.ValidTo);
+    }
+
+    [Fact]
+    public async Task DatabaseSeeder_SeedCatalogsIfEmpty_DoesNotReinjectQuangNinhUnitsAfterCustomer2ReplacesUnits()
+    {
+        await using var db = new TestDatabase();
+        await db.InitializeAsync(seedBaseline: false);
+
+        // First boot seeds only 1 neutral starter unit (no Quang Ninh units)
+        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context, "admin_kh2", "AdminKh2@123456!");
+        var initialUnits = await db.Context.AdministrativeUnits.AsNoTracking().ToListAsync();
+        Assert.Single(initialUnits);
+        Assert.DoesNotContain(initialUnits, u => u.Code.StartsWith("QN-", StringComparison.OrdinalIgnoreCase));
+
+        // Customer 2 replaces starter unit with their own province's unit
+        db.Context.AdministrativeUnits.RemoveRange(db.Context.AdministrativeUnits);
+        db.Context.AdministrativeUnits.Add(new AdministrativeUnit
+        {
+            Code = "HN-W-001",
+            Name = "Phường Ba Đình",
+            TypeCode = AdministrativeUnitTypeCodes.Ward,
+            ValidFrom = new DateTime(2025, 7, 1)
+        });
+        await db.Context.SaveChangesAsync();
+
+        // App restart runs SeedCatalogsIfEmptyAsync again -> must NOT re-seed starter or Quang Ninh units
+        await DatabaseSeeder.SeedCatalogsIfEmptyAsync(db.Context);
+        var afterRestart = await db.Context.AdministrativeUnits.AsNoTracking().ToListAsync();
+        Assert.Single(afterRestart);
+        Assert.Equal("HN-W-001", afterRestart[0].Code);
     }
 }

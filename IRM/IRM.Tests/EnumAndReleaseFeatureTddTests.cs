@@ -249,9 +249,9 @@ public sealed class EnumAndReleaseFeatureTddTests
         Assert.Equal(34, await db.Context.Nationality.CountAsync());
         Assert.All(await db.Context.Nationality.ToListAsync(), n =>
             Assert.True(IRM.Application.Features.ImportExport.LegacyImportRules.IsValidNationalityCode(n.NationalityCode)));
-        Assert.Equal(3, await db.Context.Districts.CountAsync());
-        Assert.Equal(3, await db.Context.Wards.CountAsync());
-        Assert.Equal(54, await db.Context.AdministrativeUnits.CountAsync());
+        Assert.Equal(1, await db.Context.Districts.CountAsync());
+        Assert.Equal(1, await db.Context.Wards.CountAsync());
+        Assert.Equal(1, await db.Context.AdministrativeUnits.CountAsync());
         Assert.True(await db.Context.SchemaVersions.AnyAsync(s =>
             s.Version == "1.0.1" && s.Checksum == SchemaVersionService.RequiredChecksum));
         var initialCompany = Assert.Single(await db.Context.Companies.ToListAsync());

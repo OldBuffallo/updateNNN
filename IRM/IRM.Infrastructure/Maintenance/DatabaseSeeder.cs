@@ -220,7 +220,7 @@ public static class DatabaseSeeder
                 IDField = fieldId,
                 TrackerID = trackerId,
                 LegalRepresentative = "Nguyễn Văn Mẫu (Hướng dẫn)",
-                Address = "KCN Cái Lân, Phường Bãi Cháy, TP. Hạ Long (Dữ liệu mẫu khi cài đặt lần đầu)",
+                Address = "Địa chỉ trụ sở mẫu (Hãy cập nhật theo đơn vị)",
                 TotalAmount = 1,
                 QuantityAvailable = 1,
                 Note = "🏢 Dữ liệu mẫu hướng dẫn khi cài đặt lần đầu. Bấm biểu tượng Xem (👁️) để xem mẫu Hồ sơ 6 Tab, dùng để thử nghiệm Import Excel, hoặc đổi tên / xóa khi sử dụng chính thức.",
@@ -274,53 +274,25 @@ public static class DatabaseSeeder
 
         if (!await db.Districts.AnyAsync())
         {
-            db.Districts.AddRange(
-                new District { DisTrictName = "Thành phố Hạ Long" },
-                new District { DisTrictName = "Thành phố Cẩm Phả" },
-                new District { DisTrictName = "Thành phố Móng Cái" });
+            db.Districts.Add(new District { DisTrictName = "Quận/Huyện mẫu (Admin tự cấu hình)" });
             await db.SaveChangesAsync();
         }
 
         if (!await db.Wards.AnyAsync())
         {
-            db.Wards.AddRange(
-                new Ward { WardName = "Phường Hồng Gai" },
-                new Ward { WardName = "Phường Bãi Cháy" },
-                new Ward { WardName = "Phường Cẩm Trung" });
+            db.Wards.Add(new Ward { WardName = "Phường/Xã mẫu (Admin tự cấu hình)" });
             await db.SaveChangesAsync();
         }
 
-        if (!await db.AdministrativeUnits.AnyAsync(x => x.Code == "QN-C-001"))
+        if (!await db.AdministrativeUnits.AnyAsync())
         {
-            var validFrom = new DateTime(2025, 7, 1);
-            var communes = new[]
+            db.AdministrativeUnits.Add(new AdministrativeUnit
             {
-                "Quảng La", "Thống Nhất", "Hải Hòa", "Tiên Yên", "Điền Xá", "Đông Ngũ",
-                "Hải Lạng", "Lương Minh", "Kỳ Thượng", "Ba Chẽ", "Quảng Tân", "Đầm Hà",
-                "Quảng Hà", "Đường Hoa", "Quảng Đức", "Hoành Mô", "Lục Hồn", "Bình Liêu",
-                "Hải Sơn", "Hải Ninh", "Vĩnh Thực", "Cái Chiên"
-            };
-            var wards = new[]
-            {
-                "An Sinh", "Đông Triều", "Bình Khê", "Mạo Khê", "Hoàng Quế", "Yên Tử",
-                "Vàng Danh", "Uông Bí", "Đông Mai", "Hiệp Hòa", "Quảng Yên", "Hà An",
-                "Phong Cốc", "Liên Hòa", "Tuần Châu", "Việt Hưng", "Bãi Cháy", "Hà Tu",
-                "Hà Lầm", "Cao Xanh", "Hồng Gai", "Hạ Long", "Hoành Bồ", "Mông Dương",
-                "Quang Hanh", "Cẩm Phả", "Cửa Ông", "Móng Cái 1", "Móng Cái 2", "Móng Cái 3"
-            };
-            db.AdministrativeUnits.AddRange(communes.Select((name, i) => new AdministrativeUnit
-            {
-                Code = $"QN-C-{i + 1:000}", Name = name,
-                TypeCode = AdministrativeUnitTypeCodes.Commune, ValidFrom = validFrom
-            }));
-            db.AdministrativeUnits.AddRange(wards.Select((name, i) => new AdministrativeUnit
-            {
-                Code = $"QN-W-{i + 1:000}", Name = name,
-                TypeCode = AdministrativeUnitTypeCodes.Ward, ValidFrom = validFrom
-            }));
-            db.AdministrativeUnits.AddRange(
-                new AdministrativeUnit { Code = "QN-S-001", Name = "Vân Đồn", TypeCode = AdministrativeUnitTypeCodes.SpecialZone, ValidFrom = validFrom },
-                new AdministrativeUnit { Code = "QN-S-002", Name = "Cô Tô", TypeCode = AdministrativeUnitTypeCodes.SpecialZone, ValidFrom = validFrom });
+                Code = "DB-001",
+                Name = "Địa bàn mẫu (Admin tự cấu hình)",
+                TypeCode = AdministrativeUnitTypeCodes.Ward,
+                ValidFrom = DateTime.Today
+            });
             await db.SaveChangesAsync();
         }
 
@@ -392,9 +364,9 @@ public static class DatabaseSeeder
             db.CompanySites.Add(new CompanySite
             {
                 CompanyId = company.IDCompany,
-                Name = "Nhà máy mẫu - KCN Cái Lân (Dữ liệu hướng dẫn)",
+                Name = "Địa điểm hoạt động mẫu (Dữ liệu hướng dẫn)",
                 SiteTypeCode = "FACTORY",
-                AddressLine = "Lô A1, KCN Cái Lân, Phường Bãi Cháy",
+                AddressLine = "Địa chỉ cơ sở mẫu (Hãy cập nhật)",
                 AdministrativeUnitId = adminUnit.Id,
                 ValidFrom = DateTime.Today
             });
@@ -421,7 +393,7 @@ public static class DatabaseSeeder
             {
                 Name = "CƠ SỞ LƯU TRÚ MẪU - HƯỚNG DẪN SỬ DỤNG",
                 TypeCode = "RENTED",
-                AddressLine = "Số 01 Đường Hạ Long, Phường Bãi Cháy (Dữ liệu mẫu hướng dẫn)",
+                AddressLine = "Địa chỉ cơ sở lưu trú mẫu (Dữ liệu hướng dẫn)",
                 AdministrativeUnitId = adminUnit?.Id,
                 ContactName = "Trần Văn Mẫu (Quản lý CSLT)",
                 ContactPhone = "0900000002",
@@ -453,7 +425,7 @@ public static class DatabaseSeeder
                 Birthday = new DateTime(1988, 6, 15),
                 Nationality = nationalityCode,
                 Passport = "M00000001",
-                Address = "Số 01 Đường Hạ Long, Phường Bãi Cháy (Tạm trú mẫu)",
+                Address = "Địa chỉ tạm trú mẫu (Hãy cập nhật)",
                 IDCompany = company.IDCompany,
                 IDCareer = careerId,
                 WorkPermit = WorkPermitType.WorkerHasPermit,

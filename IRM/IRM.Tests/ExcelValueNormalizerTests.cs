@@ -93,5 +93,19 @@ public sealed class ExcelValueNormalizerTests
         Assert.Equal(NormalizedCellStatus.NeedsReview, ExcelValueNormalizer.Normalize("StayPurposeCode", "INVALID", SampleNationalities, units).Status);
     }
 
+    [Theory]
+    [InlineData(0, "A")]
+    [InlineData(25, "Z")]
+    [InlineData(26, "AA")]
+    [InlineData(27, "AB")]
+    [InlineData(51, "AZ")]
+    [InlineData(52, "BA")]
+    [InlineData(701, "ZZ")]
+    [InlineData(702, "AAA")]
+    public void ToExcelColumnName_HandlesColumnsBeyondZ(int zeroBasedIndex, string expected)
+    {
+        Assert.Equal(expected, ExcelValueNormalizer.ToExcelColumnName(zeroBasedIndex));
+    }
+
     private static (string Value, NormalizedCellStatus Status) ToPair(NormalizedCellResult r) => (r.Value, r.Status);
 }

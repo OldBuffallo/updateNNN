@@ -118,28 +118,21 @@ public class DeliverySampleWorkbookTests
     }
 
     [Fact]
-    public void StaticFeedbackAssets_AndMainLayoutTrigger_ArePresentOffline()
+    public void Customer2Handover_RemovesCustomer1R6FeedbackAssetsFromMainLayoutAndWwwroot()
     {
         var repoIrmDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
         var htmlPath = Path.Combine(repoIrmDir, "IRM", "wwwroot", "PHIEU-KHAO-SAT-GOP-Y.html");
         var xlsxPath = Path.Combine(repoIrmDir, "IRM", "wwwroot", "PHIEU-KHAO-SAT-GOP-Y.xlsx");
         var mainLayoutPath = Path.Combine(repoIrmDir, "IRM", "Components", "Shared", "MainLayout.razor");
 
-        Assert.True(File.Exists(htmlPath), $"Missing {htmlPath}");
-        Assert.True(File.Exists(xlsxPath), $"Missing {xlsxPath}");
+        Assert.False(File.Exists(htmlPath), "Customer 1 R6 feedback HTML must not ship on custom/kh2.");
+        Assert.False(File.Exists(xlsxPath), "Customer 1 R6 feedback XLSX must not ship on custom/kh2.");
         Assert.True(File.Exists(mainLayoutPath), $"Missing {mainLayoutPath}");
 
-        var html = File.ReadAllText(htmlPath);
-        Assert.DoesNotContain("https://", html, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("http://", html, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("PHIẾU KHẢO SÁT", html);
-        Assert.Contains("irm_r6_feedback_v1", html);
-
         var mainLayout = File.ReadAllText(mainLayoutPath);
-        Assert.Contains("id=\"btnCustomerFeedback\"", mainLayout);
-        Assert.Contains("irmInterop.initFeedbackSpotlight", mainLayout);
-        Assert.Contains("/PHIEU-KHAO-SAT-GOP-Y.html", mainLayout);
-        Assert.Contains("/PHIEU-KHAO-SAT-GOP-Y.xlsx", mainLayout);
+        Assert.DoesNotContain("id=\"btnCustomerFeedback\"", mainLayout, StringComparison.Ordinal);
+        Assert.DoesNotContain("/PHIEU-KHAO-SAT-GOP-Y.html", mainLayout, StringComparison.Ordinal);
+        Assert.DoesNotContain("/PHIEU-KHAO-SAT-GOP-Y.xlsx", mainLayout, StringComparison.Ordinal);
     }
 
     [Fact]
