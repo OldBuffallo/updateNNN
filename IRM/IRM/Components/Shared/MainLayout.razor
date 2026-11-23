@@ -90,6 +90,18 @@
                         </MudMenu>
                     </AuthorizeView>
 
+                    <!-- App-wide Product Tour Button -->
+                    <MudTooltip Text="Xem hướng dẫn sử dụng toàn hệ thống theo từng chức năng">
+                        <MudButton id="btnAppUserGuide"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Info"
+                                   Size="Size.Small"
+                                   StartIcon="@Icons.Material.Outlined.HelpOutline"
+                                   OnClick="StartProductTourAsync">
+                            <span class="d-none d-sm-inline">Hướng dẫn sử dụng</span>
+                        </MudButton>
+                    </MudTooltip>
+
                     <!-- Customer Feedback Survey Menu & Initial Spotlight Target -->
                     <MudMenu Class="topbar-feedback-menu"
                              Dense="true"
@@ -242,6 +254,18 @@
             <!-- ════════════ MAIN CONTENT ════════════ -->
             <MudMainContent Class="irm-main">
                 <MudContainer MaxWidth="MaxWidth.False" Class="irm-main-container">
+                    @if (_showPassportNotice)
+                    {
+                        <MudAlert Severity="Severity.Warning"
+                                  Variant="Variant.Outlined"
+                                  Dense="true"
+                                  ShowCloseIcon="true"
+                                  CloseIconClicked="@(() => _showPassportNotice = false)"
+                                  Class="mb-3"
+                                  data-passport-required-notice="true">
+                            <strong>Lưu ý bắt buộc:</strong> Mọi hồ sơ Người nước ngoài (nhập tay hoặc nhập Excel) đều <strong>PHẢI có Số hộ chiếu</strong> — đây là trường định danh bắt buộc duy nhất; các thông tin khác có thể bổ sung sau.
+                        </MudAlert>
+                    }
                     <CascadingValue Value="@auth.User.IsInRole(IrmRoles.Admin)" Name="IsAdmin">
                         @Body
                     </CascadingValue>
@@ -259,6 +283,7 @@
 
 @code {
     private bool _drawerOpen = true;
+    private bool _showPassportNotice = true;
     [CascadingParameter] private IrmThemeContext Theme { get; set; } = null!;
     private bool _darkMode => Theme.IsDarkMode;
     private bool _compactDensity;
@@ -276,7 +301,7 @@
                 var density = await JS.InvokeAsync<string>("irmInterop.getDensity");
                 _compactDensity = string.Equals(density, "compact", StringComparison.OrdinalIgnoreCase);
                 await JS.InvokeVoidAsync("irmInterop.registerShortcutHandler", _dotNetRef);
-                await JS.InvokeVoidAsync("irmInterop.initFeedbackSpotlight", false);
+                await JS.InvokeVoidAsync("irmAppTour.init", false);
             }
             catch (JSException ex)
             {
@@ -286,6 +311,25 @@
             }
 
             StateHasChanged();
+        }
+    }
+
+    private async Task StartProductTourAsync()
+    {
+        if (!_drawerOpen)
+        {
+            _drawerOpen = true;
+            StateHasChanged();
+            await Task.Delay(250);
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync("irmAppTour.init", true);
+        }
+        catch (JSException ex)
+        {
+            Logger.LogWarning(ex, "Unable to start app product tour");
         }
     }
 

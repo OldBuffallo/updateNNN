@@ -11,7 +11,8 @@
                 Match="NavLinkMatch.All"
                 Icon="@Icons.Material.Outlined.Dashboard"
                 Class="irm-nav-link"
-                ActiveClass="active">
+                ActiveClass="active"
+                data-app-tour="nav-dashboard">
         <span>Bảng điều khiển</span>
     </MudNavLink>
 
@@ -24,7 +25,8 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Badge"
                 Class="irm-nav-link"
-                ActiveClass="active">
+                ActiveClass="active"
+                data-app-tour="nav-foreign-persons">
         <span>Hồ sơ Người nước ngoài</span>
     </MudNavLink>
 
@@ -32,7 +34,8 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Business"
                 Class="irm-nav-link"
-                ActiveClass="active">
+                ActiveClass="active"
+                data-app-tour="nav-companies">
         <span>Doanh nghiệp</span>
     </MudNavLink>
 
@@ -40,7 +43,8 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Domain"
                 Class="irm-nav-link"
-                ActiveClass="active">
+                ActiveClass="active"
+                data-app-tour="nav-accommodations">
         <span>Cơ sở lưu trú</span>
     </MudNavLink>
 
@@ -53,7 +57,8 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.FactCheck"
                 Class="irm-nav-link"
-                ActiveClass="active">
+                ActiveClass="active"
+                data-app-tour="nav-inspections">
         <span>Đợt kiểm tra NNN</span>
     </MudNavLink>
 
@@ -66,7 +71,8 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Search"
                 Class="irm-nav-link"
-                ActiveClass="active">
+                ActiveClass="active"
+                data-app-tour="nav-search">
         <div class="d-flex align-center justify-space-between w-100">
             <span>Tra cứu toàn cục</span>
             <span class="nav-key-hint">Ctrl+K</span>
@@ -77,7 +83,8 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Description"
                 Class="irm-nav-link"
-                ActiveClass="active">
+                ActiveClass="active"
+                data-app-tour="nav-reports">
         <span>Báo cáo định kỳ</span>
     </MudNavLink>
 
@@ -85,7 +92,8 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.Analytics"
                 Class="irm-nav-link"
-                ActiveClass="active">
+                ActiveClass="active"
+                data-app-tour="nav-statistics">
         <span>Thống kê 54 địa bàn</span>
     </MudNavLink>
 
@@ -93,12 +101,14 @@
                 Match="NavLinkMatch.Prefix"
                 Icon="@Icons.Material.Outlined.UploadFile"
                 Class="irm-nav-link"
-                ActiveClass="active">
+                ActiveClass="active"
+                data-app-tour="nav-import">
         <span>Nhập dữ liệu Excel</span>
     </MudNavLink>
 
     <!-- ════════════ HỆ THỐNG ════════════ -->
     <AuthorizeView Roles="ADMIN" Context="adminCtx">
+        <div data-app-tour="admin-system">
         <!-- ──── DANH MỤC (collapsible) ──── -->
         <div class="nav-group-header">
             <span class="nav-section-label">DANH MỤC</span>
@@ -172,5 +182,6 @@
                     ActiveClass="active">
             <span>Đồng bộ DB cũ</span>
         </MudNavLink>
+        </div>
     </AuthorizeView>
 </MudNavMenu>
