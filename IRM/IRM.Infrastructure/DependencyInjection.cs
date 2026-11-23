@@ -69,6 +69,7 @@ public static class DependencyInjection
             : OperatingSystem.IsLinux() ? new ClamAvMalwareScanner()
             : throw new PlatformNotSupportedException("IRM chỉ hỗ trợ Windows x64 và Ubuntu 22.04 amd64."));
         services.AddScoped<IRM.Application.Abstractions.IExcelReader, IRM.Infrastructure.Excel.ExcelReader>();
+        services.AddScoped<IRM.Application.Abstractions.IExcelWorkbookConverter, IRM.Infrastructure.Excel.ExcelWorkbookConverter>();
         services.AddScoped<IRM.Application.Abstractions.IDatabaseReadiness, DatabaseReadiness>();
         services.AddHostedService<LegacySyncWorker>();
         return services;
