@@ -1,29 +1,216 @@
 @namespace IRM.Components.Pages
 @inherits IRM.Components.Shared.FeatureSection<Import>
+@using IRM.Application.Features.ImportExport
 @using IRM.Features.ImportExport.Help
 
-@* Step 2: Column Mapping *@
-    @if (Page._currentStep == 2)
-    {
-        <MudAlert Severity="Severity.Info" Class="mb-3">
+@* Step 2: Field Converter (Simple) & Column Mapping (Advanced) *@
+@if (Page._currentStep == 2)
+{
+    var useSimpleMode = Page._simpleConvertMode && Page._fieldSelections.Count > 0;
+
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3" Style="flex-wrap: wrap; gap: 10px;">
+        <MudAlert Severity="Severity.Info" Dense="true" Class="ma-0" Style="flex: 1; min-width: 260px;">
             <strong>@Page._uploadedFileName</strong> — @Page._sheetInfo
         </MudAlert>
-
-        @if (Page.MissingRequiredMappings.Any())
+        @if (Page._fieldSelections.Count > 0 || Page._excelHeaders.Count > 0)
         {
-            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mb-3" data-import-warning="missing-required-fields">
-                <strong>Cảnh báo trường bắt buộc:</strong> Còn thiếu <strong>@Page.MissingRequiredMappings.Count/@IRM.Application.Features.ImportExport.ImportMapping.RequiredCoreFields.Count</strong> trường bắt buộc chưa được ghép cột:
-                <strong>@string.Join(", ", Page.MissingRequiredMappings.Select(m => m.Label))</strong>.
-                Nếu tiếp tục, các dòng thiếu trường bắt buộc sẽ báo lỗi ở bước Xem trước.
+            <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+                <MudButton Color="@(useSimpleMode ? Color.Primary : Color.Default)"
+                           Variant="@(useSimpleMode ? Variant.Filled : Variant.Outlined)"
+                           OnClick="@(() => Page.SetConvertMode(true))">Đơn giản: Lọc trường &amp; Chuẩn hóa</MudButton>
+                <MudButton Color="@(!useSimpleMode ? Color.Primary : Color.Default)"
+                           Variant="@(!useSimpleMode ? Variant.Filled : Variant.Outlined)"
+                           OnClick="@(() => Page.SetConvertMode(false))">Nâng cao: Ghép 35 cột</MudButton>
+            </MudButtonGroup>
+        }
+    </MudStack>
+
+    @if (Page.MissingRequiredMappings.Any())
+    {
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true" Class="mb-3" data-import-warning="missing-required-fields">
+            <strong>Cảnh báo trường bắt buộc:</strong> Còn thiếu <strong>@Page.MissingRequiredMappings.Count/@ImportMapping.RequiredCoreFields.Count</strong> trường bắt buộc chưa được ghép cột:
+            <strong>@string.Join(", ", Page.MissingRequiredMappings.Select(m => m.Label))</strong>.
+            Nếu tiếp tục, các dòng thiếu trường bắt buộc sẽ báo lỗi ở bước Xem trước.
+        </MudAlert>
+    }
+    else if (useSimpleMode || Page._columnMappings.Any())
+    {
+        <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true" Class="mb-3" data-import-warning="all-required-mapped">
+            Đã ghép đủ <strong>@ImportMapping.RequiredCoreFields.Count/@ImportMapping.RequiredCoreFields.Count</strong> trường bắt buộc.
+        </MudAlert>
+    }
+
+    @if (useSimpleMode)
+    {
+        var analysis = Page._convertAnalysis;
+
+        @* Notification 1: File Status *@
+        @if (analysis != null)
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mb-2" data-convert-notif="file-status">
+                <div><strong>Tình trạng file mới tải lên: @Page._uploadedFileName</strong></div>
+                <div>
+                    Đọc được <strong>@analysis.TotalDataRows dòng dữ liệu</strong> · <strong>@analysis.TotalSourceColumns cột gốc</strong>
+                    (tự khớp <strong>@analysis.AutoMatchedColumnCount cột</strong>, đang chọn <strong>@analysis.SelectedColumnCount cột</strong>, bỏ qua <strong>@analysis.IgnoredColumnCount cột không dùng</strong>).
+                    @if (analysis.MissingPassportRows.Count == 0)
+                    {
+                        <span> Trường bắt buộc <strong>Số hộ chiếu</strong>: đủ 100% các dòng.</span>
+                    }
+                    else
+                    {
+                        <span style="color: var(--mud-palette-error);">
+                            <strong>Cảnh báo:</strong> Có <strong>@analysis.MissingPassportRows.Count dòng</strong> thiếu Số hộ chiếu (dòng @string.Join(", ", analysis.MissingPassportRows.Take(8))@(analysis.MissingPassportRows.Count > 8 ? "..." : "")).
+                        </span>
+                    }
+                </div>
+            </MudAlert>
+
+            @* Notification 2: Post-Conversion Gaps & Results *@
+            var hasGaps = analysis.UnselectedCoreFieldLabels.Count > 0 || analysis.EmptyCellFields.Count > 0 || analysis.TotalWarningCells > 0;
+            <MudAlert Severity="@(hasGaps ? Severity.Warning : Severity.Success)" Variant="Variant.Outlined" Dense="true" Class="mb-3" data-convert-notif="post-convert">
+                <div><strong>Thông báo sau khi lọc &amp; chuẩn hóa (định dạng ngày cố định dd/MM/yyyy):</strong></div>
+                <ul style="margin: 4px 0 0 18px; padding: 0;">
+                    <li><strong>Đã tự động chuẩn hóa:</strong> @analysis.TotalAutoNormalizedCells ô (khoảng trắng, giới tính Nam/Nữ, ngày dd/MM/yyyy, mã quốc tịch 3 ký tự, GPLĐ).</li>
+                    @if (analysis.TotalWarningCells > 0)
+                    {
+                        <li style="color: var(--mud-palette-error);">
+                            <strong>Ô lỗi định dạng chưa tự sửa được (@analysis.TotalWarningCells ô):</strong>
+                            @string.Join(" · ", analysis.WarningFields.Select(w => $"{w.Label} (dòng {string.Join(", ", w.RowNumbers.Take(5))}{(w.RowNumbers.Count > 5 ? "..." : "")})"))
+                        </li>
+                    }
+                    else
+                    {
+                        <li><strong>Ô lỗi định dạng:</strong> 0 ô.</li>
+                    }
+                    @if (analysis.UnselectedCoreFieldLabels.Count > 0)
+                    {
+                        <li><strong>Trường cơ bản chưa chọn lấy (@analysis.UnselectedCoreFieldLabels.Count trường):</strong> @string.Join(", ", analysis.UnselectedCoreFieldLabels).</li>
+                    }
+                    @if (analysis.EmptyCellFields.Count > 0)
+                    {
+                        <li>
+                            <strong>Ô bị bỏ trống trong các cột đã chọn:</strong>
+                            @string.Join(" · ", analysis.EmptyCellFields.Select(e => $"{e.Label}: trống {e.Count}/{analysis.TotalDataRows} dòng (dòng {string.Join(", ", e.RowNumbers.Take(5))}{(e.RowNumbers.Count > 5 ? "..." : "")})"))
+                        </li>
+                    }
+                </ul>
+                <div style="font-size: 0.78rem; margin-top: 4px;">
+                    <em>Chỉ Số hộ chiếu là bắt buộc — các trường thiếu phía trên vẫn cho phép import và hồ sơ sẽ được gắn trạng thái thiếu thông tin để bổ sung sau.</em>
+                </div>
             </MudAlert>
         }
-        else if (Page._columnMappings.Any())
+
+        <MudStack Row="true" Spacing="2" Class="mb-3" Style="flex-wrap: wrap;">
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Outlined.AutoFixHigh"
+                       OnClick="Page.ResetAutoFieldSelections">Tự động ghép cột</MudButton>
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Outlined.FilterAlt"
+                       OnClick="Page.SelectOnlyPassport">Chỉ lấy Số hộ chiếu</MudButton>
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Outlined.HelpOutline"
+                       OnClick="@(() => Page.ShowFieldHelpAsync(null))" data-import-tour="field-lookup">Tra cứu 35 trường</MudButton>
+        </MudStack>
+
+        @* Group 1: Required *@
+        <MudText Typo="Typo.overline" Color="Color.Primary" Class="font-weight-bold">NHÓM 1 — TRƯỜNG BẮT BUỘC DUY NHẤT</MudText>
+        <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px;">
+            <thead><tr><th style="width:230px;">Trường IRM</th><th style="width:260px;">Cột Excel nguồn</th><th>Mẫu Gốc → Sau chuẩn hóa</th><th style="width:150px;">Trạng thái</th></tr></thead>
+            <tbody>
+                @foreach (var item in Page._fieldSelections.Where(f => f.Group == "required"))
+                {
+                    @RenderFieldRow(item, analysis)
+                }
+            </tbody>
+        </MudSimpleTable>
+
+        @* Group 2: Core *@
+        <MudText Typo="Typo.overline" Color="Color.Secondary" Class="font-weight-bold">NHÓM 2 — THÔNG TIN CƠ BẢN (TÍCH ĐỂ LẤY · BỎ TÍCH ĐỂ LOẠI BỎ)</MudText>
+        <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px;">
+            <thead><tr><th style="width:230px;">Trường IRM</th><th style="width:260px;">Cột Excel nguồn</th><th>Mẫu Gốc → Sau chuẩn hóa</th><th style="width:150px;">Trạng thái</th></tr></thead>
+            <tbody>
+                @foreach (var item in Page._fieldSelections.Where(f => f.Group == "core"))
+                {
+                    @RenderFieldRow(item, analysis)
+                }
+            </tbody>
+        </MudSimpleTable>
+
+        @* Group 3: Extended (Collapsible) *@
+        var extSelectedCount = Page._fieldSelections.Count(f => f.Group == "extended" && f.IsSelected);
+        <MudExpansionPanels Class="mb-4" Elevation="0">
+            <MudExpansionPanel Text="@($"Nhóm 3 — Mở rộng: Thăm thân & V0.1.0 ({extSelectedCount} trường đang chọn)")" Class="rounded-lg border-solid border" Style="border-width: 1px;">
+                <MudSimpleTable Dense="true" Hover="true">
+                    <thead><tr><th style="width:230px;">Trường IRM</th><th style="width:260px;">Cột Excel nguồn</th><th>Mẫu Gốc → Sau chuẩn hóa</th><th style="width:150px;">Trạng thái</th></tr></thead>
+                    <tbody>
+                        @foreach (var item in Page._fieldSelections.Where(f => f.Group == "extended"))
+                        {
+                            @RenderFieldRow(item, analysis)
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            </MudExpansionPanel>
+        </MudExpansionPanels>
+
+        @* Live 5-row Normalized Sample Preview *@
+        @if (analysis != null && analysis.SampleRows.Count > 0)
         {
-            <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true" Class="mb-3" data-import-warning="all-required-mapped">
-                Đã ghép đủ <strong>@IRM.Application.Features.ImportExport.ImportMapping.RequiredCoreFields.Count/@IRM.Application.Features.ImportExport.ImportMapping.RequiredCoreFields.Count</strong> trường bắt buộc.
-            </MudAlert>
+            var selectedFields = Page._fieldSelections.Where(f => f.IsSelected && f.SourceColumnIndex is >= 0).ToList();
+            <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-1">Xem trước kết quả sau chuẩn hóa (5 dòng đầu · @selectedFields.Count cột đã chọn)</MudText>
+            <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-4" Style="border-width: 1px; overflow-x: auto;" data-convert-preview="sample-table">
+                <thead>
+                    <tr>
+                        <th>Dòng</th>
+                        @foreach (var f in selectedFields)
+                        {
+                            <th>@f.Label@(f.IsRequired ? " *" : "")</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in analysis.SampleRows)
+                    {
+                        <tr>
+                            <td><strong>@row.RowNumber</strong></td>
+                            @foreach (var cell in row.Cells)
+                            {
+                                var cellStyle = cell.Status switch
+                                {
+                                    NormalizedCellStatus.AutoNormalized => "background: rgba(21,101,192,0.08); color: #0d47a1; font-weight: 600;",
+                                    NormalizedCellStatus.NeedsReview => "background: var(--mud-palette-warning-hover); color: #b71c1c; font-weight: 600;",
+                                    _ => ""
+                                };
+                                var iconText = cell.Status switch
+                                {
+                                    NormalizedCellStatus.AutoNormalized => " ✨",
+                                    NormalizedCellStatus.NeedsReview => " ⚠",
+                                    _ => ""
+                                };
+                                <td style="@cellStyle" title="@cell.Note">@(string.IsNullOrEmpty(cell.NormalizedValue) ? "—" : cell.NormalizedValue)@iconText</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
         }
 
+        <MudStack Row="true" Justify="Justify.Center" Spacing="3" Style="flex-wrap: wrap;">
+            <MudButton Variant="Variant.Outlined" OnClick="@(() => Page._currentStep = 1)" StartIcon="@Icons.Material.Outlined.ArrowBack" data-import-tour-control="true">Quay lại</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Outlined.Download"
+                       Disabled="@(Page._isDownloadingNormalized || Page._isProcessing)"
+                       OnClick="Page.DownloadNormalizedWorkbookAsync" data-convert-action="download-clean">
+                @if (Page._isDownloadingNormalized) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                Tải file Excel đã chuẩn hóa (.xlsx)
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+                       OnClick="Page.GoToStep3" EndIcon="@Icons.Material.Outlined.ArrowForward" data-import-tour="go-preview"
+                       Disabled="@Page._isProcessing">
+                @if (Page._isProcessing) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                Tiếp tục: Xem trước &amp; Import
+            </MudButton>
+        </MudStack>
+    }
+    else
+    {
+        @* Classic Advanced 35-Column Mapping Table *@
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.HelpOutline" Class="mb-3"
                    OnClick="@(() => Page.ShowFieldHelpAsync(null))" data-import-tour="field-lookup">Tra cứu 35 trường</MudButton>
         <MudSimpleTable Dense="true" Hover="true" Class="rounded-lg border-solid border mb-3" Style="border-width: 1px;" data-import-tour="mapping">
@@ -76,8 +263,6 @@
             </tbody>
         </MudSimpleTable>
 
-
-
         <MudAlert Severity="Severity.Success" Dense="true" Class="mb-3">
             @(Page._columnMappings.Count(m => m.SystemField != "skip"))/@Page._columnMappings.Count cột đã ghép ·
             <MudCheckBox T="bool" @bind-Value="Page._saveTemplate" Dense="true" Label="Lưu template" Class="d-inline" />
@@ -100,3 +285,70 @@
             </MudButton>
         </MudStack>
     }
+}
+
+@code {
+    private RenderFragment RenderFieldRow(ExcelFieldSelection item, ExcelConvertAnalysis? analysis) => __builder =>
+    {
+        (string Raw, NormalizedCellResult Normalized, int AutoCount, int WarnCount) summary = default;
+        var hasSummary = analysis != null && analysis.FieldSummaries.TryGetValue(item.SystemField, out summary);
+        var rowStyle = !item.IsSelected ? "opacity: 0.65;" : "";
+        <tr style="@rowStyle">
+            <td>
+                <div class="d-flex align-center gap-1">
+                    <MudCheckBox T="bool" Value="@item.IsSelected" Disabled="@item.IsRequired" Dense="true"
+                                 ValueChanged="@(v => Page.ToggleFieldSelection(item, v))" />
+                    <div>
+                        <div><strong>@item.Label</strong>@(item.IsRequired ? " *" : "")</div>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">@item.Hint</MudText>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <MudSelect T="int?" Value="@item.SourceColumnIndex" Disabled="@(!item.IsSelected)"
+                           Variant="Variant.Outlined" Dense="true" Margin="Margin.Dense" Clearable="@(!item.IsRequired)"
+                           ValueChanged="@(v => Page.ChangeFieldColumn(item, v))">
+                    <MudSelectItem T="int?" Value="@((int?)null)">— Không chọn cột —</MudSelectItem>
+                    @foreach (var h in Page._excelHeaders)
+                    {
+                        <MudSelectItem T="int?" Value="@((int?)h.Index)">Cột @((char)('A' + h.Index)): "@h.HeaderName"</MudSelectItem>
+                    }
+                </MudSelect>
+            </td>
+            <td>
+                @if (!item.IsSelected || item.SourceColumnIndex is null)
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Bỏ qua — không trích xuất</MudText>
+                }
+                else if (hasSummary && !string.IsNullOrEmpty(summary.Raw))
+                {
+                    <code>@summary.Raw</code>
+                    <span class="mx-1">→</span>
+                    <strong>@(string.IsNullOrEmpty(summary.Normalized?.Value) ? "(trống)" : summary.Normalized!.Value)</strong>
+                }
+                else
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">(Các dòng mẫu đang trống)</MudText>
+                }
+            </td>
+            <td>
+                @if (!item.IsSelected || item.SourceColumnIndex is null)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Default">Bỏ qua</MudChip>
+                }
+                else if (hasSummary && summary.WarnCount > 0)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning">⚠ @summary.WarnCount ô cần sửa</MudChip>
+                }
+                else if (hasSummary && summary.AutoCount > 0)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Info">✨ Tự sửa @summary.AutoCount ô</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Success">✓ Hợp lệ</MudChip>
+                }
+            </td>
+        </tr>
+    };
+}

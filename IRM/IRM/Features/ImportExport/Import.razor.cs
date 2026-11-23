@@ -22,6 +22,7 @@ public partial class Import : ComponentBase, IFeaturePage
     [Inject] public ICompanyService CompanySvc { get; set; } = default!;
     [Inject] public IImportService ImportSvc { get; set; } = default!;
     [Inject] public IRM.Application.Abstractions.IExcelReader ExcelReader { get; set; } = default!;
+    [Inject] public IRM.Application.Abstractions.IExcelWorkbookConverter ExcelConverter { get; set; } = default!;
 
     // ── State ──
     internal int _currentStep;
@@ -60,9 +61,20 @@ public partial class Import : ComponentBase, IFeaturePage
     internal List<ColumnMapping> _columnMappings = new();
     internal bool _saveTemplate;
     internal string _templateName = "";
+    internal bool _simpleConvertMode;
+    internal bool _isDownloadingNormalized;
+    internal List<ExcelColumnInfo> _excelHeaders = new();
+    internal List<IRM.Application.Features.ImportExport.ExcelFieldSelection> _fieldSelections = new();
+    internal IRM.Application.Features.ImportExport.ExcelConvertAnalysis? _convertAnalysis;
+    internal HashSet<string> _activeAdminUnitCodes = new(StringComparer.OrdinalIgnoreCase);
 
     internal IReadOnlyList<(string Key, string Label)> MissingRequiredMappings =>
-        IRM.Application.Features.ImportExport.ImportMapping.GetMissingRequiredFields(_columnMappings);
+        _simpleConvertMode && _fieldSelections.Count > 0
+            ? _fieldSelections
+                .Where(f => f.IsRequired && (!f.IsSelected || f.SourceColumnIndex is null or < 0))
+                .Select(f => (f.SystemField, f.Label))
+                .ToList()
+            : IRM.Application.Features.ImportExport.ImportMapping.GetMissingRequiredFields(_columnMappings);
 
     internal static bool IsRequiredSystemField(string? key) =>
         !string.IsNullOrWhiteSpace(key) &&
@@ -101,6 +113,12 @@ public partial class Import : ComponentBase, IFeaturePage
         _mfNationalities = await CatalogSvc.GetNationalitiesAsync();
         _mfCareers = await CatalogSvc.GetCareersAsync();
         _careerGroups = await CatalogSvc.GetCareerGroupsAsync();
+        try
+        {
+            var units = await CatalogSvc.GetAdministrativeUnitsAsync();
+            _activeAdminUnitCodes = units.Where(u => !u.IsDeleted).Select(u => u.Code).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+        catch { _activeAdminUnitCodes = new(StringComparer.OrdinalIgnoreCase); }
         if (_careerGroups.Count == 1) _careerGroupId = _careerGroups[0].IDCG;
     }
 
@@ -162,24 +180,24 @@ public partial class Import : ComponentBase, IFeaturePage
         try
         {
             var headers = ExcelReader.ReadHeaders(_fileStream, _sheetIndex, _headerRow);
+            _excelHeaders = headers;
 
             if (_selectedTemplateId.HasValue)
             {
                 var template = _templates.FirstOrDefault(t => t.Id == _selectedTemplateId.Value);
-                if (template != null)
-                {
-                    _columnMappings = ImportSvc.ApplyTemplate(template, headers);
-                }
-                else
-                {
-                    _columnMappings = ImportSvc.AutoMapColumns(headers);
-                }
+                _columnMappings = template != null
+                    ? ImportSvc.ApplyTemplate(template, headers)
+                    : ImportSvc.AutoMapColumns(headers);
+                _simpleConvertMode = false;
             }
             else
             {
                 _columnMappings = ImportSvc.AutoMapColumns(headers);
+                _simpleConvertMode = true;
             }
 
+            _fieldSelections = BuildDefaultFieldSelections(headers, _columnMappings);
+            RefreshConvertAnalysis();
             _currentStep = 2;
         }
         catch (Exception ex)
@@ -198,6 +216,166 @@ public partial class Import : ComponentBase, IFeaturePage
         mapping.SystemField = newValue;
         mapping.SystemFieldLabel = SystemFields.All.GetValueOrDefault(newValue, "");
         mapping.IsAutoMapped = false;
+    }
+
+    private static readonly string[] ConverterCoreOrder =
+    [
+        "StaffName", "Gender", "Birthday", "Nationality", "CompanyName",
+        "Career", "WorkPermit", "WorkPermitNumber", "VisaNumber", "VisaSymbol",
+        "TemporaryStay", "Address", "Note"
+    ];
+
+    private static readonly Dictionary<string, string> ConverterHints = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Passport"] = "Bắt buộc — Giữ số 0 đầu, xóa khoảng trắng thừa",
+        ["StaffName"] = "Tự gom khoảng trắng thừa",
+        ["Gender"] = "Male/M/1 → Nam · Female/F/0 → Nữ",
+        ["Birthday"] = "Đổi chuẩn ngày dd/MM/yyyy",
+        ["Nationality"] = "Tên Anh/Việt/2 ký tự → Mã 3 ký tự DB",
+        ["CompanyName"] = "Tự khớp tên công ty trong DB",
+        ["Career"] = "Tự đối chiếu danh mục nghề nghiệp",
+        ["WorkPermit"] = "Chưa có/Không → trống · Miễn GPLĐ → Miễn",
+        ["WorkPermitNumber"] = "Giữ nguyên dạng chữ (Text)",
+        ["VisaNumber"] = "Giữ nguyên số 0 đầu (Text)",
+        ["VisaSymbol"] = "Ký hiệu thị thực (VD: DN1, LĐ2)",
+        ["TemporaryStay"] = "Đổi chuẩn ngày dd/MM/yyyy",
+        ["Address"] = "Địa chỉ tạm trú (không ép đuôi phường/xã)",
+        ["Note"] = "Ghi chú tự do"
+    };
+
+    internal static List<IRM.Application.Features.ImportExport.ExcelFieldSelection> BuildDefaultFieldSelections(
+        List<ExcelColumnInfo> headers, List<ColumnMapping> mappings)
+    {
+        var mapByField = mappings
+            .Where(m => !string.IsNullOrWhiteSpace(m.SystemField) && m.SystemField != "skip")
+            .GroupBy(m => m.SystemField, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First().ExcelColumnIndex, StringComparer.OrdinalIgnoreCase);
+
+        var list = new List<IRM.Application.Features.ImportExport.ExcelFieldSelection>();
+
+        void AddField(string key, string group, bool isRequired)
+        {
+            var matched = mapByField.TryGetValue(key, out var colIdx);
+            list.Add(new IRM.Application.Features.ImportExport.ExcelFieldSelection
+            {
+                SystemField = key,
+                Label = SystemFields.All.GetValueOrDefault(key, key),
+                Group = group,
+                Hint = ConverterHints.GetValueOrDefault(key, "Tự chuẩn hóa định dạng theo chuẩn IRM"),
+                IsRequired = isRequired,
+                IsSelected = isRequired || matched,
+                SourceColumnIndex = matched ? colIdx : null
+            });
+        }
+
+        AddField("Passport", "required", isRequired: true);
+        foreach (var coreKey in ConverterCoreOrder)
+            AddField(coreKey, "core", isRequired: false);
+
+        var handled = new HashSet<string>(ConverterCoreOrder, StringComparer.OrdinalIgnoreCase) { "Passport", "skip" };
+        foreach (var kv in SystemFields.All)
+        {
+            if (!handled.Contains(kv.Key))
+                AddField(kv.Key, "extended", isRequired: false);
+        }
+
+        return list;
+    }
+
+    internal void RefreshConvertAnalysis()
+    {
+        if (_fileStream == null || _fieldSelections.Count == 0) return;
+        _convertAnalysis = ExcelConverter.Analyze(
+            _fileStream,
+            _excelHeaders,
+            _fieldSelections,
+            _mfNationalities,
+            _activeAdminUnitCodes,
+            new IRM.Application.Features.ImportExport.ImportReadOptions
+            {
+                SheetIndex = _sheetIndex,
+                HeaderRow = _headerRow,
+                StartRow = _startRow,
+                EndRow = _endRow
+            },
+            sampleLimit: 5);
+    }
+
+    internal void ToggleFieldSelection(IRM.Application.Features.ImportExport.ExcelFieldSelection item, bool selected)
+    {
+        if (item.IsRequired) return;
+        item.IsSelected = selected;
+        RefreshConvertAnalysis();
+    }
+
+    internal void ChangeFieldColumn(IRM.Application.Features.ImportExport.ExcelFieldSelection item, int? colIdx)
+    {
+        item.SourceColumnIndex = colIdx;
+        if (colIdx.HasValue) item.IsSelected = true;
+        RefreshConvertAnalysis();
+    }
+
+    internal void SelectOnlyPassport()
+    {
+        foreach (var item in _fieldSelections)
+            item.IsSelected = item.IsRequired;
+        RefreshConvertAnalysis();
+    }
+
+    internal void ResetAutoFieldSelections()
+    {
+        if (_excelHeaders.Count == 0) return;
+        _columnMappings = ImportSvc.AutoMapColumns(_excelHeaders);
+        _fieldSelections = BuildDefaultFieldSelections(_excelHeaders, _columnMappings);
+        RefreshConvertAnalysis();
+    }
+
+    internal void SetConvertMode(bool simple)
+    {
+        _simpleConvertMode = simple;
+        if (simple && _fieldSelections.Count == 0 && _excelHeaders.Count > 0)
+        {
+            _fieldSelections = BuildDefaultFieldSelections(_excelHeaders, _columnMappings);
+            RefreshConvertAnalysis();
+        }
+    }
+
+    internal async Task DownloadNormalizedWorkbookAsync()
+    {
+        if (_fileStream == null || _isDownloadingNormalized) return;
+        _isDownloadingNormalized = true;
+        StateHasChanged();
+        try
+        {
+            var output = ExcelConverter.ConvertToCleanWorkbook(
+                _fileStream,
+                _fieldSelections,
+                _mfNationalities,
+                _activeAdminUnitCodes,
+                new IRM.Application.Features.ImportExport.ImportReadOptions
+                {
+                    SheetIndex = _sheetIndex,
+                    HeaderRow = _headerRow,
+                    StartRow = _startRow,
+                    EndRow = _endRow
+                });
+            var baseName = Path.GetFileNameWithoutExtension(_uploadedFileName ?? "DuLieu");
+            var fileName = $"{baseName}_chuan_hoa.xlsx";
+            await JS.InvokeVoidAsync("irmInterop.downloadFile",
+                fileName,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                Convert.ToBase64String(output.WorkbookBytes));
+            Snackbar.Add($"Đã tải xuống {fileName} ({output.CleanMappings.Count} cột đã chuẩn hóa).", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi xuất file chuẩn hóa: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isDownloadingNormalized = false;
+            StateHasChanged();
+        }
     }
 
     // ══════════════════════════════════════════
@@ -231,10 +409,39 @@ public partial class Import : ComponentBase, IFeaturePage
                 Snackbar.Add($"Đã lưu template '{_templateName}'", Severity.Success);
             }
 
-            _previewRows = await ImportSvc.GeneratePreviewAsync(_fileStream, _columnMappings, _selectedCompany?.IDCompany ?? 0,
-                new IRM.Application.Features.ImportExport.ImportReadOptions {
-                    SheetIndex = _sheetIndex, HeaderRow = _headerRow, StartRow = _startRow, EndRow = _endRow,
-                    CareerGroupId = _careerGroupId, AllowCreateCompanies = _allowCreateCompanies });
+            if (_simpleConvertMode && _fieldSelections.Count > 0)
+            {
+                var converted = ExcelConverter.ConvertToCleanWorkbook(
+                    _fileStream,
+                    _fieldSelections,
+                    _mfNationalities,
+                    _activeAdminUnitCodes,
+                    new IRM.Application.Features.ImportExport.ImportReadOptions
+                    {
+                        SheetIndex = _sheetIndex,
+                        HeaderRow = _headerRow,
+                        StartRow = _startRow,
+                        EndRow = _endRow
+                    });
+                using var cleanStream = new MemoryStream(converted.WorkbookBytes);
+                _previewRows = await ImportSvc.GeneratePreviewAsync(cleanStream, converted.CleanMappings, _selectedCompany?.IDCompany ?? 0,
+                    new IRM.Application.Features.ImportExport.ImportReadOptions
+                    {
+                        SheetIndex = 0,
+                        HeaderRow = 1,
+                        StartRow = 2,
+                        EndRow = null,
+                        CareerGroupId = _careerGroupId,
+                        AllowCreateCompanies = _allowCreateCompanies
+                    });
+            }
+            else
+            {
+                _previewRows = await ImportSvc.GeneratePreviewAsync(_fileStream, _columnMappings, _selectedCompany?.IDCompany ?? 0,
+                    new IRM.Application.Features.ImportExport.ImportReadOptions {
+                        SheetIndex = _sheetIndex, HeaderRow = _headerRow, StartRow = _startRow, EndRow = _endRow,
+                        CareerGroupId = _careerGroupId, AllowCreateCompanies = _allowCreateCompanies });
+            }
 
             // Updates require an explicit choice.
             _duplicateDecisions = new();
