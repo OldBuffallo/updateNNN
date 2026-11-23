@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup — Bước 2: Lọc trường & Chuẩn hóa Excel (IRM)</title>
+  <style>
+    :root {
+      --navy: #0f2942;
+      --primary: #1565c0;
+      --primary-light: #e8f1fb;
+      --bg: #f4f7fa;
+      --card: #ffffff;
+      --border: #dce4ee;
+      --text: #162436;
+      --muted: #5c6f84;
+      --success-bg: #e7f6ee;
+      --success-text: #0f6b3e;
+      --warn-bg: #fff6e0;
+      --warn-border: #f0b429;
+      --warn-text: #8a5600;
+      --err-bg: #fdeceb;
+      --err-border: #e53935;
+      --err-text: #b71c1c;
+      --auto-bg: #e8f4ff;
+      --auto-text: #0d47a1;
+      --radius: 12px;
+      --shadow: 0 2px 10px rgba(15, 41, 66, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    /* Top bar mimicking IRM */
+    .topbar {
+      background: var(--navy);
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .topbar-badge {
+      background: rgba(255,255,255,0.16);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 24px auto 48px;
+      padding: 0 20px;
+    }
+
+    /* Stepper */
+    .stepper {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: var(--card);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .step.done { color: var(--success-text); background: var(--success-bg); }
+    .step.active { color: #fff; background: var(--primary); }
+    .step-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      background: rgba(0,0,0,0.08);
+    }
+    .step.active .step-num { background: rgba(255,255,255,0.25); }
+
+    /* Main card */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px 22px;
+      margin-bottom: 18px;
+    }
+
+    /* File header + mode switcher */
+    .file-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .file-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .file-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: var(--success-bg);
+      color: var(--success-text);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px;
+    }
+    .file-title { font-weight: 700; font-size: 15px; }
+    .file-sub { font-size: 12.5px; color: var(--muted); }
+
+    .mode-switch {
+      display: inline-flex;
+      background: #eef3f8;
+      padding: 4px;
+      border-radius: 10px;
+      gap: 4px;
+    }
+    .mode-btn {
+      border: none;
+      background: transparent;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .mode-btn.active {
+      background: var(--card);
+      color: var(--primary);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    /* Notification Banners */
+    .notif-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .notif {
+      border-radius: 10px;
+      padding: 12px 15px;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .notif-icon {
+      font-size: 18px;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+    .notif-body { flex: 1; }
+    .notif-title { font-weight: 700; margin-bottom: 4px; }
+    .notif.info { background: #eef6ff; border-color: #b6d8ff; color: #0c3d7a; }
+    .notif.warn { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn-text); }
+    .notif.ok { background: var(--success-bg); border-color: #9ed9b9; color: var(--success-text); }
+    .notif ul { margin: 4px 0 0 18px; padding: 0; }
+    .notif li { margin: 2px 0; }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill {
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fbfd;
+    }
+    .pill.ok { background: var(--success-bg); color: var(--success-text); border-color: #b7e4cc; }
+    .pill.auto { background: var(--auto-bg); color: var(--auto-text); border-color: #bddcff; }
+    .pill.warn { background: var(--warn-bg); color: var(--warn-text); border-color: var(--warn-border); }
+
+    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .15s;
+    }
+    .btn:hover { background: #f2f6fb; }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover { background: #0f4ea0; }
+    .btn-outline-primary {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .btn-outline-primary:hover { background: #d8e9fc; }
+
+    /* Group section */
+    .group-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 18px 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .group-title.required { color: var(--primary); }
+
+    .field-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 220px 260px 1fr 165px;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      transition: all .15s;
+    }
+    .field-row.required-row {
+      border-color: #90caf9;
+      background: #f5faff;
+    }
+    .field-row.unchecked {
+      background: #fafbfd;
+      opacity: 0.72;
+    }
+    .field-row.has-warn {
+      border-color: var(--warn-border);
+      background: #fffdf7;
+    }
+
+    .field-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+    .field-check input[type="checkbox"] {
+      width: 17px; height: 17px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    .req-star { color: #d32f2f; font-weight: 800; }
+    .field-hint { font-size: 11.5px; color: var(--muted); font-weight: 400; display: block; }
+
+    select.col-select {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 8px;
+      border: 1px solid #c7d4e2;
+      font-size: 13px;
+      background: #fff;
+      color: var(--text);
+    }
+    select.col-select:disabled {
+      background: #f1f4f8;
+      color: #94a3b8;
+    }
+
+    .sample-transform {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+    .val-raw {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 12px;
+      background: #f1f5f9;
+      padding: 2px 7px;
+      border-radius: 6px;
+      color: #475569;
+    }
+    .arrow { color: var(--muted); font-weight: 700; }
+    .val-clean {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+    .val-clean.auto { background: var(--auto-bg); color: var(--auto-text); }
+    .val-clean.warn { background: var(--warn-bg); color: var(--warn-text); }
+
+    .status-tag {
+      justify-self: end;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .status-tag.ok { background: var(--success-bg); color: var(--success-text); }
+    .status-tag.auto { background: var(--auto-bg); color: var(--auto-text); }
+    .status-tag.warn { background: var(--warn-bg); color: var(--warn-text); }
+    .status-tag.skip { background: #eef2f6; color: var(--muted); }
+
+    /* Collapsible advanced group */
+    details.ext-group {
+      margin-top: 14px;
+      border: 1px dashed #c4d2e0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      background: #fbfdff;
+    }
+    details.ext-group summary {
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--navy);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    details.ext-group[open] summary { margin-bottom: 12px; }
+
+    /* Live Preview Table */
+    .preview-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    table.preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    table.preview-table th {
+      background: #f1f5fa;
+      color: var(--navy);
+      text-align: left;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    table.preview-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #edf2f7;
+      white-space: nowrap;
+    }
+    table.preview-table tr:last-child td { border-bottom: none; }
+    .cell-auto {
+      background: #f0f7ff;
+      color: var(--auto-text);
+      font-weight: 600;
+      cursor: help;
+    }
+    .cell-warn {
+      background: var(--warn-bg);
+      color: var(--warn-text);
+      font-weight: 600;
+      cursor: help;
+    }
+
+    /* Footer actions */
+    .footer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: all .2s;
+      z-index: 50;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 900px) {
+      .field-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .status-tag { justify-self: start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-brand">
+      <span>IRM · Quản lý Người nước ngoài</span>
+      <span class="topbar-badge">MOCKUP TƯƠNG TÁC — BƯỚC 2 CONVERT EXCEL</span>
+    </div>
+    <div style="font-size: 13px; opacity: 0.85;">Chỉ bắt buộc duy nhất: <strong>Số hộ chiếu</strong></div>
+  </div>
+
+  <div class="container">
+    <!-- Stepper -->
+    <div class="stepper">
+      <div class="step done"><span class="step-num">✓</span> 1. Tải file Excel</div>
+      <div class="step active"><span class="step-num">2</span> 2. Lọc trường &amp; Chuẩn hóa</div>
+      <div class="step"><span class="step-num">3</span> 3. Xem trước &amp; Cảnh báo</div>
+      <div class="step"><span class="step-num">4</span> 4. Kết quả Import</div>
+    </div>
+
+    <!-- Main Converter Card -->
+    <div class="card">
+      <div class="file-bar">
+        <div class="file-meta">
+          <div class="file-icon">XLS</div>
+          <div>
+            <div class="file-title">DS_LaoDong_KhachHang2_LonXon.xlsx</div>
+            <div class="file-sub">Sheet1 · 5 dòng mẫu (tổng 120 dòng) · File gốc có 14 cột (nhiều cột rác)</div>
+          </div>
+        </div>
+        <div class="mode-switch">
+          <button class="mode-btn active" id="btnSimple" onclick="setMode('simple')">✨ Đơn giản: Lọc trường &amp; Chuẩn hóa</button>
+          <button class="mode-btn" id="btnAdvanced" onclick="setMode('advanced')">⚙ Nâng cao: Ghép đủ 35 cột</button>
+        </div>
+      </div>
+
+      <div id="simpleModeView">
+        <!-- 2-Layer Live Notification Banners -->
+        <div class="notif-stack">
+          <div class="notif info" id="fileStatusNotif"></div>
+          <div class="notif warn" id="postConvertNotif"></div>
+        </div>
+
+        <div class="toolbar">
+          <div class="stat-pills" id="statPills"></div>
+          <div class="btn-group">
+            <button class="btn" onclick="autoSelectMatched()">↻ Tự động ghép cột</button>
+            <button class="btn" onclick="onlyPassportMode()">🎯 Chỉ lấy Số hộ chiếu</button>
+          </div>
+        </div>
+
+        <div class="group-title required">
+          <span>Nhóm 1 — Trường bắt buộc duy nhất</span>
+          <span>Luôn được trích xuất</span>
+        </div>
+        <div class="field-grid" id="requiredFields"></div>
+
+        <div class="group-title">
+          <span>Nhóm 2 — Thông tin cơ bản (Tích để lấy · Bỏ tích để loại bỏ hoàn toàn)</span>
+          <span style="font-weight:500; text-transform:none;">Các cột rác trong file gốc tự động bị ẩn</span>
+        </div>
+        <div class="field-grid" id="coreFields"></div>
+
+        <details class="ext-group">
+          <summary>
+            <span>▸ Nhóm 3 — Thông tin mở rộng (Thăm thân &amp; Cư trú V0.1.0)</span>
+            <span id="extCountBadge" class="pill">0 trường đang chọn</span>
+          </summary>
+          <div class="field-grid" id="extFields"></div>
+        </details>
+      </div>
+
+      <div id="advancedModeView" style="display:none; padding: 18px; background:#f8fafc; border-radius:10px; border:1px dashed #cbd5e1;">
+        <strong>Chế độ nâng cao (Bảng ghép 35 cột hiện có):</strong> Giữ nguyên giao diện ghép từng cột Excel A, B, C... sang 35 trường hệ thống và hỗ trợ chọn <em>Template ghép cột</em> cũ cho người dùng chuyên sâu.
+        <div style="margin-top:10px;">
+          <button class="btn btn-outline-primary" onclick="setMode('simple')">← Quay lại chế độ Đơn giản</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Preview Card -->
+    <div class="card">
+      <div class="toolbar" style="margin-bottom:10px;">
+        <div>
+          <div style="font-weight:800; font-size:15px;">Xem trước kết quả sau chuẩn hóa (5 dòng đầu tiên)</div>
+          <div style="font-size:12.5px; color:var(--muted);">Chỉ hiển thị đúng các trường bạn đã tích chọn bên trên. Di chuột vào ô có ✨ hoặc ⚠ để xem dữ liệu gốc.</div>
+        </div>
+        <div id="previewStats" class="stat-pills"></div>
+      </div>
+      <div class="preview-wrap">
+        <table class="preview-table" id="previewTable"></table>
+      </div>
+
+      <div class="footer-bar">
+        <button class="btn" onclick="showToast('Quay lại Bước 1: Chọn file Excel')">← Quay lại</button>
+        <div class="btn-group">
+          <button class="btn btn-outline-primary" onclick="showToast('Đã xuất file DS_LaoDong_ChuanHoa.xlsx chỉ gồm ' + getSelectedFields().length + ' cột sạch!')">
+            ⬇ Tải file Excel đã chuẩn hóa (.xlsx)
+          </button>
+          <button class="btn btn-primary" onclick="showToast('Đã chuyển ' + getSelectedFields().length + ' cột đã chuẩn hóa sang Bước 3 (Xem trước & Import)!')">
+            Tiếp tục: Xem trước &amp; Import →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Simulated messy Excel columns (including junk columns!)
+    const excelColumns = [
+      { idx: 0, letter: "A", header: "STT (cột rác)" },
+      { idx: 1, letter: "B", header: "Full Name" },
+      { idx: 2, letter: "C", header: "So HC" },
+      { idx: 3, letter: "D", header: "Sex" },
+      { idx: 4, letter: "E", header: "DOB" },
+      { idx: 5, letter: "F", header: "Country" },
+      { idx: 6, letter: "G", header: "Ten Don Vi" },
+      { idx: 7, letter: "H", header: "Ghi chu noi bo (rac)" },
+      { idx: 8, letter: "I", header: "Work Permit" },
+      { idx: 9, letter: "J", header: "Visa No" },
+      { idx: 10, letter: "K", header: "Han tam tru" },
+      { idx: 11, letter: "L", header: "Dia chi o VN" },
+      { idx: 12, letter: "M", header: "Co tham than?" },
+      { idx: 13, letter: "N", header: "Ma dia ban V010" }
+    ];
+
+    // Simulated messy raw rows (5 rows)
+    const rawRows = [
+      { row: 2, vals: ["1", "  nguyen van a ", " 0012345 ", "Male", "1990-06-03", "Korea", "Công ty TNHH Alpha", "x", "Chưa có GPLĐ", "DN1-998", "2027-05-20", "12 Lê Duẩn, Hải Châu", "true", "QN-W-001"] },
+      { row: 3, vals: ["2", "KIM MIN SOO", "M8845120", "1", "15-08-1988", "KR", "Công ty TNHH Alpha", "", "Miễn GPLĐ", "LD2-112", "30/11/2026", "45 Bạch Đằng", "Không", "QN-W-001"] },
+      { row: 4, vals: ["3", "  TANAKA   YUKI", "TK009911", "Female", "03.11.1995", "Japan", "Công ty Beta", "", "GP-2026-01", "DN2-441", "31/02/2027", "88 Trần Phú", "yes", ""] },
+      { row: 5, vals: ["4", "", "P7766554", "F", "1992/01/10", "USA", "", "", "Không", "", "15/09/2027", "", "0", ""] },
+      { row: 6, vals: ["5", "LI WEI", "E4433221", "nam", "20/04/1985", "Trung Quoc", "Công ty Beta", "", "", "TT-008", "01/08/2028", "Khu 1 Bãi Cháy", "Có", "QN-W-002"] }
+    ];
+
+    const fieldDefs = [
+      { key: "Passport", label: "Số hộ chiếu", group: "required", hint: "Giữ số 0 đầu, xóa khoảng trắng", defaultCol: 2, checked: true },
+      { key: "StaffName", label: "Họ và tên", group: "core", hint: "Tự gom khoảng trắng thừa", defaultCol: 1, checked: true },
+      { key: "Gender", label: "Giới tính", group: "core", hint: "Male/M/1 → Nam · Female/F/0 → Nữ", defaultCol: 3, checked: true },
+      { key: "Birthday", label: "Ngày sinh", group: "core", hint: "Đổi nhiều kiểu ngày → dd/MM/yyyy", defaultCol: 4, checked: true },
+      { key: "Nationality", label: "Quốc tịch", group: "core", hint: "Tên Anh/Việt/2 ký tự → Mã 3 ký tự", defaultCol: 5, checked: true },
+      { key: "CompanyName", label: "Công ty", group: "core", hint: "Tự khớp tên công ty trong DB", defaultCol: 6, checked: true },
+      { key: "WorkPermit", label: "Giấy phép lao động", group: "core", hint: "Chưa có/Không → trống · Miễn GPLĐ → Miễn", defaultCol: 8, checked: true },
+      { key: "VisaNumber", label: "Số Visa", group: "core", hint: "Giữ dạng Text", defaultCol: 9, checked: false },
+      { key: "TemporaryStay", label: "Hạn tạm trú", group: "core", hint: "Đổi về dd/MM/yyyy", defaultCol: 10, checked: true },
+      { key: "Address", label: "Địa chỉ", group: "core", hint: "Không ép đuôi phường/xã", defaultCol: 11, checked: false },
+      { key: "FamilyVisit", label: "Có thăm thân", group: "ext", hint: "true/yes/1 → Có · false/0 → Không", defaultCol: 12, checked: false },
+      { key: "AdministrativeUnitCode", label: "Mã địa bàn (V0.1.0)", group: "ext", hint: "Chuẩn hóa chữ hoa", defaultCol: 13, checked: false }
+    ];
+
+    const state = fieldDefs.map(f => ({ ...f, colIdx: f.defaultCol }));
+
+    function normalizeCell(key, raw) {
+      const s = (raw ?? "").trim();
+      if (!s) return { value: "", status: "empty", note: "" };
+
+      if (key === "Passport") {
+        const cleaned = s.replace(/\s+/g, "");
+        return cleaned !== raw
+          ? { value: cleaned, status: "auto", note: `Đã xóa khoảng trắng ("${raw}" → "${cleaned}")` }
+          : { value: cleaned, status: "ok", note: "" };
+      }
+
+      if (key === "StaffName") {
+        const cleaned = s.replace(/\s+/g, " ");
+        return cleaned !== raw
+          ? { value: cleaned, status: "auto", note: `Gom khoảng trắng ("${raw}" → "${cleaned}")` }
+          : { value: cleaned, status: "ok", note: "" };
+      }
+
+      if (key === "Gender") {
+        const low = s.toLowerCase();
+        if (["nam", "male", "m", "1"].includes(low)) {
+          return s === "Nam"
+            ? { value: "Nam", status: "ok", note: "" }
+            : { value: "Nam", status: "auto", note: `Tự chuẩn hóa "${raw}" → "Nam"` };
+        }
+        if (["nữ", "nu", "female", "f", "0", "2"].includes(low)) {
+          return s === "Nữ"
+            ? { value: "Nữ", status: "ok", note: "" }
+            : { value: "Nữ", status: "auto", note: `Tự chuẩn hóa "${raw}" → "Nữ"` };
+        }
+        return { value: s, status: "warn", note: `Không nhận diện được giới tính "${raw}"` };
+      }
+
+      if (key === "Birthday" || key === "TemporaryStay") {
+        // yyyy-MM-dd or yyyy/MM/dd
+        let m = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+        if (m) {
+          const d = +m[3], mo = +m[2], y = +m[1];
+          if (isValidDate(y, mo, d)) {
+            const out = `${pad(d)}/${pad(mo)}/${y}`;
+            return { value: out, status: "auto", note: `Đổi định dạng "${raw}" → "${out}"` };
+          }
+          return { value: s, status: "warn", note: `Ngày không tồn tại: "${raw}"` };
+        }
+        // dd-MM-yyyy or dd.MM.yyyy or dd/MM/yyyy
+        m = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+        if (m) {
+          const d = +m[1], mo = +m[2], y = +m[3];
+          if (isValidDate(y, mo, d)) {
+            const out = `${pad(d)}/${pad(mo)}/${y}`;
+            return out === s
+              ? { value: out, status: "ok", note: "" }
+              : { value: out, status: "auto", note: `Đổi dấu phân cách "${raw}" → "${out}"` };
+          }
+          return { value: s, status: "warn", note: `Ngày không hợp lệ: "${raw}" (cần sửa)` };
+        }
+        return { value: s, status: "warn", note: `Không đọc được ngày "${raw}"` };
+      }
+
+      if (key === "Nationality") {
+        const map = {
+          "korea": "KOR", "south korea": "KOR", "kr": "KOR", "han quoc": "KOR", "kor": "KOR",
+          "japan": "JPN", "jp": "JPN", "nhat ban": "JPN", "jpn": "JPN",
+          "usa": "USA", "us": "USA", "united states": "USA", "hoa ky": "USA",
+          "china": "CHN", "cn": "CHN", "trung quoc": "CHN", "chn": "CHN"
+        };
+        const low = s.toLowerCase();
+        if (map[low]) {
+          const code = map[low];
+          return code === s
+            ? { value: code, status: "ok", note: "" }
+            : { value: code, status: "auto", note: `Ánh xạ quốc tịch "${raw}" → "${code}"` };
+        }
+        return { value: s, status: "warn", note: `Chưa có trong danh mục Quốc tịch: "${raw}"` };
+      }
+
+      if (key === "WorkPermit") {
+        const low = s.toLowerCase();
+        if (["chưa có", "chưa có gplđ", "không", "không có", "0"].includes(low)) {
+          return { value: "", status: "auto", note: `Đưa "${raw}" về trống (Chưa có GPLĐ)` };
+        }
+        if (low.includes("miễn") && s !== "Miễn") {
+          return { value: "Miễn", status: "auto", note: `Chuẩn hóa "${raw}" → "Miễn"` };
+        }
+        return { value: s, status: "ok", note: "" };
+      }
+
+      if (key === "FamilyVisit") {
+        const low = s.toLowerCase();
+        if (["true", "yes", "1", "co", "có", "x"].includes(low)) {
+          return s === "Có"
+            ? { value: "Có", status: "ok", note: "" }
+            : { value: "Có", status: "auto", note: `Chuẩn hóa "${raw}" → "Có"` };
+        }
+        if (["false", "no", "0", "khong", "không"].includes(low)) {
+          return s === "Không"
+            ? { value: "Không", status: "ok", note: "" }
+            : { value: "Không", status: "auto", note: `Chuẩn hóa "${raw}" → "Không"` };
+        }
+        return { value: s, status: "warn", note: `Giá trị lạ: "${raw}"` };
+      }
+
+      return { value: s, status: "ok", note: "" };
+    }
+
+    function pad(n) { return n < 10 ? "0" + n : "" + n; }
+    function isValidDate(y, m, d) {
+      const dt = new Date(y, m - 1, d);
+      return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
+    }
+
+    function getSelectedFields() {
+      return state.filter(f => f.checked && f.colIdx >= 0);
+    }
+
+    function render() {
+      const reqEl = document.getElementById("requiredFields");
+      const coreEl = document.getElementById("coreFields");
+      const extEl = document.getElementById("extFields");
+      reqEl.innerHTML = ""; coreEl.innerHTML = ""; extEl.innerHTML = "";
+
+      let extSelected = 0;
+
+      state.forEach((f, idx) => {
+        if (f.group === "ext" && f.checked) extSelected++;
+        const firstRaw = f.colIdx >= 0 ? (rawRows.find(r => r.vals[f.colIdx])?.vals[f.colIdx] ?? "") : "";
+        const norm = f.checked && f.colIdx >= 0 ? normalizeCell(f.key, firstRaw) : null;
+
+        // Also check if ANY row in this field has warn
+        let warnCount = 0, autoCount = 0;
+        if (f.checked && f.colIdx >= 0) {
+          rawRows.forEach(r => {
+            const res = normalizeCell(f.key, r.vals[f.colIdx]);
+            if (res.status === "warn") warnCount++;
+            if (res.status === "auto") autoCount++;
+          });
+        }
+
+        const row = document.createElement("div");
+        row.className = "field-row"
+          + (f.group === "required" ? " required-row" : "")
+          + (!f.checked ? " unchecked" : "")
+          + (warnCount > 0 ? " has-warn" : "");
+
+        const optionsHtml = `<option value="-1">— Không chọn cột —</option>` +
+          excelColumns.map(c => `<option value="${c.idx}" ${c.idx === f.colIdx ? "selected" : ""}>Cột ${c.letter}: "${c.header}"</option>`).join("");
+
+        let sampleHtml = `<span style="color:var(--muted); font-size:12.5px;">Bỏ qua — không trích xuất cột này</span>`;
+        let tagHtml = `<span class="status-tag skip">Bỏ qua</span>`;
+
+        if (f.checked && f.colIdx >= 0) {
+          const cleanClass = norm.status === "auto" ? "auto" : norm.status === "warn" ? "warn" : "";
+          sampleHtml = `
+            <span class="val-raw">${escapeHtml(firstRaw || "(trống)")}</span>
+            <span class="arrow">→</span>
+            <span class="val-clean ${cleanClass}">${escapeHtml(norm.value || "(trống)")}</span>
+          `;
+          if (warnCount > 0) tagHtml = `<span class="status-tag warn">⚠ ${warnCount} ô cần sửa</span>`;
+          else if (autoCount > 0) tagHtml = `<span class="status-tag auto">✨ Tự sửa ${autoCount} ô</span>`;
+          else tagHtml = `<span class="status-tag ok">✓ Hợp lệ</span>`;
+        }
+
+        row.innerHTML = `
+          <label class="field-check">
+            <input type="checkbox" ${f.checked ? "checked" : ""} ${f.group === "required" ? "disabled" : ""} onchange="toggleField(${idx}, this.checked)" />
+            <span>
+              ${f.label}${f.group === "required" ? ' <span class="req-star">*</span>' : ""}
+              <span class="field-hint">${f.hint}</span>
+            </span>
+          </label>
+          <select class="col-select" ${!f.checked ? "disabled" : ""} onchange="changeCol(${idx}, +this.value)">
+            ${optionsHtml}
+          </select>
+          <div class="sample-transform">${sampleHtml}</div>
+          ${tagHtml}
+        `;
+
+        if (f.group === "required") reqEl.appendChild(row);
+        else if (f.group === "core") coreEl.appendChild(row);
+        else extEl.appendChild(row);
+      });
+
+      document.getElementById("extCountBadge").textContent = `${extSelected} trường đang chọn`;
+      renderPreview();
+    }
+
+    function renderPreview() {
+      const selected = getSelectedFields();
+      const table = document.getElementById("previewTable");
+
+      let totalAuto = 0, totalWarn = 0;
+
+      const thead = `<thead><tr><th>Dòng</th>${selected.map(f => `<th>${f.label}${f.group === "required" ? " *" : ""}</th>`).join("")}</tr></thead>`;
+      const tbody = `<tbody>${rawRows.map(r => {
+        const tds = selected.map(f => {
+          const raw = r.vals[f.colIdx];
+          const res = normalizeCell(f.key, raw);
+          if (res.status === "auto") totalAuto++;
+          if (res.status === "warn") totalWarn++;
+          const cls = res.status === "auto" ? "cell-auto" : res.status === "warn" ? "cell-warn" : "";
+          const badge = res.status === "auto" ? " ✨" : res.status === "warn" ? " ⚠" : "";
+          const title = res.note ? `title="${escapeHtml(res.note)}"` : "";
+          return `<td class="${cls}" ${title}>${escapeHtml(res.value || "—")}${badge}</td>`;
+        }).join("");
+        return `<tr><td><strong>${r.row}</strong></td>${tds}</tr>`;
+      }).join("")}</tbody>`;
+
+      table.innerHTML = thead + tbody;
+
+      document.getElementById("statPills").innerHTML = `
+        <span class="pill ok">✓ Đã chọn ${selected.length} / ${excelColumns.length} cột (loại bỏ ${excelColumns.length - selected.length} cột rác)</span>
+        <span class="pill auto">✨ ${totalAuto} ô tự động chuẩn hóa</span>
+        ${totalWarn > 0 ? `<span class="pill warn">⚠ ${totalWarn} ô lỗi định dạng cần kiểm tra</span>` : `<span class="pill ok">✓ 0 ô lỗi định dạng</span>`}
+      `;
+
+      document.getElementById("previewStats").innerHTML = `
+        <span class="pill">${selected.length} cột đầu ra</span>
+      `;
+
+      renderNotifications(selected, totalAuto, totalWarn);
+    }
+
+    function renderNotifications(selected, totalAuto, totalWarn) {
+      // 1. File Status Notification (tình trạng file gốc mới tải lên)
+      const matchedDefaultCount = fieldDefs.filter(f => f.defaultCol >= 0).length;
+      const junkColCount = excelColumns.length - matchedDefaultCount;
+      const passportField = state.find(f => f.key === "Passport");
+      const missingPassportRows = passportField && passportField.colIdx >= 0
+        ? rawRows.filter(r => !(r.vals[passportField.colIdx] || "").trim()).map(r => r.row)
+        : rawRows.map(r => r.row);
+
+      document.getElementById("fileStatusNotif").innerHTML = `
+        <div class="notif-icon">📄</div>
+        <div class="notif-body">
+          <div class="notif-title">Tình trạng file mới tải lên: DS_LaoDong_KhachHang2_LonXon.xlsx</div>
+          <div>
+            Đọc được <strong>${rawRows.length} dòng mẫu</strong> (tổng 120 dòng) · <strong>${excelColumns.length} cột gốc</strong>
+            (tự khớp <strong>${matchedDefaultCount} cột</strong> vào trường IRM, <strong>${junkColCount} cột không dùng/cột rác</strong> sẽ bỏ qua).
+            ${missingPassportRows.length === 0
+              ? `Trường bắt buộc <strong>Số hộ chiếu</strong>: <strong style="color:var(--success-text);">đủ 100% các dòng</strong>.`
+              : `<strong style="color:var(--err-text);">⚠ Có ${missingPassportRows.length} dòng thiếu Số hộ chiếu (dòng ${missingPassportRows.join(", ")}) — sẽ bị báo lỗi khi import.</strong>`}
+          </div>
+        </div>
+      `;
+
+      // 2. Post-Conversion Gap Notification (sau khi lọc & sửa đổi thì còn thiếu những gì)
+      const unselectedCore = state.filter(f => f.group === "core" && (!f.checked || f.colIdx < 0));
+      const emptyCellDetails = [];
+      const warnCellDetails = [];
+
+      selected.forEach(f => {
+        const emptyRows = [];
+        const badRows = [];
+        rawRows.forEach(r => {
+          const raw = r.vals[f.colIdx];
+          const res = normalizeCell(f.key, raw);
+          if (res.status === "empty" && f.group !== "required") emptyRows.push(r.row);
+          if (res.status === "warn") badRows.push(`dòng ${r.row} ("${escapeHtml(raw)}")`);
+        });
+        if (emptyRows.length > 0) emptyCellDetails.push(`<strong>${f.label}</strong>: trống ${emptyRows.length}/${rawRows.length} dòng (dòng ${emptyRows.join(", ")})`);
+        if (badRows.length > 0) warnCellDetails.push(`<strong>${f.label}</strong>: ${badRows.join(", ")}`);
+      });
+
+      const postEl = document.getElementById("postConvertNotif");
+      const hasAnyGap = unselectedCore.length > 0 || emptyCellDetails.length > 0 || totalWarn > 0;
+      postEl.className = "notif " + (hasAnyGap ? "warn" : "ok");
+
+      if (!hasAnyGap) {
+        postEl.innerHTML = `
+          <div class="notif-icon">✅</div>
+          <div class="notif-body">
+            <div class="notif-title">Sau khi chuẩn hóa: Dữ liệu đầy đủ, sẵn sàng Import!</div>
+            <div>Đã tự động chuẩn hóa <strong>${totalAuto} ô</strong> theo chuẩn IRM (ngày <code>dd/MM/yyyy</code>), không thiếu trường cơ bản và không có ô lỗi định dạng.</div>
+          </div>
+        `;
+      } else {
+        postEl.innerHTML = `
+          <div class="notif-icon">🔔</div>
+          <div class="notif-body">
+            <div class="notif-title">Thông báo sau khi lọc &amp; chuẩn hóa (định dạng ngày cố định <code>dd/MM/yyyy</code>):</div>
+            <ul>
+              <li><strong>Đã tự động chuẩn hóa:</strong> ${totalAuto} ô (khoảng trắng, giới tính Nam/Nữ, ngày <code>dd/MM/yyyy</code>, mã quốc tịch 3 ký tự, GPLĐ).</li>
+              ${warnCellDetails.length > 0
+                ? `<li><strong style="color:var(--err-text);">Ô lỗi định dạng chưa tự sửa được (${totalWarn} ô):</strong> ${warnCellDetails.join(" · ")}.</li>`
+                : `<li><strong>Ô lỗi định dạng:</strong> 0 ô.</li>`}
+              ${unselectedCore.length > 0
+                ? `<li><strong>Trường cơ bản chưa chọn lấy (${unselectedCore.length} trường):</strong> ${unselectedCore.map(f => f.label).join(", ")}.</li>`
+                : ``}
+              ${emptyCellDetails.length > 0
+                ? `<li><strong>Ô bị bỏ trống trong các cột đã chọn:</strong> ${emptyCellDetails.join(" · ")}.</li>`
+                : ``}
+            </ul>
+            <div style="margin-top:6px; font-size:12px; opacity:0.9;">
+              <em>Lưu ý: Chỉ <strong>Số hộ chiếu</strong> là bắt buộc — các trường thiếu phía trên vẫn cho phép import và hồ sơ sẽ được đánh dấu thiếu thông tin để bổ sung sau.</em>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function toggleField(idx, checked) {
+      state[idx].checked = checked;
+      render();
+    }
+
+    function changeCol(idx, colIdx) {
+      state[idx].colIdx = colIdx;
+      render();
+    }
+
+    function autoSelectMatched() {
+      state.forEach((f, i) => {
+        f.colIdx = fieldDefs[i].defaultCol;
+        f.checked = fieldDefs[i].checked;
+      });
+      render();
+      showToast("Đã tự động ghép lại các cột khớp tên trong file Excel.");
+    }
+
+    function onlyPassportMode() {
+      state.forEach(f => { f.checked = f.group === "required"; });
+      render();
+      showToast("Đã chuyển về chế độ tối giản: chỉ trích xuất Số hộ chiếu.");
+    }
+
+    function setMode(mode) {
+      document.getElementById("btnSimple").classList.toggle("active", mode === "simple");
+      document.getElementById("btnAdvanced").classList.toggle("active", mode === "advanced");
+      document.getElementById("simpleModeView").style.display = mode === "simple" ? "block" : "none";
+      document.getElementById("advancedModeView").style.display = mode === "advanced" ? "block" : "none";
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(window._t);
+      window._t = setTimeout(() => el.classList.remove("show"), 3200);
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    render();
+  </script>
+</body>
+</html>
