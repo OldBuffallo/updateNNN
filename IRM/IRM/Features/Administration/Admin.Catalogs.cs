@@ -357,9 +357,117 @@ public partial class Admin
     // ── AdministrativeUnits (Địa bàn hành chính) ──
 
     internal IEnumerable<AdministrativeUnitDto> FilteredAdminUnits =>
-        string.IsNullOrWhiteSpace(_adminUnitTypeFilter)
-            ? _adminUnits
-            : _adminUnits.Where(u => u.TypeCode == _adminUnitTypeFilter);
+        _adminUnits.Where(u =>
+            (string.IsNullOrWhiteSpace(_adminUnitTypeFilter) || u.TypeCode == _adminUnitTypeFilter)
+            && (string.IsNullOrWhiteSpace(_adminUnitSearch)
+                || u.Code.Contains(_adminUnitSearch.Trim(), StringComparison.OrdinalIgnoreCase)
+                || u.Name.Contains(_adminUnitSearch.Trim(), StringComparison.OrdinalIgnoreCase)));
+
+    internal async Task DownloadAdminUnitTemplateAsync()
+    {
+        try
+        {
+            var bytes = CatalogSvc.GenerateAdministrativeUnitTemplate();
+            var base64 = Convert.ToBase64String(bytes);
+            await JS.InvokeVoidAsync(
+                "irmInterop.downloadFile",
+                "Mau-Dia-Ban-Hanh-Chinh.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                base64);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Không thể tải file mẫu: {ex.Message}", Severity.Error);
+        }
+    }
+
+    internal async Task HandleAdminUnitExcelUploadAsync(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file is null) return;
+
+        if (!file.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            Snackbar.Add("Chỉ hỗ trợ file Excel định dạng .xlsx.", Severity.Warning);
+            return;
+        }
+
+        _importingAdminUnits = true;
+        _adminUnitImportResult = null;
+        try
+        {
+            using var ms = new MemoryStream();
+            await file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(ms);
+            _adminUnitImportBytes = ms.ToArray();
+            _adminUnitImportFileName = file.Name;
+
+            using var previewStream = new MemoryStream(_adminUnitImportBytes);
+            _adminUnitImportPreview = await CatalogSvc.PreviewAdministrativeUnitsExcelAsync(previewStream, _adminUnitImportFileName);
+
+            if (_adminUnitImportPreview.TotalRows == 0)
+            {
+                Snackbar.Add("File Excel không có dòng dữ liệu nào.", Severity.Warning);
+            }
+            else if (_adminUnitImportPreview.ErrorCount > 0)
+            {
+                Snackbar.Add($"Đã đọc {_adminUnitImportPreview.TotalRows} dòng: {_adminUnitImportPreview.ValidCount} hợp lệ, {_adminUnitImportPreview.ErrorCount} dòng lỗi.", Severity.Warning);
+            }
+            else
+            {
+                Snackbar.Add($"Đã đọc {_adminUnitImportPreview.TotalRows} dòng hợp lệ (Thêm mới: {_adminUnitImportPreview.CreateCount}, Cập nhật: {_adminUnitImportPreview.UpdateCount}).", Severity.Info);
+            }
+        }
+        catch (Exception ex)
+        {
+            _adminUnitImportBytes = null;
+            _adminUnitImportPreview = null;
+            Snackbar.Add($"Lỗi đọc file Excel địa bàn: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _importingAdminUnits = false;
+        }
+    }
+
+    internal async Task ConfirmImportAdminUnitsAsync()
+    {
+        if (_adminUnitImportBytes is null || _adminUnitImportPreview is null || _adminUnitImportPreview.ValidCount == 0)
+        {
+            Snackbar.Add("Không có dòng hợp lệ để nạp.", Severity.Warning);
+            return;
+        }
+
+        _importingAdminUnits = true;
+        try
+        {
+            using var ms = new MemoryStream(_adminUnitImportBytes);
+            _adminUnitImportResult = await CatalogSvc.ImportAdministrativeUnitsExcelAsync(ms, _adminUnitImportFileName);
+            _adminUnits = await CatalogSvc.GetAllAdministrativeUnitsAsync();
+            BuildCards();
+            _adminUnitImportBytes = null;
+            _adminUnitImportPreview = null;
+
+            Snackbar.Add(
+                $"Đã nạp địa bàn thành công: thêm mới {_adminUnitImportResult.CreatedCount}, cập nhật {_adminUnitImportResult.UpdatedCount}, khôi phục {_adminUnitImportResult.ReactivatedCount}.",
+                Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi nạp Excel địa bàn: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _importingAdminUnits = false;
+        }
+    }
+
+    internal void ClearAdminUnitImport()
+    {
+        _adminUnitImportBytes = null;
+        _adminUnitImportFileName = "";
+        _adminUnitImportPreview = null;
+        _adminUnitImportResult = null;
+    }
 
     internal async Task SaveAdminUnitAsync()
     {

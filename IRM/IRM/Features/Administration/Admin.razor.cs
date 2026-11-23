@@ -1,3 +1,4 @@
+using IRM.Application.Features.Administration.Contracts;
 using IRM.Data.Models;
 using IRM.Services;
 using IRM.Application.Models;
@@ -20,6 +21,7 @@ public partial class Admin : ComponentBase, IFeaturePage
     [Inject] public IAuditService AuditSvc { get; set; } = default!;
     [Inject] public IAuthService AuthSvc { get; set; } = default!;
     [Inject] public IForeignerRegistryService RegistrySvc { get; set; } = default!;
+    [Inject] public IJSRuntime JS { get; set; } = default!;
 
     [Parameter]
     public string? SectionKey { get; set; }
@@ -66,6 +68,12 @@ public partial class Admin : ComponentBase, IFeaturePage
     internal bool _editingAdminUnit;
     internal bool _adminUnitSubmitted;
     internal string _adminUnitTypeFilter = "";
+    internal string _adminUnitSearch = "";
+    internal byte[]? _adminUnitImportBytes;
+    internal string _adminUnitImportFileName = "";
+    internal AdministrativeUnitImportPreview? _adminUnitImportPreview;
+    internal AdministrativeUnitImportResult? _adminUnitImportResult;
+    internal bool _importingAdminUnits;
 
     internal string? _auditFilterUsername;
     internal string? _auditFilterAction;

@@ -12,12 +12,20 @@
 <div class="section-header">
     <div class="d-flex align-center justify-space-between flex-wrap gap-2">
         <div>
-            <h3>Thống kê Lịch sử & 54 Địa bàn</h3>
+            <h3>Thống kê Lịch sử & Địa bàn</h3>
             <span class="section-meta">
-                Hệ thống truy vấn theo mốc thời gian (As-Of) · Tổng người tính duy nhất theo ForeignPersonId
+                Hệ thống truy vấn theo mốc thời gian (As-Of) · Danh sách địa bàn lấy động theo cấu hình Quản trị hệ thống (@_units.Count đơn vị)
             </span>
         </div>
         <div class="d-flex align-center gap-2">
+            <AuthorizeView Roles="ADMIN">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Outlined.LocationCity"
+                           Href="/admin/admin-units">
+                    Cấu hình địa bàn
+                </MudButton>
+            </AuthorizeView>
             <AuthorizeView Roles="ADMIN,REPORTER">
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
@@ -184,7 +192,7 @@
     </MudText>
     <div class="d-flex align-center flex-wrap gap-2">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Map" OnClick="LoadOverview">
-            Tổng quan 54 địa bàn
+            Tổng quan địa bàn (@_units.Count)
         </MudButton>
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Fingerprint" OnClick="LoadDocuments">
             Định danh & Giấy tờ
@@ -240,7 +248,7 @@
     <MudPaper Class="pa-4 mb-4" Elevation="0" Style="border: 1px solid var(--border); border-radius: 12px;">
         <div class="d-flex align-center justify-space-between mb-3">
             <MudText Typo="Typo.subtitle2" Class="font-weight-bold">
-                Tổng quan thống kê 54 xã / phường / đặc khu (@_overview.Count đơn vị)
+                Tổng quan thống kê địa bàn hành chính (@_overview.Count đơn vị)
             </MudText>
         </div>
         <MudDataGrid T="TerritoryOverview" Breakpoint="Breakpoint.None" Items="_overview" Hover="true" Striped="true" Class="irm-data-table">

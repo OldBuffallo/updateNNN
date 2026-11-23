@@ -1,10 +1,15 @@
 @namespace IRM.Components.Pages
 @inherits IRM.Components.Shared.FeatureSection<Admin>
+@using IRM.Application.Features.Administration.Contracts
 @using IRM.Data.Models
+@using Microsoft.AspNetCore.Components.Forms
 
 <MudPaper Class="pa-4 mb-4">
+    <MudText Typo="Typo.subtitle2" Style="font-weight: 700;" Class="mb-1">
+        Cấu hình thủ công địa bàn hành chính
+    </MudText>
     <MudText Typo="Typo.body2" Class="mb-3" Color="Color.Secondary">
-        Quản lý đơn vị hành chính (phường/xã/thị trấn). Khi sáp nhập đơn vị, hãy vô hiệu hóa đơn vị cũ và tạo đơn vị mới.
+        Danh mục này dùng chung cho toàn hệ thống (Hồ sơ NNN, Doanh nghiệp, Cơ sở lưu trú, Đợt kiểm tra và Thống kê địa bàn). Khi sáp nhập đơn vị, hãy vô hiệu hóa đơn vị cũ và tạo đơn vị mới.
     </MudText>
     <MudGrid>
         <MudItem xs="12" md="2">
@@ -28,7 +33,7 @@
             </MudSelect>
         </MudItem>
         <MudItem xs="12" md="2">
-            <MudDatePicker Label="Hiệu lực từ" @bind-Date="_validFromDate" Variant="Variant.Outlined" />
+            <MudDatePicker Label="Hiệu lực từ" @bind-Date="_validFromDate" DateFormat="dd/MM/yyyy" Variant="Variant.Outlined" />
         </MudItem>
         <MudItem xs="12" md="3" Class="d-flex align-center">
             <MudStack Row="true" Spacing="1">
@@ -39,18 +44,154 @@
     </MudGrid>
 </MudPaper>
 
-<MudStack Row="true" Spacing="2" Class="mb-3">
-    <MudChip T="string" Color="@(string.IsNullOrEmpty(Page._adminUnitTypeFilter) ? Color.Primary : Color.Default)"
-             OnClick='() => Page._adminUnitTypeFilter = ""'>Tất cả (@Page._adminUnits.Count)</MudChip>
-    <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.Ward ? Color.Primary : Color.Default)"
-             OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.Ward'>Phường (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.Ward))</MudChip>
-    <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.Commune ? Color.Primary : Color.Default)"
-             OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.Commune'>Xã (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.Commune))</MudChip>
-    <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.SpecialZone ? Color.Primary : Color.Default)"
-             OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.SpecialZone'>Đặc khu (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.SpecialZone))</MudChip>
-    <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.Province ? Color.Primary : Color.Default)"
-             OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.Province'>Tỉnh/TP (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.Province))</MudChip>
-</MudStack>
+<MudPaper Class="pa-4 mb-4">
+    <div class="d-flex align-center justify-space-between flex-wrap gap-2 mb-2">
+        <div>
+            <MudText Typo="Typo.subtitle2" Style="font-weight: 700;">
+                Nạp hàng loạt danh mục địa bàn từ Excel (.xlsx)
+            </MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                Hỗ trợ 4 cột: <strong>Mã địa bàn</strong>, <strong>Tên địa bàn</strong>, <strong>Loại</strong> (Phường/Xã/Đặc khu/Tỉnh-TP), <strong>Hiệu lực từ</strong> (dd/MM/yyyy). Mã đã có sẽ được cập nhật an toàn.
+            </MudText>
+        </div>
+        <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       Size="Size.Small"
+                       StartIcon="@Icons.Material.Outlined.Download"
+                       OnClick="Page.DownloadAdminUnitTemplateAsync">
+                Tải file mẫu Excel
+            </MudButton>
+            <InputFile id="adminUnitExcelInput"
+                       accept=".xlsx"
+                       OnChange="Page.HandleAdminUnitExcelUploadAsync"
+                       style="display:none" />
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Small"
+                       HtmlTag="label"
+                       for="adminUnitExcelInput"
+                       Disabled="Page._importingAdminUnits"
+                       StartIcon="@Icons.Material.Outlined.UploadFile">
+                Chọn file Excel (.xlsx)
+            </MudButton>
+        </MudStack>
+    </div>
+
+    @if (Page._importingAdminUnits)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-2" />
+    }
+
+    @if (Page._adminUnitImportResult is not null)
+    {
+        <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" Dense="true" Class="mt-2">
+            <strong>Kết quả nạp Excel:</strong>
+            Thêm mới <strong>@Page._adminUnitImportResult.CreatedCount</strong> ·
+            Cập nhật <strong>@Page._adminUnitImportResult.UpdatedCount</strong> ·
+            Khôi phục <strong>@Page._adminUnitImportResult.ReactivatedCount</strong> ·
+            Bỏ qua do lỗi <strong>@Page._adminUnitImportResult.SkippedErrorCount</strong>.
+        </MudAlert>
+    }
+
+    @if (Page._adminUnitImportPreview is not null)
+    {
+        <MudAlert Severity="@(Page._adminUnitImportPreview.ErrorCount > 0 ? Severity.Warning : Severity.Info)"
+                  Variant="Variant.Outlined"
+                  Dense="true"
+                  Class="mt-3 mb-2">
+            File <strong>@Page._adminUnitImportPreview.FileName</strong>:
+            Tổng <strong>@Page._adminUnitImportPreview.TotalRows</strong> dòng ·
+            Thêm mới <strong>@Page._adminUnitImportPreview.CreateCount</strong> ·
+            Cập nhật <strong>@Page._adminUnitImportPreview.UpdateCount</strong> ·
+            Lỗi <strong>@Page._adminUnitImportPreview.ErrorCount</strong>.
+        </MudAlert>
+
+        <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="mb-3" Style="max-height: 280px; overflow-y: auto;">
+            <thead>
+                <tr>
+                    <th>Dòng</th>
+                    <th>Mã</th>
+                    <th>Tên địa bàn</th>
+                    <th>Loại</th>
+                    <th>Hiệu lực từ</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Page._adminUnitImportPreview.Rows.Take(50))
+                {
+                    <tr>
+                        <td>@row.RowNumber</td>
+                        <td>@row.Code</td>
+                        <td>@row.Name</td>
+                        <td>@FormatType(row.TypeCode)</td>
+                        <td>@(row.ValidFrom == default ? "—" : row.ValidFrom.ToString("dd/MM/yyyy"))</td>
+                        <td>
+                            @if (row.Action == AdministrativeUnitImportAction.Error)
+                            {
+                                <MudText Color="Color.Error" Typo="Typo.caption">@row.ErrorMessage</MudText>
+                            }
+                            else if (row.Action == AdministrativeUnitImportAction.Create)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Outlined">Thêm mới</MudChip>
+                            }
+                            else
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">@(row.WillReactivate ? "Khôi phục & cập nhật" : "Cập nhật")</MudChip>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+
+        <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Success"
+                       Size="Size.Small"
+                       Disabled="@(Page._importingAdminUnits || Page._adminUnitImportPreview.ValidCount == 0)"
+                       StartIcon="@Icons.Material.Outlined.CheckCircle"
+                       OnClick="Page.ConfirmImportAdminUnitsAsync">
+                Xác nhận nạp (@Page._adminUnitImportPreview.ValidCount địa bàn hợp lệ)
+            </MudButton>
+            <MudButton Variant="Variant.Text"
+                       Size="Size.Small"
+                       Disabled="Page._importingAdminUnits"
+                       OnClick="Page.ClearAdminUnitImport">
+                Hủy
+            </MudButton>
+        </MudStack>
+    }
+</MudPaper>
+
+<MudGrid Class="mb-3 align-center" Spacing="2">
+    <MudItem xs="12" md="4">
+        <MudTextField T="string"
+                      @bind-Value="Page._adminUnitSearch"
+                      Immediate="true"
+                      Clearable="true"
+                      Placeholder="Tìm theo mã hoặc tên địa bàn..."
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Outlined.Search"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense" />
+    </MudItem>
+    <MudItem xs="12" md="8">
+        <MudStack Row="true" Spacing="1" Wrap="Wrap.Wrap">
+            <MudChip T="string" Color="@(string.IsNullOrEmpty(Page._adminUnitTypeFilter) ? Color.Primary : Color.Default)"
+                     OnClick='() => Page._adminUnitTypeFilter = ""'>Tất cả (@Page._adminUnits.Count)</MudChip>
+            <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.Ward ? Color.Primary : Color.Default)"
+                     OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.Ward'>Phường (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.Ward))</MudChip>
+            <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.Commune ? Color.Primary : Color.Default)"
+                     OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.Commune'>Xã (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.Commune))</MudChip>
+            <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.SpecialZone ? Color.Primary : Color.Default)"
+                     OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.SpecialZone'>Đặc khu (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.SpecialZone))</MudChip>
+            <MudChip T="string" Color="@(Page._adminUnitTypeFilter == AdministrativeUnitTypeCodes.Province ? Color.Primary : Color.Default)"
+                     OnClick='() => Page._adminUnitTypeFilter = AdministrativeUnitTypeCodes.Province'>Tỉnh/TP (@Page._adminUnits.Count(u => u.TypeCode == AdministrativeUnitTypeCodes.Province))</MudChip>
+        </MudStack>
+    </MudItem>
+</MudGrid>
 
 <MudSimpleTable Dense="true" Hover="true" Striped="true" Class="admin-detail-table">
     <thead>
@@ -110,4 +251,3 @@
         _ => typeCode
     };
 }
-

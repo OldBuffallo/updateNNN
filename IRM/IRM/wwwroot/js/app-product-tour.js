@@ -78,8 +78,8 @@
         {
             element: '[data-app-tour="nav-statistics"]',
             popover: {
-                title: 'Thống kê 54 địa bàn',
-                description: 'Xem thống kê phân bố người nước ngoài theo 54 địa bàn hành chính, khu công nghiệp và tình trạng định danh điện tử.',
+                title: 'Thống kê địa bàn',
+                description: 'Xem thống kê phân bố người nước ngoài theo danh mục địa bàn hành chính do Quản trị viên cấu hình (tại Danh mục hệ thống → Địa bàn hành chính), khu công nghiệp và tình trạng định danh điện tử.',
                 side: 'right',
                 align: 'start'
             }
