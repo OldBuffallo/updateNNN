@@ -6,6 +6,8 @@ using IRM.Infrastructure.Excel;
 using IRM.Infrastructure.Persistence.Stores.Reports;
 using IRM.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace IRM.Tests;
 
@@ -219,5 +221,65 @@ public sealed class OfflineSqlServerHardeningTests
         Assert.Contains("OperationCanceledException", guidance, StringComparison.Ordinal);
         Assert.Contains("if (_loading) return;", stats, StringComparison.Ordinal);
         Assert.Contains("Disabled=\"_loading\"", stats, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ClamAvMalwareScanner_AllowsMissingClamScanWhenOptional_AndBlocksWhenRequired()
+    {
+        var missingExe = Path.Combine(Path.GetTempPath(), $"missing-clamscan-{Guid.NewGuid():N}");
+        var sampleFile = Path.GetTempFileName();
+        try
+        {
+            var optionalScanner = new IRM.Infrastructure.Files.ClamAvMalwareScanner(requireClamAv: false, executablePath: missingExe);
+            await optionalScanner.ScanAsync(sampleFile);
+
+            var strictScanner = new IRM.Infrastructure.Files.ClamAvMalwareScanner(requireClamAv: true, executablePath: missingExe);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => strictScanner.ScanAsync(sampleFile));
+        }
+        finally
+        {
+            if (File.Exists(sampleFile)) File.Delete(sampleFile);
+        }
+    }
+
+    [Fact]
+    public async Task DatabaseStartup_SqliteDemoMode_CreatesSchemaEnforcesForeignKeysAndSeedsAdmin()
+    {
+        var dbFile = Path.Combine(Path.GetTempPath(), $"irm-sqlite-demo-{Guid.NewGuid():N}.db");
+        try
+        {
+            var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+            services.AddLogging();
+            IRM.Infrastructure.DependencyInjection.AddIrmInfrastructure(
+                services,
+                $"Data Source={dbFile}",
+                enableLegacySyncWorker: false,
+                requireDefenderScanner: false,
+                databaseProvider: "Sqlite");
+
+            var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Database:Provider"] = "Sqlite",
+                    ["Bootstrap:AdminUsername"] = "admin",
+                    ["Bootstrap:AdminPassword"] = "AdminDemo@2026!"
+                })
+                .Build();
+
+            await using var provider = services.BuildServiceProvider();
+            await IRM.Infrastructure.Maintenance.DatabaseStartup.InitializeAsync(provider, config, false, false, null);
+
+            using var scope = provider.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<IrmDbContext>();
+            Assert.True(await db.Accounts.AnyAsync(a => a.Username == "admin"));
+            Assert.True(await db.AdministrativeUnits.AnyAsync());
+            Assert.True(await db.Companies.AnyAsync());
+            Assert.True(await db.SchemaVersions.AnyAsync(s => s.Version == "1.0.1"));
+        }
+        finally
+        {
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+            if (File.Exists(dbFile)) File.Delete(dbFile);
+        }
     }
 }

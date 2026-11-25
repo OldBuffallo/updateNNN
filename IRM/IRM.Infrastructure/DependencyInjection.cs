@@ -1,5 +1,6 @@
 using IRM.Data;
 using IRM.Services;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,16 +12,42 @@ public static class DependencyInjection
         this IServiceCollection services,
         string connectionString,
         bool enableLegacySyncWorker = false,
-        bool requireDefenderScanner = false)
+        bool requireDefenderScanner = false,
+        string databaseProvider = "SqlServer")
     {
-        void ConfigureSqlServer(DbContextOptionsBuilder options) => options.UseSqlServer(connectionString, sql =>
+        var useSqlite = string.Equals(databaseProvider, "Sqlite", StringComparison.OrdinalIgnoreCase);
+        if (useSqlite)
         {
-            sql.MigrationsAssembly(typeof(IrmDbContext).Assembly.GetName().Name);
-            sql.CommandTimeout(60);
-            sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-        });
-        services.AddDbContextFactory<IrmDbContext>(ConfigureSqlServer);
-        services.AddDbContext<IrmDbContext>(ConfigureSqlServer);
+            var sb = new SqliteConnectionStringBuilder(connectionString)
+            {
+                ForeignKeys = true
+            };
+            if (!string.IsNullOrWhiteSpace(sb.DataSource) && !sb.DataSource.Equals(":memory:", StringComparison.OrdinalIgnoreCase))
+            {
+                var dir = Path.GetDirectoryName(Path.GetFullPath(sb.DataSource));
+                if (!string.IsNullOrWhiteSpace(dir)) Directory.CreateDirectory(dir);
+            }
+            connectionString = sb.ToString();
+        }
+
+        void ConfigureDatabase(DbContextOptionsBuilder options)
+        {
+            if (useSqlite)
+            {
+                options.UseSqlite(connectionString, sql => sql.CommandTimeout(60));
+            }
+            else
+            {
+                options.UseSqlServer(connectionString, sql =>
+                {
+                    sql.MigrationsAssembly(typeof(IrmDbContext).Assembly.GetName().Name);
+                    sql.CommandTimeout(60);
+                    sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                });
+            }
+        }
+        services.AddDbContextFactory<IrmDbContext>(ConfigureDatabase);
+        services.AddDbContext<IrmDbContext>(ConfigureDatabase);
         services.AddScoped<SqlCompanyStore>();
         services.AddScoped<ICompanyStore>(sp => sp.GetRequiredService<SqlCompanyStore>());
         services.AddScoped<SqlCompanyProfileStore>();
@@ -70,7 +97,7 @@ public static class DependencyInjection
         services.AddSingleton<IStorageCapacityGuard, StorageCapacityGuard>();
         services.AddSingleton<IMalwareScanner>(_ => OperatingSystem.IsWindows()
             ? new WindowsDefenderMalwareScanner(requireDefenderScanner)
-            : OperatingSystem.IsLinux() ? new ClamAvMalwareScanner()
+            : OperatingSystem.IsLinux() ? new ClamAvMalwareScanner(requireDefenderScanner)
             : throw new PlatformNotSupportedException("IRM chỉ hỗ trợ Windows x64 và Ubuntu 22.04 amd64."));
         services.AddScoped<IRM.Application.Abstractions.IExcelReader, IRM.Infrastructure.Excel.ExcelReader>();
         services.AddScoped<IRM.Application.Abstractions.IExcelWorkbookConverter, IRM.Infrastructure.Excel.ExcelWorkbookConverter>();

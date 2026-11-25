@@ -12,6 +12,7 @@
     <ProjectReference Include="../IRM.Application/IRM.Application.csproj" />
     <PackageReference Include="ClosedXML" Version="0.104.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.31" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.31" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.31" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>

@@ -25,7 +25,8 @@ if (command.Handled) return;
 builder.Services.AddIrmInfrastructure(
     command.ConnectionString,
     builder.Configuration.GetValue("LegacySync:Enabled", false),
-    builder.Configuration.GetValue("Security:RequireDefenderScanner", false));
+    builder.Configuration.GetValue("Security:RequireDefenderScanner", false),
+    builder.Configuration["Database:Provider"] ?? "SqlServer");
 var app = builder.Build();
 await DatabaseStartup.InitializeAsync(app.Services, builder.Configuration, bootstrapOnly, provisionDatabase,
     builder.Configuration["Provisioning:AdminConnectionString"]);
