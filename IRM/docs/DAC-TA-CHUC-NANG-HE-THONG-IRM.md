@@ -17,7 +17,7 @@ Giải pháp `IRM/IRM.sln` được chia thành 4 project sản phẩm và 1 pro
 | **`IRM.Application`** | Service Interfaces (`I*Service`), Store Abstractions (`I*Store`), Application Services (RBAC guard + DTO mapping), DTOs/Contracts, `ExcelValueNormalizer` | Chỉ tham chiếu `IRM.Core`; **không** lộ `DbContext`, `DbSet`, `IQueryable` ra bất kỳ interface nào |
 | **`IRM.Infrastructure`** | `IrmDbContext`, EF Core Configurations & Migrations, SQL Stores (`Sql*Store`), ClosedXML Excel Helpers (`ExcelReader`, `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper`, `SqlExportStore`, `SqlStatisticsExportStore`), `DatabaseSeeder`, `PrivateFileStorage`, `LegacySync` | Tham chiếu `IRM.Core`, `IRM.Application`; **không** tham chiếu `IRM` (Web) |
 | **`IRM`** | Blazor Interactive Server UI (`Components/`, `Features/`), `Program.cs`, `Hosting/` (Minimal APIs, Security, Maintenance CLI), `wwwroot/` (offline vendor assets, `irm-interop.js`, `import-tour.js`, `app-product-tour.js`) | Presentation + Composition Root |
-| **`IRM.Tests`** | xUnit (`409 passed`, `6 SQL-Server-only skipped`) + Node.js browser/JS harness (`54/54 passed`) | Kiểm thử đầy đủ các tầng |
+| **`IRM.Tests`** | xUnit (`419 passed`, `6 SQL-Server-only skipped`) + Node.js browser/JS harness (`54/54 passed`) | Kiểm thử đầy đủ các tầng |
 
 ```mermaid
 flowchart LR
@@ -247,5 +247,35 @@ Mọi thay đổi mã nguồn trên nhánh `custom/kh2` phải vượt qua toàn
 | Bộ kiểm thử | Lệnh chạy (từ `IRM/`) | Quy mô hiện tại | Phạm vi bao phủ |
 | :--- | :--- | :--- | :--- |
 | **Build Release** | `dotnet build IRM.sln -c Release` | 5 project | Biên dịch + MudBlazor Analyzer (`MUD0002`...) |
-| **.NET xUnit Suite** | `dotnet test IRM.Tests/IRM.Tests.csproj -c Release --no-build` | **409 Passed**, 0 Failed, 6 Skipped (SQL Server integration) | 52 file test: Architecture boundaries, RBAC/Auth, Passport-only rules (Schema, Manual, Import, Downstream), `ExcelValueNormalizer`, `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper` & Upsert, Statistics, Reports, Search, Inspections, Accommodations, Companies, Unified ForeignPersons, Markup guards (`AppProductTourMarkupTests`, `DynamicAdminUnitsMarkupTests`) |
+| **.NET xUnit Suite** | `dotnet test IRM.Tests/IRM.Tests.csproj -c Release --no-build` | **419 Passed**, 0 Failed, 6 Skipped (SQL Server integration) | 54 file test: Architecture boundaries, RBAC/Auth, Passport-only rules (Schema, Manual, Import, Downstream), `ExcelValueNormalizer` (gồm cột > 26 `AA/AB`), `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper` & Upsert, `OfflineSqlServerHardeningTests`, `OfflineDeploymentScriptTests`, Statistics, Reports, Search, Inspections, Accommodations, Companies, Unified ForeignPersons, Markup guards (`AppProductTourMarkupTests`, `DynamicAdminUnitsMarkupTests`) |
 | **Node.js Browser/JS Suite** | `node --test IRM.Tests/Browser/*.test.cjs` | **54/54 Passed** | 6 file test: `app-product-tour.test.cjs`, `feedback-spotlight.test.cjs`, `import-tour.test.cjs`, `responsive-table.test.cjs`, `theme-chart.test.cjs`, `theme-preference.test.cjs` |
+
+---
+
+## 7. Chuẩn triển khai Offline & Bảo vệ Runtime (SQL Server / Blazor Server)
+
+### 7.1 Đảm bảo 100% Air-Gapped (Không phụ thuộc Internet)
+- **Tài nguyên tĩnh nội bộ:** Toàn bộ CSS/JS/Fonts/Icons/Charts/Tour (`MudBlazor`, `app.css`, `chart.umd.min.js`, `driver.js 1.12.1`, `images/*`) được đóng gói offline trong `wwwroot/` và NuGet static web assets; **0 lời gọi `http://` hoặc `https://` ra mạng ngoài**.
+- **Tương thích phần cứng & phần mềm diệt virus hãng thứ 3:**
+  - Bộ cài kiểm tra tối thiểu **2 luồng CPU** (không chặn cứng xung cơ bản `< 2000 MHz` của các dòng laptop/mini-PC đời mới như i5-U, N100).
+  - `WindowsDefenderMalwareScanner` hỗ trợ cấu hình `Security:RequireDefenderScanner` (**mặc định `false`** trên `custom/kh2`): máy cài Bkav / Kaspersky / ESET (tắt Defender) vẫn cài đặt, vượt qua `--self-test` và tải tệp bình thường; nếu Defender đang bật và phát hiện mã độc (`ExitCode == 2`) vẫn chặn tuyệt đối; stdout/stderr được đọc bất đồng bộ để chống treo pipe.
+- **Vận hành LAN & HTTPS:**
+  - Mặc định `Security:RequireHttpsForRemoteClients = true` (máy chủ dùng `http://localhost:5050`, máy trạm LAN dùng `https://TEN-MAY:5443`).
+  - Nếu mạng LAN nội bộ thuần không dùng chứng chỉ HTTPS, quản trị viên có thể đổi `Security:RequireHttpsForRemoteClients = false` trong `C:\ProgramData\IRM\app\appsettings.Production.json` và khởi động lại dịch vụ `IRM`.
+- **Script bảo trì & phục hồi ổn định:**
+  - `backup.ps1` tự `Push-Location $appRoot` để chạy thủ công từ bất kỳ thư mục nào đều đọc đúng `appsettings.Production.json`.
+  - `install.ps1`, `repair.ps1`, `restore.ps1` đều dùng vòng lặp retry `/health/ready` tối đa 30 giây (15 × 2s) và kết nối thống nhất qua `127.0.0.1,14331`.
+  - `deploy/database/IRM-v1.0.1-schema.sql` và `verify-installed-database.sql` đồng bộ đủ cả 3 EF Core migration (`InitialSqlServerV101`, `AddVisaSymbol`, `MakeEmployeeCompanyNullable`).
+
+### 7.2 Bảo vệ Runtime trên SQL Server & Blazor Server
+- **An toàn Migration SQL Server:** `20261122093015_MakeEmployeeCompanyNullable` chủ động `DropIndex("IX_Employees_IDCompany")` trước khi `AlterColumn` và `CreateIndex` lại sau đó ở cả `Up()` và `Down()`.
+- **An toàn truy vấn & dữ liệu null/chuỗi:**
+  - `SqlStatisticsStore.GetTerritoryAsync` chiếu `CompanyName` ngay trong SQL trước khi gom nhóm (không phụ thuộc navigation chưa Include).
+  - `PassportRules.NormalizePassport` trả về `null` nếu chuỗi không chứa chữ cái hoặc chữ số (ngăn hash chuỗi rỗng hoặc ghi `NULL` vào `ElectronicIdentities.IdentitySearchKey`).
+  - `AdministrativeUnitExcelHelper` & `SqlCatalogStore` kiểm tra giới hạn `Code.Length <= 450` (tránh lỗi cắt chuỗi `nvarchar(450)` trên SQL Server) và dùng `GroupBy` an toàn trước `ToDictionary`.
+  - `SqlFamilyVisitorStore.Unified` chuẩn hóa `CompanyId <= 0` thành `null` trên mọi bảng liên quan (`Employees`, `StayCases`, `ResidencePeriods`).
+- **Ổn định Blazor Server Circuit:**
+  - Chặn gọi song song cùng một `IrmDbContext` tại `Statistics.razor` bằng cờ `_loading` + vô hiệu hóa nút + `try/catch`.
+  - Bọc `try/catch` cho luồng đọc `OpenReadStream` (tối đa 100 MB) và kiểm tra hộ chiếu trùng tại `Import.razor.cs`.
+  - Bắt đầy đủ `JSException`, `JSDisconnectedException`, `OperationCanceledException` tại `MainLayout.razor` và `Import.Guidance.razor.cs`; cô lập `localStorage` để không làm gãy phím tắt/Product Tour khi trình duyệt chặn bộ nhớ cục bộ.
+

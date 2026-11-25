@@ -3,17 +3,17 @@
 ## Hai hình thức bàn giao
 
 1. **Online/VPS:** IRM chạy bằng Docker Compose phía sau HTTPS. Quy trình triển khai nằm tại `deploy/deploy-vps.ps1`.
-2. **Offline/Windows R6:** tên artifact là `IRM-v1.0.2-windows-x64-offline-setup-R6.exe`. Gói chứa ứng dụng .NET self-contained, SQL Server 2022 Express Core và CU27; máy cài không cần Internet nếu đã có .NET Framework 4.7.2 trở lên cho SQL Server. Kiểm tra biên bản, trạng thái ký số và checksum đi kèm để phân biệt candidate thử với bản được phép bàn giao chính thức.
+2. **Offline/Windows KH2:** tên artifact là `IRM-v1.0.2-windows-x64-offline-setup-KH2.exe`. Gói chứa ứng dụng .NET self-contained, SQL Server 2022 Express Core và CU27; máy cài không cần Internet nếu đã có .NET Framework 4.7.2 trở lên cho SQL Server. Kiểm tra biên bản, trạng thái ký số và checksum đi kèm để phân biệt candidate thử với bản được phép bàn giao chính thức.
 
 ## Cài offline trên Windows
 
-Bộ cài R6 dùng giao diện đồng bộ màn hình đăng nhập (Landing Page) của ứng dụng: bố cục 2 cột với nền xanh olive vát khối đa giác (`#C2D67C → #9AB55C → #6D8446`), Công an hiệu ở phần đầu, nhân vật 3D Công an Nhân dân đứng trên bệ ở cột phải, khung bảng kiểm tra/biểu mẫu sáng rõ ở cột trái và nút chính màu cam (`#EA580C`). Bảng quét, hộp thông báo và báo cáo môi trường HTML dùng chung bảng màu olive sáng; bản in dùng nền trắng. Theme chỉ áp dụng cho bộ cài; không đổi theme Windows. Hộp thoại bảo mật của Windows do hệ điều hành hiển thị. Điều kiện Windows, RAM, SQL và hành vi nâng cấp giữ nguyên. Gói R4/R5 cũ vẫn giữ nội dung và checksum cũ.
+Bộ cài dùng giao diện đồng bộ màn hình đăng nhập (Landing Page) của ứng dụng: bố cục 2 cột với nền xanh olive vát khối đa giác (`#C2D67C → #9AB55C → #6D8446`), Công an hiệu ở phần đầu, nhân vật 3D Công an Nhân dân đứng trên bệ ở cột phải, khung bảng kiểm tra/biểu mẫu sáng rõ ở cột trái và nút chính màu cam (`#EA580C`). Bảng quét, hộp thông báo và báo cáo môi trường HTML dùng chung bảng màu olive sáng; bản in dùng nền trắng. Theme chỉ áp dụng cho bộ cài; không đổi theme Windows. Hộp thoại bảo mật của Windows do hệ điều hành hiển thị.
 
 > Bộ cài bàn giao chính thức phải có chữ ký Authenticode từ chứng thư Code Signing tin cậy. Không bàn giao artifact được tạo với `-AllowUnsigned`, vì Windows SmartScreen hoặc chính sách doanh nghiệp có thể chặn hoàn toàn.
 
-Yêu cầu tối thiểu: Windows 10 phiên bản 1607 x64 trở lên (build tối thiểu 14393, bao gồm Windows 11) hoặc Windows Server 2016 x64 trở lên (build tối thiểu 14393; bộ cài giao diện cần Desktop Experience), đã có .NET Framework 4.7.2 trở lên, 2 CPU logic từ 2 GHz, 2 GB RAM khả dụng, 10 GB ổ đĩa trống và Windows Defender đang hoạt động để quét tệp tải lên.
+Yêu cầu tối thiểu: Windows 10 phiên bản 1607 x64 trở lên (build tối thiểu 14393, bao gồm Windows 11) hoặc Windows Server 2016 x64 trở lên (build tối thiểu 14393; bộ cài giao diện cần Desktop Experience), đã có .NET Framework 4.7.2 trở lên, tối thiểu 2 luồng CPU, 2 GB RAM khả dụng và 10 GB ổ đĩa trống. Nếu máy đang dùng phần mềm diệt virus hãng thứ 3 (Bkav/Kaspersky/ESET) tắt Windows Defender, bộ cài vẫn cho phép cài đặt bình thường (cấu hình mặc định `Security:RequireDefenderScanner = false`; có thể bật `true` trong `appsettings.Production.json` nếu đơn vị yêu cầu quét bắt buộc bằng Windows Defender).
 
-1. Sao chép file `IRM-v1.0.2-windows-x64-offline-setup-R6.exe` và checksum đi kèm vào máy cần cài; xác minh SHA-256 trước khi chạy.
+1. Sao chép file `IRM-v1.0.2-windows-x64-offline-setup-KH2.exe` và checksum đi kèm vào máy cần cài; xác minh SHA-256 trước khi chạy.
 2. Nhấp đúp file và chọn **Yes** khi Windows hỏi quyền Administrator.
 3. Ở **Bước 1**, nhấn **Quét môi trường**. Trình cài đặt hiển thị báo cáo tickbox và lưu bản HTML tại `C:\ProgramData\IRM\logs`.
 4. Nếu thiếu SQL Server/CU27, báo cáo ghi **Sẽ cài bổ sung**. Các thành phần này được lấy ngay trong bộ cài, không tải Internet.
@@ -27,7 +27,7 @@ Khi chạy lại bộ cài để nâng cấp, database nghiệp vụ được gi
 Sau khi cài:
 
 - Trên máy chủ: `http://localhost:5050`
-- Trong mạng LAN khi đã bật tùy chọn LAN: `https://TEN-MAY:5443`
+- Trong mạng LAN khi đã bật tùy chọn LAN: `https://TEN-MAY:5443` *(nếu mạng LAN nội bộ không dùng HTTPS, đặt `"RequireHttpsForRemoteClients": false` dưới mục `"Security"` trong `C:\ProgramData\IRM\app\appsettings.Production.json` và khởi động lại dịch vụ `IRM`)*
 - Dữ liệu và cấu hình: `C:\ProgramData\IRM`
 - Công cụ backup/restore/repair/uninstall: `C:\ProgramData\IRM\tools`
 - Mã khôi phục database: `C:\ProgramData\IRM\MA-KHOI-PHUC.txt` (chỉ Administrators và SYSTEM đọc được)
@@ -35,11 +35,11 @@ Sau khi cài:
 ## Kiểm tra sau cài
 
 - Mở shortcut **IRM** trên Desktop.
-- Đăng nhập bằng tài khoản đã tạo trong bộ cài.
+- Đăng nhập bằng tài khoản đã tạo trong bộ cài; xem hướng dẫn **Product Tour** tự động hiện ở lần đăng nhập đầu tiên (hoặc nhấn nút **Hướng dẫn sử dụng** trên thanh tiêu đề).
+- Vào **Danh mục hệ thống → Địa bàn hành chính** (`/admin/admin-units`) để tự cấu hình hoặc tải file mẫu Excel và nạp danh mục địa bàn của đơn vị.
 - Kiểm tra `http://localhost:5050/health/ready` trả về trạng thái `ready`.
-- Chạy `C:\ProgramData\IRM\tools\backup.ps1`, sau đó xác nhận có tệp backup mới.
-- **Kiểm thử nhanh Import Excel mẫu R6 (`IRM-MAU-IMPORT-TEST-DA-SUA.xlsx`):** Vào mục **Import Excel**, ở Bước 1 chọn Công ty **CÔNG TY MẪU - HÃY ĐỔI TÊN** và Nhóm nghề **Kỹ thuật**, tải lên tệp `IRM-MAU-IMPORT-TEST-DA-SUA.xlsx` đi kèm trong thư mục bàn giao — hệ thống tự động ghép đủ 19 cột và nạp thành công 10/10 hồ sơ mẫu (gồm cả mã quốc tịch 3 chữ cái, số định danh có số `0` đầu và hồ sơ diện `Thân nhân`).
-- **Gửi phản hồi nghiệm thu (`Khảo sát & Góp ý`):** Ngay lần đầu mở ứng dụng Web, hiệu ứng spotlight trên thanh tiêu đề sẽ chỉ dẫn nút **Khảo sát & Góp ý (R6)**. Khách hàng có thể bấm nút này để mở trực tiếp phiếu khảo sát HTML hoặc tải phiếu Excel (`PHIEU-KHAO-SAT-GOP-Y.html` / `PHIEU-KHAO-SAT-GOP-Y.xlsx`, cũng có sẵn ngay trong thư mục bàn giao).
+- Chạy `C:\ProgramData\IRM\tools\backup.ps1`, sau đó xác nhận có tệp backup mới trong `C:\ProgramData\IRM\backups`.
+- Kiểm thử nhanh **Nhập dữ liệu Excel** (`/import`): chỉ bắt buộc cột **Số hộ chiếu**, hệ thống tự chuẩn hóa ngày `dd/MM/yyyy` và hiển thị thông báo tình trạng trước khi nạp.
 
 ## Gỡ cài đặt
 
