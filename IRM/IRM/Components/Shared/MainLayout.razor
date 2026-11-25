@@ -262,20 +262,28 @@
 
             try
             {
-                var density = await JS.InvokeAsync<string>("irmInterop.getDensity");
-                _compactDensity = string.Equals(density, "compact", StringComparison.OrdinalIgnoreCase);
                 var dismissed = await JS.InvokeAsync<string?>("localStorage.getItem", "irm-passport-notice-dismissed");
                 if (string.Equals(dismissed, "1", StringComparison.Ordinal))
                 {
                     _showPassportNotice = false;
                 }
+            }
+            catch (Exception ex) when (ex is JSException or JSDisconnectedException or OperationCanceledException)
+            {
+                Logger.LogWarning(ex, "Unable to read passport notice state from storage");
+            }
+
+            try
+            {
+                var density = await JS.InvokeAsync<string>("irmInterop.getDensity");
+                _compactDensity = string.Equals(density, "compact", StringComparison.OrdinalIgnoreCase);
                 await JS.InvokeVoidAsync("irmInterop.registerShortcutHandler", _dotNetRef);
                 await JS.InvokeVoidAsync("irmAppTour.init", false);
             }
-            catch (JSException ex)
+            catch (Exception ex) when (ex is JSException or JSDisconnectedException or OperationCanceledException)
             {
                 // Global shortcuts are progressive enhancement. A stale client-side
-                // asset must never terminate the Blazor circuit.
+                // asset or disconnected circuit must never terminate Blazor.
                 Logger.LogWarning(ex, "Unable to register the global shortcut handler");
             }
 
@@ -290,7 +298,7 @@
         {
             await JS.InvokeVoidAsync("localStorage.setItem", "irm-passport-notice-dismissed", "1");
         }
-        catch (JSException ex)
+        catch (Exception ex) when (ex is JSException or JSDisconnectedException or OperationCanceledException)
         {
             Logger.LogWarning(ex, "Unable to persist passport notice dismissal");
         }
@@ -309,7 +317,7 @@
         {
             await JS.InvokeVoidAsync("irmAppTour.init", true);
         }
-        catch (JSException ex)
+        catch (Exception ex) when (ex is JSException or JSDisconnectedException or OperationCanceledException)
         {
             Logger.LogWarning(ex, "Unable to start app product tour");
         }
@@ -322,7 +330,7 @@
         {
             await JS.InvokeAsync<string>("irmInterop.setDensity", _compactDensity ? "compact" : "comfortable");
         }
-        catch (JSException ex)
+        catch (Exception ex) when (ex is JSException or JSDisconnectedException or OperationCanceledException)
         {
             Logger.LogWarning(ex, "Unable to persist table density preference");
         }

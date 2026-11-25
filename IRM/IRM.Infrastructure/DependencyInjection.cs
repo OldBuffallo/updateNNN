@@ -7,7 +7,11 @@ namespace IRM.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddIrmInfrastructure(this IServiceCollection services, string connectionString, bool enableLegacySyncWorker = false)
+    public static IServiceCollection AddIrmInfrastructure(
+        this IServiceCollection services,
+        string connectionString,
+        bool enableLegacySyncWorker = false,
+        bool requireDefenderScanner = false)
     {
         void ConfigureSqlServer(DbContextOptionsBuilder options) => options.UseSqlServer(connectionString, sql =>
         {
@@ -65,7 +69,7 @@ public static class DependencyInjection
         services.AddScoped<ISchemaVersionService, SchemaVersionService>();
         services.AddSingleton<IStorageCapacityGuard, StorageCapacityGuard>();
         services.AddSingleton<IMalwareScanner>(_ => OperatingSystem.IsWindows()
-            ? new WindowsDefenderMalwareScanner()
+            ? new WindowsDefenderMalwareScanner(requireDefenderScanner)
             : OperatingSystem.IsLinux() ? new ClamAvMalwareScanner()
             : throw new PlatformNotSupportedException("IRM chỉ hỗ trợ Windows x64 và Ubuntu 22.04 amd64."));
         services.AddScoped<IRM.Application.Abstractions.IExcelReader, IRM.Infrastructure.Excel.ExcelReader>();

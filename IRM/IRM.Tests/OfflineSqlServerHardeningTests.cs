@@ -186,4 +186,38 @@ public sealed class OfflineSqlServerHardeningTests
         var stay = await db.Context.StayCases.SingleAsync(s => s.ForeignPersonId == savedId);
         Assert.Null(stay.SponsorCompanyId);
     }
+
+    [Fact]
+    public async Task WindowsDefenderMalwareScanner_AllowsMissingDefenderWhenOptional_AndBlocksWhenRequired()
+    {
+        var missingExe = Path.Combine(Path.GetTempPath(), $"missing-mpcmdrun-{Guid.NewGuid():N}.exe");
+        var sampleFile = Path.GetTempFileName();
+        try
+        {
+            var optionalScanner = new IRM.Infrastructure.Files.WindowsDefenderMalwareScanner(requireDefender: false, customExecutablePath: missingExe);
+            await optionalScanner.ScanAsync(sampleFile); // Must NOT throw on 3rd-party AV machines
+
+            var strictScanner = new IRM.Infrastructure.Files.WindowsDefenderMalwareScanner(requireDefender: true, customExecutablePath: missingExe);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => strictScanner.ScanAsync(sampleFile));
+        }
+        finally
+        {
+            if (File.Exists(sampleFile)) File.Delete(sampleFile);
+        }
+    }
+
+    [Fact]
+    public void BlazorCircuitGuards_HandleJsDisconnectAndConcurrentStatisticsLoads()
+    {
+        var root = ResolveSolutionRoot();
+        var mainLayout = File.ReadAllText(Path.Combine(root, "IRM", "Components", "Shared", "MainLayout.razor"));
+        var guidance = File.ReadAllText(Path.Combine(root, "IRM", "Features", "ImportExport", "Import.Guidance.razor.cs"));
+        var stats = File.ReadAllText(Path.Combine(root, "IRM", "Features", "Reports", "Statistics.razor"));
+
+        Assert.Contains("JSDisconnectedException", mainLayout, StringComparison.Ordinal);
+        Assert.Contains("OperationCanceledException", mainLayout, StringComparison.Ordinal);
+        Assert.Contains("OperationCanceledException", guidance, StringComparison.Ordinal);
+        Assert.Contains("if (_loading) return;", stats, StringComparison.Ordinal);
+        Assert.Contains("Disabled=\"_loading\"", stats, StringComparison.Ordinal);
+    }
 }

@@ -140,11 +140,11 @@ public partial class Import : ComponentBase, IFeaturePage
         if (_fileStream is not null) _tourContextVersion++;
         _fileStream?.Dispose();
         _fileStream = new MemoryStream();
-        await file.OpenReadStream(maxAllowedSize: 100 * 1024 * 1024).CopyToAsync(_fileStream); // 100MB max
-        _uploadedFileName = file.Name;
 
         try
         {
+            await file.OpenReadStream(maxAllowedSize: 100 * 1024 * 1024).CopyToAsync(_fileStream); // 100MB max
+            _uploadedFileName = file.Name;
             _sheetNames = ExcelReader.ReadSheetNames(_fileStream);
             _sheetIndex = 0; _headerRow = 0; _startRow = 0; _endRow = null;
             var (rowCount, colCount, sheetName) = ExcelReader.GetSheetInfo(_fileStream);
@@ -153,6 +153,7 @@ public partial class Import : ComponentBase, IFeaturePage
         catch (Exception ex)
         {
             Snackbar.Add($"Không thể đọc file: {ex.Message}", Severity.Error);
+            _fileStream?.Dispose();
             _fileStream = null;
             _uploadedFileName = null;
         }
@@ -599,19 +600,19 @@ public partial class Import : ComponentBase, IFeaturePage
             return;
         }
 
-        // Check duplicate passport
-        if (!string.IsNullOrWhiteSpace(_mf.Passport))
-        {
-            var isDup = await EmployeeSvc.CheckDuplicatePassportAsync(_mf.Passport);
-            if (isDup)
-            {
-                Snackbar.Add($"Hộ chiếu {_mf.Passport} đã tồn tại trong hệ thống!", Severity.Warning);
-                return;
-            }
-        }
-
         try
         {
+            // Check duplicate passport
+            if (!string.IsNullOrWhiteSpace(_mf.Passport))
+            {
+                var isDup = await EmployeeSvc.CheckDuplicatePassportAsync(_mf.Passport);
+                if (isDup)
+                {
+                    Snackbar.Add($"Hộ chiếu {_mf.Passport} đã tồn tại trong hệ thống!", Severity.Warning);
+                    return;
+                }
+            }
+
             await EmployeeSvc.CreateAsync(_mf);
             Snackbar.Add($"Đã thêm nhân viên \"{IRM.Core.Rules.PersonDisplayHelper.FormatName(_mf.StaffName, _mf.Passport)}\" thành công!", Severity.Success);
             ResetManualForm();

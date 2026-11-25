@@ -45,7 +45,7 @@ public partial class Import
     }
 
     private static bool IsGuidanceInteropFailure(Exception ex) =>
-        ex is JSException or JSDisconnectedException or ObjectDisposedException or InvalidOperationException;
+        ex is JSException or JSDisconnectedException or ObjectDisposedException or InvalidOperationException or OperationCanceledException;
 
     internal async Task ShowFieldHelpAsync(string? fieldKey)
     {

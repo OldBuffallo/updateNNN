@@ -828,6 +828,7 @@ else
     private void OpenAddPerson()
     {
         _isEditingProfile = false;
+        _profileSubmitted = false;
         _form = new UnifiedForeignPersonInput
         {
             Gender = 1,
@@ -848,6 +849,7 @@ else
     private void OpenEditPerson(UnifiedForeignPersonDto item)
     {
         _isEditingProfile = true;
+        _profileSubmitted = false;
         _form = new UnifiedForeignPersonInput
         {
             ForeignPersonId = item.ForeignPersonId,

@@ -191,13 +191,13 @@
         Chuyên đề phân tích mở rộng
     </MudText>
     <div class="d-flex align-center flex-wrap gap-2">
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Map" OnClick="LoadOverview">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Map" OnClick="LoadOverview" Disabled="_loading">
             Tổng quan địa bàn (@_units.Count)
         </MudButton>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Fingerprint" OnClick="LoadDocuments">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Fingerprint" OnClick="LoadDocuments" Disabled="_loading">
             Định danh & Giấy tờ
         </MudButton>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Factory" OnClick="LoadZones">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Factory" OnClick="LoadZones" Disabled="_loading">
             Khu & Cụm kinh tế
         </MudButton>
     </div>
@@ -351,22 +351,63 @@
         }
     }
 
+    private bool _loading;
+
     private async Task LoadDocuments()
     {
-        Prepare();
-        _documents = await StatisticsService.GetDocumentIdentityStatisticsAsync(_filter);
+        if (_loading) return;
+        _loading = true;
+        try
+        {
+            Prepare();
+            _documents = await StatisticsService.GetDocumentIdentityStatisticsAsync(_filter);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private async Task LoadOverview()
     {
-        Prepare();
-        _overview = (await StatisticsService.GetTerritoryOverviewAsync(_filter)).ToList();
+        if (_loading) return;
+        _loading = true;
+        try
+        {
+            Prepare();
+            _overview = (await StatisticsService.GetTerritoryOverviewAsync(_filter)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private async Task LoadZones()
     {
-        Prepare();
-        _zones = (await StatisticsService.GetZoneStatisticsAsync(_filter)).ToList();
+        if (_loading) return;
+        _loading = true;
+        try
+        {
+            Prepare();
+            _zones = (await StatisticsService.GetZoneStatisticsAsync(_filter)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     private async Task Export()
