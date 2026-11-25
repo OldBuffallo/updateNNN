@@ -52,19 +52,21 @@ public sealed class SqlStatisticsStore : IStatisticsStore
             .GroupBy(x => x.AccommodationId!.Value)
             .Select(g => new { AccId = g.Key, Count = g.Select(x => x.ForeignPersonId).Distinct().Count() })
             .ToDictionaryAsync(x => x.AccId, x => x.Count, cancellationToken);
-        var accCompanyMap = await _db.CompanyAccommodationAgreements.AsNoTracking()
+        var accAgreements = await _db.CompanyAccommodationAgreements.AsNoTracking()
             .Where(x => accIds.Contains(x.AccommodationId) && x.ValidFrom <= at && (!x.ValidTo.HasValue || x.ValidTo.Value >= at))
+            .Select(x => new { x.AccommodationId, CompanyName = x.Company != null ? x.Company.CompanyName : "" })
+            .ToListAsync(cancellationToken);
+        var accCompanyMap = accAgreements
             .GroupBy(x => x.AccommodationId)
-            .ToDictionaryAsync(
+            .ToDictionary(
                 g => g.Key,
-                g => string.Join(", ", g.Select(x => x.Company!.CompanyName).Distinct()),
-                cancellationToken);
+                g => string.Join(", ", g.Select(x => x.CompanyName).Where(n => !string.IsNullOrWhiteSpace(n)).Distinct()));
         foreach (var accommodation in accommodationRows)
         {
             accommodation.CurrentResidentCount = residentCounts.GetValueOrDefault(accommodation.AccommodationId);
             accommodation.Companies = accCompanyMap.GetValueOrDefault(accommodation.AccommodationId, "");
         }
-        var unitName = await _db.AdministrativeUnits.Where(x => x.Id == unitId).Select(x => x.Name).SingleAsync(cancellationToken);
+        var unitName = await _db.AdministrativeUnits.Where(x => x.Id == unitId).Select(x => x.Name).FirstOrDefaultAsync(cancellationToken) ?? "";
         return new TerritoryStatistics
         {
             AdministrativeUnitName = unitName,

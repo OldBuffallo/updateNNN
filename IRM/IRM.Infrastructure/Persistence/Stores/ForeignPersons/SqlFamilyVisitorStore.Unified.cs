@@ -471,6 +471,7 @@ public sealed partial class SqlFamilyVisitorStore
                 var workStay = await _db.StayCases.FirstOrDefaultAsync(
                     s => s.ForeignPersonId == person.Id && s.PurposeCode == StayPurposeCodes.Work && s.StatusCode != "DELETED",
                     cancellationToken);
+                var normalizedCompanyId = input.CompanyId is > 0 ? input.CompanyId : null;
                 if (workStay is null)
                 {
                     _db.StayCases.Add(new StayCase
@@ -478,7 +479,7 @@ public sealed partial class SqlFamilyVisitorStore
                         ForeignPersonId = person.Id,
                         PurposeCode = StayPurposeCodes.Work,
                         IsPrimary = true,
-                        SponsorCompanyId = input.CompanyId,
+                        SponsorCompanyId = normalizedCompanyId,
                         ValidFrom = (input.DocumentValidFrom ?? DateTime.Today).Date,
                         ValidTo = (input.TemporaryStay ?? input.DocumentValidTo)?.Date,
                         StatusCode = "ACTIVE",
@@ -487,7 +488,7 @@ public sealed partial class SqlFamilyVisitorStore
                 }
                 else
                 {
-                    workStay.SponsorCompanyId = input.CompanyId;
+                    workStay.SponsorCompanyId = normalizedCompanyId;
                     workStay.ValidTo = (input.TemporaryStay ?? input.DocumentValidTo)?.Date;
                     workStay.Note = input.Note;
                     workStay.UpdatedAt = DateTime.UtcNow;
@@ -647,6 +648,7 @@ public sealed partial class SqlFamilyVisitorStore
                     .OrderByDescending(r => r.ValidFrom)
                     .FirstOrDefaultAsync(r => r.ForeignPersonId == person.Id, cancellationToken);
 
+                var normalizedResponsibleCompanyId = input.CompanyId is > 0 ? input.CompanyId : null;
                 if (existingRes is null)
                 {
                     _db.ResidencePeriods.Add(new ResidencePeriod
@@ -654,7 +656,7 @@ public sealed partial class SqlFamilyVisitorStore
                         ForeignPersonId = person.Id,
                         AdministrativeUnitId = input.AdministrativeUnitId.Value,
                         AddressLine = input.ResidenceAddress.Trim(),
-                        ResponsibleCompanyId = input.CompanyId,
+                        ResponsibleCompanyId = normalizedResponsibleCompanyId,
                         ValidFrom = (input.VisitStartDate ?? input.DocumentValidFrom ?? DateTime.Today).Date,
                         ValidTo = (input.TemporaryStay ?? input.VisitEndDate ?? input.DocumentValidTo)?.Date
                     });
@@ -663,7 +665,7 @@ public sealed partial class SqlFamilyVisitorStore
                 {
                     existingRes.AdministrativeUnitId = input.AdministrativeUnitId.Value;
                     existingRes.AddressLine = input.ResidenceAddress.Trim();
-                    existingRes.ResponsibleCompanyId = input.CompanyId;
+                    existingRes.ResponsibleCompanyId = normalizedResponsibleCompanyId;
                     existingRes.ValidTo = (input.TemporaryStay ?? input.VisitEndDate ?? input.DocumentValidTo)?.Date;
                 }
             }
@@ -702,27 +704,30 @@ public sealed partial class SqlFamilyVisitorStore
             if (!string.IsNullOrWhiteSpace(input.ElectronicIdentityNumber))
             {
                 var eidNum = input.ElectronicIdentityNumber.Trim();
-                var eidKey = SearchKey(eidNum)!;
-                var existingEid = await _db.ElectronicIdentities
-                    .FirstOrDefaultAsync(e => e.ForeignPersonId == person.Id && e.IdentitySearchKey == eidKey, cancellationToken);
+                var eidKey = SearchKey(eidNum);
+                if (!string.IsNullOrEmpty(eidKey))
+                {
+                    var existingEid = await _db.ElectronicIdentities
+                        .FirstOrDefaultAsync(e => e.ForeignPersonId == person.Id && e.IdentitySearchKey == eidKey, cancellationToken);
 
-                if (existingEid is null)
-                {
-                    _db.ElectronicIdentities.Add(new ElectronicIdentity
+                    if (existingEid is null)
                     {
-                        ForeignPersonId = person.Id,
-                        IdentityNumber = eidNum,
-                        IdentitySearchKey = eidKey,
-                        ValidFrom = (input.ElectronicIdentityValidFrom ?? DateTime.Today).Date,
-                        ValidTo = input.ElectronicIdentityValidTo?.Date,
-                        StatusCode = "ACTIVE"
-                    });
-                }
-                else
-                {
-                    existingEid.IdentityNumber = eidNum;
-                    existingEid.ValidTo = input.ElectronicIdentityValidTo?.Date;
-                    existingEid.StatusCode = "ACTIVE";
+                        _db.ElectronicIdentities.Add(new ElectronicIdentity
+                        {
+                            ForeignPersonId = person.Id,
+                            IdentityNumber = eidNum,
+                            IdentitySearchKey = eidKey,
+                            ValidFrom = (input.ElectronicIdentityValidFrom ?? DateTime.Today).Date,
+                            ValidTo = input.ElectronicIdentityValidTo?.Date,
+                            StatusCode = "ACTIVE"
+                        });
+                    }
+                    else
+                    {
+                        existingEid.IdentityNumber = eidNum;
+                        existingEid.ValidTo = input.ElectronicIdentityValidTo?.Date;
+                        existingEid.StatusCode = "ACTIVE";
+                    }
                 }
             }
 

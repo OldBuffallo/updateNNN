@@ -187,8 +187,8 @@ public partial class SqlImportStore
 
         if (fields.TryGetValue("ElectronicIdentityNumber", out var identityNumber))
         {
-            var identityKey = IRM.Core.Rules.PassportRules.SearchKey(identityNumber)!;
-            if (!await _db.ElectronicIdentities.AnyAsync(item => item.ForeignPersonId == person.Id && item.IdentitySearchKey == identityKey))
+            var identityKey = IRM.Core.Rules.PassportRules.SearchKey(identityNumber);
+            if (!string.IsNullOrEmpty(identityKey) && !await _db.ElectronicIdentities.AnyAsync(item => item.ForeignPersonId == person.Id && item.IdentitySearchKey == identityKey))
             {
                 var identity = new ElectronicIdentity
                 {

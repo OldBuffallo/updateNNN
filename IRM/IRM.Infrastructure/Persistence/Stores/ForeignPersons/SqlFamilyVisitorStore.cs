@@ -48,7 +48,9 @@ public sealed partial class SqlFamilyVisitorStore : IForeignerRegistryStore
     {
         if (_guard is not null) await _guard.RequireAnyRoleAsync(IrmRoles.Admin, IrmRoles.DataEditor);
         if (string.IsNullOrWhiteSpace(identity.IdentityNumber)) throw new ArgumentException("Số định danh là bắt buộc.");
-        identity.IdentitySearchKey = SearchKey(identity.IdentityNumber)!;
+        var identityKey = SearchKey(identity.IdentityNumber);
+        if (string.IsNullOrEmpty(identityKey)) throw new ArgumentException("Số định danh phải chứa ít nhất một chữ cái hoặc chữ số.");
+        identity.IdentitySearchKey = identityKey;
         if (identity.Id == 0) _db.ElectronicIdentities.Add(identity); else _db.ElectronicIdentities.UpdateValues(_db, identity);
         await _db.SaveChangesAsync(cancellationToken); await _audit.LogAsync("UPSERT", "ElectronicIdentity", identity.Id); return identity.Id;
     }
@@ -201,14 +203,18 @@ public sealed partial class SqlFamilyVisitorStore : IForeignerRegistryStore
 
             if (!string.IsNullOrWhiteSpace(input.ElectronicIdentityNumber))
             {
-                _db.ElectronicIdentities.Add(new ElectronicIdentity
+                var eidKey = SearchKey(input.ElectronicIdentityNumber);
+                if (!string.IsNullOrEmpty(eidKey))
                 {
-                    ForeignPerson = person,
-                    IdentityNumber = input.ElectronicIdentityNumber.Trim(),
-                    IdentitySearchKey = SearchKey(input.ElectronicIdentityNumber)!,
-                    ValidFrom = input.ValidFrom.Date,
-                    ValidTo = input.ValidTo?.Date
-                });
+                    _db.ElectronicIdentities.Add(new ElectronicIdentity
+                    {
+                        ForeignPerson = person,
+                        IdentityNumber = input.ElectronicIdentityNumber.Trim(),
+                        IdentitySearchKey = eidKey,
+                        ValidFrom = input.ValidFrom.Date,
+                        ValidTo = input.ValidTo?.Date
+                    });
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(input.DocumentNumber))

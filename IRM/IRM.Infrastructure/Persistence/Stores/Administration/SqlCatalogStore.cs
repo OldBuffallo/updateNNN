@@ -257,6 +257,10 @@ public class SqlCatalogStore : ICatalogStore
         {
             throw new InvalidOperationException("Mã và tên địa bàn không được để trống.");
         }
+        if (unit.Code.Length > 450)
+        {
+            throw new InvalidOperationException("Mã địa bàn không được vượt quá 450 ký tự.");
+        }
 
         var normalizedCode = unit.Code.ToUpperInvariant();
         var validFromDate = unit.ValidFrom.Date;
@@ -284,6 +288,10 @@ public class SqlCatalogStore : ICatalogStore
         if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(name))
         {
             throw new InvalidOperationException("Mã và tên địa bàn không được để trống.");
+        }
+        if (code.Length > 450)
+        {
+            throw new InvalidOperationException("Mã địa bàn không được vượt quá 450 ký tự.");
         }
 
         var normalizedCode = code.ToUpperInvariant();
@@ -345,9 +353,10 @@ public class SqlCatalogStore : ICatalogStore
         var preview = AdministrativeUnitExcelHelper.ParseWorkbook(stream, fileName, allExisting);
 
         var existingByCodeAndDate = allExisting
+            .GroupBy(u => (Code: u.Code.Trim().ToUpperInvariant(), ValidFrom: u.ValidFrom.Date))
             .ToDictionary(
-                u => (Code: u.Code.Trim().ToUpperInvariant(), ValidFrom: u.ValidFrom.Date),
-                u => u);
+                g => g.Key,
+                g => g.OrderByDescending(u => !u.IsDeleted).ThenByDescending(u => u.Id).First());
 
         var existingByCode = allExisting
             .GroupBy(u => u.Code.Trim(), StringComparer.OrdinalIgnoreCase)

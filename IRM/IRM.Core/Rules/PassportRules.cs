@@ -9,7 +9,8 @@ public static class PassportRules
     public static string? NormalizePassport(string? value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
-        return string.Concat(value.Where(char.IsLetterOrDigit)).ToUpperInvariant();
+        var normalized = string.Concat(value.Where(char.IsLetterOrDigit)).ToUpperInvariant();
+        return normalized.Length == 0 ? null : normalized;
     }
 
     public static string? SearchKey(string? value)

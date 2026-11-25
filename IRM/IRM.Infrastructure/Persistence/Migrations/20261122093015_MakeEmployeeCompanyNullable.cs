@@ -14,6 +14,10 @@ namespace IRM.Data.Migrations
                 name: "FK_Employees_Companies_IDCompany",
                 table: "Employees");
 
+            migrationBuilder.DropIndex(
+                name: "IX_Employees_IDCompany",
+                table: "Employees");
+
             migrationBuilder.AlterColumn<int>(
                 name: "CompanyId",
                 table: "ImportHistories",
@@ -38,6 +42,11 @@ namespace IRM.Data.Migrations
                 oldClrType: typeof(int),
                 oldType: "int");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_Employees_IDCompany",
+                table: "Employees",
+                column: "IDCompany");
+
             migrationBuilder.AddForeignKey(
                 name: "FK_Employees_Companies_IDCompany",
                 table: "Employees",
@@ -52,6 +61,10 @@ namespace IRM.Data.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_Employees_Companies_IDCompany",
+                table: "Employees");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Employees_IDCompany",
                 table: "Employees");
 
             migrationBuilder.AlterColumn<int>(
@@ -83,6 +96,11 @@ namespace IRM.Data.Migrations
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Employees_IDCompany",
+                table: "Employees",
+                column: "IDCompany");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Employees_Companies_IDCompany",

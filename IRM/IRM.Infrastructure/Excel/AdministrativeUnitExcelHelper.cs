@@ -125,6 +125,10 @@ public static class AdministrativeUnitExcelHelper
             {
                 errors.Add("Thiếu Mã địa bàn.");
             }
+            else if (rawCode.Length > 450)
+            {
+                errors.Add("Mã địa bàn vượt quá giới hạn 450 ký tự.");
+            }
             else if (!seenCodesInFile.Add(rawCode))
             {
                 errors.Add($"Mã địa bàn '{rawCode}' bị trùng lặp trong cùng file Excel.");
