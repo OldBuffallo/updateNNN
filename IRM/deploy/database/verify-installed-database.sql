@@ -46,7 +46,13 @@ IF NOT EXISTS (
     SELECT 1 FROM dbo.__EFMigrationsHistory
     WHERE MigrationId = N'20260927120137_AddVisaSymbol'
 )
-    THROW 51003, N'The latest required EF Core migration has not been applied.', 1;
+    THROW 51003, N'The AddVisaSymbol EF Core migration has not been applied.', 1;
+
+IF NOT EXISTS (
+    SELECT 1 FROM dbo.__EFMigrationsHistory
+    WHERE MigrationId = N'20261122093015_MakeEmployeeCompanyNullable'
+)
+    THROW 51004, N'The MakeEmployeeCompanyNullable EF Core migration has not been applied.', 1;
 
 PRINT N'[3/7] Constraints and indexes';
 IF EXISTS (

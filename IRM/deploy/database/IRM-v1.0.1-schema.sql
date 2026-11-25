@@ -1528,6 +1528,42 @@ BEGIN
 END;
 GO
 
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260927120137_AddVisaSymbol'
+)
+BEGIN
+    IF COL_LENGTH(N'dbo.Employees', N'VisaSymbol') IS NULL
+        ALTER TABLE [Employees] ADD [VisaSymbol] nvarchar(max) NULL;
+    IF COL_LENGTH(N'dbo.ArchivedEmployees', N'VisaSymbol') IS NULL
+        ALTER TABLE [ArchivedEmployees] ADD [VisaSymbol] nvarchar(max) NULL;
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260927120137_AddVisaSymbol', N'8.0.31');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20261122093015_MakeEmployeeCompanyNullable'
+)
+BEGIN
+    IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = N'FK_Employees_Companies_IDCompany')
+        ALTER TABLE [Employees] DROP CONSTRAINT [FK_Employees_Companies_IDCompany];
+    IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Employees_IDCompany' AND object_id = OBJECT_ID(N'dbo.Employees'))
+        DROP INDEX [IX_Employees_IDCompany] ON [Employees];
+
+    ALTER TABLE [ImportHistories] ALTER COLUMN [CompanyId] int NULL;
+    ALTER TABLE [Employees] ALTER COLUMN [IDCompany] int NULL;
+    ALTER TABLE [ArchivedEmployees] ALTER COLUMN [IDCompany] int NULL;
+
+    CREATE INDEX [IX_Employees_IDCompany] ON [Employees] ([IDCompany]);
+    ALTER TABLE [Employees] ADD CONSTRAINT [FK_Employees_Companies_IDCompany] FOREIGN KEY ([IDCompany]) REFERENCES [Companies] ([IDCompany]) ON DELETE SET NULL;
+
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20261122093015_MakeEmployeeCompanyNullable', N'8.0.31');
+END;
+GO
+
 COMMIT;
 GO
 

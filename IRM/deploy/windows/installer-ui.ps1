@@ -130,8 +130,8 @@ function Invoke-EnvironmentScan {
 
 
     $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
-    $cpuOk = $cpu.NumberOfLogicalProcessors -ge 2 -and $cpu.MaxClockSpeed -ge 2000
-    Add-ScanRow 'CPU tối thiểu 2 lõi, 2 GHz' $cpuOk "$($cpu.Name) — $($cpu.NumberOfLogicalProcessors) luồng, $($cpu.MaxClockSpeed) MHz"
+    $cpuOk = $cpu.NumberOfLogicalProcessors -ge 2
+    Add-ScanRow 'CPU tối thiểu 2 luồng xử lý' $cpuOk "$($cpu.Name) — $($cpu.NumberOfLogicalProcessors) luồng, $($cpu.MaxClockSpeed) MHz"
 
     $freeRamGb = [math]::Round(([long]$os.FreePhysicalMemory * 1KB) / 1GB, 1)
     Add-ScanRow 'RAM khả dụng tối thiểu 2 GB' ($freeRamGb -ge 2) "$freeRamGb GB khả dụng"
@@ -195,7 +195,8 @@ function Invoke-EnvironmentScan {
 
     $defender = $null
     try { $defender = Get-MpComputerStatus -ErrorAction Stop } catch { }
-    Add-ScanRow 'Windows Defender' ($defender -and $defender.AntivirusEnabled) $(if($defender -and $defender.AntivirusEnabled){'Đang hoạt động và sẵn sàng quét tệp tải lên'}else{'Chưa bật; hãy bật Windows Defender rồi quét lại'})
+    $defenderEnabled = [bool]($defender -and $defender.AntivirusEnabled)
+    Add-ScanRow 'Windows Defender (tùy chọn)' $true $(if($defenderEnabled){'Đang hoạt động và sẵn sàng quét tệp tải lên'}else{'Đang tắt (có thể máy dùng Bkav/Kaspersky/ESET) — vẫn cho phép cài đặt offline'}) $false $false
 
     Save-EnvironmentReport
     $hardFailures = @($script:scanRows | Where-Object { $_.Required -and -not $_.Passed -and -not $_.WillInstall })

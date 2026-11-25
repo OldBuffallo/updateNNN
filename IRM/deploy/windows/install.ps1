@@ -102,7 +102,7 @@ function Assert-Preflight {
     if (-not $framework.Passed) { throw $framework.Detail }
 
     $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
-    if ($cpu.NumberOfLogicalProcessors -lt 2 -or $cpu.MaxClockSpeed -lt 2000) { throw "Cần tối thiểu 2 CPU core, 2 GHz." }
+    if ($cpu.NumberOfLogicalProcessors -lt 2) { throw "Cần tối thiểu 2 luồng CPU." }
     $available = [long]$os.FreePhysicalMemory * 1KB
     if ($available -lt $minimumAvailableBytes) { throw "Cần tối thiểu 2 GB RAM khả dụng." }
     $drive = Get-PSDrive -Name ([IO.Path]::GetPathRoot($installRoot).TrimEnd(':\'))
@@ -230,7 +230,7 @@ $bootstrap.EnvironmentVariables['ConnectionStrings__DefaultConnection'] = $conne
 $provisioningAdminConnectionString = if ($installedSqlNow) {
     "Server=127.0.0.1,14331;Database=master;User Id=sa;Password=$saPassword;Encrypt=True;TrustServerCertificate=True"
 } else {
-    "Server=.\IRMEXPRESS;Database=master;Integrated Security=True;Encrypt=True;TrustServerCertificate=True"
+    "Server=127.0.0.1,14331;Database=master;Integrated Security=True;Encrypt=True;TrustServerCertificate=True"
 }
 $bootstrap.EnvironmentVariables['Provisioning__AdminConnectionString'] = $provisioningAdminConnectionString
 $bootstrap.EnvironmentVariables['Provisioning__AppPassword'] = $appPassword
@@ -285,9 +285,18 @@ foreach ($shortcutPath in @((Join-Path ([Environment]::GetFolderPath('CommonDesk
 }
 Write-InstallStep 'Khởi động và kiểm tra IRM'
 Start-Service IRM
-Start-Sleep -Seconds 5
-$health = Invoke-RestMethod 'http://127.0.0.1:5050/health/ready' -TimeoutSec 15
-if ($health.status -ne 'ready') { throw "Health check IRM thất bại." }
+$ready = $false
+for ($attempt = 1; $attempt -le 15; $attempt++) {
+    Start-Sleep -Seconds 2
+    try {
+        $health = Invoke-RestMethod 'http://127.0.0.1:5050/health/ready' -TimeoutSec 10
+        if ($health.status -eq 'ready') {
+            $ready = $true
+            break
+        }
+    } catch { }
+}
+if (-not $ready) { throw "Health check IRM thất bại sau 30 giây." }
 if ((Get-PSDrive -Name ([IO.Path]::GetPathRoot($installRoot).TrimEnd(':\'))).Free -lt $minimumPostInstallBytes) { throw "Sau cài đặt còn dưới 4 GB ổ đĩa." }
 Start-Process 'http://localhost:5050'
 Write-Host 'Cài đặt IRM v1.0.2 hoàn tất.' -ForegroundColor Green
