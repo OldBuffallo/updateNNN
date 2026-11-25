@@ -134,13 +134,22 @@ public sealed class ExcelWorkbookConverter : IExcelWorkbookConverter
         IReadOnlySet<string> activeAdminUnitCodes,
         int sampleLimit)
     {
+        var selectedIndices = activeSelections
+            .Where(s => s.SourceColumnIndex is >= 0)
+            .Select(s => s.SourceColumnIndex!.Value)
+            .ToHashSet();
+
         var analysis = new ExcelConvertAnalysis
         {
             TotalDataRows = rows.Count,
             TotalSourceColumns = headers.Count,
             AutoMatchedColumnCount = allSelections.Count(s => s.SourceColumnIndex is >= 0),
             SelectedColumnCount = activeSelections.Count,
-            IgnoredColumnCount = Math.Max(0, headers.Count - activeSelections.Count),
+            IgnoredColumnCount = Math.Max(0, headers.Count - selectedIndices.Count),
+            IgnoredColumnHeaders = headers
+                .Where(h => !selectedIndices.Contains(h.Index))
+                .Select(h => string.IsNullOrWhiteSpace(h.HeaderName) ? $"Cột {ExcelValueNormalizer.ToExcelColumnName(h.Index)}" : h.HeaderName)
+                .ToList(),
             UnselectedCoreFieldLabels = allSelections
                 .Where(s => s.Group == "core" && (!s.IsSelected || s.SourceColumnIndex is null or < 0))
                 .Select(s => s.Label)
@@ -164,7 +173,14 @@ public sealed class ExcelWorkbookConverter : IExcelWorkbookConverter
                 : rIdx + 2;
 
             if (!hasPassportSelection)
+            {
                 analysis.MissingPassportRows.Add(rowNumber);
+                analysis.ActionIssues.Add(new ExcelActionIssueItem(
+                    rowNumber, "Passport", "Số hộ chiếu", "(chưa ghép cột)",
+                    "Chưa chọn cột Số hộ chiếu trong bảng ghép cột.",
+                    "Chọn cột chứa Số hộ chiếu ở Nhóm 1 phía trên.",
+                    IsBlocking: true));
+            }
 
             var cleanValues = new string[activeSelections.Count];
             List<ConvertedSampleCell>? sampleCells = rIdx < sampleLimit ? new List<ConvertedSampleCell>(activeSelections.Count) : null;
@@ -182,6 +198,11 @@ public sealed class ExcelWorkbookConverter : IExcelWorkbookConverter
                 if (sel.SystemField.Equals("Passport", StringComparison.OrdinalIgnoreCase) && norm.Status == NormalizedCellStatus.Empty)
                 {
                     analysis.MissingPassportRows.Add(rowNumber);
+                    analysis.ActionIssues.Add(new ExcelActionIssueItem(
+                        rowNumber, sel.SystemField, sel.Label, raw,
+                        "Thiếu Số hộ chiếu (trường định danh bắt buộc duy nhất).",
+                        "Điền Số hộ chiếu hợp lệ (có chữ/số) vào dòng này trong file Excel.",
+                        IsBlocking: true));
                 }
                 else if (norm.Status == NormalizedCellStatus.Empty && !sel.IsRequired)
                 {
@@ -193,6 +214,8 @@ public sealed class ExcelWorkbookConverter : IExcelWorkbookConverter
                 {
                     analysis.TotalAutoNormalizedCells++;
                     perFieldAuto[sel.SystemField] = perFieldAuto.GetValueOrDefault(sel.SystemField) + 1;
+                    analysis.NormalizedChanges.Add(new ExcelNormalizedDiffItem(
+                        rowNumber, sel.SystemField, sel.Label, raw, norm.Value, norm.Note));
                 }
                 else if (norm.Status == NormalizedCellStatus.NeedsReview)
                 {
@@ -202,6 +225,12 @@ public sealed class ExcelWorkbookConverter : IExcelWorkbookConverter
                         warnMap[sel.SystemField] = wItem = (sel.Label, [], []);
                     wItem.Rows.Add(rowNumber);
                     if (wItem.Samples.Count < 3) wItem.Samples.Add(raw);
+
+                    analysis.ActionIssues.Add(new ExcelActionIssueItem(
+                        rowNumber, sel.SystemField, sel.Label, raw,
+                        norm.Note ?? "Giá trị chưa đúng định dạng chuẩn IRM.",
+                        BuildSuggestedFix(sel.SystemField),
+                        IsBlocking: false));
                 }
 
                 sampleCells?.Add(new ConvertedSampleCell(sel.SystemField, raw, norm.Value, norm.Status, norm.Note));
@@ -229,5 +258,21 @@ public sealed class ExcelWorkbookConverter : IExcelWorkbookConverter
             .ToList();
 
         return (analysis, normalizedMatrix);
+    }
+
+    private static string BuildSuggestedFix(string systemField)
+    {
+        if (ExcelValueNormalizer.DateFields.Contains(systemField))
+            return "Sửa thành định dạng ngày dd/MM/yyyy (VD: 15/08/1990).";
+
+        return systemField switch
+        {
+            "Nationality" => "Dùng mã quốc tịch 3 chữ cái (VD: KOR, JPN, CHN, USA) hoặc tên quốc gia có trong Danh mục Quốc tịch.",
+            "Gender" => "Chỉ nhập Nam hoặc Nữ.",
+            "AdministrativeUnitCode" => "Dùng mã địa bàn đang hoạt động trong Danh mục Địa bàn hành chính.",
+            "StayPurposeCode" => "Dùng một trong các mã diện: WORK, STUDY, FAMILY_VISIT, OTHER.",
+            "DocumentTypeCode" => "Dùng mã loại giấy tờ: VISA, VISA_EXTENSION, TRC, VISA_EXEMPTION, OTHER.",
+            _ => "Kiểm tra lại định dạng giá trị hoặc để trống nếu chưa có thông tin."
+        };
     }
 }

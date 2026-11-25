@@ -176,6 +176,7 @@ public partial class SqlImportStore
 
                     if (isChanged)
                     {
+                        preview.FieldChanges = ComputeEmployeeFieldChanges(existing, employee, nationalities, careers);
                         if (!string.IsNullOrWhiteSpace(existing.Note) && string.IsNullOrWhiteSpace(employee.Note))
                             preview.Warnings.Add("Cập nhật sẽ ghi đè trống cột Ghi chú hiện có");
                         if (!string.IsNullOrWhiteSpace(existing.SettlementResultsString) && string.IsNullOrWhiteSpace(employee.SettlementResultsString))
@@ -202,5 +203,57 @@ public partial class SqlImportStore
             e.TemporaryStay >= DateTime.Today && e.Passport != null && !importedPassports.Contains(e.Passport)))
             previewRows[0].Warnings.Add("Nhân viên còn hạn tạm trú nhưng không được cập nhật trong file");
         return previewRows;
+    }
+
+    private static List<ImportFieldDiff> ComputeEmployeeFieldChanges(
+        Employee existing,
+        Employee incoming,
+        List<NationalityEntity> nationalities,
+        List<Career> careers)
+    {
+        var diffs = new List<ImportFieldDiff>();
+
+        void Compare(string label, string? oldVal, string? newVal)
+        {
+            var o = (oldVal ?? "").Trim();
+            var n = (newVal ?? "").Trim();
+            if (string.Equals(o, n, StringComparison.Ordinal)) return;
+            var isClear = !string.IsNullOrEmpty(o) && string.IsNullOrEmpty(n);
+            diffs.Add(new ImportFieldDiff(
+                label,
+                string.IsNullOrEmpty(o) ? "(trống)" : o,
+                string.IsNullOrEmpty(n) ? "(trống)" : n,
+                isClear));
+        }
+
+        string FormatNat(string? code)
+        {
+            if (string.IsNullOrWhiteSpace(code)) return "";
+            var nat = nationalities.FirstOrDefault(x => string.Equals(x.NationalityCode, code, StringComparison.OrdinalIgnoreCase));
+            return nat is null ? code : $"{nat.NationalityName} ({nat.NationalityCode})";
+        }
+
+        string FormatCareer(int? id)
+        {
+            if (!id.HasValue || id.Value <= 0) return "";
+            return careers.FirstOrDefault(x => x.IDCareer == id.Value)?.CareerName ?? id.Value.ToString();
+        }
+
+        Compare("Họ tên", existing.StaffName, incoming.StaffName);
+        if (existing.Gender != incoming.Gender)
+            Compare("Giới tính", existing.GenderString, incoming.GenderString);
+        Compare("Ngày sinh", existing.Birthday?.ToString("dd/MM/yyyy"), incoming.Birthday?.ToString("dd/MM/yyyy"));
+        Compare("Quốc tịch", FormatNat(existing.Nationality), FormatNat(incoming.Nationality));
+        Compare("Địa chỉ", existing.Address, incoming.Address);
+        Compare("Nghề nghiệp", FormatCareer(existing.IDCareer), FormatCareer(incoming.IDCareer));
+        Compare("GPLĐ", existing.WorkPermitString, incoming.WorkPermitString);
+        Compare("Số GPLĐ", existing.WorkPermitNumber, incoming.WorkPermitNumber);
+        Compare("Số Visa", existing.VisaNumber, incoming.VisaNumber);
+        Compare("Ký hiệu Visa", existing.VisaSymbol, incoming.VisaSymbol);
+        Compare("Hạn tạm trú", existing.TemporaryStay?.ToString("dd/MM/yyyy"), incoming.TemporaryStay?.ToString("dd/MM/yyyy"));
+        Compare("Ghi chú", existing.Note, incoming.Note);
+        Compare("Kết quả giải quyết", existing.SettlementResultsString, incoming.SettlementResultsString);
+
+        return diffs;
     }
 }

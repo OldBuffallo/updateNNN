@@ -39,6 +39,23 @@ public sealed record FieldIssueSummary(
     List<int> RowNumbers,
     List<string> SampleBadValues);
 
+public sealed record ExcelNormalizedDiffItem(
+    int RowNumber,
+    string SystemField,
+    string FieldLabel,
+    string RawValue,
+    string NormalizedValue,
+    string? Note);
+
+public sealed record ExcelActionIssueItem(
+    int RowNumber,
+    string SystemField,
+    string FieldLabel,
+    string RawValue,
+    string Reason,
+    string SuggestedFix,
+    bool IsBlocking);
+
 public sealed class ExcelConvertAnalysis
 {
     public int TotalDataRows { get; set; }
@@ -46,12 +63,15 @@ public sealed class ExcelConvertAnalysis
     public int AutoMatchedColumnCount { get; set; }
     public int SelectedColumnCount { get; set; }
     public int IgnoredColumnCount { get; set; }
+    public List<string> IgnoredColumnHeaders { get; set; } = [];
     public List<int> MissingPassportRows { get; set; } = [];
     public int TotalAutoNormalizedCells { get; set; }
     public int TotalWarningCells { get; set; }
     public List<string> UnselectedCoreFieldLabels { get; set; } = [];
     public List<FieldIssueSummary> WarningFields { get; set; } = [];
     public List<FieldIssueSummary> EmptyCellFields { get; set; } = [];
+    public List<ExcelNormalizedDiffItem> NormalizedChanges { get; set; } = [];
+    public List<ExcelActionIssueItem> ActionIssues { get; set; } = [];
     public Dictionary<string, (string Raw, NormalizedCellResult Normalized, int AutoCount, int WarnCount)> FieldSummaries { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public List<ConvertedSampleRow> SampleRows { get; set; } = [];
 }

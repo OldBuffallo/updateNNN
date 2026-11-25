@@ -3,11 +3,18 @@
 namespace IRM.Data.Models;
 
 /// <summary>Dòng xem trước import</summary>
+public sealed record ImportFieldDiff(
+    string FieldLabel,
+    string OldValue,
+    string NewValue,
+    bool IsDestructiveClear = false);
+
 public class ImportPreviewRow
 {
     public int RowNumber { get; set; }
     public string Status { get; set; } = "new";  // "new", "duplicate", "error"
     public List<string> Warnings { get; set; } = new();
+    public List<ImportFieldDiff> FieldChanges { get; set; } = new();
     public string? ErrorMessage { get; set; }
     public string? ExistingFingerprint { get; set; }
     public int? ExistingEmployeeId { get; set; }  // ID nhân viên trùng (nếu có)
