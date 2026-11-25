@@ -17,7 +17,7 @@ Giải pháp `IRM/IRM.sln` được chia thành 4 project sản phẩm và 1 pro
 | **`IRM.Application`** | Service Interfaces (`I*Service`), Store Abstractions (`I*Store`), Application Services (RBAC guard + DTO mapping), DTOs/Contracts, `ExcelValueNormalizer` | Chỉ tham chiếu `IRM.Core`; **không** lộ `DbContext`, `DbSet`, `IQueryable` ra bất kỳ interface nào |
 | **`IRM.Infrastructure`** | `IrmDbContext`, EF Core Configurations & Migrations, SQL Stores (`Sql*Store`), ClosedXML Excel Helpers (`ExcelReader`, `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper`, `SqlExportStore`, `SqlStatisticsExportStore`), `DatabaseSeeder`, `PrivateFileStorage`, `LegacySync` | Tham chiếu `IRM.Core`, `IRM.Application`; **không** tham chiếu `IRM` (Web) |
 | **`IRM`** | Blazor Interactive Server UI (`Components/`, `Features/`), `Program.cs`, `Hosting/` (Minimal APIs, Security, Maintenance CLI), `wwwroot/` (offline vendor assets, `irm-interop.js`, `import-tour.js`, `app-product-tour.js`) | Presentation + Composition Root |
-| **`IRM.Tests`** | xUnit (`419 passed`, `6 SQL-Server-only skipped`) + Node.js browser/JS harness (`54/54 passed`) | Kiểm thử đầy đủ các tầng |
+| **`IRM.Tests`** | xUnit (`422 passed`, `6 SQL-Server-only skipped`) + Node.js browser/JS harness (`54/54 passed`) | Kiểm thử đầy đủ các tầng |
 
 ```mermaid
 flowchart LR
@@ -247,7 +247,7 @@ Mọi thay đổi mã nguồn trên nhánh `custom/kh2` phải vượt qua toàn
 | Bộ kiểm thử | Lệnh chạy (từ `IRM/`) | Quy mô hiện tại | Phạm vi bao phủ |
 | :--- | :--- | :--- | :--- |
 | **Build Release** | `dotnet build IRM.sln -c Release` | 5 project | Biên dịch + MudBlazor Analyzer (`MUD0002`...) |
-| **.NET xUnit Suite** | `dotnet test IRM.Tests/IRM.Tests.csproj -c Release --no-build` | **419 Passed**, 0 Failed, 6 Skipped (SQL Server integration) | 54 file test: Architecture boundaries, RBAC/Auth, Passport-only rules (Schema, Manual, Import, Downstream), `ExcelValueNormalizer` (gồm cột > 26 `AA/AB`), `ExcelWorkbookConverter`, `AdministrativeUnitExcelHelper` & Upsert, `OfflineSqlServerHardeningTests`, `OfflineDeploymentScriptTests`, Statistics, Reports, Search, Inspections, Accommodations, Companies, Unified ForeignPersons, Markup guards (`AppProductTourMarkupTests`, `DynamicAdminUnitsMarkupTests`) |
+| **.NET xUnit Suite** | `dotnet test IRM.Tests/IRM.Tests.csproj -c Release --no-build` | **422 Passed**, 0 Failed, 6 Skipped (SQL Server integration) | 55 file test: Architecture boundaries, RBAC/Auth, Passport-only rules (Schema, Manual, Import, Downstream), `ExcelValueNormalizer` (gồm cột > 26 `AA/AB`), `ExcelWorkbookConverter`, `ImportVisualDiffTests`, `AdministrativeUnitExcelHelper` & Upsert, `OfflineSqlServerHardeningTests`, `OfflineDeploymentScriptTests`, Statistics, Reports, Search, Inspections, Accommodations, Companies, Unified ForeignPersons, Markup guards (`AppProductTourMarkupTests`, `DynamicAdminUnitsMarkupTests`) |
 | **Node.js Browser/JS Suite** | `node --test IRM.Tests/Browser/*.test.cjs` | **54/54 Passed** | 6 file test: `app-product-tour.test.cjs`, `feedback-spotlight.test.cjs`, `import-tour.test.cjs`, `responsive-table.test.cjs`, `theme-chart.test.cjs`, `theme-preference.test.cjs` |
 
 ---
