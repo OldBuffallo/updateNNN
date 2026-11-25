@@ -312,7 +312,14 @@ public partial class Import : ComponentBase, IFeaturePage
     internal void ChangeFieldColumn(IRM.Application.Features.ImportExport.ExcelFieldSelection item, int? colIdx)
     {
         item.SourceColumnIndex = colIdx;
-        if (colIdx.HasValue) item.IsSelected = true;
+        if (colIdx.HasValue)
+        {
+            item.IsSelected = true;
+        }
+        else if (!item.IsRequired)
+        {
+            item.IsSelected = false;
+        }
         RefreshConvertAnalysis();
     }
 

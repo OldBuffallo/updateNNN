@@ -137,4 +137,36 @@ public sealed class ImportVisualDiffTests
         Assert.Contains(row.FieldChanges, f => f.FieldLabel == "Hạn tạm trú" && f.OldValue == "01/05/2026" && f.NewValue == "01/11/2026" && !f.IsDestructiveClear);
         Assert.Contains(row.FieldChanges, f => f.FieldLabel == "Ghi chú" && f.OldValue == "Ghi chú cũ" && f.IsDestructiveClear);
     }
+
+    [Fact]
+    public void ImportUi_UsesAppDesignSystem_RemovesNineRequiredCopy_AndRendersVisualDiffs()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "IRM.sln")))
+            dir = dir.Parent;
+        Assert.NotNull(dir);
+        var root = dir!.FullName;
+
+        var importRazor = File.ReadAllText(Path.Combine(root, "IRM", "Features", "ImportExport", "Import.razor"));
+        var prepRazor = File.ReadAllText(Path.Combine(root, "IRM", "Features", "ImportExport", "Components", "ImportPreparationSection.razor"));
+        var mappingRazor = File.ReadAllText(Path.Combine(root, "IRM", "Features", "ImportExport", "Components", "ImportMappingSection.razor"));
+        var previewRazor = File.ReadAllText(Path.Combine(root, "IRM", "Features", "ImportExport", "Components", "ImportPreviewSection.razor"));
+
+        Assert.Contains("class=\"section-header\"", importRazor, StringComparison.Ordinal);
+
+        Assert.DoesNotContain("chín trường bắt buộc", prepRazor, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("chín cột bắt buộc", prepRazor, StringComparison.OrdinalIgnoreCase);
+
+        // 1-click mapping (no Disabled="@(!item.IsSelected)" blocking column pick)
+        Assert.DoesNotContain("Disabled=\"@(!item.IsSelected)\"", mappingRazor, StringComparison.Ordinal);
+        Assert.Contains("NormalizedChanges", mappingRazor, StringComparison.Ordinal);
+        Assert.Contains("ActionIssues", mappingRazor, StringComparison.Ordinal);
+        Assert.Contains("IgnoredColumnHeaders", mappingRazor, StringComparison.Ordinal);
+        Assert.Contains("irm-diff-old", mappingRazor, StringComparison.Ordinal);
+
+        // Step 3 DB diff & status filter chips
+        Assert.Contains("FieldChanges", previewRazor, StringComparison.Ordinal);
+        Assert.Contains("IsDestructiveClear", previewRazor, StringComparison.Ordinal);
+        Assert.Contains("_statusFilter", previewRazor, StringComparison.Ordinal);
+    }
 }

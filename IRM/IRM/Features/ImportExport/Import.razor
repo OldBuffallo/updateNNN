@@ -9,37 +9,42 @@
 <div id="@_tourRootId">
 <span data-import-tour="notice" role="status" aria-live="polite"></span>
 
-<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4" Wrap="Wrap.Wrap">
-    <MudStack Spacing="0">
-        <MudText Typo="Typo.h5" Style="font-weight: 800;">Nhập hồ sơ từ Excel</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Secondary">Tải mẫu, điền thông tin và kiểm tra hồ sơ trước khi lưu.</MudText>
-    </MudStack>
-    <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap">
-        @if (!_manualMode)
-        {
-            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.HelpOutline"
-                       Disabled="_isProcessing" OnClick="StartImportTourAsync" data-import-tour-control="true">
-                Hướng dẫn từng bước
+<div class="section-header">
+    <div class="d-flex align-center justify-space-between flex-wrap gap-2">
+        <div>
+            <h3>Nhập dữ liệu Excel</h3>
+            <span class="section-meta">
+                Tải file Excel bất kỳ, tự động chuẩn hóa định dạng dd/MM/yyyy và xem rõ mọi thay đổi trước khi lưu
+            </span>
+        </div>
+        <div class="d-flex align-center flex-wrap gap-2">
+            @if (!_manualMode)
+            {
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Outlined.HelpOutline"
+                           Disabled="_isProcessing" OnClick="StartImportTourAsync" data-import-tour-control="true">
+                    Hướng dẫn từng bước
+                </MudButton>
+            }
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Outlined.History"
+                       Color="Color.Default" OnClick="@(() => _showHistory = !_showHistory)" data-import-tour-control="true">
+                @(_showHistory ? "Ẩn lịch sử" : "Lịch sử Import")
             </MudButton>
-        }
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.History"
-                   Color="Color.Default" OnClick="@(() => _showHistory = !_showHistory)" data-import-tour-control="true">
-            @(_showHistory ? "Ẩn lịch sử" : "Lịch sử Import")
-        </MudButton>
-        @if (_currentStep > 0 || _manualMode)
-        {
-            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Download"
-                       Color="Color.Primary" OnClick="DownloadSampleFile" Disabled="_isDownloadingSample">
-                Tải lại file mẫu
+            @if (_currentStep > 0 || _manualMode)
+            {
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" StartIcon="@Icons.Material.Outlined.Download"
+                           Color="Color.Primary" OnClick="DownloadSampleFile" Disabled="_isDownloadingSample">
+                    Tải lại file mẫu
+                </MudButton>
+            }
+            <MudButton Variant="@(_manualMode ? Variant.Filled : Variant.Outlined)"
+                       Size="Size.Small"
+                       StartIcon="@Icons.Material.Outlined.Edit"
+                       Color="Color.Primary" OnClick="@(() => _manualMode = !_manualMode)" data-import-tour-control="true">
+                @(_manualMode ? "Chuyển Import Excel" : "Nhập thủ công")
             </MudButton>
-        }
-        <MudButton Variant="@(_manualMode ? Variant.Filled : Variant.Outlined)"
-                   StartIcon="@Icons.Material.Outlined.Edit"
-                   Color="Color.Success" OnClick="@(() => _manualMode = !_manualMode)" data-import-tour-control="true">
-            @(_manualMode ? "Chuyển Import Excel" : "Nhập thủ công")
-        </MudButton>
-    </MudStack>
-</MudStack>
+        </div>
+    </div>
+</div>
 
 @* ── Import History Panel ── *@
 @if (_showHistory)

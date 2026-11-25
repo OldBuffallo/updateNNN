@@ -86,3 +86,103 @@
         gap: 6px;
     }
 }
+
+
+/* ── Import Visual Diff & Unified Design System Tokens (Light + Dark Safe) ── */
+.irm-diff-pair {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.8125rem;
+}
+
+.irm-diff-old {
+    text-decoration: line-through;
+    color: var(--mud-palette-text-secondary);
+    background: var(--mud-palette-action-default-hover);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.78rem;
+}
+
+.irm-diff-new {
+    color: var(--mud-palette-primary);
+    background: var(--mud-palette-primary-hover);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.78rem;
+}
+
+.irm-diff-clear {
+    color: var(--mud-palette-error);
+    background: var(--mud-palette-error-hover);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.78rem;
+}
+
+.irm-diff-arrow {
+    color: var(--mud-palette-text-secondary);
+    font-weight: 600;
+}
+
+.irm-diff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.irm-diff-field-label {
+    font-weight: 600;
+    color: var(--mud-palette-text-primary);
+    font-size: 0.78rem;
+}
+
+.irm-import-summary-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+@media (max-width: 960px) {
+    .irm-import-summary-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.irm-import-stat-card {
+    background: var(--mud-palette-surface);
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.irm-import-stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--mud-palette-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.irm-import-stat-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--mud-palette-text-primary);
+    line-height: 1.2;
+}
+
+.irm-import-stat-sub {
+    font-size: 0.75rem;
+    color: var(--mud-palette-text-secondary);
+}
